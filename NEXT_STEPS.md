@@ -70,3 +70,9 @@ Konkrete Folgeaufgabe:
 3. Repo-Struktur anlegen
 4. erster minimaler Workflow umsetzen
 5. erst dann echte API-/Upload-Automatisierung angehen
+
+---
+
+## Referenz
+- `READINESS_REVIEW.md` bewertet, wie startklar die Zusammenarbeit aktuell ist.
+- `START_READY.md` definiert den ersten konkret freigegebenen Parallel-Sprint.

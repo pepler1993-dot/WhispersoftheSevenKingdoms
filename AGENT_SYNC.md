@@ -82,3 +82,21 @@ Kein Roman, kein Bürokratiekostüm – nur genug Struktur, damit nicht alles im
   - `AI_STRATEGY.md`
   - `NEXT_STEPS.md`
   - `POC_WORKFLOW.md`
+
+### 2026-03-21 – Pako
+- Typ: Decision
+- Branch: `pako/readiness-review`
+- Bereich: Zusammenarbeit / Startfreigabe
+- Gemacht:
+  - `READINESS_REVIEW.md` erstellt
+  - `START_READY.md` erstellt
+  - aktuellen Projektstand auf Startklarheit für Pako/Jarvis bewertet
+- Wichtig für den anderen:
+  - paralleles Arbeiten ist jetzt freigegeben, aber noch mit engem Scope
+  - erster Sprint soll sich auf Struktur, Schema und PoC-Content-Templates beschränken
+  - nächste sinnvolle Branches sind `feature/pako-repo-structure` und `feature/jarvis-content-templates`
+- Nächster sinnvoller Schritt:
+  - Jarvis startet Content-Templates; Pako startet Repo-Struktur
+- Referenzen:
+  - `READINESS_REVIEW.md`
+  - `START_READY.md`
