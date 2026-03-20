@@ -446,3 +446,17 @@ Sinnvolle nächste konkrete Schritte:
 5. **erst danach Upload-Automatisierung anfassen**
 
 Sonst baut ihr euch zuerst einen Raumhafen und merkt danach, dass noch nicht mal ein Fahrrad existiert.
+
+---
+
+## 9. Weiterführende Automatisierung
+
+Für eine schrittweise Analyse der konkreten Automatisierung pro Einzelschritt siehe:
+- `AUTOMATION.md`
+
+Dort ist pro Pipeline-Stufe dokumentiert:
+- was voll automatisierbar ist
+- was nur halbautomatisch sinnvoll ist
+- was man bewusst manuell prüfen sollte
+- welche Skripte und Tools sich anbieten
+- welche Reihenfolge für den Ausbau realistisch ist
