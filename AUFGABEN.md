@@ -89,3 +89,4 @@ Ziel: Videos und Musik zum Einschlafen im Game of Thrones-Stil posten und das Pr
 - Siehe `AI_STRATEGY.md` für den geplanten KI-Einsatz.
 - Siehe `NEXT_STEPS.md` für konkrete Folgeaufgaben aus Feedback und Entscheidungen.
 - Siehe `POC_WORKFLOW.md` für den ersten minimalen End-to-End-Testfall.
+- Siehe `AGENT_SYNC.md` für laufende Übergaben, Feedback und kurze Status-Updates zwischen den Agenten.

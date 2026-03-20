@@ -347,6 +347,14 @@ Vor jedem Merge kurz festhalten:
 - Muss der andere danach rebasen/mergen?
 - Gibt es Breaking Changes?
 
+### Übergaben und Feedback
+Zusätzlich soll `AGENT_SYNC.md` als laufende gemeinsame Kurzlog-Datei genutzt werden für:
+- Feedback auf Branches oder Dokumente
+- kurze Übergaben zwischen Pako und Jarvis
+- Hinweise auf Entscheidungen, Ideen und offene Fragen
+
+So bleibt Zusammenarbeit nachvollziehbar, ohne dass jede Kleinigkeit in fünf Dateien dupliziert wird.
+
 ---
 
 ## 9. Was nicht parallel gemacht werden sollte
