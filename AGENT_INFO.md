@@ -5,8 +5,8 @@
 
 ## Team
 - Kevin (Hauptnutzer)
-- Jarvis (dieser Agent)
-- Weiterer Agent (bitte hier ergänzen!)
+- Jarvis (Agent für Content-/Publishing-Schicht)
+- Pako (Agent für Struktur-/Schema-/Automations-Schicht)
 
 ## Bisherige Struktur
 - **README.md:** Projektbeschreibung und Thema
