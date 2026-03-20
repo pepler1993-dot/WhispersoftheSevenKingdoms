@@ -86,3 +86,6 @@ Ziel: Videos und Musik zum Einschlafen im Game of Thrones-Stil posten und das Pr
 - Siehe `PIPELINE.md` für die vollständige End-to-End-Dokumentation vom Song bis zum Upload.
 - Siehe `AUTOMATION.md` für die schrittweise Analyse der Automatisierbarkeit.
 - Siehe `PARALLEL_WORK_PLAN.md` für konkrete Aufgabenverteilung zwischen Pako und Jarvis inklusive Merge-Plan.
+- Siehe `AI_STRATEGY.md` für den geplanten KI-Einsatz.
+- Siehe `NEXT_STEPS.md` für konkrete Folgeaufgaben aus Feedback und Entscheidungen.
+- Siehe `POC_WORKFLOW.md` für den ersten minimalen End-to-End-Testfall.

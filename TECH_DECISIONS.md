@@ -76,3 +76,10 @@ Warum aktuell trotzdem TypeScript bevorzugt wird:
 - Welche CLI-Bibliothek wird verwendet (`commander`, `yargs` oder minimal eigenständig)?
 - Wird JSON Schema, Zod oder AJV für Validierung bevorzugt?
 - Wird Thumbnail-Erzeugung nur mit `ffmpeg` gemacht oder zusätzlich mit `sharp`?
+
+---
+
+## Verwandte Entscheidungen / Referenzen
+- `AI_STRATEGY.md` → Einordnung, wo KI nötig, sinnvoll oder optional ist
+- `NEXT_STEPS.md` → aus Feedback und Entscheidungen abgeleitete Folgeaufgaben
+- `POC_WORKFLOW.md` → erster konkreter Proof-of-Concept-Workflow
