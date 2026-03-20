@@ -20,6 +20,15 @@
 6. **README pflegen:**
    - Neue Songs oder Strukturänderungen dort kurz aufnehmen.
 
+7. **Entscheidungen und Pläne dokumentieren:**
+   - Jede technische Entscheidung, Aufgabenplanung oder Prozessänderung muss in einer passenden Datei im Repo dokumentiert werden.
+   - Solche Änderungen dürfen nicht nur im Chat stehen bleiben.
+   - Die Dokumentation muss zusammen mit dem zugehörigen Branch gepusht werden, damit alle denselben Stand sehen.
+
+8. **Agenten-Sync pflegen:**
+   - Wichtige Updates, Feedback, Übergaben, Ideen und offene Fragen zwischen Agenten werden zusätzlich in `AGENT_SYNC.md` festgehalten.
+   - Nach relevanten Änderungen soll dort kurz dokumentiert werden, was gemacht wurde und was der andere Agent wissen muss.
+
 **Sonderfall:**
 - Wenn's mal dringend ist und jemand auf main muss: Kurz im Chat absprechen.
 

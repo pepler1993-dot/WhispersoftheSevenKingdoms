@@ -325,6 +325,14 @@ Vor Beginn eines neuen Pakets schreibt jeder kurz:
 - welche Dateien betroffen sind
 - was genau geliefert werden soll
 
+### Dokumentationspflicht
+Wenn Entscheidungen, Regeln, Architekturpläne oder Arbeitspläne entstehen, gilt:
+1. sie werden in einer passenden Datei im Repo dokumentiert
+2. sie bleiben nicht nur im Chat stehen
+3. der Branch mit dieser Dokumentation wird gepusht, damit der andere Agent darauf arbeiten kann
+
+Nur im Chat getroffene Grundsatzentscheidungen sind praktisch Treibsand mit Zeitstempel.
+
 Beispiel:
 > Ich nehme `feature/pako-song-schema`.
 > Dateien: `schemas/song.schema.json`, `templates/metadata/example.song.json`, `docs/technical/metadata.md`
@@ -338,6 +346,14 @@ Vor jedem Merge kurz festhalten:
 - Welche Dateien sind kritisch?
 - Muss der andere danach rebasen/mergen?
 - Gibt es Breaking Changes?
+
+### Übergaben und Feedback
+Zusätzlich soll `AGENT_SYNC.md` als laufende gemeinsame Kurzlog-Datei genutzt werden für:
+- Feedback auf Branches oder Dokumente
+- kurze Übergaben zwischen Pako und Jarvis
+- Hinweise auf Entscheidungen, Ideen und offene Fragen
+
+So bleibt Zusammenarbeit nachvollziehbar, ohne dass jede Kleinigkeit in fünf Dateien dupliziert wird.
 
 ---
 
