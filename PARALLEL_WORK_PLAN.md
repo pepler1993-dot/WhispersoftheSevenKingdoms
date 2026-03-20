@@ -325,6 +325,14 @@ Vor Beginn eines neuen Pakets schreibt jeder kurz:
 - welche Dateien betroffen sind
 - was genau geliefert werden soll
 
+### Dokumentationspflicht
+Wenn Entscheidungen, Regeln, Architekturpläne oder Arbeitspläne entstehen, gilt:
+1. sie werden in einer passenden Datei im Repo dokumentiert
+2. sie bleiben nicht nur im Chat stehen
+3. der Branch mit dieser Dokumentation wird gepusht, damit der andere Agent darauf arbeiten kann
+
+Nur im Chat getroffene Grundsatzentscheidungen sind praktisch Treibsand mit Zeitstempel.
+
 Beispiel:
 > Ich nehme `feature/pako-song-schema`.
 > Dateien: `schemas/song.schema.json`, `templates/metadata/example.song.json`, `docs/technical/metadata.md`

@@ -20,6 +20,11 @@
 6. **README pflegen:**
    - Neue Songs oder Strukturänderungen dort kurz aufnehmen.
 
+7. **Entscheidungen und Pläne dokumentieren:**
+   - Jede technische Entscheidung, Aufgabenplanung oder Prozessänderung muss in einer passenden Datei im Repo dokumentiert werden.
+   - Solche Änderungen dürfen nicht nur im Chat stehen bleiben.
+   - Die Dokumentation muss zusammen mit dem zugehörigen Branch gepusht werden, damit alle denselben Stand sehen.
+
 **Sonderfall:**
 - Wenn's mal dringend ist und jemand auf main muss: Kurz im Chat absprechen.
 
