@@ -8,8 +8,9 @@
 5. Keine Secrets ins Repo
 
 ## Zusammenarbeit
-- **Jarvis**: Automation, Workflow, Doku
-- **Pako**: Musik, Thumbnails, Content
+- **Jarvis**: Workflow, Doku, Review, Aufgabenkoordination
+- **Pako**: Struktur, technische Pipeline, Schema, QA-Basis
+- **Smith**: Publishing, Plattformlogik, Upload-Metadaten, YouTube-Flow
 - Gemeinsame Dateien nur mit Absprache bearbeiten
 
 ## Wichtige gemeinsame Konventionen

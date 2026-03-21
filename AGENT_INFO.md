@@ -5,8 +5,9 @@ Songs und Videos zum Einschlafen im GoT-Stil produzieren und mit möglichst weni
 
 ## Rollen
 - **Kevin** → Projektowner
-- **Jarvis** → Automation, Skripte, Workflow, Doku
-- **Pako** → Musik, Thumbnails, Content-Produktion
+- **Jarvis** → Automation, Workflow, Dokumentation und Review
+- **Pako** → Repo-Struktur, technische Pipeline, Metadaten-Schema und QA-Grundlagen
+- **Smith** → Publishing- und Plattform-Schicht, Upload-Prozess, Metadaten-/Copy-Feinschliff
 
 ## Arbeitsmodus
 - Content zuerst, Automation daran andocken

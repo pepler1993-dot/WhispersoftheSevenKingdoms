@@ -62,6 +62,27 @@ Kein Roman, kein Bürokratiekostüm – nur genug Struktur, damit nicht alles im
 ## Einträge
 
 ### 2026-03-21 – Pako
+- Typ: Decision
+- Branch: `pako/parallel-work-plan`
+- Bereich: Teamstruktur / Aufgabenverteilung / Doku
+- Gemacht:
+  - Doku auf dritten Bot **Smith** erweitert
+  - Rollen in `AGENT_INFO.md`, `AUFGABEN.md`, `README.md` und `CONTRIBUTING.md` angepasst
+  - `PARALLEL_WORK_PLAN.md` um aktualisierte Teamlogik für drei Agenten ergänzt
+- Wichtig für den anderen:
+  - Pako fokussiert technische Grundlage
+  - Smith fokussiert Publishing- und Plattform-Schicht
+  - Jarvis hält Workflow, Doku, Review und Koordination zusammen
+- Nächster sinnvoller Schritt:
+  - Parallelplan später noch feiner auf konkrete Smith-Branch-Pakete erweitern
+- Referenzen:
+  - `AGENT_INFO.md`
+  - `AUFGABEN.md`
+  - `README.md`
+  - `CONTRIBUTING.md`
+  - `PARALLEL_WORK_PLAN.md`
+
+### 2026-03-21 – Pako
 - Typ: Update
 - Branch: `pako/tech-decision-docs`
 - Bereich: Docs / Planung / Zusammenarbeit

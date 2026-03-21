@@ -1,8 +1,26 @@
-# Parallel-Arbeitsplan – Pako & Jarvis
+# Parallel-Arbeitsplan – Pako, Jarvis & Smith
 
-Ziel: Das Projekt so aufteilen, dass **Pako** und **Jarvis** gleichzeitig arbeiten können, ohne sich ständig gegenseitig zu blockieren, Dateien zu überschreiben oder unnötige Merge-Konflikte zu erzeugen.
+Ziel: Das Projekt so aufteilen, dass **Pako**, **Jarvis** und **Smith** gleichzeitig arbeiten können, ohne sich ständig gegenseitig zu blockieren, Dateien zu überschreiben oder unnötige Merge-Konflikte zu erzeugen.
 
 Dieser Plan teilt die Arbeit in **klare Verantwortungsbereiche**, **Merge-Fenster**, **Abhängigkeiten** und **konkrete Regeln** auf.
+
+---
+
+## 0. Aktualisierte Teamlogik
+
+Mit **Smith** kommt ein dritter Arbeitsstrang dazu.
+
+Die grobe Verteilung ist jetzt:
+- **Pako** → technische Struktur, Pipeline, Schema, QA-Grundlagen
+- **Jarvis** → Doku, Workflow, Review, übergreifende Abstimmung
+- **Smith** → Publishing-Schicht, Plattformlogik, Upload-Prozess, Metadaten-/Copy-Feinschliff
+
+Wichtige Folge daraus:
+- Pako liefert die technische Grundlage
+- Smith baut darauf die Veröffentlichungs- und Plattformseite auf
+- Jarvis hält Regeln, Doku, Übergaben und Konsistenz zusammen
+
+So gibt es drei getrennte Schienen statt zweier Bots, die sich gegenseitig in dieselbe Datei laufen.
 
 ---
 
