@@ -62,6 +62,51 @@ Kein Roman, kein Bürokratiekostüm – nur genug Struktur, damit nicht alles im
 ## Einträge
 
 ### 2026-03-21 – Pako
+- Typ: Update
+- Branch: `feature/pako-repo-structure`
+- Bereich: Struktur / Schema / technische Grundlage
+- Gemacht:
+  - Zielstruktur für `input/`, `work/`, `output/`, `templates/`, `docs/`, `scripts/` angelegt
+  - `schemas/song.schema.json` als erstes Metadaten-Schema v1 angelegt
+  - `templates/metadata/example.song.json` als Referenzdatei ergänzt
+  - technische Doku für Repo-Struktur und Metadatenregeln ergänzt
+- Wichtig für den anderen:
+  - `upload/` bleibt für den einfachen Übergabe-Workflow bestehen
+  - die größere Struktur ist das technische Grundgerüst für den PoC-Ausbau
+  - Metadaten v1 ist bewusst klein gehalten und auf den aktuellen Demo-Stand zugeschnitten
+- Nächster sinnvoller Schritt:
+  - ersten Preflight-/Report-Schritt bauen und die Report-Struktur in `work/publish/` vorbereiten
+- Referenzen:
+  - `schemas/song.schema.json`
+  - `templates/metadata/example.song.json`
+  - `docs/technical/metadata.md`
+  - `docs/technical/repo-structure.md`
+  - `scripts/metadata/validate-song-metadata.js`
+  - `docs/technical/validation.md`
+
+### 2026-03-21 – Pako
+- Typ: Update
+- Branch: `feature/pako-repo-structure`
+- Bereich: QA / Preflight / Repo-Struktur
+- Gemacht:
+  - `scripts/qa/preflight-metadata-report.js` angelegt
+  - JSON-Report-Ausgabe nach `work/publish/reports/` ergänzt
+  - `docs/technical/preflight.md` dokumentiert
+  - `input/README.md` und `output/youtube/README.md` als Orientierung für die neue Struktur ergänzt
+  - Metadaten-Preflight einmal gegen die Demo-Dateien ausgeführt
+- Wichtig für den anderen:
+  - der erste QA-Schritt liefert jetzt nicht nur PASS/FAIL auf Konsole, sondern auch einen verwertbaren JSON-Report
+  - `work/publish/reports/metadata-preflight.latest.json` ist aktuell die einfachste Referenz für den Stand
+- Nächster sinnvoller Schritt:
+  - nächsten PoC-Baustein vorbereiten: Dateivollständigkeit zwischen Song, Thumbnail und Metadaten prüfen
+- Referenzen:
+  - `scripts/qa/preflight-metadata-report.js`
+  - `docs/technical/preflight.md`
+  - `work/publish/reports/metadata-preflight.latest.json`
+  - `input/README.md`
+  - `output/youtube/README.md`
+
+### 2026-03-21 – Pako
 - Typ: Decision
 - Branch: `pako/parallel-work-plan`
 - Bereich: Teamstruktur / Aufgabenverteilung / Doku

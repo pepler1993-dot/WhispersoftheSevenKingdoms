@@ -1,0 +1,23 @@
+{
+  "slug": "whispers-of-winterfell",
+  "title": "Whispers of Winterfell",
+  "platform": "youtube",
+  "theme": "Winterfell",
+  "mood": ["calm", "cold", "melancholic"],
+  "notes": "Beispiel-Metadatei für Demo-Content und erste Automationsläufe.",
+  "duration_hint": "long-form sleep track",
+  "music_brief": {
+    "style": "fantasy sleep music",
+    "influences": ["cold north", "night wind", "soft strings"],
+    "tempo": "slow",
+    "energy": "low",
+    "avoid": ["battle drums", "harsh percussion"]
+  },
+  "thumbnail_brief": {
+    "scene": "Winterfell at night in cold blue moonlight",
+    "elements": ["snow", "castle silhouette", "soft fog"],
+    "text": "Whispers of Winterfell",
+    "style": "dark, readable, atmospheric",
+    "avoid": ["busy collage", "tiny text"]
+  }
+}

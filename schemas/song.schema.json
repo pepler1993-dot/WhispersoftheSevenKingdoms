@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://whispers.example/schemas/song.schema.json",
+  "title": "Whispers of the Seven Kingdoms Song Metadata",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "slug",
+    "title",
+    "platform",
+    "theme",
+    "mood"
+  ],
+  "properties": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "description": "Gemeinsamer Schlüssel für Song, Thumbnail und Metadaten."
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "platform": {
+      "type": "string",
+      "enum": ["youtube", "spotify", "soundcloud"]
+    },
+    "theme": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mood": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "notes": {
+      "type": "string"
+    },
+    "duration_hint": {
+      "type": "string"
+    },
+    "music_brief": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "style": { "type": "string" },
+        "influences": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "tempo": { "type": "string" },
+        "energy": { "type": "string" },
+        "avoid": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "thumbnail_brief": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "scene": { "type": "string" },
+        "elements": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "text": { "type": "string" },
+        "style": { "type": "string" },
+        "avoid": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}
