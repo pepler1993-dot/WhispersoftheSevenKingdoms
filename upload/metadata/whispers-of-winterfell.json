@@ -1,0 +1,9 @@
+{
+  "slug": "whispers-of-winterfell",
+  "title": "Whispers of Winterfell",
+  "platform": "youtube",
+  "theme": "Winterfell",
+  "mood": ["calm", "cold", "melancholic"],
+  "notes": "Demo-Datensatz für den ersten Automationslauf. Song und Thumbnail müssen denselben Slug verwenden.",
+  "duration_hint": "long-form sleep track"
+}
