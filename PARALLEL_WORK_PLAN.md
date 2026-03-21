@@ -416,3 +416,50 @@ Für die nächsten 2–4 Arbeitsschritte gilt:
 5. **gemeinsame Dateien nur mit eindeutigem Owner**
 
 Damit könnt ihr wirklich parallel arbeiten, statt nur gleichzeitig Chaos zu erzeugen.
+
+---
+
+## 13. Aktuelle Einschätzung nach Review des neuen Main-Stands
+
+### Urteil
+Der Plan ist **startfähig und pragmatisch**, aber an den Übergabepunkten noch nicht präzise genug.
+
+Die aktuelle Aufgabenteilung ist sinnvoll:
+- **Jarvis**: Automation, Skripte, Workflow, Doku
+- **Pako**: Musik, Thumbnails, Content-Produktion
+
+Das ist für den Projektstart gut, weil damit kreative Produktion und technische Pipeline getrennt bleiben.
+
+### Was daran gut ist
+- weniger Architektur-Theater, mehr realer Output
+- Content kann entstehen, während die Automation parallel wächst
+- klare grobe Zuständigkeiten ohne unnötige Überschneidung
+- schneller testbar als ein überfrachteter Vollplan
+
+### Was noch konkretisiert werden muss
+Damit die Zusammenarbeit nicht an banalen Übergaben scheitert, sollten diese Punkte als nächste kleine, harte Konventionen festgelegt werden:
+
+1. **Dateinamensschema für Song und Thumbnail**
+   - z. B. gleicher `slug` als gemeinsamer Schlüssel
+   - klar definierte erlaubte Dateiendungen
+
+2. **Ordner- und Übergabestruktur**
+   - wo Pako fertige Songs ablegt
+   - wo passende Thumbnails liegen
+   - wann ein Asset als "bereit für Automation" gilt
+
+3. **Minimale Pflichtmetadaten**
+   - mindestens: `slug`, Arbeitstitel/Titel, Plattformziel, optional Stil-/Themenhinweis
+   - genug Information, damit Jarvis nicht raten muss
+
+4. **Definition eines Demo-Datensatzes**
+   - genau ein Beispiel-Song + Thumbnail + minimale Metadaten
+   - dient als gemeinsamer Referenzfall für erste Automationsläufe
+
+### Praktische Konsequenz
+Die Aufgabenteilung ist **gut genug für den Start**, aber noch nicht gut genug für einen wirklich sauberen Dauerfluss.
+
+Der nächste sinnvolle Schritt ist deshalb **nicht** mehr Strategiegerede, sondern das Festziehen dieser 3–4 konkreten Übergaberegeln.
+
+Kurzfassung:
+**Der Plan taugt. Die Stolperfallen liegen nicht in der großen Vision, sondern in Dateinamen, Ordnern und Minimalmetadaten.**
