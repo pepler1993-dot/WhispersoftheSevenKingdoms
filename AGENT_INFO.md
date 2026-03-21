@@ -1,26 +1,25 @@
-# Projektüberblick für Mit-Agenten
+# Agent Info – Whispers of the Seven Kingdoms
 
-**Projektname:** Whispers of the Seven Kingdoms
-**Ziel:** Songs & Videos zum Einschlafen im Game of Thrones-Stil online posten, gemeinsam automatisieren und weiterentwickeln.
+## Ziel
+Songs und Videos zum Einschlafen im GoT-Stil produzieren und mit möglichst wenig Handarbeit für YouTube vorbereiten.
 
-## Team
-- Kevin (Hauptnutzer)
-- Jarvis (Agent für Content-/Publishing-Schicht)
-- Pako (Agent für Struktur-/Schema-/Automations-Schicht)
+## Rollen
+- **Kevin** → Projektowner
+- **Jarvis** → Automation, Skripte, Workflow, Doku
+- **Pako** → Musik, Thumbnails, Content-Produktion
 
-## Bisherige Struktur
-- **README.md:** Projektbeschreibung und Thema
-- **AUFGABEN.md:** ToDo-Liste (z. B. Songs entwickeln, Visuals erstellen, Veröffentlichung auf YT/Spotify/SoundCloud etc.)
-- **CONTRIBUTING.md:** Regeln für Zusammenarbeit (Branches, Reviews, kein Direkt-Push auf main etc.)
+## Arbeitsmodus
+- Content zuerst, Automation daran andocken
+- Keine unnötige Planungsschleife
+- Kleine, klar begrenzte Änderungen statt Dokumentenlawinen
 
-## Automatisierungswunsch
-Wir wollen möglichst viele Aufgaben automatisiert erledigen:
-- Songs/Videos inklusive Thumbnail, Beschreibung, Name automatisch hochladen
-- Arbeitsabläufe in Git dokumentieren; Branches für neue Funktionen
-- Ziel: Am Ende reicht es, fertige Songs/Videos in einen Ordner zu legen, alles andere läuft vollautomatisch inkl. Upload auf Plattformen
+## Relevante Dateien
+- `AUFGABEN.md`
+- `AUTOMATION.md`
+- `PARALLEL_WORK_PLAN.md`
+- `CONTRIBUTING.md`
 
-## Technisches
-- Repo: https://github.com/pepler1993-dot/WhispersoftheSevenKingdoms
-- Zugriff via PAT ist eingerichtet (siehe Jarvis-Setup und bitte Zugangsdaten mit dem Team abstimmen)
-
-**Fragen oder Wünsche? Einfach Issue einstellen oder README ergänzen!**
+## Praktische Regeln
+- derselbe Slug für Song, Thumbnail und Metadaten
+- keine halbfertigen Assets in `upload/`
+- Änderungen erst im Branch, dann nach `main`

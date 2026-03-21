@@ -463,3 +463,156 @@ Der nächste sinnvolle Schritt ist deshalb **nicht** mehr Strategiegerede, sonde
 
 Kurzfassung:
 **Der Plan taugt. Die Stolperfallen liegen nicht in der großen Vision, sondern in Dateinamen, Ordnern und Minimalmetadaten.**
+
+---
+
+## 14. Konkrete Übergaberegeln zwischen Pako und Jarvis
+
+Ziel dieses Abschnitts: Die Zusammenarbeit nicht nur grob, sondern operativ belastbar machen.
+
+Diese Regeln sind absichtlich klein, konkret und testbar. Keine Philosophie, sondern Schrauben, die nicht lose sein sollten.
+
+### 14.1 Dateinamensschema
+
+Alle zusammengehörigen Assets verwenden denselben **Slug** als gemeinsamen Schlüssel.
+
+### Slug-Regel
+- nur Kleinbuchstaben
+- Wörter mit Bindestrichen trennen
+- keine Leerzeichen
+- keine Umlaute/Sonderzeichen
+- Beispiel: `whispers-of-winterfell`
+
+### Dateinamen
+- Song: `<slug>.<ext>`
+- Thumbnail: `<slug>.<ext>`
+- optionale Metadaten: `<slug>.json`
+
+### Erlaubte Dateiendungen
+- Song: `.mp3`, `.wav`, `.ogg`
+- Thumbnail: `.jpg`, `.png`, `.webp`
+- Metadaten: `.json`
+
+### Regel für Matching
+Jarvis darf Song und Thumbnail standardmäßig **nur über den identischen Slug** matchen.
+
+Beispiel:
+- `whispers-of-winterfell.mp3`
+- `whispers-of-winterfell.jpg`
+- `whispers-of-winterfell.json`
+
+Nicht erlaubt als Normalfall:
+- `Whispers of Winterfell FINAL.mp3`
+- `winterfell-thumb-neu2.png`
+- `song1.mp3`
+
+Wenn die Dateinamen wie ein schlecht sortierter Downloads-Ordner aussehen, ist das kein Sonderfall, sondern kaputte Übergabe.
+
+---
+
+### 14.2 Ordner- und Übergabestruktur
+
+Für den aktuellen pragmatischen Workflow gilt folgende operative Struktur:
+
+```text
+upload/
+  songs/
+  thumbnails/
+  metadata/
+  done/
+```
+
+### Bedeutung
+- `upload/songs/` → Pako legt dort fertig exportierte Songdateien ab
+- `upload/thumbnails/` → Pako legt dort das passende Thumbnail mit gleichem Slug ab
+- `upload/metadata/` → optionale oder minimale JSON-Metadaten pro Song
+- `upload/done/` → Jarvis verschiebt erfolgreich verarbeitete Dateien dorthin
+
+### Wann gilt ein Asset als "bereit für Automation"?
+Ein Song gilt als bereit, wenn:
+1. Songdatei in `upload/songs/` liegt
+2. passendes Thumbnail in `upload/thumbnails/` liegt
+3. beide denselben Slug tragen
+4. optionale Metadaten vorhanden sind oder Mindestinformationen anderweitig eindeutig vorliegen
+
+### Regel
+Pako legt **keine halbfertigen Dateien** in die produktiven Upload-Ordner.
+
+Für unfertige Zwischenstände sollte ein separater Arbeitsbereich genutzt werden, nicht die Übergabestruktur für die Automation.
+
+---
+
+### 14.3 Minimale Pflichtmetadaten
+
+Für den ersten belastbaren Automationslauf reicht ein kleines Pflichtset.
+
+### Minimale Felder in `<slug>.json`
+```json
+{
+  "slug": "whispers-of-winterfell",
+  "title": "Whispers of Winterfell",
+  "platform": "youtube",
+  "theme": "Winterfell",
+  "mood": ["calm", "cold", "melancholic"]
+}
+```
+
+### Pflichtfelder
+- `slug`
+- `title`
+- `platform`
+
+### Empfohlene Zusatzfelder
+- `theme`
+- `mood`
+- `notes`
+- `duration_hint`
+
+### Zweck
+Diese Minimalmetadaten geben Jarvis genug Kontext, um:
+- Titel zu prüfen oder leicht anzureichern
+- Beschreibung nicht blind zu halluzinieren
+- Tags sinnvoll abzuleiten
+- das Zielsystem eindeutig zu kennen
+
+### Regel
+Wenn keine JSON-Metadaten mitgeliefert werden, muss wenigstens der Slug sauber und der Arbeitstitel eindeutig dokumentiert sein. Besser ist aber: **Metadatei mitgeben und das Raten beerdigen.**
+
+---
+
+### 14.4 Demo-Datensatz als Referenzfall
+
+Es soll genau **ein verbindlicher Referenzfall** angelegt werden, gegen den erste Automationsläufe getestet werden.
+
+### Referenz-Slug
+- `whispers-of-winterfell`
+
+### Erwartete Dateien
+- `upload/songs/whispers-of-winterfell.mp3` oder `.wav`
+- `upload/thumbnails/whispers-of-winterfell.jpg`
+- `upload/metadata/whispers-of-winterfell.json`
+
+### Zweck des Demo-Datensatzes
+- Test der Dateierkennung
+- Test des Song/Thumbnail-Matchings
+- Test der Titel-/Beschreibungsgenerierung
+- Test des Verschiebe- und Logging-Verhaltens
+- gemeinsame Referenz für Debugging zwischen Pako und Jarvis
+
+### Regel
+Neue Automation wird **zuerst** gegen den Demo-Datensatz geprüft, bevor mehrere Songs oder Sonderfälle angefasst werden.
+
+Sonst debuggt ihr gleichzeitig Code, Content, Dateinamen und Randfälle — also vier Probleme auf einmal, wie zivilisierte Leidensgenossen.
+
+---
+
+## 15. Nächste direkte Umsetzung
+
+Die nächsten sinnvollen Repo-Schritte sind damit:
+
+1. `upload/songs/`, `upload/thumbnails/`, `upload/metadata/`, `upload/done/` im Repo anlegen
+2. eine Beispiel-Metadatei für `whispers-of-winterfell` anlegen
+3. Jarvis passt die Automation auf `metadata/` + Slug-Matching an
+4. Pako liefert den ersten Demo-Content genau in dieser Struktur
+
+Damit wird aus einem vagen Arbeitsplan ein tatsächlich testbarer Übergabepunkt.

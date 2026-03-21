@@ -1,7 +1,36 @@
 # Whispers of the Seven Kingdoms
 
-Ein Repo für Einschlaflieder und Musikstücke inspiriert von Game of Thrones (GoT – Westeros, Essos und Co.).
+GoT-inspirierte Sleep-Music mit einfacher Upload-Automation.
 
-Hier findest du entspannende, thematisch angelehnte Songs zum Einschlafen, Träumen oder Entspannen – alles im Stil und Feeling der sieben Königslande.
+## Ziel
+- Songs und passende Thumbnails im Stil von Westeros erstellen
+- Inhalte reproduzierbar für YouTube vorbereiten
+- Automation so aufbauen, dass Content nur noch in definierte Ordner gelegt werden muss
 
-Mit Liebe von Kevin gepflegt und kuratiert.
+## Aktueller Fokus
+1. Content erstellen: Songs + Thumbnails
+2. Übergabe standardisieren: Slug, Ordner, Minimalmetadaten
+3. Automation für YouTube-Upload schrittweise aufbauen
+
+## Kernstruktur
+```text
+upload/
+  songs/
+  thumbnails/
+  metadata/
+  done/
+```
+
+## Übergaberegeln
+- Song, Thumbnail und Metadaten verwenden denselben Slug
+- Beispiele:
+  - `whispers-of-winterfell.mp3`
+  - `whispers-of-winterfell.jpg`
+  - `whispers-of-winterfell.json`
+- Keine halbfertigen Dateien in die produktiven Upload-Ordner legen
+
+## Wichtige Dateien
+- `AUFGABEN.md` → aktuelle Aufgabenverteilung
+- `AUTOMATION.md` → pragmatischer Upload-Workflow
+- `PARALLEL_WORK_PLAN.md` → Zusammenarbeit und konkrete Übergaberegeln
+- `upload_automation_example.py` → einfacher PoC für den Upload-Flow
