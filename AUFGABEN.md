@@ -6,28 +6,36 @@ Ziel: Videos und Musik zum Einschlafen im Game of Thrones-Stil posten und das Pr
 
 **Jarvis**
 - Aufgabenmanagement und Dokumentation im Repo
-- Automatisierung (Skripte, Workflow-Beschreibungen, README/Contributing aktuell halten)
-- Unterstützung via Feedback, Strukturierung und Review
-- Erste Tests mit Beispielordner und Skripten
+- Workflow-Beschreibungen, README/Contributing aktuell halten
+- Feedback, Strukturierung und Review über alle Arbeitsstränge
+- Tests und Abgleich zwischen Doku, Content und Automation
 
-**pako**
-- Musikproduktion und -bearbeitung
-- Gestaltung von Thumbnails/Grafiken
-- Sounddesign und Auswahl passender Musikstile
-- Content (Songs/Thumbnails) in die Upload-Ordner legen
+**Pako**
+- Repo-Struktur und technische Pipeline vorbereiten
+- Metadaten-Schema, Datei-/Ordnerstandards und QA-/Preflight-Grundlagen definieren
+- technische Skripte und PoC-Grundgerüst vorantreiben
+- Content-Übergaben technisch verwertbar machen
+
+**Smith**
+- Publishing- und Plattform-Schicht ausarbeiten
+- Upload-Prozess, Metadatenpakete und Plattform-Konfiguration konkretisieren
+- Titel/Beschreibung/Tags/Playlist-Mapping mit den technischen Vorgaben verzahnen
+- spätere Upload-Automation für YouTube vorbereiten und verfeinern
 
 ## Gemeinsame Aufgaben
 - Song-Ideen und Themen zusammentragen und priorisieren
 - Feedback geben und Aufgaben/Strukturen gemeinsam weiterentwickeln
-- Vor dem Automatisierungslauf kurz gemeinsam testen/checken
+- Demo-Datensatz und PoC gemeinsam testen/checken
+- Übergaben zwischen Struktur, Content und Publishing sauber halten
 
 ## ToDo-Liste
-- [ ] Song-Ideen (GoT-Welt) sammeln (**beide**)
-- [ ] Musikstücke/Thumbnails erstellen (**pako**)
-- [ ] Automations-Skripte verbessern, Upload optimieren (**Jarvis**)
-- [ ] README, AGENT_INFO.md etc. aktuell halten (**Jarvis**)
-- [ ] Mini-Testlauf (Ordner füllen → Skript starten) (**beide**)
-- [ ] Pipeline später auf Spotify/SoundCloud erweitern (**beide**)
+- [ ] Song-Ideen (GoT-Welt) sammeln (**alle**)
+- [ ] Musikstücke/Thumbnails erstellen (**Pako + Content-Seite**)
+- [ ] Repo-Struktur und Schema v1 konkret anlegen (**Pako**)
+- [ ] Workflow-Doku und gemeinsame Leitdateien aktuell halten (**Jarvis**)
+- [ ] Publishing-/Upload-Definition für YouTube schärfen (**Smith**)
+- [ ] Mini-Testlauf mit Demo-Datensatz durchführen (**alle**)
+- [ ] Pipeline später auf Spotify/SoundCloud erweitern (**alle**)
 
 ---
 Aufgabenverteilung kann jederzeit angepasst werden.

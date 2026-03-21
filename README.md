@@ -29,6 +29,12 @@ upload/
   - `whispers-of-winterfell.json`
 - Keine halbfertigen Dateien in die produktiven Upload-Ordner legen
 
+## Team-Rollen
+- **Kevin** → Projektowner
+- **Pako** → technische Pipeline, Struktur, Schema, QA-Basis
+- **Jarvis** → Dokumentation, Workflow, Review und Koordination
+- **Smith** → Publishing-Schicht, Plattformlogik, Upload-Feinschliff
+
 ## Wichtige Dateien
 - `AUFGABEN.md` → aktuelle Aufgabenverteilung
 - `AUTOMATION.md` → pragmatischer Upload-Workflow
