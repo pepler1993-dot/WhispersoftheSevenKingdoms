@@ -38,4 +38,16 @@ Ziel: Videos und Musik zum Einschlafen im Game of Thrones-Stil posten und das Pr
 - [ ] Pipeline später auf Spotify/SoundCloud erweitern (**alle**)
 
 ---
+**Erledigt (abgehakt):**
+- [x] Publishing-/Upload-Definition für YouTube → Templates sind fertig
+- [x] Repo-Struktur und Schema v1 → existiert
+
+**Neu hinugekommen:**
+- [ ] Video-Rendering Script bauen (Pako, Issue #7)
+- [ ] Metadaten-Generator bauen (Smith, Issue #8)
+- [ ] YouTube Upload Script bauen (Smith, Issue #9)
+- [ ] Pipeline-Orchestrierung bauen (Pako, Issue #10)
+- [ ] Erster End-to-End Testlauf (alle)
+
+---
 Aufgabenverteilung kann jederzeit angepasst werden.

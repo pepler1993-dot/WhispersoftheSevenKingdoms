@@ -14,16 +14,47 @@
 - Gemeinsame Dateien nur mit Absprache bearbeiten
 
 ## Sync-Service ist Pflicht
+
 Für aktive Task-Arbeit gilt nicht mehr „Chat lesen und loslegen".
 
-Verbindlicher Ablauf:
-1. Task beim Sync-Service lesen
-2. Claim versuchen
-3. Nur bei erfolgreichem Claim arbeiten
-4. Während der Arbeit Heartbeats senden
-5. Vor jedem GitHub-Write resyncen
-6. Neue Events inkrementell nachziehen
-7. Am Ende releasen
+### Verbindlicher Ablauf
+
+1. **Task lesen**
+   - `GET /tasks` und `GET /tasks/{task_id}` nutzen
+   - Aktuellen Snapshot, Owner, Lease, Phase prüfen
+
+2. **Claim versuchen**
+   - `POST /tasks/{task_id}/claim` mit `{ "agent_id": "<deine_agent_id>" }`
+   - Nur bei Erfolg (status 200) weiterarbeiten
+
+3. **Während der Arbeit**
+   - Regelmäßig Heartbeats senden: `POST /tasks/{task_id}/heartbeat`
+   - Lease aktiv halten
+   - Inkrementell neue Events holen: `GET /tasks/{task_id}/events?after_seq=<letzter_seq>`
+
+4. **Vor jedem schreibenden GitHub-Schritt**
+   - Resync: aktuellen Task-State lesen und Events nachziehen
+   - Lease gültig? Kein fremder Lease?
+   - Erst danach committen/pushen/PR erstellen
+
+5. **Bei Claim-Fehler**
+   - Nicht parallel arbeiten
+   - Task neu lesen, abwarten oder anderen Task wählen
+
+6. **Fertigstellen**
+   - Finalen Stand prüfen
+   - `POST /tasks/{task_id}/release` mit `{ "agent_id": "...", "phase": "released" }`
+
+### Wichtige Regeln
+- Kein Commit/Push/PR/Kommentar/Review ohne gültigen Claim
+- Kein paralleles Arbeiten an demselben Task bei gültigem fremdem Lease
+- Vor jedem GitHub-Write immer resyncen
+- Bei abgelaufenem/unklarem Lease: sofort stoppen, neu claimen
+- Telegram ist nur Steuerung/Kontext, nicht Wahrheitsquelle
+
+### Quellen der Wahrheit
+- **GitHub**: Code, Commits, PRs, Reviews, Kommentare
+- **agent-sync-service**: Ownership, Lease, Aktivitätszustand, inkrementeller Änderungsabgleich
 
 ## Regeln für GitHub-Arbeit
 - Kein Commit, Push, PR, Review oder Kommentar ohne gültigen Claim
