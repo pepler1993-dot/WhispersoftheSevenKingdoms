@@ -1,0 +1,35 @@
+# Whispers of the Seven Kingdoms – Python Dependencies
+# Install with: pip install -r requirements.txt
+
+# Core & Utilities
+numpy>=1.24.0
+scipy>=1.10.0
+Pillow>=10.0.0
+PyYAML>=6.0
+requests>=2.28.0
+pydub>=0.25.1
+
+# MusicGen (Hugging Face)
+transformers>=4.40.0
+torch>=2.0.0
+torchaudio>=2.0.0
+diffusers>=0.25.0
+accelerate>=0.27.0
+sentencepiece>=0.2.0
+protobuf>=3.20.0
+
+# YouTube Upload
+google-api-python-client>=2.0.0
+google-auth-httplib2>=0.2.0
+google-auth-oauthlib>=1.0.0
+
+# Optional: progress bars, logging
+tqdm>=4.65.0
+
+# Development / QA (optional)
+jsonschema>=4.19.0
+
+# Hinweis: ffmpeg muss systemweit installiert sein (nicht via pip)
+# Ubuntu/Debian: sudo apt-get install ffmpeg
+# macOS: brew install ffmpeg
+# Windows: Download von ffmpeg.org und PATH hinzufügen
