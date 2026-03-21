@@ -98,13 +98,32 @@ Kein Roman, kein Bürokratiekostüm – nur genug Struktur, damit nicht alles im
   - der erste QA-Schritt liefert jetzt nicht nur PASS/FAIL auf Konsole, sondern auch einen verwertbaren JSON-Report
   - `work/publish/reports/metadata-preflight.latest.json` ist aktuell die einfachste Referenz für den Stand
 - Nächster sinnvoller Schritt:
-  - nächsten PoC-Baustein vorbereiten: Dateivollständigkeit zwischen Song, Thumbnail und Metadaten prüfen
+  - Demo-Content vervollständigen oder Platzhalter für Song/Thumbnail anlegen, damit der Vollständigkeitscheck sinnvoll grün werden kann
 - Referenzen:
   - `scripts/qa/preflight-metadata-report.js`
   - `docs/technical/preflight.md`
   - `work/publish/reports/metadata-preflight.latest.json`
   - `input/README.md`
   - `output/youtube/README.md`
+
+### 2026-03-21 – Pako
+- Typ: Update
+- Branch: `feature/pako-asset-completeness-check`
+- Bereich: QA / Upload-Übergabe / PoC
+- Gemacht:
+  - `scripts/qa/check-upload-completeness.js` angelegt
+  - `docs/technical/upload-completeness.md` dokumentiert
+  - Vollständigkeits-Report für den `upload/`-Workflow ergänzt
+  - Check gegen den aktuellen Demo-Stand ausgeführt
+- Wichtig für den anderen:
+  - aktuell existieren pro Slug nur Metadaten, aber noch keine Songs oder Thumbnails in `upload/songs/` und `upload/thumbnails/`
+  - deshalb schlägt der Vollständigkeitscheck korrekt für alle drei Demo-Slugs fehl
+- Nächster sinnvoller Schritt:
+  - Demo-Assets liefern oder Platzhalter-/Testdateien definieren, damit der nächste PoC-Schritt vorbereitet werden kann
+- Referenzen:
+  - `scripts/qa/check-upload-completeness.js`
+  - `docs/technical/upload-completeness.md`
+  - `work/publish/reports/upload-completeness.latest.json`
 
 ### 2026-03-21 – Pako
 - Typ: Decision
