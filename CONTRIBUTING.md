@@ -1,35 +1,18 @@
-# Beitragsregeln für Whispers of the Seven Kingdoms
+# Contributing
 
-## Zusammenarbeit (für 2 Personen)
+## Grundregeln
+1. Änderungen im eigenen Branch machen
+2. Vor neuer Arbeit `git pull` auf aktuellen Stand
+3. Kleine, klar abgegrenzte Commits
+4. Erst nach kurzem Review nach `main`
+5. Keine Secrets ins Repo
 
-1. **Eigene Branches:**
-   - Neue Features/Bugfixes immer im eigenen Branch (z. B. `feature/song-titel` oder `bugfix/audio-glitch`).
+## Zusammenarbeit
+- **Jarvis**: Automation, Workflow, Doku
+- **Pako**: Musik, Thumbnails, Content
+- Gemeinsame Dateien nur mit Absprache bearbeiten
 
-2. **Kein Direkt-Push auf main:**
-   - Änderungen via Pull/Merge Request einpflegen, nicht direkt auf main pushen.
-
-3. **Commit-Stil:**
-   - Kurze, präzise Commit-Messages (z. B. „Add House Stark lullaby“).
-
-4. **Regelmäßiges Pullen:**
-   - Vor neuen Änderungen immer `git pull`, um Konflikte früh zu erkennen.
-
-5. **Review:**
-   - Mindestens einer reviewed Änderungen des anderen vor dem Merge (ein 👍 oder Kommentar reicht).
-
-6. **README pflegen:**
-   - Neue Songs oder Strukturänderungen dort kurz aufnehmen.
-
-7. **Entscheidungen und Pläne dokumentieren:**
-   - Jede technische Entscheidung, Aufgabenplanung oder Prozessänderung muss in einer passenden Datei im Repo dokumentiert werden.
-   - Solche Änderungen dürfen nicht nur im Chat stehen bleiben.
-   - Die Dokumentation muss zusammen mit dem zugehörigen Branch gepusht werden, damit alle denselben Stand sehen.
-
-8. **Agenten-Sync pflegen:**
-   - Wichtige Updates, Feedback, Übergaben, Ideen und offene Fragen zwischen Agenten werden zusätzlich in `AGENT_SYNC.md` festgehalten.
-   - Nach relevanten Änderungen soll dort kurz dokumentiert werden, was gemacht wurde und was der andere Agent wissen muss.
-
-**Sonderfall:**
-- Wenn's mal dringend ist und jemand auf main muss: Kurz im Chat absprechen.
-
-_Diese Regeln sollen den Flow erleichtern und Konflikte vermeiden – nicht bremsen!_
+## Wichtige gemeinsame Konventionen
+- gleicher Slug für Song, Thumbnail und Metadaten
+- keine halbfertigen Dateien in die Upload-Ordner
+- Übergaberegeln stehen in `PARALLEL_WORK_PLAN.md`
