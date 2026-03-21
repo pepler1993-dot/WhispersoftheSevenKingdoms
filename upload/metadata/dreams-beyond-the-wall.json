@@ -1,0 +1,23 @@
+{
+  "slug": "dreams-beyond-the-wall",
+  "title": "Dreams Beyond the Wall",
+  "platform": "youtube",
+  "theme": "Beyond the Wall",
+  "mood": ["icy", "quiet", "mystical"],
+  "notes": "Dritter Demo-Datensatz für kalte, minimalistische Nord-Stimmung.",
+  "duration_hint": "long-form sleep track",
+  "music_brief": {
+    "style": "icy ambient fantasy sleep music",
+    "influences": ["frozen wind", "thin choir", "distant bells", "slow pads", "vast empty snowfields"],
+    "tempo": "very slow",
+    "energy": "very low",
+    "avoid": ["action scoring", "loud impacts", "busy melody"]
+  },
+  "thumbnail_brief": {
+    "scene": "A frozen landscape beyond the Wall under pale moonlight",
+    "elements": ["snow plain", "ice mist", "faint aurora", "dark horizon"],
+    "text": "Dreams Beyond the Wall",
+    "style": "cold, minimal, readable, atmospheric",
+    "avoid": ["character collage", "chaotic details", "warm color dominance"]
+  }
+}

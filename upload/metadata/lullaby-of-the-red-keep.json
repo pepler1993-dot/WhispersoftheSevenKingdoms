@@ -1,0 +1,23 @@
+{
+  "slug": "lullaby-of-the-red-keep",
+  "title": "Lullaby of the Red Keep",
+  "platform": "youtube",
+  "theme": "King's Landing",
+  "mood": ["warm", "solemn", "sleepy"],
+  "notes": "Zweiter Demo-Datensatz für Content-Richtung und spätere Automationsläufe.",
+  "duration_hint": "long-form sleep track",
+  "music_brief": {
+    "style": "royal fantasy sleep music",
+    "influences": ["quiet halls", "candlelight", "soft harp", "distant choir", "night in a palace"],
+    "tempo": "slow",
+    "energy": "low",
+    "avoid": ["aggressive brass", "martial drums", "dramatic swells"]
+  },
+  "thumbnail_brief": {
+    "scene": "The Red Keep at night above the dark city",
+    "elements": ["warm torchlight", "castle silhouette", "night sky", "subtle gold accents"],
+    "text": "Lullaby of the Red Keep",
+    "style": "elegant, dark, readable, atmospheric",
+    "avoid": ["crowded composition", "tiny text", "overly bright colors"]
+  }
+}
