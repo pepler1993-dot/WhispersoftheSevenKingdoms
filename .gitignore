@@ -1,1 +1,5 @@
 .claw/
+
+# Runtime reports
+work/publish/reports/*.json
+!work/publish/reports/.gitkeep
