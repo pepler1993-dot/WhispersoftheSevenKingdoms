@@ -13,6 +13,9 @@ Songs und Videos zum Einschlafen im GoT-Stil produzieren und mit möglichst weni
 - Content zuerst, Automation daran andocken
 - Keine unnötige Planungsschleife
 - Kleine, klar begrenzte Änderungen statt Dokumentenlawinen
+- Task-Arbeit läuft über den agent-sync-service, nicht nur über Chat-Kontext
+- Ohne erfolgreichen Claim keine aktive Bearbeitung desselben Tasks
+- Vor jedem GitHub-Write ist ein Resync Pflicht
 
 ## Relevante Dateien
 - `AUFGABEN.md`

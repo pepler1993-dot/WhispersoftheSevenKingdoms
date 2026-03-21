@@ -127,6 +127,24 @@ Kein Roman, kein Bürokratiekostüm – nur genug Struktur, damit nicht alles im
 
 ### 2026-03-21 – Pako
 - Typ: Decision
+- Branch: `feature/pako-asset-completeness-check`
+- Bereich: Zusammenarbeit / Sync-Protokoll / GitHub-Disziplin
+- Gemacht:
+  - neue Pflichtregel für agent-sync-service in `CONTRIBUTING.md` dokumentiert
+  - `AGENT_INFO.md` um Claim-/Resync-Regeln ergänzt
+  - festgehalten, dass Chat nicht mehr als alleinige Arbeitsgrundlage reicht
+- Wichtig für den anderen:
+  - vor aktiver Task-Arbeit gilt jetzt verbindlich: read -> claim -> work -> heartbeat -> resync before write -> release
+  - GitHub bleibt Entwicklungs-Wahrheit, der Sync-Service bleibt Koordinations-Wahrheit
+  - ohne gültigen Claim keine schreibenden GitHub-Aktionen
+- Nächster sinnvoller Schritt:
+  - bei nächster echter Task-Bearbeitung die Regeln auch in der praktischen Task-/Branch-Routine nachziehen
+- Referenzen:
+  - `CONTRIBUTING.md`
+  - `AGENT_INFO.md`
+
+### 2026-03-21 – Pako
+- Typ: Decision
 - Branch: `pako/parallel-work-plan`
 - Bereich: Teamstruktur / Aufgabenverteilung / Doku
 - Gemacht:
