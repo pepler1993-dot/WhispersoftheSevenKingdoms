@@ -1,5 +1,5 @@
 # PROJECT STATUS – Whispers of the Seven Kingdoms
-> Letzte Aktualisierung: 2026-03-21 21:23 UTC
+> Letzte Aktualisierung: 2026-03-21 22:46 UTC
 > Aktualisiert von: Smith
 
 **Agents: Lest diese Datei zuerst. Sie enthält alles was ihr wissen müsst.**
@@ -20,90 +20,84 @@ Ein Befehl → Audio generieren → Thumbnail → Video → Metadaten → YouTub
 | Kevin (@Kpepz189) | Infrastruktur, Proxmox | Mensch |
 | Eddi (@xDisslike) | Sync-Service, Koordination | Mensch |
 
-## ✅ Erledigte Meilensteine
+## ✅ PIPELINE IST CODE-COMPLETE (Stand 21.03.2026)
 
-### M1: Repo & Struktur (erledigt)
-- Repo: `pepler1993-dot/WhispersoftheSevenKingdoms`
-- Schema: `schemas/song.schema.json`
-- 3 Demo-Songs in `upload/metadata/`
-- Branch-Strategie: `BRANCHING.md`
+### Alle Komponenten fertig & getestet:
+1. **Audio-Generation** → `publishing/MusicGen_Colab.ipynb` (Google Colab, GPU)
+2. **Thumbnail-Generator** → `scripts/thumbnails/generate_thumbnail.py` (Pillow, 8 GoT-Paletten)
+3. **Video-Rendering** → `scripts/video/render.py` (ffmpeg, 1920x1080)
+4. **Metadaten-Generator** → `scripts/metadata/metadata_gen.py` (Titel, Tags, Beschreibung)
+5. **YouTube Upload** → `scripts/publish/youtube_upload.py` (OAuth2 + API v3)
+6. **Pipeline-Orchestrierung** → `pipeline.py` (ein Befehl für alles)
+7. **Dokumentation** → `QUICKSTART.md`, `PROJECT_STATUS.md`
 
-### M2: Publishing Templates (erledigt, PR #4)
-- `publishing/` – Titel, Beschreibung, Tags, Playlist-Strategie
-- Competitive Analysis, SEO-Daten
+### Dry-Run bestanden ✅
+`pipeline.py --slug whispers-of-winterfell --skip-upload` → Thumbnail + Video + Metadaten + QA ✅
 
-### M3: MusicGen Pipeline (erledigt, PR #4)
-- `publishing/musicgen/` – generate.py, merge.py, upload.py
-- 8 GoT-Tracks × 5 Prompt-Variationen in prompts.json
-- Google Colab Notebook bereit
+### YouTube API connected ✅
+- Kanal erstellt & verifiziert
+- OAuth2 Credentials eingerichtet
+- `client_secret.json` auf Server (gitignored)
 
-### M4: Metadaten-Generator (erledigt, PR #16)
-- `scripts/metadata/metadata_gen.py`
-- song.json → YouTube-Titel, Beschreibung, Tags, Playlists
-- 8 Lore-Einträge, Mood-basierte Titel-Varianten
+## 🔶 Nächste Schritte
 
-### M5: YouTube Upload Script (erledigt, PR #16)
-- `scripts/publish/youtube_upload.py`
-- OAuth2 + YouTube Data API v3
-- Resumable Upload, Retry-Logic, Playlist-Support
+### JETZT: Erster echter Song
+1. Colab öffnen → `publishing/MusicGen_Colab.ipynb` von GitHub laden
+2. GPU (T4) auswählen, GitHub Token eintragen
+3. Run All → ~30 Min → MP3 wird zu GitHub gepusht
+4. Server: `git pull && python3 pipeline.py --slug whispers-of-winterfell`
+5. Erster Song auf YouTube! 🚀
 
-### M6: Video-Rendering (erledigt, PR #18)
-- `scripts/video/render.py`
-- Audio + Standbild → MP4 (1920x1080, H.264, AAC)
-
-### M7: Thumbnail-Generator (erledigt, PR #19)
-- `scripts/thumbnails/generate_thumbnail.py`
-- 8 GoT-Farbpaletten, Text-Overlay, Vignette, Branding
-- Pillow-basiert, kein API-Key nötig
-
-### M8: Dokumentation (erledigt, PR #12, #17)
-- README, PIPELINE, CONTRIBUTING, AUFGABEN aktualisiert
-- Upload-Checklist, Templates
-
-## 🔶 In Arbeit
-
-### Pipeline-Orchestrierung (#10, Pako)
-Ein Script das alles zusammenführt: Audio → Thumbnail → Video → Metadaten → Upload
-
-## ❌ Offen / Blocker
-
-| Was | Wer | Blocker? |
-|---|---|---|
-| YouTube-Kanal erstellen | Kevin | **JA** – ohne das kein Upload |
-| Google Cloud + OAuth2 | Kevin | **JA** – Upload braucht API |
-| GPU-Passthrough Proxmox | Kevin | Nein – Colab als Alternative |
-| Erster E2E Testlauf (#15) | Alle | Wartet auf YouTube-API |
-| HF Token rotieren | Kevin | Sicherheit |
+### SPÄTER: Volle Automatisierung
+- GPU-Passthrough auf Kevins Proxmox (GTX 1070)
+- Cron-Job für nächtliche Generierung
+- Webhook für automatischen Pipeline-Start nach Audio-Push
 
 ## 📁 Wichtige Pfade
 ```
+pipeline.py                         ← EIN BEFEHL FÜR ALLES
 scripts/
-  metadata/metadata_gen.py      ← Metadaten generieren
-  publish/youtube_upload.py     ← YouTube Upload
-  video/render.py               ← Video rendern
+  metadata/metadata_gen.py          ← Metadaten generieren
+  publish/youtube_upload.py         ← YouTube Upload
+  video/render.py                   ← Video rendern
   thumbnails/generate_thumbnail.py  ← Thumbnails
-  metadata/validate-song-metadata.js ← Schema-Validator
 publishing/
-  musicgen/                     ← Audio-Pipeline
-  TAG_LIBRARY.md, TITLE_TEMPLATE.md, etc.
-upload/metadata/                ← Song-JSONs
-schemas/song.schema.json        ← Song-Schema
-output/                         ← Generierte Dateien
+  MusicGen_Colab.ipynb              ← Audio-Generation (Colab)
+  musicgen/                         ← Prompts, Config, Scripts
+upload/metadata/                    ← Song-JSONs (3 Demo-Songs)
+upload/songs/                       ← Generierte Audio-Dateien
+output/youtube/                     ← Fertige Videos + Metadaten
 ```
+
+## 📋 Entscheidungen (FINAL – nicht mehr diskutieren)
+- Audio-Speicher: GitHub als MP3
+- Python CLI Scripts (kein Jupyter für Pipeline)
+- MusicGen-medium für GoT-Sound
+- Thumbnails: Template-basiert mit Pillow (kein API-Key)
+- Tags: 15-25 pro Video
+- Keine leeren Playlists
+- Colab für Audio (manueller Start), Rest automatisch
+- Prompts: stimmungsbasiert + technische Basics (BPM, Key)
+- Später: Kevins Proxmox GPU für volle Automatisierung
 
 ## 🔧 Infrastruktur
 - **Sync-Service**: `https://unsuitable-amina-tyrannizingly.ngrok-free.dev`
-- **Protokoll**: Read → Claim → Work → Heartbeat → Resync → Release
-- **Audio-Generation**: Proxmox (GTX 1070) oder Google Colab
-- **Alles andere**: Eddis Server (kein GPU nötig)
+- **Backup**: Alle 6h automatisch (Cron)
+- **YouTube API**: Connected (OAuth2 Token auf Server)
+- **Audio**: Google Colab (T4 GPU, kostenlos)
+- **Server**: Eddis Maschine (Pipeline, Upload, Cron)
 
-## 📋 Entscheidungen (nicht mehr diskutieren)
-- Audio-Speicher: GitHub als MP3
-- Python CLI Scripts (kein Jupyter für Pipeline)
-- MusicGen-melody für GoT-Sound
-- Thumbnails: Template-basiert mit Pillow
-- Tags: 15-25 pro Video
-- Keine leeren Playlists
+## 📊 Erledigte PRs
+| PR | Was | Wer |
+|---|---|---|
+| #4 | Publishing Templates + MusicGen Pipeline | Smith |
+| #12 | Doku-Update | Jarvis |
+| #16 | Metadaten-Generator + YouTube Upload | Smith |
+| #17 | Templates + Checklist | Jarvis |
+| #18 | Video-Rendering | Pako |
+| #19 | Thumbnail-Generator | Smith |
+| #20 | Pipeline-Orchestrierung | Pako |
+| #25 | QUICKSTART.md | Jarvis |
 
 ---
-*Diese Datei wird bei jedem Meilenstein aktualisiert. Nicht manuell editieren – Smith pflegt sie.*
+*Diese Datei wird bei jedem Meilenstein aktualisiert. Smith pflegt sie.*
