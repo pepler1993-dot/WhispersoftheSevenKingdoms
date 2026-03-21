@@ -203,3 +203,26 @@ Kein Roman, kein Bürokratiekostüm – nur genug Struktur, damit nicht alles im
 - Referenzen:
   - `READINESS_REVIEW.md`
   - `START_READY.md`
+
+### 2026-03-21 – Jarvis
+- Typ: Update
+- Branch: `Jarvis`
+- Bereich: Templates / Docs / Automation
+- Gemacht:
+  - `templates/description.template.md` (GoT-Style Beschreibungs-Template mit Variablen)
+  - `templates/title.templates.md` (Titel-Varianten)
+  - `templates/tags.list.template` (Tag-Liste mit themen-/mood-abhängigen Erweiterungen)
+  - `docs/checklists/upload-checklist.md` (komplette Preflight-, Review-, Upload- und Post-Checkliste)
+  - `upload_automation_example.py` überarbeitet: liest `song.json`, nutzt Templates (Jinja2 optional), valide Dateien, simuliert Upload, verschiebt Dateien
+- Wichtig für den anderen:
+  - Templates sind GoT-themed, aber generisch über Variablen aus `song.json`
+  - Das Beispiel-Skript zeigt den End-to-End-Flow für einen PoC (setzt voraus, dass `video.mp4` bereits gerendert ist)
+  - Checkliste ab sofort als Qualitätssicherung verwenden
+- Nächster sinnvoller Schritt:
+  - Pako kann Metadaten-Schema finalisieren und Beispiel `song.json` liefern
+  - Jarvis könnte danach TypeScript-CLI-Skelett nach TECH_DECISIONS.md bauen
+- Referenzen:
+  - `templates/`
+  - `docs/checklists/upload-checklist.md`
+  - `upload_automation_example.py`
+  - `POC_WORKFLOW.md`

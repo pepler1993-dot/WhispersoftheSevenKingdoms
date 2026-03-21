@@ -1,0 +1,70 @@
+# YouTube Tags Template — Whispers of the Seven Kingdoms
+
+## Base Tags (always include)
+whispers of the seven kingdoms
+game of thrones
+got
+ambient sleep music
+fantasy music
+relaxing music
+sleep music
+study music
+meditation music
+background music
+dark ambient
+cinematic ambient
+
+## Theme-specific tags (add based on theme)
+{% if theme == "Winterfell" %}winterfell
+north
+stark
+castle
+snow
+icy{% endif %}
+{% if theme == "King's Landing" %}kings landing
+cersei
+tywin
+lannister
+capital
+gold
+red keep{% endif %}
+{% if theme == "Dorne" %}dorne
+martell
+sun
+desert
+ocean
+sand{% endif %}
+{% if theme == "The Wall" %}the wall
+night's watch
+jon snow
+castle black
+ice
+snow
+beyond the wall{% endif %}
+{% if theme == "Essos" %}essos
+daenerys
+dothraki
+dragons
+free cities
+vaes dothrak{% endif %}
+
+## Mood-based tags
+{% if "calm" in mood %}calm
+peaceful
+tranquil{% endif %}
+{% if "dark" in mood %}dark ambient
+gothic
+mysterious
+ominous{% endif %}
+{% if "melancholic" in mood %}melancholic
+sad
+emotional
+sorrowful{% endif %}
+{% if "epic" in mood %}epic
+cinematic
+orchestral
+dramatic{% endif %}
+
+## Auto-generated from slug
+{{slug}}
+{{slug.replace('-', ' ')}}

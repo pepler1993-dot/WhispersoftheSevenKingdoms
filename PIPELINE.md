@@ -449,6 +449,23 @@ Sonst baut ihr euch zuerst einen Raumhafen und merkt danach, dass noch nicht mal
 
 ---
 
+## Aktueller Stand (Stand: 2026-03-21)
+
+| Stufe | Status | Bemerkung |
+|---|---|---|
+| 1. Idee & Planung | ✅ | Schema + Briefing-Vorlage existiert |
+| 2. Song-Erstellung | ✅ | MusicGen-Pipeline fertig (`publishing/musicgen/`) |
+| 3. Audio-Finalisierung | ✅ | `merge.py` mit Crossfade |
+| 4. Video-Erstellung | ❌ | Script fehlt (Pako #7) |
+| 5. Metadaten | 🔶 | Templates da, Generator fehlt (Smith #8) |
+| 6. QA | ✅ | Preflight + Validierung existiert (`scripts/qa/`) |
+| 7. Publikationsvorbereitung | 🔶 | Teilweise (Templates unter `publishing/`) |
+| 8. Upload | ❌ | YouTube-Script fehlt (Smith #9) |
+
+Legende: ✅ erledigt | 🔶 teilweise | ❌ offen
+
+---
+
 ## 9. Weiterführende Automatisierung
 
 Für eine schrittweise Analyse der konkreten Automatisierung pro Einzelschritt siehe:
