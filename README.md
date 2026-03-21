@@ -40,10 +40,20 @@ upload/
 - `AUTOMATION.md` → pragmatischer Upload-Workflow
 - `PARALLEL_WORK_PLAN.md` → Zusammenarbeit und konkrete Übergaberegeln
 - `upload_automation_example.py` → einfacher PoC für den Upload-Flow
+- `QUICKSTART.md` → 5-Minuten-Schnellstart (empfohlen für neue Teammitglieder)
+- `PROJECT_STATUS.md` → zentrale Statusübersicht, Meilensteine, Team
+
+## Pipeline-Skripte (automatisiert)
+- `scripts/metadata/metadata_gen.py` → Metadaten aus JSON generieren
+- `scripts/thumbnails/generate_thumbnail.py` → Thumbnail nach Theme
+- `scripts/video/render.py` → Audio + Bild → MP4 (ffmpeg)
+- `scripts/publish/youtube_upload.py` → YouTube Upload
+- `publishing/musicgen/generate.py` → MusicGen Audiogenerierung
+- `scripts/orchestrate.py` (geplant) → Gesamtsteuerung
 
 ## Komponenten im Überblick
 - **Publishing-Toolkit** unter `publishing/`:
-  - Titel-, Beschreibungs- und Tag-Templates
+  - Titel-,Beschreibungs- und Tag-Templates
   - Playlist-Strategie
   - Publishing-Beispiele und Anleitungen
 - **MusicGen-Pipeline** unter `publishing/musicgen/`:
