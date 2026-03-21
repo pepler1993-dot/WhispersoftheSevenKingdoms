@@ -4,6 +4,9 @@
 work/publish/reports/*.json
 !work/publish/reports/.gitkeep
 
+# Auto-generated briefing (memory)
+BRIEFING.md
+
 # OAuth Secrets
 client_secret*.json
 .youtube_token.json
