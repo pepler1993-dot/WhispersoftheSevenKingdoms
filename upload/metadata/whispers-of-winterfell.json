@@ -5,5 +5,19 @@
   "theme": "Winterfell",
   "mood": ["calm", "cold", "melancholic"],
   "notes": "Demo-Datensatz für den ersten Automationslauf. Song und Thumbnail müssen denselben Slug verwenden.",
-  "duration_hint": "long-form sleep track"
+  "duration_hint": "long-form sleep track",
+  "music_brief": {
+    "style": "fantasy sleep music",
+    "influences": ["cold north", "ancient castle", "night wind", "soft strings", "distant choir"],
+    "tempo": "slow",
+    "energy": "low",
+    "avoid": ["epic battle drums", "sudden loud transitions", "harsh percussion"]
+  },
+  "thumbnail_brief": {
+    "scene": "Winterfell at night in cold blue moonlight",
+    "elements": ["snow", "castle silhouette", "soft fog", "dim warm window lights"],
+    "text": "Whispers of Winterfell",
+    "style": "dark, clean, readable, atmospheric",
+    "avoid": ["busy collage", "tiny text", "oversaturated colors"]
+  }
 }
