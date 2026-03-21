@@ -1,0 +1,9 @@
+{
+  "type": "metadata-preflight",
+  "timestamp": "2026-03-21T14:06:31.302Z",
+  "target": "upload/metadata",
+  "exitCode": 0,
+  "status": "pass",
+  "stdout": "PASS upload/metadata/dreams-beyond-the-wall.json\nPASS upload/metadata/lullaby-of-the-red-keep.json\nPASS upload/metadata/whispers-of-winterfell.json\n---\nChecked files: 3\nFailures: 0",
+  "stderr": ""
+}
