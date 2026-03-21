@@ -1,0 +1,100 @@
+{
+  "tracks": [
+    {
+      "name": "winterfell_peaceful_piano",
+      "category": "peaceful",
+      "house": "stark",
+      "prompts": [
+        "peaceful medieval piano, gentle snowfall ambience, calm sleep music, soft and soothing, castle atmosphere, no vocals",
+        "soft piano melody, winter night, gentle wind, peaceful and warm, medieval castle, sleep music, no vocals",
+        "gentle harp and piano, quiet snowfall, ancient castle ambience, calm and serene, deep sleep, no vocals",
+        "slow peaceful piano, crackling fireplace, warm medieval hall, soothing lullaby, sleep ambient, no vocals",
+        "soft strings and piano, cold winter night, gentle and melancholic, peaceful castle, sleep music, no vocals"
+      ]
+    },
+    {
+      "name": "kings_landing_night",
+      "category": "peaceful",
+      "house": "lannister",
+      "prompts": [
+        "warm ambient music, gentle harp and soft strings, mediterranean night, royal palace, calm and regal, sleep music, no vocals",
+        "soft lute melody, warm evening breeze, ancient city ambience, peaceful and elegant, no vocals",
+        "gentle strings and flute, candlelit palace, warm night atmosphere, soothing royal music, no vocals",
+        "quiet harp melody, moonlit courtyard, warm stone walls, regal and peaceful, deep sleep, no vocals",
+        "soft chamber music, gentle night breeze, ancient palace, warm and calming, no vocals"
+      ]
+    },
+    {
+      "name": "targaryen_ethereal",
+      "category": "dark",
+      "house": "targaryen",
+      "prompts": [
+        "ethereal ambient music, mysterious and ancient, soft choir pads, dark but peaceful, deep sleep music, no vocals",
+        "haunting ambient, dragon inspired, deep drones, mystical atmosphere, calm and vast, no vocals",
+        "ethereal strings, ancient power, slow and meditative, dark ambient sleep music, no vocals",
+        "deep mystical pads, ancient temple atmosphere, vast and ethereal, peaceful darkness, no vocals",
+        "soft choir ambient, dragon flight, majestic and calm, deep sleep drone, no vocals"
+      ]
+    },
+    {
+      "name": "the_wall_dark_ambient",
+      "category": "dark",
+      "house": "nights_watch",
+      "prompts": [
+        "dark ambient soundscape, cold wind, ice and snow, mysterious and vast, deep bass drones, haunting, no vocals",
+        "frozen ambient, howling wind, deep cold atmosphere, dark and peaceful, sleep ambient, no vocals",
+        "icy drone ambient, vast frozen landscape, slow dark pads, deep meditation, no vocals",
+        "cold wind ambient, massive ice wall, lonely and vast, dark sleep music, deep drones, no vocals",
+        "arctic ambient, distant wolves, frozen night, dark and still, deep sleep soundscape, no vocals"
+      ]
+    },
+    {
+      "name": "highgarden_gentle",
+      "category": "peaceful",
+      "house": "tyrell",
+      "prompts": [
+        "gentle acoustic guitar, warm summer garden, birds singing softly, peaceful, relaxing sleep music, medieval, no vocals",
+        "soft flute and harp, sunny garden ambience, butterflies, warm and light, soothing, no vocals",
+        "peaceful lute melody, gentle breeze, flower garden, warm afternoon, calming, no vocals",
+        "soft acoustic strings, warm sunshine, blooming roses, gentle and happy, sleep music, no vocals",
+        "gentle mandolin, summer afternoon, birds and breeze, peaceful garden, calming melody, no vocals"
+      ]
+    },
+    {
+      "name": "godswood_meditation",
+      "category": "meditation",
+      "house": "stark",
+      "prompts": [
+        "meditative ambient, ancient forest, gentle wind through leaves, mystical and sacred, soft flute, no vocals",
+        "forest ambient, soft rain on leaves, ancient trees, deep calm, nature meditation, no vocals",
+        "sacred ambient music, old growth forest, gentle streams, peaceful and still, spiritual, no vocals",
+        "deep forest drone, rustling leaves, ancient wisdom, meditative and calm, no vocals",
+        "mystical flute, sacred grove, gentle water, ancient trees, deep relaxation ambient, no vocals"
+      ]
+    },
+    {
+      "name": "rains_of_castamere_sleep",
+      "category": "peaceful",
+      "house": "lannister",
+      "prompts": [
+        "slow melancholic piano, gentle and sad, medieval castle, soft rain background, emotional sleep music, no vocals",
+        "bittersweet piano melody, rainy night, stone castle, lonely and peaceful, sleep ambient, no vocals",
+        "gentle sad piano, quiet rainfall, candle-lit hall, melancholic but calming, deep sleep, no vocals",
+        "slow emotional piano, rain on stone, empty castle halls, peaceful sadness, sleep music, no vocals",
+        "melancholic harp and piano, gentle rain, ancient stone walls, bittersweet calm, no vocals"
+      ]
+    },
+    {
+      "name": "dorne_desert_night",
+      "category": "peaceful",
+      "house": "martell",
+      "prompts": [
+        "warm desert night ambient, soft oud, middle eastern inspired, peaceful oasis, calm sleep music, no vocals",
+        "gentle arabic flute, warm night breeze, desert stars, soothing and exotic, sleep ambient, no vocals",
+        "soft percussion and strings, desert oasis, warm sand, peaceful night, mediterranean calm, no vocals",
+        "warm oud melody, starlit desert, gentle wind, exotic and peaceful, deep sleep, no vocals",
+        "middle eastern ambient, warm desert evening, gentle fountain, peaceful oasis night, no vocals"
+      ]
+    }
+  ]
+}
