@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Events{% endblock %}
+{% block content %}
+<h1>GitHub Events</h1>
+<section class="panel">
+  <table>
+    <thead><tr><th>delivery_id</th><th>event_type</th><th>action</th><th>repo</th><th>sender</th><th>received_at</th></tr></thead>
+    <tbody>
+      {% for event in events %}
+      <tr>
+        <td class="mono">{{ event.delivery_id }}</td>
+        <td>{{ event.event_type }}</td>
+        <td>{{ event.action }}</td>
+        <td>{{ event.repo }}</td>
+        <td>{{ event.sender }}</td>
+        <td>{{ event.received_at }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6">Keine Events</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

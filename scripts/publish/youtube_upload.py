@@ -80,7 +80,7 @@ def get_credentials():
             creds = flow.run_local_server(port=0)
 
         # Token speichern
-        with open(TOKEN_PATH, "w") as f:
+        with open(TOKEN_PATH, "w", encoding="utf-8") as f:
             f.write(creds.to_json())
         print(f"✅ Token gespeichert: {TOKEN_PATH}")
 
@@ -238,7 +238,7 @@ def main():
         print(f"❌ Metadaten nicht gefunden: {args.metadata}")
         sys.exit(1)
 
-    with open(args.metadata) as f:
+    with open(args.metadata, encoding="utf-8") as f:
         metadata = json.load(f)
 
     # Auth

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Task Detail{% endblock %}
+{% block content %}
+<h1>Task Detail</h1>
+<div class="panel"><strong>{{ task_id }}</strong></div>
+<div class="grid two">
+  <section class="panel">
+    <h2>State</h2>
+    <pre>{{ detail.state | tojson(indent=2) }}</pre>
+  </section>
+  <section class="panel">
+    <h2>Snapshot</h2>
+    <pre>{{ detail.snapshot | tojson(indent=2) }}</pre>
+  </section>
+</div>
+<div class="grid two">
+  <section class="panel">
+    <h2>Task Events</h2>
+    <ul class="list mono">
+      {% for event in detail.task_events %}
+      <li>#{{ event.seq }} {{ event.event_type }} / {{ event.action }}</li>
+      {% else %}
+      <li>Keine Task-Events</li>
+      {% endfor %}
+    </ul>
+  </section>
+  <section class="panel">
+    <h2>GitHub Events</h2>
+    <ul class="list mono">
+      {% for event in detail.github_events %}
+      <li>{{ event.delivery_id }} — {{ event.event_type }} / {{ event.action }}</li>
+      {% else %}
+      <li>Keine GitHub Events</li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}agent-sync-service Admin{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/admin.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">agent-sync-service</div>
+      <nav>
+        <a href="/admin" class="nav-link {% if page == 'dashboard' %}active{% endif %}">Dashboard</a>
+        <a href="/admin/pipeline" class="nav-link {% if page == 'pipeline' %}active{% endif %}">Pipeline</a>
+        <a href="/admin/tasks" class="nav-link {% if page == 'tasks' %}active{% endif %}">Tasks</a>
+        <a href="/admin/events" class="nav-link {% if page == 'events' %}active{% endif %}">Events</a>
+        <a href="/admin/system" class="nav-link {% if page == 'system' %}active{% endif %}">System</a>
+      </nav>
+    </aside>
+    <main class="content">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</body>
+</html>

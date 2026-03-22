@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1>Dashboard</h1>
+<div class="cards">
+  {% for phase, count in summary.phase_counts.items() %}
+    <div class="card stat"><div class="label">{{ phase }}</div><div class="value">{{ count }}</div></div>
+  {% endfor %}
+</div>
+<div class="grid two">
+  <section class="panel">
+    <h2>Aktive Leases</h2>
+    <ul class="list">
+      {% for task in summary.active_leases %}
+        <li><a href="/admin/tasks/{{ task.task_id }}">{{ task.task_id }}</a> — {{ task.owner_agent }} — <span class="badge {{ task.phase }}">{{ task.phase }}</span></li>
+      {% else %}
+        <li>Keine aktiven Leases</li>
+      {% endfor %}
+    </ul>
+  </section>
+  <section class="panel">
+    <h2>Stale Tasks</h2>
+    <ul class="list">
+      {% for task in summary.stale_tasks %}
+        <li><a href="/admin/tasks/{{ task.task_id }}">{{ task.task_id }}</a></li>
+      {% else %}
+        <li>Keine stale Tasks</li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+<div class="grid two">
+  <section class="panel">
+    <h2>Letzte Task-Events</h2>
+    <ul class="list mono">
+      {% for event in summary.recent_task_events[:10] %}
+        <li>#{{ event.seq }} {{ event.task_id }} — {{ event.event_type }} / {{ event.action }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+  <section class="panel">
+    <h2>Letzte GitHub Events</h2>
+    <ul class="list mono">
+      {% for event in summary.recent_github_events[:10] %}
+        <li>{{ event.delivery_id }} — {{ event.event_type }} / {{ event.action }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+{% endblock %}

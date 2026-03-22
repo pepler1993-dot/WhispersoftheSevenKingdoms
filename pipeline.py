@@ -244,8 +244,7 @@ def main():
             '--image', str(thumb_path),
             '--output', str(video_path),
         ]
-    node_bin = shutil.which('node') or 'node'
-    preflight_cmd = [node_bin, 'scripts/qa/preflight-metadata-report.js']
+    preflight_cmd = [sys.executable, 'scripts/qa/preflight_metadata_report.py']
 
     if args.dry_run:
         print('DRY:', ' '.join(metadata_cmd))

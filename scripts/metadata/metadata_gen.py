@@ -319,7 +319,7 @@ def load_song_meta(slug):
     if not os.path.exists(path):
         print(f"❌ Nicht gefunden: {path}")
         return None
-    with open(path) as f:
+    with open(path, encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -332,7 +332,7 @@ def list_songs():
     for f in sorted(os.listdir(METADATA_DIR)):
         if f.endswith(".json"):
             slug = f.replace(".json", "")
-            with open(os.path.join(METADATA_DIR, f)) as fh:
+            with open(os.path.join(METADATA_DIR, f), encoding="utf-8") as fh:
                 meta = json.load(fh)
             print(f"  {slug}")
             print(f"    Titel: {meta.get('title', '?')}")
@@ -387,7 +387,7 @@ def main():
         os.makedirs(OUTPUT_DIR, exist_ok=True)
         output_path = os.path.join(OUTPUT_DIR, f"{args.song}.youtube.json")
 
-    with open(output_path, "w") as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)
 
     print(f"✅ Metadaten generiert: {output_path}")

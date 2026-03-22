@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% block title %}Run {{ run.run_id }}{% endblock %}
+{% block content %}
+<div class="status-header">
+  <h1>{{ run.title or run.slug }}</h1>
+  <span class="badge {{ run.status }}">{{ run.status }}</span>
+</div>
+
+<div class="action-bar">
+  <a href="/admin/pipeline" class="btn btn-secondary btn-sm">Alle Runs</a>
+  {% if run.status == 'running' %}
+    <form method="post" action="/admin/pipeline/run/{{ run.run_id }}/cancel" style="margin:0">
+      <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Run wirklich abbrechen?')">Abbrechen</button>
+    </form>
+  {% endif %}
+  {% if run.status == 'rendered' %}
+    <form method="post" action="/admin/pipeline/run/{{ run.run_id }}/upload" style="margin:0">
+      <button type="submit" class="btn btn-success" onclick="return confirm('Video jetzt zu YouTube hochladen?')">Upload zu YouTube</button>
+    </form>
+  {% endif %}
+  {% if run.status == 'uploaded' %}
+    <span style="color:var(--good);font-weight:700">Upload abgeschlossen</span>
+  {% endif %}
+</div>
+
+{% if run.error_message %}
+<div class="panel" style="border-color:var(--bad)">
+  <strong style="color:var(--bad)">Fehler:</strong> {{ run.error_message }}
+</div>
+{% endif %}
+
+<div class="panel">
+  <h2>Konfiguration</h2>
+  <div class="config-grid">
+    <div class="config-item"><div class="label">Slug</div><div class="value">{{ run.slug }}</div></div>
+    <div class="config-item"><div class="label">Run ID</div><div class="value" style="font-size:13px">{{ run.run_id }}</div></div>
+    {% if run.config %}
+    <div class="config-item"><div class="label">Minuten</div><div class="value">{{ run.config.get('minutes', 42) }}</div></div>
+    <div class="config-item"><div class="label">Loop Hours</div><div class="value">{{ run.config.get('loop_hours', 0) }}</div></div>
+    <div class="config-item"><div class="label">Audio Preset</div><div class="value">{{ run.config.get('audio_preset', 'ambient') }}</div></div>
+    <div class="config-item"><div class="label">Animated</div><div class="value">{{ 'Ja' if run.config.get('animated') else 'Nein' }}</div></div>
+    <div class="config-item"><div class="label">Public</div><div class="value">{{ 'Ja' if run.config.get('public') else 'Nein' }}</div></div>
+    {% if run.config.get('house') %}
+    <div class="config-item"><div class="label">House/Theme</div><div class="value">{{ run.config.house }}</div></div>
+    {% endif %}
+    {% endif %}
+    <div class="config-item"><div class="label">Gestartet</div><div class="value" style="font-size:13px">{{ run.started_at[:19] if run.started_at else '—' }}</div></div>
+    <div class="config-item"><div class="label">Beendet</div><div class="value" style="font-size:13px">{{ run.finished_at[:19] if run.finished_at else '—' }}</div></div>
+  </div>
+</div>
+
+{% if run.status in ('rendered', 'uploaded') and output_files %}
+<div class="panel">
+  <h2>Preview</h2>
+  {% for f in output_files %}
+    {% if f.name == 'video.mp4' %}
+    <div style="margin-bottom:16px">
+      <video class="preview-video" controls preload="metadata">
+        <source src="/admin/pipeline/preview/{{ run.slug }}/video.mp4" type="video/mp4" />
+      </video>
+    </div>
+    {% endif %}
+  {% endfor %}
+
+  <div class="grid two">
+    {% for f in output_files %}
+      {% if f.name.endswith('.jpg') or f.name.endswith('.png') %}
+      <div>
+        <h3>Thumbnail</h3>
+        <img class="preview-thumb" src="/admin/pipeline/preview/{{ run.slug }}/{{ f.name }}" alt="Thumbnail" />
+      </div>
+      {% endif %}
+      {% if f.name == 'metadata.json' %}
+      <div>
+        <h3>Metadata</h3>
+        <div class="preview-meta" id="preview-meta">Wird geladen...</div>
+      </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <div style="margin-top:12px;color:var(--muted);font-size:13px">
+    <strong>Output-Dateien:</strong>
+    {% for f in output_files %}
+      {{ f.name }} ({{ f.size }}){% if not loop.last %}, {% endif %}
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<div class="panel">
+  <h2>Logs</h2>
+  <div class="log-viewer" id="log-viewer">
+    {% for log in logs %}
+    <div class="log-line {{ log.stream }}">{{ log.message }}</div>
+    {% else %}
+    <div class="log-line system">Warte auf Logs...</div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+(function() {
+  const status = '{{ run.status }}';
+  const runId = '{{ run.run_id }}';
+  const slug = '{{ run.slug }}';
+  const viewer = document.getElementById('log-viewer');
+  let lastId = {{ logs[-1].id if logs else 0 }};
+  let polling = (status === 'running' || status === 'created' || status === 'uploading');
+
+  function pollLogs() {
+    if (!polling) return;
+    fetch('/admin/pipeline/run/' + runId + '/logs?after_id=' + lastId)
+      .then(r => r.json())
+      .then(data => {
+        if (data.logs && data.logs.length > 0) {
+          data.logs.forEach(log => {
+            const div = document.createElement('div');
+            div.className = 'log-line ' + log.stream;
+            div.textContent = log.message;
+            viewer.appendChild(div);
+            lastId = log.id;
+          });
+          viewer.scrollTop = viewer.scrollHeight;
+        }
+        if (data.status !== 'running' && data.status !== 'created' && data.status !== 'uploading') {
+          polling = false;
+          if (data.status === 'rendered' || data.status === 'uploaded' || data.status === 'failed') {
+            setTimeout(() => location.reload(), 1000);
+          }
+        }
+        if (polling) setTimeout(pollLogs, 2000);
+      })
+      .catch(() => { if (polling) setTimeout(pollLogs, 5000); });
+  }
+
+  if (polling) {
+    viewer.scrollTop = viewer.scrollHeight;
+    setTimeout(pollLogs, 2000);
+  }
+
+  const metaEl = document.getElementById('preview-meta');
+  if (metaEl && (status === 'rendered' || status === 'uploaded')) {
+    fetch('/admin/pipeline/preview/' + slug + '/metadata.json')
+      .then(r => r.json())
+      .then(data => {
+        let html = '';
+        if (data.titles && data.titles.primary) html += '<div><strong>Titel:</strong> ' + data.titles.primary + '</div>';
+        else if (data.title) html += '<div><strong>Titel:</strong> ' + data.title + '</div>';
+        if (data.description) html += '<div style="margin-top:8px"><strong>Description:</strong><pre style="margin:4px 0">' + data.description.substring(0, 500) + '</pre></div>';
+        if (data.tags) html += '<div style="margin-top:8px"><strong>Tags:</strong> ' + (Array.isArray(data.tags) ? data.tags.join(', ') : data.tags) + '</div>';
+        if (data.privacy) html += '<div style="margin-top:8px"><strong>Privacy:</strong> ' + data.privacy + '</div>';
+        metaEl.innerHTML = html || '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+      })
+      .catch(() => { metaEl.textContent = 'Metadata konnte nicht geladen werden'; });
+  }
+})();
+</script>
+{% endblock %}
