@@ -55,11 +55,11 @@ def post_process(input_path, output_path, preset="ambient", no_reverb=False, no_
     output_path = Path(output_path)
 
     if not input_path.exists():
-        print(f"❌ Input nicht gefunden: {input_path}")
+        print(f"[ERROR] Input nicht gefunden: {input_path}")
         sys.exit(1)
 
     cfg = PRESETS.get(preset, PRESETS["ambient"])
-    print(f"🎛️  Preset: {preset} – {cfg['desc']}")
+    print(f"[PRESET] {preset} -- {cfg['desc']}")
 
     # Filter-Chain aufbauen
     filters = []
@@ -67,20 +67,20 @@ def post_process(input_path, output_path, preset="ambient", no_reverb=False, no_
     # 1. EQ für Wärme
     if cfg["eq"] and not no_eq:
         filters.append(cfg["eq"])
-        print(f"  📊 EQ: Bass-Boost + Höhen-Reduktion")
+        print(f"  [EQ] Bass-Boost + Hoehen-Reduktion")
 
     # 2. Reverb für Räumlichkeit
     if cfg["reverb"] and not no_reverb:
         filters.append(cfg["reverb"])
-        print(f"  🏛️  Reverb: Räumlicher Klang")
+        print(f"  [REVERB] Raeumlicher Klang")
 
     # 3. Loudnorm immer
     filters.append(cfg["loudnorm"])
-    print(f"  📏 Normalisierung: Konsistente Lautstärke")
+    print(f"  [NORM] Konsistente Lautstaerke")
 
     # 4. Limiter gegen Clipping
     filters.append("alimiter=limit=0.95:attack=5:release=50")
-    print(f"  🛡️  Limiter: Anti-Clipping")
+    print(f"  [LIMITER] Anti-Clipping")
 
     filter_chain = ",".join(filters)
 
@@ -94,18 +94,18 @@ def post_process(input_path, output_path, preset="ambient", no_reverb=False, no_
         str(output_path)
     ]
 
-    print(f"  🔄 Processing...")
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    print(f"  [PROCESSING]...")
+    result = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8', errors='replace')
 
     if result.returncode != 0:
-        print(f"❌ ffmpeg Fehler:\n{result.stderr[-500:]}")
+        print(f"[ERROR] ffmpeg Fehler:\n{result.stderr[-500:]}")
         sys.exit(1)
 
     # Größenvergleich
     in_size = input_path.stat().st_size / (1024 * 1024)
     out_size = output_path.stat().st_size / (1024 * 1024)
-    print(f"✅ Output: {output_path}")
-    print(f"   {in_size:.1f} MB → {out_size:.1f} MB")
+    print(f"[OK] Output: {output_path}")
+    print(f"   {in_size:.1f} MB -> {out_size:.1f} MB", flush=True)
 
 
 def main():

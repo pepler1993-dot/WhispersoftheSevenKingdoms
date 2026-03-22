@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 """
 Animated Video Renderer – Whispers of the Seven Kingdoms
-Erzeugt Loop-Videos mit Kamerafahrt + Partikel-Effekten aus einem Hintergrundbild.
+Erzeugt Loop-Videos mit Partikel-Effekten aus einem Hintergrundbild.
 """
 import argparse
 import math
 import random
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 try:
     from PIL import Image, ImageDraw
 except ImportError:
-    print("❌ Pillow fehlt: pip install Pillow")
+    print("[ERROR] Pillow fehlt: pip install Pillow")
     sys.exit(1)
 
 # Partikel-Presets pro Theme
@@ -113,8 +114,8 @@ def render_animated_video(bg_path, output_path, theme="winterfell",
     WIDTH, HEIGHT = 1920, 1080
     TOTAL_FRAMES = fps * loop_duration
 
-    # Load & upscale background for pan room
-    bg = Image.open(bg_path).resize((2880, 1620), Image.LANCZOS)
+    # Load & resize background to target resolution (no camera pan)
+    bg = Image.open(bg_path).resize((WIDTH, HEIGHT), Image.LANCZOS)
 
     # Init particles
     particles = [
@@ -137,19 +138,13 @@ def render_animated_video(bg_path, output_path, theme="winterfell",
         '-pix_fmt', 'yuv420p', loop_file
     ]
 
-    proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.DEVNULL)
 
-    MAX_PAN_X, MAX_PAN_Y = 960, 200
+    report_interval = max(1, TOTAL_FRAMES // 10)
+    t0 = time.time()
 
     for fi in range(TOTAL_FRAMES):
-        progress = fi / TOTAL_FRAMES
-
-        # Pendulum pan (seamless loop via sin)
-        pan_x = int(MAX_PAN_X * (0.5 + 0.5 * math.sin(2 * math.pi * progress - math.pi / 2)))
-        pan_y = int(MAX_PAN_Y * (0.5 + 0.5 * math.sin(2 * math.pi * progress * 0.7)))
-
-        crop = bg.crop((pan_x, pan_y, pan_x + WIDTH, pan_y + HEIGHT))
-        frame = crop.convert('RGBA')
+        frame = bg.copy().convert('RGBA')
 
         # Draw particles
         overlay = Image.new('RGBA', (WIDTH, HEIGHT), (0, 0, 0, 0))
@@ -161,17 +156,18 @@ def render_animated_video(bg_path, output_path, theme="winterfell",
         frame = Image.alpha_composite(frame, overlay).convert('RGB')
         proc.stdin.write(frame.tobytes())
 
-        if fi % (TOTAL_FRAMES // 5) == 0:
+        if fi % report_interval == 0:
             pct = int(fi / TOTAL_FRAMES * 100)
-            print(f"  Rendering: {pct}%")
+            elapsed = time.time() - t0
+            print(f"  [RENDER] {pct}% ({fi}/{TOTAL_FRAMES} frames, {elapsed:.0f}s)", flush=True)
 
     proc.stdin.close()
     proc.wait()
-    print(f"  Rendering: 100%")
+    print(f"  [RENDER] 100% ({TOTAL_FRAMES} frames, {time.time() - t0:.0f}s)", flush=True)
 
     # If audio provided: loop video to match audio length, mux
     if audio_path:
-        print(f"  Muxing with audio...")
+        print(f"  [MUX] Muxing with audio...", flush=True)
         mux_cmd = [
             'ffmpeg', '-y',
             '-stream_loop', '-1',
@@ -182,10 +178,18 @@ def render_animated_video(bg_path, output_path, theme="winterfell",
             '-shortest', '-movflags', '+faststart',
             str(Path(output_path).resolve())
         ]
-        subprocess.run(mux_cmd, check=True, capture_output=True)
-        Path(loop_file).unlink(missing_ok=True)
+        subprocess.run(mux_cmd, check=True, capture_output=True, encoding='utf-8', errors='replace')
 
-    print(f"✅ Video: {output_path}")
+        # Retry loop for deleting temp file (PermissionError on some OS)
+        for attempt in range(5):
+            try:
+                Path(loop_file).unlink(missing_ok=True)
+                break
+            except PermissionError:
+                time.sleep(0.5)
+
+    size_mb = Path(output_path).stat().st_size / (1024 * 1024)
+    print(f"  [OK] Video: {output_path} ({size_mb:.1f} MB)", flush=True)
 
 
 def main():
@@ -194,7 +198,7 @@ def main():
     parser.add_argument("--output", required=True, help="Ausgabe MP4")
     parser.add_argument("--theme", default="winterfell", help="Partikel-Theme")
     parser.add_argument("--audio", help="Audio-Datei (MP3)")
-    parser.add_argument("--loop-duration", type=int, default=30, help="Loop-Länge in Sekunden")
+    parser.add_argument("--loop-duration", type=int, default=30, help="Loop-Laenge in Sekunden")
     parser.add_argument("--fps", type=int, default=24)
     args = parser.parse_args()
 
