@@ -43,6 +43,8 @@ THEMES = {
         "subtitle_color": (170, 200, 230),
         "vignette_strength": 0.7,
         "mood": "cold",
+        "font_title": "MedievalSharp-Regular.ttf",    # Nordisch/mittelalterlich → Stark
+        "font_subtitle": "Cinzel-Regular.ttf",
     },
     "king's landing": {
         "bg_color": (45, 25, 10),
@@ -52,6 +54,8 @@ THEMES = {
         "subtitle_color": (200, 180, 140),
         "vignette_strength": 0.6,
         "mood": "warm",
+        "font_title": "UnifrakturMaguntia-Book.ttf",  # Blackletter/Royal → Krone
+        "font_subtitle": "PlayfairDisplay-Bold.ttf",
     },
     "targaryen": {
         "bg_color": (40, 10, 10),
@@ -61,6 +65,8 @@ THEMES = {
         "subtitle_color": (220, 180, 160),
         "vignette_strength": 0.8,
         "mood": "dark",
+        "font_title": "AlmendraDisplay-Regular.ttf",  # Fantasy/Drachen → Targaryen
+        "font_subtitle": "Cinzel-Regular.ttf",
     },
     "the wall": {
         "bg_color": (10, 15, 25),
@@ -70,6 +76,8 @@ THEMES = {
         "subtitle_color": (150, 170, 200),
         "vignette_strength": 0.9,
         "mood": "cold",
+        "font_title": "IMFellEnglishSC-Regular.ttf",  # Antik/wuchtig → Night's Watch
+        "font_subtitle": "Cinzel-Regular.ttf",
     },
     "highgarden": {
         "bg_color": (15, 35, 15),
@@ -79,6 +87,8 @@ THEMES = {
         "subtitle_color": (200, 230, 180),
         "vignette_strength": 0.5,
         "mood": "warm",
+        "font_title": "PlayfairDisplay-Bold.ttf",     # Elegant/edel → Tyrell
+        "font_subtitle": "PlayfairDisplay-Bold.ttf",
     },
     "dorne": {
         "bg_color": (50, 30, 15),
@@ -88,6 +98,8 @@ THEMES = {
         "subtitle_color": (220, 190, 150),
         "vignette_strength": 0.6,
         "mood": "warm",
+        "font_title": "AmaticSC-Bold.ttf",            # Exotisch/handschriftlich → Martell
+        "font_subtitle": "Cinzel-Regular.ttf",
     },
     "godswood": {
         "bg_color": (20, 30, 15),
@@ -97,6 +109,8 @@ THEMES = {
         "subtitle_color": (200, 220, 190),
         "vignette_strength": 0.7,
         "mood": "mystical",
+        "font_title": "UncialAntiqua-Regular.ttf",    # Keltisch/mystisch → Alte Götter
+        "font_subtitle": "Cinzel-Regular.ttf",
     },
     "castamere": {
         "bg_color": (35, 20, 15),
@@ -106,6 +120,8 @@ THEMES = {
         "subtitle_color": (210, 190, 150),
         "vignette_strength": 0.7,
         "mood": "melancholic",
+        "font_title": "PirataOne-Regular.ttf",        # Dramatisch/ornamental → Lannister
+        "font_subtitle": "PlayfairDisplay-Bold.ttf",
     },
     "default": {
         "bg_color": (20, 20, 35),
@@ -115,6 +131,8 @@ THEMES = {
         "subtitle_color": (190, 185, 210),
         "vignette_strength": 0.6,
         "mood": "calm",
+        "font_title": "CinzelDecorative-Bold.ttf",
+        "font_subtitle": "Cinzel-Regular.ttf",
     },
 }
 
@@ -172,26 +190,47 @@ def add_vignette(img, strength=0.7):
     return result
 
 
-def get_font(size, bold=False):
-    """Versucht eine gute Schriftart zu laden, Fallback auf Default."""
+def get_font(size, bold=False, style="title", theme=None):
+    """Lädt thematische Fonts pro Haus/Theme."""
+    # Per-theme font selection
+    if theme and style == "title" and "font_title" in theme:
+        path = FONT_DIR / theme["font_title"]
+        if path.exists():
+            try:
+                return ImageFont.truetype(str(path), size)
+            except (IOError, OSError):
+                pass
+    if theme and style == "subtitle" and "font_subtitle" in theme:
+        path = FONT_DIR / theme["font_subtitle"]
+        if path.exists():
+            try:
+                return ImageFont.truetype(str(path), size)
+            except (IOError, OSError):
+                pass
+
+    # Fallback: Cinzel
+    if style == "title":
+        fantasy_fonts = ["CinzelDecorative-Bold.ttf", "Cinzel-Bold.ttf"]
+    elif style == "subtitle":
+        fantasy_fonts = ["Cinzel-Regular.ttf", "Cinzel-Bold.ttf"]
+    else:
+        fantasy_fonts = ["Cinzel-Bold.ttf"]
+
+    for name in fantasy_fonts:
+        path = FONT_DIR / name
+        if path.exists():
+            return ImageFont.truetype(str(path), size)
+
+    # System fallback
     font_names = [
         "DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf",
         "arial.ttf",
         "FreeSans.ttf",
     ]
-
-    # Check fonts dir
-    for name in font_names:
-        path = FONT_DIR / name
-        if path.exists():
-            return ImageFont.truetype(str(path), size)
-
-    # System fonts
     system_paths = [
         "/usr/share/fonts/truetype/dejavu/",
         "/usr/share/fonts/truetype/freefont/",
         "/usr/share/fonts/",
-        "C:/Windows/Fonts/",
     ]
     for sp in system_paths:
         for name in font_names:
@@ -199,7 +238,6 @@ def get_font(size, bold=False):
             if path.exists():
                 return ImageFont.truetype(str(path), size)
 
-    # Fallback
     try:
         return ImageFont.truetype("DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf", size)
     except (IOError, OSError):
@@ -239,7 +277,7 @@ def draw_text_with_shadow(draw, pos, text, font, fill, shadow_color=(0, 0, 0), s
     draw.text(pos, text, font=font, fill=fill)
 
 
-def generate_thumbnail(title, theme_name, subtitle="Sleep Music", output_path=None, bg_image=None):
+def generate_thumbnail(title, theme_name, subtitle="3 Hours Deep Sleep Music", output_path=None, bg_image=None):
     """Generiert ein YouTube-Thumbnail."""
     theme = get_theme(theme_name)
 
@@ -271,10 +309,10 @@ def generate_thumbnail(title, theme_name, subtitle="Sleep Music", output_path=No
         except Exception:
             pass
 
-    # 4. Text-Layout
-    title_font = get_font(72, bold=True)
-    subtitle_font = get_font(36, bold=False)
-    brand_font = get_font(24, bold=False)
+    # 4. Text-Layout (Theme-spezifische Fonts)
+    title_font = get_font(80, bold=True, style="title", theme=theme)
+    subtitle_font = get_font(32, bold=False, style="subtitle", theme=theme)
+    brand_font = get_font(22, bold=False, style="brand", theme=theme)
 
     # Titel (zentriert, mit Umbruch)
     max_text_width = WIDTH - 160
@@ -343,7 +381,7 @@ def main():
     parser = argparse.ArgumentParser(description="Thumbnail-Generator – Whispers of the Seven Kingdoms")
     parser.add_argument("--title", type=str, help="Video-Titel für Thumbnail")
     parser.add_argument("--theme", type=str, default="default", help="Theme/Location (winterfell, targaryen, etc.)")
-    parser.add_argument("--subtitle", type=str, default="Sleep Music", help="Untertitel")
+    parser.add_argument("--subtitle", type=str, default="3 Hours Deep Sleep Music", help="Untertitel")
     parser.add_argument("--output", type=str, help="Output-Pfad (default: output/thumbnails/)")
     parser.add_argument("--bg-image", type=str, help="Optionales Hintergrundbild")
     parser.add_argument("--list-themes", action="store_true", help="Alle Themes anzeigen")

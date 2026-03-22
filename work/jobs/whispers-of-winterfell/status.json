@@ -1,7 +1,6 @@
 {
   "slug": "whispers-of-winterfell",
-  "phase": "waiting_for_colab",
-  "updated_at": "2026-03-21T22:43:00.713121+00:00",
-  "notes": "Run the matching Colab job and place generated audio into upload/songs/",
-  "job_file": "publishing/musicgen/jobs/whispers-of-winterfell.job.json"
+  "phase": "done",
+  "updated_at": "2026-03-21T23:47:37.215463+00:00",
+  "output": "output/youtube/whispers-of-winterfell"
 }
