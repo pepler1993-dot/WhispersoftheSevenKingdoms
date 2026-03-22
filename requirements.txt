@@ -1,0 +1,18 @@
+# Core dependencies for the local pipeline
+Pillow>=10.0.0
+Jinja2>=3.1.0
+requests>=2.31.0
+PyYAML>=6.0.0
+pydub>=0.25.1
+numpy>=1.26.0
+scipy>=1.11.0
+
+# YouTube upload
+google-api-python-client>=2.120.0
+google-auth-oauthlib>=1.2.0
+google-auth-httplib2>=0.2.0
+
+# Optional / generation-related
+# Needed when running MusicGen locally instead of Colab/Kaggle
+transformers>=4.39.0
+torch>=2.2.0
