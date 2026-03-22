@@ -35,6 +35,7 @@ Ein Befehl → Audio generieren → Thumbnail → Video → Metadaten → YouTub
 `pipeline.py --slug whispers-of-winterfell --skip-upload` → Thumbnail + Video + Metadaten + QA ✅
 
 ### YouTube API connected ✅
+- **Kanal:** https://www.youtube.com/@Whispersofthe7Kingdoms
 - Kanal erstellt & verifiziert
 - OAuth2 Credentials eingerichtet
 - `client_secret.json` auf Server (gitignored)
