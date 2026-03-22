@@ -53,6 +53,13 @@ Diese Datei ist für:
 - standardisierte Metadaten-Templates
 - halbautomatische Upload-Pakete für mehrere Plattformen
 
+### Smiths Extras
+- ASMR + Sleep Music Hybrid – Flüsternde GoT-Zitate über die Musik (ElevenLabs TTS)
+- Saisonale Specials – "Winter is Coming" Playlist im Dezember, "Red Wedding Anniversary"
+- Sleep Music Battle – Verschiedene KI-Modelle generieren zum gleichen Prompt, Community votet
+- Reaction-Videos auf eigene Songs – Meta-Content: "KI bewertet KI-Musik"
+- Binaural Beats Layer – 432Hz/528Hz Frequenzen unter die Musik mischen (Sleep-Nische liebt das)
+
 ### Später, aber aktuell Overkill
 - eigene Streaming-Plattform
 - dezentrale Speicherung
