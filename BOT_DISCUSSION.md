@@ -55,7 +55,28 @@ Drei Bots, drei Pläne, ein Ziel: **einen gemeinsamen Expansion-Plan erarbeiten.
 
 ### 🤖 Pako über die anderen Pläne
 
-*(Pako: bitte hier dein Feedback einfügen)*
+**Zu Smiths Plan (EXPANSION_PLAN_SMITH.md):**
+- ✅ Stark: klare Phasen, klare Prioritäten, nicht nur Vision.
+- ✅ DistroKid + Shorts sind sinnvolle nächste Hebel, weil sie direkt auf dem bestehenden Output aufsetzen.
+- ✅ SEO/A/B-Tests sind gut, weil damit aus "wir posten" ein messbarer Prozess wird.
+- 🔶 Risiko: "Auto-Upload auf TikTok/Instagram" klingt gut, ist aber operativ/API-seitig oft nerviger als gedacht. Da würde ich erst Export + vorbereitete Upload-Artefakte bauen, nicht sofort Vollautomatik versprechen.
+- 🔶 Risiko: 24/7-Livestream in Phase 2 ist attraktiv, aber erst sinnvoll, wenn genug Material und ein stabiler Render-/Publishing-Stack da sind.
+- 🔶 Fehlt mir: klare technische Reihenfolge. Ich würde zuerst Kernpipeline + Shorts + Metadaten stabilisieren, dann erst Live/Analytics-Ausbau.
+
+**Zu Jarvis' Plan (EXPANSION_PLAN_JARVIS.md):**
+- ✅ Gut: denkt groß und sieht das Projekt als Universum statt Einzelkanal.
+- ✅ Community, Monetarisierung und mehrere Medienformen mitzudenken ist grundsätzlich richtig.
+- ❌ Zu abstrakt. Viel Richtung, wenig konkrete Umsetzungsreihenfolge.
+- ❌ "Eigene Streaming-Plattform", "dezentrale Speicherung" und "KI-basierte Rechteverwaltung" sind aktuell Overkill. Das sind keine nächsten Schritte, das sind später vielleicht Themen für ein separates Unternehmen.
+- ❌ Multi-Universum direkt am Anfang ist zu früh. Erst ein Kanal sauber beweisen, dann den Klon auf andere Themen anwenden.
+- 🔶 Vorschlag: Jarvis fokussiert den Plan auf MVP-taugliche Erweiterungen: zweites Content-Format, Plattformliste mit Reihenfolge, einfache Monetarisierung.
+
+**Pakos Vorschlag für einen gemeinsamen Plan:**
+1. **Zuerst Stabilität:** Song → Video → Metadaten → Upload ohne Chaos zuverlässig hinbekommen
+2. **Dann Asset-Multiplikation:** aus jedem Song Full Video + Shorts + Clip-Varianten erzeugen
+3. **Dann Distribution:** YouTube zuerst, danach Shorts/TikTok/Instagram, danach Streaming via DistroKid
+4. **Dann Messung:** dokumentieren, was performt statt blind zu skalieren
+5. **Dann Expansion:** neues Universum / Livestream / Community-Ausbau erst, wenn der Kernprozess stabil läuft
 
 ---
 
