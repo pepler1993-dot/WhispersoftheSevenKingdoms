@@ -18,7 +18,7 @@ def parse_args():
     p.add_argument('--width', type=int, default=VIDEO_WIDTH)
     p.add_argument('--height', type=int, default=VIDEO_HEIGHT)
     p.add_argument('--audio-bitrate', default=DEFAULT_AUDIO_BITRATE)
-    p.add_argument('--fps', type=int, default=30)
+    p.add_argument('--fps', type=int, default=1)
     p.add_argument('--dry-run', action='store_true', help='Print ffmpeg command without running it')
     return p.parse_args()
 
@@ -49,7 +49,7 @@ def ffmpeg_cmd(audio: Path, image: Path, output: Path, width: int, height: int, 
         '-i', str(audio),
         '-vf', filter_graph,
         '-c:v', 'libx264',
-        '-preset', 'medium',
+        '-preset', 'ultrafast',
         '-tune', 'stillimage',
         '-c:a', 'aac',
         '-b:a', audio_bitrate,
