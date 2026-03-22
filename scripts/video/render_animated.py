@@ -133,7 +133,7 @@ def render_animated_video(bg_path, output_path, theme="winterfell",
         '-f', 'rawvideo', '-pix_fmt', 'rgb24',
         '-s', f'{WIDTH}x{HEIGHT}', '-r', str(fps),
         '-i', 'pipe:0',
-        '-c:v', 'libx264', '-preset', 'fast', '-crf', '20',
+        '-c:v', 'libx264', '-preset', 'medium', '-crf', '28',
         '-pix_fmt', 'yuv420p', loop_file
     ]
 
@@ -177,7 +177,8 @@ def render_animated_video(bg_path, output_path, theme="winterfell",
             '-stream_loop', '-1',
             '-i', str(Path(loop_file).resolve()),
             '-i', str(Path(audio_path).resolve()),
-            '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k',
+            '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '28',
+            '-c:a', 'aac', '-b:a', '192k',
             '-shortest', '-movflags', '+faststart',
             str(Path(output_path).resolve())
         ]
@@ -194,7 +195,7 @@ def main():
     parser.add_argument("--theme", default="winterfell", help="Partikel-Theme")
     parser.add_argument("--audio", help="Audio-Datei (MP3)")
     parser.add_argument("--loop-duration", type=int, default=30, help="Loop-Länge in Sekunden")
-    parser.add_argument("--fps", type=int, default=30)
+    parser.add_argument("--fps", type=int, default=24)
     args = parser.parse_args()
 
     render_animated_video(
