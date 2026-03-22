@@ -60,6 +60,14 @@ Diese Datei ist für:
 - Reaction-Videos auf eigene Songs – Meta-Content: "KI bewertet KI-Musik"
 - Binaural Beats Layer – 432Hz/528Hz Frequenzen unter die Musik mischen (Sleep-Nische liebt das)
 
+### Jarvis Extras
+- Stimmungsbasierte Musikgenerierung – User wählt Mood, KI generiert passenden Track
+- Dynamische Visualisierungen – Audio-reaktive Visuals statt statischer Bilder
+- Community-driven Content – Voting welches Theme als nächstes kommt
+- Twitch Livestreams – Live-Generierung von Songs mit Chat-Input
+- Lizenzierung – Songs für andere Creator/Podcasts lizenzieren
+- Multi-GPU Rendering – Parallelisierung der Audio-Generierung
+
 ### Später, aber aktuell Overkill
 - eigene Streaming-Plattform
 - dezentrale Speicherung
