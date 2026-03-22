@@ -187,12 +187,24 @@ def main():
         '--duration', f'{args.minutes} Minutes',
         '--output', str(metadata_out),
     ]
-    render_cmd = [
-        sys.executable, 'scripts/video/render.py',
-        '--audio', str(audio_path),
-        '--image', str(thumb_path),
-        '--output', str(video_path),
-    ]
+    # Animated renderer (with particle effects + camera pan)
+    bg_image = REPO_ROOT / 'assets' / 'backgrounds' / f'{theme}.jpg'
+    if bg_image.exists():
+        render_cmd = [
+            sys.executable, 'scripts/video/render_animated.py',
+            '--bg-image', str(bg_image),
+            '--theme', theme,
+            '--audio', str(audio_path),
+            '--output', str(video_path),
+        ]
+    else:
+        # Fallback: static thumbnail + audio
+        render_cmd = [
+            sys.executable, 'scripts/video/render.py',
+            '--audio', str(audio_path),
+            '--image', str(thumb_path),
+            '--output', str(video_path),
+        ]
     node_bin = shutil.which('node') or 'node'
     preflight_cmd = [node_bin, 'scripts/qa/preflight-metadata-report.js']
 
