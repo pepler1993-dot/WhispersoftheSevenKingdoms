@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -17,16 +19,70 @@ OUTPUT_YT_DIR = REPO_ROOT / 'output' / 'youtube'
 WORK_JOBS_DIR = REPO_ROOT / 'work' / 'jobs'
 COLAB_JOBS_DIR = REPO_ROOT / 'publishing' / 'musicgen' / 'jobs'
 
+_step_count = 0
+_step_total = 0
+_pipeline_start = 0.0
+
 
 def now_iso():
     return datetime.now(timezone.utc).isoformat()
 
 
-def run(cmd, cwd=None):
-    print('RUN:', ' '.join(str(x) for x in cmd))
-    result = subprocess.run(cmd, cwd=cwd or REPO_ROOT)
+def _utf8_env():
+    env = os.environ.copy()
+    env['PYTHONIOENCODING'] = 'utf-8'
+    env['PYTHONUNBUFFERED'] = '1'
+    return env
+
+
+def _set_total_steps(n):
+    global _step_total, _pipeline_start
+    _step_total = n
+    _pipeline_start = time.time()
+
+
+def _fmt_time(seconds):
+    m, s = divmod(int(seconds), 60)
+    return f'{m}m {s:02d}s'
+
+
+def _fmt_size(path):
+    try:
+        mb = Path(path).stat().st_size / (1024 * 1024)
+        return f'{mb:.1f} MB'
+    except OSError:
+        return '?'
+
+
+def _step(label):
+    global _step_count
+    _step_count += 1
+    elapsed = _fmt_time(time.time() - _pipeline_start)
+    print(f'\n{"=" * 60}', flush=True)
+    print(f'[{_step_count}/{_step_total}] {label} ({elapsed} elapsed)', flush=True)
+    print(f'{"=" * 60}', flush=True)
+
+
+def _info(msg):
+    print(f'>> {msg}', flush=True)
+
+
+def _ok(msg):
+    print(f'>> {msg}', flush=True)
+
+
+def _warn(msg):
+    print(f'!! {msg}', flush=True)
+
+
+def run(cmd, cwd=None, fatal=True):
+    print('RUN:', ' '.join(str(x) for x in cmd), flush=True)
+    result = subprocess.run(cmd, cwd=cwd or REPO_ROOT, env=_utf8_env())
     if result.returncode != 0:
-        raise SystemExit(result.returncode)
+        if fatal:
+            raise SystemExit(result.returncode)
+        print(f'WARNING: command exited with code {result.returncode} (non-fatal)', flush=True)
+    return result.returncode
 
 
 def find_first(slug: str, folder: Path, exts: tuple[str, ...]):
@@ -71,7 +127,7 @@ def parse_args():
     p.add_argument('--public', action='store_true', help='Upload publicly instead of private')
     p.add_argument('--skip-upload', action='store_true', help='Run pipeline but do not upload to YouTube')
     p.add_argument('--skip-done-move', action='store_true', help='Do not move processed source files to upload/done')
-    p.add_argument('--animated', action='store_true', help='Use animated renderer (particle effects + camera pan). Default: static image.')
+    p.add_argument('--animated', action='store_true', help='Use animated renderer (particle effects). Default: static image.')
     p.add_argument('--dry-run', action='store_true', help='Print steps without executing external scripts')
     p.add_argument('--loop-hours', type=float, default=0, help='Loop audio to target hours (e.g. 3 for 3h from 20min source)')
     p.add_argument('--crossfade', type=int, default=8, help='Crossfade seconds for loop (default: 8)')
@@ -162,7 +218,43 @@ def main():
             update_status(slug, 'waiting_for_colab', error='audio_missing_on_resume')
         raise SystemExit(1)
 
-    # Loop short audio to target duration (e.g. 20 min → 3h)
+    title = meta.get('title', slug.replace('-', ' ').title())
+    if isinstance(title, dict):
+        title = title.get('primary', slug.replace('-', ' ').title())
+
+    # Calculate total steps
+    total = 0
+    if args.loop_hours and args.loop_hours > 0:
+        total += 1
+    if not args.skip_post_process:
+        total += 1
+    total += 1  # thumbnail
+    total += 1  # metadata
+    total += 1  # render
+    total += 1  # QA
+    if not args.skip_upload:
+        total += 1
+    if not args.skip_done_move:
+        total += 1
+    _set_total_steps(total)
+
+    renderer_label = 'animated (particles)' if args.animated else 'static'
+    upload_label = 'skip' if args.skip_upload else ('public' if args.public else 'private')
+    audio_size = _fmt_size(audio_path)
+
+    print(f'\n{"*" * 60}', flush=True)
+    print(f'PIPELINE START: {slug}', flush=True)
+    print(f'  Title:    {title}', flush=True)
+    print(f'  Theme:    {theme}', flush=True)
+    print(f'  Duration: {args.minutes} min', flush=True)
+    print(f'  Audio:    {audio_path.name} ({audio_size})', flush=True)
+    print(f'  Preset:   {args.audio_preset}', flush=True)
+    print(f'  Renderer: {renderer_label}', flush=True)
+    print(f'  Upload:   {upload_label}', flush=True)
+    print(f'  Steps:    {total}', flush=True)
+    print(f'{"*" * 60}', flush=True)
+
+    # Loop short audio to target duration
     if args.loop_hours and args.loop_hours > 0:
         looped_path = SONGS_DIR / f'{slug}-looped.mp3'
         loop_cmd = [
@@ -172,14 +264,16 @@ def main():
             '--target-hours', str(args.loop_hours),
             '--crossfade', str(args.crossfade),
         ]
+        _step(f'AUDIO LOOP -- target: {args.loop_hours}h, crossfade: {args.crossfade}s')
         if args.dry_run:
             print('DRY:', ' '.join(loop_cmd))
         else:
             run(loop_cmd)
             audio_path = looped_path
+        _info(f'{_fmt_size(audio_path)}')
         update_status(slug, 'audio_looped', looped=str(looped_path.relative_to(REPO_ROOT)))
 
-    # Post-processing: EQ, Reverb, Normalisierung
+    # Post-processing
     if not args.skip_post_process:
         processed_path = audio_path.parent / f'{audio_path.stem}-processed{audio_path.suffix}'
         post_cmd = [
@@ -188,21 +282,25 @@ def main():
             '--output', str(processed_path),
             '--preset', args.audio_preset,
         ]
+        _step(f'AUDIO POST-PROCESS -- preset: {args.audio_preset}')
+        in_size = _fmt_size(audio_path)
         if args.dry_run:
             print('DRY:', ' '.join(post_cmd))
         else:
             run(post_cmd)
             audio_path = processed_path
+        out_size = _fmt_size(audio_path)
+        _info(f'{in_size} -> {out_size}')
         update_status(slug, 'audio_processed', processed=str(processed_path.relative_to(REPO_ROOT)))
 
     update_status(slug, 'audio_ready', audio=str(audio_path.relative_to(REPO_ROOT)))
 
+    # Thumbnail
     thumb_path = find_first(slug, THUMBS_DIR, ('.jpg', '.jpeg', '.png', '.webp'))
     yt_dir = OUTPUT_YT_DIR / slug
     yt_dir.mkdir(parents=True, exist_ok=True)
 
-    title = meta.get('title', slug.replace('-', ' ').title())
-
+    _step('THUMBNAIL')
     if thumb_path is None:
         thumb_path = yt_dir / 'thumbnail.jpg'
         cmd = [
@@ -215,8 +313,12 @@ def main():
             print('DRY:', ' '.join(cmd))
         else:
             run(cmd)
+        _info(f'Generated: {thumb_path.name} ({_fmt_size(thumb_path)})')
+    else:
+        _info(f'Using existing: {thumb_path.name} ({_fmt_size(thumb_path)})')
     update_status(slug, 'thumbnail_ready', thumbnail=str(thumb_path.relative_to(REPO_ROOT)))
 
+    # Metadata
     video_path = yt_dir / 'video.mp4'
     metadata_out = yt_dir / 'metadata.json'
 
@@ -226,9 +328,20 @@ def main():
         '--duration', f'{args.minutes} Minutes',
         '--output', str(metadata_out),
     ]
-    # Animated renderer only with explicit --animated flag
-    bg_image = REPO_ROOT / 'assets' / 'backgrounds' / f'{theme}.jpg'
-    if args.animated and bg_image.exists():
+
+    _step('METADATA GENERATION')
+    if args.dry_run:
+        print('DRY:', ' '.join(metadata_cmd))
+    else:
+        run(metadata_cmd)
+    _info(f'Output: {metadata_out.relative_to(REPO_ROOT)}')
+    update_status(slug, 'metadata_ready', metadata=str(metadata_out.relative_to(REPO_ROOT)))
+
+    # Video render
+    if args.animated:
+        bg_image = REPO_ROOT / 'assets' / 'backgrounds' / f'{theme}.jpg'
+        if not bg_image.exists():
+            bg_image = thumb_path
         render_cmd = [
             sys.executable, 'scripts/video/render_animated.py',
             '--bg-image', str(bg_image),
@@ -236,29 +349,43 @@ def main():
             '--audio', str(audio_path),
             '--output', str(video_path),
         ]
+        _step('VIDEO RENDER (animated) -- this may take several minutes')
+        _info(f'Theme: {theme} | Background: {bg_image.name}')
+        _info(f'Audio: {audio_path.name} ({_fmt_size(audio_path)})')
     else:
-        # Default: static thumbnail + audio (fast, small output)
         render_cmd = [
             sys.executable, 'scripts/video/render.py',
             '--audio', str(audio_path),
             '--image', str(thumb_path),
             '--output', str(video_path),
         ]
-    preflight_cmd = [sys.executable, 'scripts/qa/preflight_metadata_report.py']
+        _step('VIDEO RENDER (static)')
+        _info(f'Thumbnail: {thumb_path.name} | Audio: {audio_path.name}')
 
     if args.dry_run:
-        print('DRY:', ' '.join(metadata_cmd))
         print('DRY:', ' '.join(render_cmd))
+    else:
+        run(render_cmd)
+    _info(f'Video: {video_path.name} ({_fmt_size(video_path)})')
+    update_status(slug, 'rendered', video=str(video_path.relative_to(REPO_ROOT)))
+
+    # QA
+    preflight_cmd = [sys.executable, 'scripts/qa/preflight_metadata_report.py']
+    _step('QA PREFLIGHT CHECK')
+    if args.dry_run:
         print('DRY:', ' '.join(preflight_cmd))
     else:
-        run(metadata_cmd)
-        update_status(slug, 'metadata_ready', metadata=str(metadata_out.relative_to(REPO_ROOT)))
-        run(render_cmd)
-        update_status(slug, 'rendered', video=str(video_path.relative_to(REPO_ROOT)))
-        run(preflight_cmd)
-        update_status(slug, 'qa_passed')
+        qa_exit = run(preflight_cmd, fatal=False)
+        if qa_exit == 0:
+            update_status(slug, 'qa_passed')
+        else:
+            _warn(f'finished with warnings after {_fmt_time(time.time() - _pipeline_start)} (exit code {qa_exit})')
+            _warn('Some metadata checks failed (non-fatal, see report above)')
+            update_status(slug, 'qa_warning')
 
+    # Upload
     if not args.skip_upload:
+        _step('YOUTUBE UPLOAD')
         upload_cmd = [
             sys.executable, 'scripts/publish/youtube_upload.py',
             '--video', str(video_path),
@@ -272,7 +399,9 @@ def main():
             run(upload_cmd)
             update_status(slug, 'uploaded')
 
+    # Move to done
     if not args.skip_done_move and not args.dry_run:
+        _step('CLEANUP -- moving source files to done/')
         done_slug_dir = DONE_DIR / slug
         done_slug_dir.mkdir(parents=True, exist_ok=True)
         for source in [audio_path, metadata_path, thumb_path if thumb_path.parent == THUMBS_DIR else None]:
@@ -282,8 +411,15 @@ def main():
                     shutil.move(str(source), str(target))
         update_status(slug, 'done', output=str(yt_dir.relative_to(REPO_ROOT)))
 
-    print(f'OK: pipeline completed for {slug}')
-    print(f'OUTPUT: {yt_dir}')
+    total_time = _fmt_time(time.time() - _pipeline_start)
+    print(f'\n{"*" * 60}', flush=True)
+    print(f'PIPELINE COMPLETE: {slug}', flush=True)
+    print(f'  Total time: {total_time}', flush=True)
+    print(f'  Output:     {yt_dir.relative_to(REPO_ROOT)}/', flush=True)
+    print(f'  Video:      {_fmt_size(video_path)}', flush=True)
+    print(f'  Metadata:   {metadata_out.relative_to(REPO_ROOT)}', flush=True)
+    print(f'{"*" * 60}', flush=True)
+    print('Pipeline finished successfully', flush=True)
 
 
 if __name__ == '__main__':

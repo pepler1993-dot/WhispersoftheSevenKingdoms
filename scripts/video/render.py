@@ -77,11 +77,14 @@ def main():
     if args.dry_run:
         return
 
-    result = subprocess.run(cmd)
+    print(f'  Rendering static video...', flush=True)
+    result = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8', errors='replace')
     if result.returncode != 0:
+        print(result.stderr, file=sys.stderr)
         fail(f'ffmpeg exited with code {result.returncode}', result.returncode)
 
-    print(f'OK: rendered {output}')
+    size_mb = output.stat().st_size / (1024 * 1024)
+    print(f'  [OK] rendered {output.name} ({size_mb:.1f} MB)', flush=True)
 
 
 if __name__ == '__main__':

@@ -8,12 +8,13 @@ import math
 import random
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 try:
     from PIL import Image, ImageDraw
 except ImportError:
-    print("❌ Pillow fehlt: pip install Pillow")
+    print("[ERROR] Pillow fehlt: pip install Pillow")
     sys.exit(1)
 
 # Partikel-Presets pro Theme
@@ -113,16 +114,13 @@ def render_animated_video(bg_path, output_path, theme="winterfell",
     WIDTH, HEIGHT = 1920, 1080
     TOTAL_FRAMES = fps * loop_duration
 
-    # Load & upscale background for pan room
-    bg = Image.open(bg_path).resize((2880, 1620), Image.LANCZOS)
+    bg = Image.open(bg_path).resize((WIDTH, HEIGHT), Image.LANCZOS).convert('RGBA')
 
-    # Init particles
     particles = [
         Particle(WIDTH, HEIGHT, preset["type"], preset["color"])
         for _ in range(preset["count"])
     ]
 
-    # Pipe frames to ffmpeg
     if audio_path:
         loop_file = str(Path(output_path).with_suffix('.loop.mp4'))
     else:
@@ -137,21 +135,12 @@ def render_animated_video(bg_path, output_path, theme="winterfell",
         '-pix_fmt', 'yuv420p', loop_file
     ]
 
-    proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.DEVNULL)
 
-    MAX_PAN_X, MAX_PAN_Y = 960, 200
-
+    report_interval = max(1, TOTAL_FRAMES // 10)
     for fi in range(TOTAL_FRAMES):
-        progress = fi / TOTAL_FRAMES
+        frame = bg.copy()
 
-        # Pendulum pan (seamless loop via sin)
-        pan_x = int(MAX_PAN_X * (0.5 + 0.5 * math.sin(2 * math.pi * progress - math.pi / 2)))
-        pan_y = int(MAX_PAN_Y * (0.5 + 0.5 * math.sin(2 * math.pi * progress * 0.7)))
-
-        crop = bg.crop((pan_x, pan_y, pan_x + WIDTH, pan_y + HEIGHT))
-        frame = crop.convert('RGBA')
-
-        # Draw particles
         overlay = Image.new('RGBA', (WIDTH, HEIGHT), (0, 0, 0, 0))
         draw = ImageDraw.Draw(overlay)
         for p in particles:
@@ -161,17 +150,16 @@ def render_animated_video(bg_path, output_path, theme="winterfell",
         frame = Image.alpha_composite(frame, overlay).convert('RGB')
         proc.stdin.write(frame.tobytes())
 
-        if fi % (TOTAL_FRAMES // 5) == 0:
+        if fi % report_interval == 0:
             pct = int(fi / TOTAL_FRAMES * 100)
-            print(f"  Rendering: {pct}%")
+            print(f"  Rendering frames: {pct}% ({fi}/{TOTAL_FRAMES})", flush=True)
 
     proc.stdin.close()
+    print(f"  Rendering frames: 100%  --  waiting for encoder to finish...", flush=True)
     proc.wait()
-    print(f"  Rendering: 100%")
 
-    # If audio provided: loop video to match audio length, mux
     if audio_path:
-        print(f"  Muxing with audio...")
+        print(f"  Muxing video loop with audio (this may take a moment)...", flush=True)
         mux_cmd = [
             'ffmpeg', '-y',
             '-stream_loop', '-1',
@@ -182,10 +170,19 @@ def render_animated_video(bg_path, output_path, theme="winterfell",
             '-shortest', '-movflags', '+faststart',
             str(Path(output_path).resolve())
         ]
-        subprocess.run(mux_cmd, check=True, capture_output=True)
-        Path(loop_file).unlink(missing_ok=True)
+        mux_result = subprocess.run(mux_cmd, capture_output=True, text=True, encoding='utf-8', errors='replace')
+        if mux_result.returncode != 0:
+            print(mux_result.stderr, file=sys.stderr)
+            sys.exit(mux_result.returncode)
+        for attempt in range(5):
+            try:
+                Path(loop_file).unlink(missing_ok=True)
+                break
+            except PermissionError:
+                time.sleep(1)
 
-    print(f"✅ Video: {output_path}")
+    size_mb = Path(output_path).stat().st_size / (1024 * 1024)
+    print(f"  [OK] Video: {output_path} ({size_mb:.1f} MB)", flush=True)
 
 
 def main():

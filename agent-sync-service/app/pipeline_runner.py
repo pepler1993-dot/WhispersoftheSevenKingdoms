@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 import threading
@@ -9,11 +10,18 @@ from typing import Any
 
 from app.store import AgentSyncDB
 
-PIPELINE_DIR = Path(__file__).resolve().parent.parent / 'WhispersoftheSevenKingdoms'
+PIPELINE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _utf8_env() -> dict[str, str]:
+    env = os.environ.copy()
+    env['PYTHONIOENCODING'] = 'utf-8'
+    env['PYTHONUNBUFFERED'] = '1'
+    return env
 
 
 def _build_command(slug: str, config: dict[str, Any]) -> list[str]:
@@ -66,6 +74,7 @@ def start_run(run_id: str, slug: str, config: dict[str, Any], db: AgentSyncDB) -
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             cwd=str(PIPELINE_DIR),
+            env=_utf8_env(),
         )
     except Exception as exc:
         db.update_run(run_id, status='failed', error_message=str(exc), finished_at=_now_iso())
@@ -130,7 +139,8 @@ def trigger_upload(run_id: str, slug: str, config: dict[str, Any], db: AgentSync
     def _upload():
         try:
             proc = subprocess.Popen(
-                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=str(PIPELINE_DIR),
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                cwd=str(PIPELINE_DIR), env=_utf8_env(),
             )
             stdout_t = threading.Thread(
                 target=_stream_reader, args=(proc.stdout, run_id, 'stdout', db), daemon=True

@@ -168,8 +168,23 @@ INSTRUMENT_MAP = {
 }
 
 
+def _extract_title_str(song_meta):
+    title = song_meta.get("title", song_meta.get("slug", ""))
+    if isinstance(title, dict):
+        primary = title.get("primary", "")
+        return primary.split("\u2013")[0].split("--")[0].split("|")[0].strip()
+    return title
+
+
+def _extract_theme(song_meta):
+    theme = song_meta.get("theme")
+    if isinstance(theme, str):
+        return theme
+    return _extract_title_str(song_meta)
+
+
 def find_lore(theme):
-    """Findet passenden Lore-Eintrag für ein Thema."""
+    """Findet passenden Lore-Eintrag fuer ein Thema."""
     theme_lower = theme.lower()
     for key, lore in LORE.items():
         if key in theme_lower or theme_lower in key:
@@ -180,7 +195,7 @@ def find_lore(theme):
 def generate_title(song_meta, duration_str="8 Hours"):
     """Generiert Titel-Varianten."""
     mood = song_meta.get("mood", ["calm"])[0]
-    theme = song_meta.get("theme", song_meta["title"])
+    theme = _extract_theme(song_meta)
     instrument = INSTRUMENT_MAP.get(mood, "Ambient")
 
     templates = TITLE_TEMPLATES.get(mood, TITLE_TEMPLATES["default"])
@@ -197,7 +212,7 @@ def generate_title(song_meta, duration_str="8 Hours"):
 
 def generate_description(song_meta):
     """Generiert YouTube-Beschreibung."""
-    theme = song_meta.get("theme", song_meta["title"])
+    theme = _extract_theme(song_meta)
     mood = song_meta.get("mood", ["calm"])[0]
     lore = find_lore(theme)
 
@@ -248,7 +263,7 @@ def generate_tags(song_meta):
     tags = list(CORE_TAGS)
 
     # House-spezifische Tags
-    lore = find_lore(song_meta.get("theme", ""))
+    lore = find_lore(_extract_theme(song_meta))
     if lore:
         house = lore["house"]
         tags.extend(HOUSE_TAGS.get(house, []))
@@ -276,7 +291,7 @@ def generate_playlist(song_meta):
     """Bestimmt passende Playlists."""
     playlists = ["Game of Thrones Sleep Music – Full Collection"]
 
-    lore = find_lore(song_meta.get("theme", ""))
+    lore = find_lore(_extract_theme(song_meta))
     if lore:
         playlists.append(lore["playlist"])
 
@@ -317,7 +332,7 @@ def load_song_meta(slug):
     """Lädt song.json aus upload/metadata/."""
     path = os.path.join(METADATA_DIR, f"{slug}.json")
     if not os.path.exists(path):
-        print(f"❌ Nicht gefunden: {path}")
+        print(f"[ERROR] Nicht gefunden: {path}")
         return None
     with open(path, encoding="utf-8") as f:
         return json.load(f)
@@ -325,7 +340,7 @@ def load_song_meta(slug):
 
 def list_songs():
     """Zeigt alle verfügbaren Songs."""
-    print("\n🎵 Verfügbare Songs:\n")
+    print("\n[SONGS] Verfuegbare Songs:\n")
     if not os.path.exists(METADATA_DIR):
         print("  (keine)")
         return
@@ -390,10 +405,10 @@ def main():
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)
 
-    print(f"✅ Metadaten generiert: {output_path}")
-    print(f"🎵 Titel: {metadata['titles']['primary']}")
-    print(f"🏷️  Tags: {len(metadata['tags'])}")
-    print(f"📋 Playlists: {len(metadata['playlists'])}")
+    print(f"[OK] Metadaten generiert: {output_path}")
+    print(f"[TITLE] {metadata['titles']['primary']}")
+    print(f"[TAGS] {len(metadata['tags'])}")
+    print(f"[PLAYLISTS] {len(metadata['playlists'])}")
 
 
 if __name__ == "__main__":

@@ -546,6 +546,20 @@ class AgentSyncDB:
     # ── pipeline runs ──
 
     def create_run(self, run: dict[str, Any]) -> None:
+        config_val = run.get('config')
+        config_json = json.dumps(config_val, ensure_ascii=False) if config_val is not None else None
+        params = (
+            str(run['run_id']),
+            str(run['slug']),
+            str(run['title']) if run.get('title') else None,
+            str(run.get('status', 'created')),
+            config_json,
+            run.get('pid'),
+            run.get('started_at'),
+            run.get('finished_at'),
+            run.get('error_message'),
+            str(run['created_at']),
+        )
         with self._lock:
             with self._connect() as conn:
                 conn.execute(
@@ -555,12 +569,7 @@ class AgentSyncDB:
                         pid, started_at, finished_at, error_message, created_at
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ''',
-                    (
-                        run['run_id'], run['slug'], run.get('title'), run.get('status', 'created'),
-                        json.dumps(run.get('config'), ensure_ascii=False),
-                        run.get('pid'), run.get('started_at'), run.get('finished_at'),
-                        run.get('error_message'), run['created_at'],
-                    ),
+                    params,
                 )
                 conn.commit()
 
