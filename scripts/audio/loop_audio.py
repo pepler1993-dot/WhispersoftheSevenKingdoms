@@ -2,18 +2,17 @@
 """
 Loop Audio – Whispers of the Seven Kingdoms
 
-Nimmt eine Audio-Datei (z.B. 20 Min) und loopt sie auf eine Ziel-Dauer
-mit nahtlosem Crossfade zwischen den Wiederholungen.
+Nimmt eine Audio-Datei und loopt sie auf eine Ziel-Dauer
+mit echtem Crossfade zwischen jeder Wiederholung.
 
 Usage:
-    python loop_audio.py --input song-20min.wav --output song-3h.mp3 --target-hours 3
+    python loop_audio.py --input song.mp3 --output song-3h.mp3 --target-hours 3
     python loop_audio.py --input song.wav --output song-looped.mp3 --target-hours 3 --crossfade 8
 """
 
 import argparse
 import subprocess
 import sys
-import os
 from pathlib import Path
 
 
@@ -27,8 +26,8 @@ def get_duration(audio_path):
     return float(result.stdout.strip())
 
 
-def loop_audio(input_path, output_path, target_hours=3, crossfade_seconds=5):
-    """Audio loopen mit Crossfade auf Ziel-Dauer."""
+def loop_audio(input_path, output_path, target_hours=3, crossfade_seconds=8):
+    """Audio loopen mit echtem Crossfade zwischen jeder Wiederholung."""
     input_path = Path(input_path)
     output_path = Path(output_path)
 
@@ -49,39 +48,55 @@ def loop_audio(input_path, output_path, target_hours=3, crossfade_seconds=5):
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     if repeats <= 1:
-        # Keine Wiederholung nötig
         subprocess.run(["ffmpeg", "-y", "-i", str(input_path),
                        "-t", str(target_seconds),
                        "-c:a", "libmp3lame", "-b:a", "192k",
                        str(output_path)], check=True)
     else:
-        # Concat-Liste erstellen
-        concat_list = output_path.parent / "_concat_list.txt"
-        with open(concat_list, "w") as f:
-            for _ in range(repeats):
-                f.write(f"file '{input_path.resolve()}'\n")
+        # Echter Crossfade: iterativ zwei Dateien crossfaden
+        # Schritt 1: Erste Kopie als Basis
+        temp_dir = output_path.parent / "_loop_temp"
+        temp_dir.mkdir(exist_ok=True)
 
-        # Schritt 1: Aneinanderreihen
-        temp_concat = output_path.parent / "_temp_concat.wav"
+        current = temp_dir / "loop_0.wav"
         subprocess.run([
-            "ffmpeg", "-y", "-f", "concat", "-safe", "0",
-            "-i", str(concat_list),
-            "-c", "copy", str(temp_concat)
+            "ffmpeg", "-y", "-i", str(input_path),
+            "-acodec", "pcm_s16le", "-ar", "44100", str(current)
         ], check=True, capture_output=True)
 
-        # Schritt 2: Crossfade an den Übergängen + auf Ziel-Dauer schneiden
-        # Fade-in am Anfang, Fade-out am Ende für sauberen Start/Stop
+        # Schritt 2: Iterativ crossfaden
+        for i in range(1, repeats):
+            next_out = temp_dir / f"loop_{i}.wav"
+            print(f"  🔀 Crossfade {i}/{repeats-1}...")
+
+            # acrossfade: crossfadet Ende von current mit Anfang von input
+            subprocess.run([
+                "ffmpeg", "-y",
+                "-i", str(current),
+                "-i", str(input_path),
+                "-filter_complex",
+                f"acrossfade=d={crossfade_seconds}:c1=tri:c2=tri",
+                "-acodec", "pcm_s16le", "-ar", "44100",
+                str(next_out)
+            ], check=True, capture_output=True)
+
+            # Alte Temp-Datei löschen um Disk zu sparen
+            current.unlink(missing_ok=True)
+            current = next_out
+
+        # Schritt 3: Auf Ziel-Dauer schneiden + als MP3 exportieren
+        print(f"  ✂️  Schneiden auf {target_hours}h + MP3 Export...")
         subprocess.run([
-            "ffmpeg", "-y", "-i", str(temp_concat),
+            "ffmpeg", "-y", "-i", str(current),
             "-t", str(target_seconds),
-            "-af", f"afade=t=in:d={crossfade_seconds},afade=t=out:st={target_seconds - crossfade_seconds}:d={crossfade_seconds}",
+            "-af", f"afade=t=in:d=3,afade=t=out:st={target_seconds - 5}:d=5",
             "-c:a", "libmp3lame", "-b:a", "192k",
             str(output_path)
         ], check=True)
 
         # Cleanup
-        concat_list.unlink(missing_ok=True)
-        temp_concat.unlink(missing_ok=True)
+        current.unlink(missing_ok=True)
+        temp_dir.rmdir()
 
     final_duration = get_duration(output_path)
     print(f"✅ Output: {output_path} ({final_duration:.0f}s = {final_duration/60:.1f} Min)")
@@ -92,7 +107,7 @@ def main():
     parser.add_argument("--input", required=True, help="Input Audio (WAV/MP3)")
     parser.add_argument("--output", required=True, help="Output Audio (MP3)")
     parser.add_argument("--target-hours", type=float, default=3, help="Ziel-Dauer in Stunden (default: 3)")
-    parser.add_argument("--crossfade", type=int, default=5, help="Crossfade in Sekunden (default: 5)")
+    parser.add_argument("--crossfade", type=int, default=8, help="Crossfade in Sekunden (default: 8)")
 
     args = parser.parse_args()
     loop_audio(args.input, args.output, args.target_hours, args.crossfade)

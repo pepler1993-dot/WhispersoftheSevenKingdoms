@@ -74,7 +74,10 @@ def parse_args():
     p.add_argument('--animated', action='store_true', help='Use animated renderer (particle effects + camera pan). Default: static image.')
     p.add_argument('--dry-run', action='store_true', help='Print steps without executing external scripts')
     p.add_argument('--loop-hours', type=float, default=0, help='Loop audio to target hours (e.g. 3 for 3h from 20min source)')
-    p.add_argument('--crossfade', type=int, default=5, help='Crossfade seconds for loop (default: 5)')
+    p.add_argument('--crossfade', type=int, default=8, help='Crossfade seconds for loop (default: 8)')
+    p.add_argument('--audio-preset', default='ambient', choices=['ambient', 'dark', 'gentle', 'raw'],
+                   help='Audio post-processing preset (default: ambient)')
+    p.add_argument('--skip-post-process', action='store_true', help='Skip audio post-processing (EQ/Reverb/Normalize)')
     p.add_argument('--prepare-colab', action='store_true', help='Prepare job + status files for manual Colab run')
     p.add_argument('--resume', action='store_true', help='Resume pipeline after Colab has produced audio')
     return p.parse_args()
@@ -175,6 +178,22 @@ def main():
             run(loop_cmd)
             audio_path = looped_path
         update_status(slug, 'audio_looped', looped=str(looped_path.relative_to(REPO_ROOT)))
+
+    # Post-processing: EQ, Reverb, Normalisierung
+    if not args.skip_post_process:
+        processed_path = audio_path.parent / f'{audio_path.stem}-processed{audio_path.suffix}'
+        post_cmd = [
+            sys.executable, 'scripts/audio/post_process.py',
+            '--input', str(audio_path),
+            '--output', str(processed_path),
+            '--preset', args.audio_preset,
+        ]
+        if args.dry_run:
+            print('DRY:', ' '.join(post_cmd))
+        else:
+            run(post_cmd)
+            audio_path = processed_path
+        update_status(slug, 'audio_processed', processed=str(processed_path.relative_to(REPO_ROOT)))
 
     update_status(slug, 'audio_ready', audio=str(audio_path.relative_to(REPO_ROOT)))
 
