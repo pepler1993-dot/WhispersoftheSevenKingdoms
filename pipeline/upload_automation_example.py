@@ -30,12 +30,12 @@ except ImportError:
     print("Warning: jinja2 not installed. Templates will use basic substitution.")
 
 # Paths
-BASE_DIR = Path(__file__).parent.parent
-UPLOAD_SONGS = BASE_DIR / "upload" / "songs"
-UPLOAD_THUMBNAILS = BASE_DIR / "upload" / "thumbnails"
-UPLOAD_METADATA = BASE_DIR / "upload" / "metadata"
-UPLOAD_DONE = BASE_DIR / "upload" / "done"
-TEMPLATES_DIR = BASE_DIR / "templates"
+BASE_DIR = Path(__file__).resolve().parent.parent
+UPLOAD_SONGS = BASE_DIR / "data" / "upload" / "songs"
+UPLOAD_THUMBNAILS = BASE_DIR / "data" / "upload" / "thumbnails"
+UPLOAD_METADATA = BASE_DIR / "data" / "upload" / "metadata"
+UPLOAD_DONE = BASE_DIR / "data" / "upload" / "done"
+TEMPLATES_DIR = BASE_DIR / "docs" / "templates"
 
 # Ensure dirs exist
 for p in [UPLOAD_SONGS, UPLOAD_THUMBNAILS, UPLOAD_METADATA, UPLOAD_DONE]:
@@ -191,7 +191,7 @@ def process_slug(slug: str):
     title, description, tags = generate_content(slug, meta)
 
     # Output directory for this video
-    out_dir = BASE_DIR / "output" / "youtube" / slug
+    out_dir = BASE_DIR / "data" / "output" / "youtube" / slug
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # In a real pipeline, you'd generate video.mp4 here using ffmpeg

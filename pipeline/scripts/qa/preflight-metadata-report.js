@@ -6,7 +6,7 @@ const { spawnSync } = require('child_process');
 const repoRoot = path.resolve(__dirname, '../..');
 const reportsDir = path.join(repoRoot, 'work', 'publish', 'reports');
 const validator = path.join(repoRoot, 'scripts', 'metadata', 'validate-song-metadata.js');
-const targetArg = process.argv[2] || 'upload/metadata';
+const targetArg = process.argv[2] || 'data/upload/metadata';
 const targetPath = path.resolve(repoRoot, targetArg);
 
 fs.mkdirSync(reportsDir, { recursive: true });

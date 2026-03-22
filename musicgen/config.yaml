@@ -28,7 +28,7 @@ upload:
     token_env: "GITHUB_TOKEN"   # Name der Umgebungsvariable
     repo: "pepler1993-dot/WhispersoftheSevenKingdoms"
     branch: "main"
-    path: "upload/songs"
+    path: "data/upload/songs"
   
   nextcloud:
     url: ""

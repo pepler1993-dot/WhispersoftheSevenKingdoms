@@ -1,9 +1,20 @@
 .claw/
 
-# Runtime reports
-work/publish/reports/*.json
-!work/publish/reports/.gitkeep
+# Runtime data
+data/output/youtube/*/video.mp4
+data/work/publish/reports/*.json
+!data/work/publish/reports/.gitkeep
+
+# Upload artifacts (keep structure, ignore large files)
+data/upload/done/*/whispers-*-looped*.mp3
+data/upload/songs/*.mp3
+data/upload/songs/*.wav
+!data/upload/songs/.gitkeep
 
 # OAuth Secrets
 client_secret*.json
 .youtube_token.json
+
+# Python
+__pycache__/
+*.pyc

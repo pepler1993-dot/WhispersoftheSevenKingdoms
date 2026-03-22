@@ -6,9 +6,9 @@ import re
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 SCHEMA_PATH = REPO_ROOT / "schemas" / "song.schema.json"
-DEFAULT_TARGET = REPO_ROOT / "upload" / "metadata"
+DEFAULT_TARGET = REPO_ROOT / "data" / "upload" / "metadata"
 
 
 def load_json(file_path):

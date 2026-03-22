@@ -9,7 +9,7 @@ from typing import Any
 
 from app.store import AgentSyncDB
 
-PIPELINE_DIR = Path(__file__).resolve().parent.parent / 'WhispersoftheSevenKingdoms'
+PIPELINE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 
 
 def _now_iso() -> str:
@@ -18,7 +18,7 @@ def _now_iso() -> str:
 
 def _build_command(slug: str, config: dict[str, Any]) -> list[str]:
     cmd = [
-        sys.executable, str(PIPELINE_DIR / 'pipeline.py'),
+        sys.executable, str(PIPELINE_DIR / 'pipeline' / 'pipeline.py'),
         '--slug', slug,
         '--skip-upload',
         '--skip-done-move',
@@ -106,8 +106,8 @@ def start_run_async(run_id: str, slug: str, config: dict[str, Any], db: AgentSyn
 
 
 def trigger_upload(run_id: str, slug: str, config: dict[str, Any], db: AgentSyncDB) -> None:
-    video_path = PIPELINE_DIR / 'output' / 'youtube' / slug / 'video.mp4'
-    metadata_path = PIPELINE_DIR / 'output' / 'youtube' / slug / 'metadata.json'
+    video_path = PIPELINE_DIR / 'data' / 'output' / 'youtube' / slug / 'video.mp4'
+    metadata_path = PIPELINE_DIR / 'data' / 'output' / 'youtube' / slug / 'metadata.json'
 
     if not video_path.exists():
         db.update_run(run_id, status='failed', error_message='Video file not found for upload')
@@ -117,7 +117,7 @@ def trigger_upload(run_id: str, slug: str, config: dict[str, Any], db: AgentSync
         return
 
     cmd = [
-        sys.executable, str(PIPELINE_DIR / 'scripts' / 'publish' / 'youtube_upload.py'),
+        sys.executable, str(PIPELINE_DIR / 'pipeline' / 'scripts' / 'publish' / 'youtube_upload.py'),
         '--video', str(video_path),
         '--metadata', str(metadata_path),
     ]
@@ -176,7 +176,7 @@ def cancel_run(run_id: str, db: AgentSyncDB) -> bool:
 
 
 def get_output_path(slug: str, filename: str) -> Path | None:
-    path = PIPELINE_DIR / 'output' / 'youtube' / slug / filename
+    path = PIPELINE_DIR / 'data' / 'output' / 'youtube' / slug / filename
     if path.exists() and path.is_file():
         return path
     return None
@@ -184,7 +184,7 @@ def get_output_path(slug: str, filename: str) -> Path | None:
 
 def list_available_assets() -> dict[str, list[str]]:
     result: dict[str, list[str]] = {'songs': [], 'thumbnails': [], 'metadata': []}
-    upload_dir = PIPELINE_DIR / 'upload'
+    upload_dir = PIPELINE_DIR / 'data' / 'upload'
 
     songs_dir = upload_dir / 'songs'
     if songs_dir.exists():
@@ -202,7 +202,7 @@ def list_available_assets() -> dict[str, list[str]]:
 
 
 def list_available_themes() -> list[str]:
-    bg_dir = PIPELINE_DIR / 'assets' / 'backgrounds'
+    bg_dir = PIPELINE_DIR / 'data' / 'assets' / 'backgrounds'
     if not bg_dir.exists():
         return []
     return sorted(f.stem for f in bg_dir.iterdir() if f.is_file() and f.suffix in {'.jpg', '.jpeg', '.png'})

@@ -7,15 +7,15 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent
-UPLOAD_DIR = REPO_ROOT / 'upload'
+REPO_ROOT = Path(__file__).resolve().parent.parent
+UPLOAD_DIR = REPO_ROOT / 'data' / 'upload'
 SONGS_DIR = UPLOAD_DIR / 'songs'
 THUMBS_DIR = UPLOAD_DIR / 'thumbnails'
 METADATA_DIR = UPLOAD_DIR / 'metadata'
 DONE_DIR = UPLOAD_DIR / 'done'
-OUTPUT_YT_DIR = REPO_ROOT / 'output' / 'youtube'
-WORK_JOBS_DIR = REPO_ROOT / 'work' / 'jobs'
-COLAB_JOBS_DIR = REPO_ROOT / 'publishing' / 'musicgen' / 'jobs'
+OUTPUT_YT_DIR = REPO_ROOT / 'data' / 'output' / 'youtube'
+WORK_JOBS_DIR = REPO_ROOT / 'data' / 'work' / 'jobs'
+COLAB_JOBS_DIR = REPO_ROOT / 'musicgen' / 'jobs'
 
 
 def now_iso():
@@ -166,7 +166,7 @@ def main():
     if args.loop_hours and args.loop_hours > 0:
         looped_path = SONGS_DIR / f'{slug}-looped.mp3'
         loop_cmd = [
-            sys.executable, 'scripts/audio/loop_audio.py',
+            sys.executable, 'pipeline/scripts/audio/loop_audio.py',
             '--input', str(audio_path),
             '--output', str(looped_path),
             '--target-hours', str(args.loop_hours),
@@ -183,7 +183,7 @@ def main():
     if not args.skip_post_process:
         processed_path = audio_path.parent / f'{audio_path.stem}-processed{audio_path.suffix}'
         post_cmd = [
-            sys.executable, 'scripts/audio/post_process.py',
+            sys.executable, 'pipeline/scripts/audio/post_process.py',
             '--input', str(audio_path),
             '--output', str(processed_path),
             '--preset', args.audio_preset,
@@ -206,7 +206,7 @@ def main():
     if thumb_path is None:
         thumb_path = yt_dir / 'thumbnail.jpg'
         cmd = [
-            sys.executable, 'scripts/thumbnails/generate_thumbnail.py',
+            sys.executable, 'pipeline/scripts/thumbnails/generate_thumbnail.py',
             '--title', title,
             '--theme', theme,
             '--output', str(thumb_path),
@@ -221,16 +221,16 @@ def main():
     metadata_out = yt_dir / 'metadata.json'
 
     metadata_cmd = [
-        sys.executable, 'scripts/metadata/metadata_gen.py',
+        sys.executable, 'pipeline/scripts/metadata/metadata_gen.py',
         '--song', slug,
         '--duration', f'{args.minutes} Minutes',
         '--output', str(metadata_out),
     ]
     # Animated renderer only with explicit --animated flag
-    bg_image = REPO_ROOT / 'assets' / 'backgrounds' / f'{theme}.jpg'
+    bg_image = REPO_ROOT / 'data' / 'assets' / 'backgrounds' / f'{theme}.jpg'
     if args.animated and bg_image.exists():
         render_cmd = [
-            sys.executable, 'scripts/video/render_animated.py',
+            sys.executable, 'pipeline/scripts/video/render_animated.py',
             '--bg-image', str(bg_image),
             '--theme', theme,
             '--audio', str(audio_path),
@@ -239,12 +239,12 @@ def main():
     else:
         # Default: static thumbnail + audio (fast, small output)
         render_cmd = [
-            sys.executable, 'scripts/video/render.py',
+            sys.executable, 'pipeline/scripts/video/render.py',
             '--audio', str(audio_path),
             '--image', str(thumb_path),
             '--output', str(video_path),
         ]
-    preflight_cmd = [sys.executable, 'scripts/qa/preflight_metadata_report.py']
+    preflight_cmd = [sys.executable, 'pipeline/scripts/qa/preflight_metadata_report.py']
 
     if args.dry_run:
         print('DRY:', ' '.join(metadata_cmd))
@@ -260,7 +260,7 @@ def main():
 
     if not args.skip_upload:
         upload_cmd = [
-            sys.executable, 'scripts/publish/youtube_upload.py',
+            sys.executable, 'pipeline/scripts/publish/youtube_upload.py',
             '--video', str(video_path),
             '--metadata', str(metadata_out),
         ]

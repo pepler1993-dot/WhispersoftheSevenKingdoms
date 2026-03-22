@@ -16,10 +16,10 @@ import os
 import sys
 
 # Pfade relativ zum Repo-Root
-REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-METADATA_DIR = os.path.join(REPO_ROOT, "upload", "metadata")
-TAG_LIBRARY = os.path.join(REPO_ROOT, "publishing", "TAG_LIBRARY.md")
-OUTPUT_DIR = os.path.join(REPO_ROOT, "output", "youtube")
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+METADATA_DIR = os.path.join(REPO_ROOT, "data", "upload", "metadata")
+TAG_LIBRARY = os.path.join(REPO_ROOT, "docs", "publishing", "TAG_LIBRARY.md")
+OUTPUT_DIR = os.path.join(REPO_ROOT, "data", "output", "youtube")
 
 
 # === TITEL-TEMPLATES ===

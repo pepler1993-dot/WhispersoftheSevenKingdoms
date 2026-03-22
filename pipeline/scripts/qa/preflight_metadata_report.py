@@ -7,13 +7,13 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent.parent
-REPORTS_DIR = REPO_ROOT / "work" / "publish" / "reports"
-VALIDATOR = REPO_ROOT / "scripts" / "metadata" / "validate_song_metadata.py"
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+REPORTS_DIR = REPO_ROOT / "data" / "work" / "publish" / "reports"
+VALIDATOR = REPO_ROOT / "pipeline" / "scripts" / "metadata" / "validate_song_metadata.py"
 
 
 def main():
-    target = sys.argv[1] if len(sys.argv) > 1 else "upload/metadata"
+    target = sys.argv[1] if len(sys.argv) > 1 else "data/upload/metadata"
     target_path = (REPO_ROOT / target).resolve()
 
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)

@@ -37,7 +37,7 @@ except ImportError:
 SCOPES = ["https://www.googleapis.com/auth/youtube.upload",
           "https://www.googleapis.com/auth/youtube"]
 
-REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 TOKEN_PATH = os.path.join(REPO_ROOT, ".youtube_token.json")
 
 # Retry config

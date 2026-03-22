@@ -478,7 +478,7 @@ async def admin_pipeline_upload_asset(
     if not slug:
         raise HTTPException(status_code=400, detail='Slug is required')
 
-    upload_dir = PIPELINE_DIR / 'upload'
+    upload_dir = PIPELINE_DIR / 'data' / 'upload'
 
     if asset_type == 'audio':
         ext = Path(file.filename or '').suffix.lower()
@@ -533,12 +533,12 @@ def admin_pipeline_start(
     if not slug:
         raise HTTPException(status_code=400, detail='Slug is required')
 
-    metadata_path = PIPELINE_DIR / 'upload' / 'metadata' / f'{slug}.json'
+    metadata_path = PIPELINE_DIR / 'data' / 'upload' / 'metadata' / f'{slug}.json'
     if not metadata_path.exists():
         raise HTTPException(status_code=400, detail=f'Metadata file missing: upload/metadata/{slug}.json')
 
     audio_found = any(
-        (PIPELINE_DIR / 'upload' / 'songs' / f'{slug}{ext}').exists()
+        (PIPELINE_DIR / 'data' / 'upload' / 'songs' / f'{slug}{ext}').exists()
         for ext in ALLOWED_AUDIO_EXT
     )
     if not audio_found:
@@ -587,7 +587,7 @@ def admin_pipeline_run_detail(request: Request, run_id: str):
     logs = db.get_run_logs(run_id, limit=1000)
 
     output_files: list[dict[str, str]] = []
-    output_dir = PIPELINE_DIR / 'output' / 'youtube' / run['slug']
+    output_dir = PIPELINE_DIR / 'data' / 'output' / 'youtube' / run['slug']
     if output_dir.exists():
         for f in sorted(output_dir.iterdir()):
             if f.is_file():

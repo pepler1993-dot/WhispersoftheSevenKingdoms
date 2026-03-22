@@ -24,10 +24,10 @@ try:
 except ImportError:
     HAS_PILLOW = False
 
-REPO_ROOT = Path(__file__).resolve().parent.parent.parent
-ASSETS_DIR = REPO_ROOT / "assets"
-TEMPLATES_DIR = REPO_ROOT / "templates" / "thumbnails"
-OUTPUT_DIR = REPO_ROOT / "output" / "thumbnails"
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+ASSETS_DIR = REPO_ROOT / "data" / "assets"
+TEMPLATES_DIR = REPO_ROOT / "docs" / "templates" / "thumbnails"
+OUTPUT_DIR = REPO_ROOT / "data" / "output" / "thumbnails"
 FONT_DIR = Path(__file__).parent / "fonts"
 
 WIDTH = 1280
