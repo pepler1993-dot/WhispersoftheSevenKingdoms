@@ -72,6 +72,8 @@ def parse_args():
     p.add_argument('--skip-upload', action='store_true', help='Run pipeline but do not upload to YouTube')
     p.add_argument('--skip-done-move', action='store_true', help='Do not move processed source files to upload/done')
     p.add_argument('--dry-run', action='store_true', help='Print steps without executing external scripts')
+    p.add_argument('--loop-hours', type=float, default=0, help='Loop audio to target hours (e.g. 3 for 3h from 20min source)')
+    p.add_argument('--crossfade', type=int, default=5, help='Crossfade seconds for loop (default: 5)')
     p.add_argument('--prepare-colab', action='store_true', help='Prepare job + status files for manual Colab run')
     p.add_argument('--resume', action='store_true', help='Resume pipeline after Colab has produced audio')
     return p.parse_args()
@@ -155,6 +157,23 @@ def main():
         if args.resume:
             update_status(slug, 'waiting_for_colab', error='audio_missing_on_resume')
         raise SystemExit(1)
+
+    # Loop short audio to target duration (e.g. 20 min → 3h)
+    if args.loop_hours and args.loop_hours > 0:
+        looped_path = SONGS_DIR / f'{slug}-looped.mp3'
+        loop_cmd = [
+            sys.executable, 'scripts/audio/loop_audio.py',
+            '--input', str(audio_path),
+            '--output', str(looped_path),
+            '--target-hours', str(args.loop_hours),
+            '--crossfade', str(args.crossfade),
+        ]
+        if args.dry_run:
+            print('DRY:', ' '.join(loop_cmd))
+        else:
+            run(loop_cmd)
+            audio_path = looped_path
+        update_status(slug, 'audio_looped', looped=str(looped_path.relative_to(REPO_ROOT)))
 
     update_status(slug, 'audio_ready', audio=str(audio_path.relative_to(REPO_ROOT)))
 
