@@ -23,13 +23,43 @@ Minimaler FastAPI-Dienst für GitHub-Webhooks und einen kleinen lesbaren Sync-La
 - **release** = Besitz aufgeben, Task bleibt offen
 - **complete** = Task fachlich abschließen
 
-## Setup
+## Lokales Setup (Entwicklung)
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 export GITHUB_WEBHOOK_SECRET='dein-langes-zufallssecret'
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+## Server-Deployment (Debian 12 LXC / VM)
+
+Ressourcen: 1 CPU Core, 512 MB RAM, 2 GB Disk genuegt.
+
+### Erstinstallation
+```bash
+bash deploy/setup.sh                 # auf main
+bash deploy/setup.sh feature-branch  # auf bestimmtem Branch
+```
+
+Das Skript installiert System-Pakete, klont das Repo nach `/opt/whispers/`,
+erstellt ein Python-venv und richtet einen systemd-Service ein.
+
+Danach:
+1. Webhook-Secret setzen: `GITHUB_WEBHOOK_SECRET` in `/etc/systemd/system/agent-sync.service` anpassen
+2. `systemctl daemon-reload && systemctl start agent-sync`
+3. Dashboard: `http://localhost:8000/admin`
+
+### Update
+```bash
+bash /opt/whispers/WhispersoftheSevenKingdoms/agent-sync-service/deploy/update.sh
+```
+Pullt den neuesten Stand, installiert Dependencies und startet den Service neu.
+
+### Logs
+```bash
+journalctl -u agent-sync -f          # Live-Logs
+systemctl status agent-sync          # Status
 ```
 
 ## GitHub Webhook konfigurieren
