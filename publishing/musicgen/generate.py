@@ -47,17 +47,21 @@ def load_model(config):
 
     print(f"🔄 Lade Modell: {model_name}...")
     processor = AutoProcessor.from_pretrained(model_name)
-    model = MusicgenForConditionalGeneration.from_pretrained(model_name)
 
     if device == "cuda":
         import torch
         if torch.cuda.is_available():
-            model = model.to("cuda")
-            print(f"✅ Modell auf GPU geladen")
+            # float16 für weniger VRAM (T4/16GB kompatibel)
+            model = MusicgenForConditionalGeneration.from_pretrained(
+                model_name, torch_dtype=torch.float16
+            ).to("cuda")
+            print(f"✅ Modell auf GPU geladen (float16, VRAM-sparend)")
         else:
             print("⚠️  Keine GPU gefunden, nutze CPU (langsam!)")
+            model = MusicgenForConditionalGeneration.from_pretrained(model_name)
             device = "cpu"
     else:
+        model = MusicgenForConditionalGeneration.from_pretrained(model_name)
         print(f"✅ Modell auf CPU geladen")
 
     sample_rate = model.config.audio_encoder.sampling_rate
