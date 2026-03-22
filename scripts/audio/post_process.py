@@ -24,7 +24,7 @@ from pathlib import Path
 PRESETS = {
     "ambient": {
         "desc": "Warm, spacious ambient – ideal für Sleep Music",
-        "eq": "equalizer=f=80:t=q:w=1.2:g=3,equalizer=f=200:t=q:w=1:g=2,equalizer=f=3000:t=q:w=1:g=-2,equalizer=f=8000:t=q:w=1:g=-3",
+        "eq": "equalizer=f=80:t=q:w=1.2:g=3,equalizer=f=200:t=q:w=1:g=2,equalizer=f=2000:t=q:w=0.8:g=-3,equalizer=f=4000:t=q:w=1:g=-4,equalizer=f=8000:t=q:w=1:g=-6,equalizer=f=12000:t=q:w=1:g=-8",
         "reverb": "aecho=0.8:0.7:60|90:0.3|0.2",
         "loudnorm": "loudnorm=I=-16:TP=-1.5:LRA=11",
     },
