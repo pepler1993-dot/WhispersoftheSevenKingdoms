@@ -42,12 +42,53 @@ Ein Song → mehrere Assets → mehrere Plattformen → mehrere Universen.
 
 **Ergebnis:** 5 Songs live, Shorts laufen, Songs auf Streaming-Plattformen.
 
-**Pro Song entsteht:**
+**Pro Song entsteht (automatisch via Pipeline):**
 - 1× Full Video (3h, YouTube)
 - 10-15× Shorts (YouTube, TikTok, Reels)
 - 1× Audio (Spotify, Apple Music, Amazon via DistroKid)
 - 1× Thumbnail (haus-spezifischer Font + Background)
 - 1× Metadaten-Set (Titel, Tags, Beschreibung)
+- 1× Reddit-Post-Draft (für manuelle Veröffentlichung)
+
+---
+
+## Growth-Strategie (durchgehend ab Phase 2)
+
+### Warum Sleep Music unfair gut funktioniert
+- 1 View = 3-8h Watchtime (normale Videos: 5-10 Min)
+- 4000h Watchtime ÷ 3h/View = nur ~1.333 Views nötig
+- Zum Vergleich: Gaming-Kanal braucht ~48.000 Views für dieselbe Watchtime
+
+### Shorts als Subscriber-Trichter
+- Shorts gehen viral, Langvideos nicht
+- Jeder Short endet mit Hinweis auf das Full Video
+- 10-15 Shorts pro Song → 50-75 Shorts bei 5 Songs
+- **Pipeline-Automatisierung:** `scripts/shorts/generate_shorts.py` schneidet automatisch
+
+### SEO – gefunden werden statt suchen (automatisiert)
+- Titel-Format: `{Titel} | 3 Hours Deep Sleep Music | Fantasy Ambient`
+- Tags automatisch generiert via `scripts/metadata/metadata_gen.py`
+- Keywords: "sleep music", "relaxing fantasy music", "medieval ambient", "GoT soundtrack"
+- Upload-Timing: 18-20 Uhr UTC (Abend-Suche nach Sleep Content)
+
+### Reddit & Communities (semi-automatisiert)
+- Post-Drafts automatisch generiert pro Song
+- Ziel-Subreddits: r/sleep, r/gameofthrones, r/Fantasy, r/ambientmusic, r/studymusic
+- Manuelles Posten (kein Spam-Risiko durch Bot-Posts)
+
+### Playlist-Strategie (automatisiert)
+- Jeder Song wird automatisch zur Kanal-Playlist hinzugefügt
+- YouTube autoplayed Playlists → ein Video zieht das nächste mit
+- Bei 3h Videos = massive Watchtime-Kette pro Session
+
+### Wachstums-Prognose
+
+| Monat | Subs | Watchtime | Shorts online |
+|-------|------|-----------|---------------|
+| 1 | 50-100 | 200-500h | 15-30 |
+| 2 | 200-400 | 1000-2000h | 50-75 |
+| 3 | 500-800 | 2500-3500h | 100+ |
+| 4 | 1000+ ✅ | 4000h+ ✅ | 120+ |
 
 ---
 

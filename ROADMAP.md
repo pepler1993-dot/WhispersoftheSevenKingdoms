@@ -27,12 +27,21 @@ März 2026                    April 2026                    Mai-Juni 2026       
 
 ---
 
-### 📈 M2 – Shorts & Streaming (Woche 2-4)
+### 📈 M2 – Shorts, Streaming & Growth Engine (Woche 2-4)
 - [ ] Shorts-Pipeline bauen (`scripts/shorts/generate_shorts.py`)
+  - Auto-Cut: 10-15 × 60s Clips pro Song
+  - Jeder Short mit Hinweis auf Full Video
 - [ ] DistroKid Account → Songs auf Spotify, Apple Music, Amazon
 - [ ] 4 weitere Songs generieren (King's Landing, Targaryen, Highgarden, Castamere)
+- [ ] SEO-Automatisierung in Metadaten-Generator
+  - Titel-Format: `{Name} | 3 Hours Deep Sleep Music | Fantasy Ambient`
+  - Auto-Tags: sleep music, fantasy, ambient, GoT keywords
+  - Upload-Timing: 18-20 Uhr UTC
+- [ ] Reddit Post-Draft Generator (`scripts/marketing/reddit_draft.py`)
+  - Pro Song ein fertiger Post für r/sleep, r/gameofthrones, r/Fantasy
+- [ ] Playlist-Automatisierung im YouTube Upload Script
 - [ ] Performance-Tracking einrichten (JSON: Views, CTR, Watchtime)
-- [ ] SEO-optimierte Tags & Beschreibungen
+- **Ziel:** 50-75 Shorts online, 200-500h Watchtime
 - **Ergebnis:** 5 Songs live, Shorts laufen, Musik auf Streaming-Plattformen
 
 ---
@@ -48,11 +57,40 @@ März 2026                    April 2026                    Mai-Juni 2026       
 
 ### 👑 M4 – Monetarisierung (Monat 3-6)
 - [ ] YouTube Partner Program (1000 Subs + 4000h Watchtime)
+  - Sleep Music Vorteil: 1 View = 3h Watchtime → nur ~1.333 Views nötig
 - [ ] 24/7 YouTube Livestream Radio
 - [ ] A/B-Testing Thumbnails
+- [ ] Kollaborationen mit anderen Ambient/Sleep-Kanälen
 - [ ] Discord Community (ab 500+ Subs)
 - [ ] Drittes Universum evaluieren
 - **Ergebnis:** Erste Einnahmen, wachsende Community
+
+---
+
+## 📊 Wachstums-Prognose
+
+| Monat | Subs | Watchtime | Shorts | Songs |
+|-------|------|-----------|--------|-------|
+| 1 | 50-100 | 200-500h | 15-30 | 1-2 |
+| 2 | 200-400 | 1000-2000h | 50-75 | 5 |
+| 3 | 500-800 | 2500-3500h | 100+ | 8+ |
+| 4 | 1000+ ✅ | 4000h+ ✅ | 120+ | 10+ |
+
+## 🤖 Was die Pipeline automatisch macht
+
+```
+Song (MP3) rein
+    ↓
+├── Thumbnail (haus-spezifischer Font + Background)
+├── Full Video (3h, 1080p, Partikeleffekte)
+├── 10-15 Shorts (auto-cut, 60s)
+├── Metadaten (SEO-Titel, Tags, Beschreibung)
+├── Reddit Post-Draft
+├── DistroKid Export
+└── YouTube Upload + Playlist-Einsortierung
+    ↓
+Alles online 🚀
+```
 
 ---
 
