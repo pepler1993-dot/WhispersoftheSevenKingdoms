@@ -71,6 +71,7 @@ def parse_args():
     p.add_argument('--public', action='store_true', help='Upload publicly instead of private')
     p.add_argument('--skip-upload', action='store_true', help='Run pipeline but do not upload to YouTube')
     p.add_argument('--skip-done-move', action='store_true', help='Do not move processed source files to upload/done')
+    p.add_argument('--animated', action='store_true', help='Use animated renderer (particle effects + camera pan). Default: static image.')
     p.add_argument('--dry-run', action='store_true', help='Print steps without executing external scripts')
     p.add_argument('--loop-hours', type=float, default=0, help='Loop audio to target hours (e.g. 3 for 3h from 20min source)')
     p.add_argument('--crossfade', type=int, default=5, help='Crossfade seconds for loop (default: 5)')
@@ -206,9 +207,9 @@ def main():
         '--duration', f'{args.minutes} Minutes',
         '--output', str(metadata_out),
     ]
-    # Animated renderer (with particle effects + camera pan)
+    # Animated renderer only with explicit --animated flag
     bg_image = REPO_ROOT / 'assets' / 'backgrounds' / f'{theme}.jpg'
-    if bg_image.exists():
+    if args.animated and bg_image.exists():
         render_cmd = [
             sys.executable, 'scripts/video/render_animated.py',
             '--bg-image', str(bg_image),
@@ -217,7 +218,7 @@ def main():
             '--output', str(video_path),
         ]
     else:
-        # Fallback: static thumbnail + audio
+        # Default: static thumbnail + audio (fast, small output)
         render_cmd = [
             sys.executable, 'scripts/video/render.py',
             '--audio', str(audio_path),
