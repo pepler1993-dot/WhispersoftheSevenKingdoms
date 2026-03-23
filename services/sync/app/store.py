@@ -15,6 +15,45 @@ class AgentSyncDB:
         self._lock = Lock()
         self._init_db()
         self._migrate_if_needed()
+        self._integrity_check()
+
+    def _integrity_check(self) -> None:
+        """Run integrity check on startup. Log warning if DB is corrupted."""
+        try:
+            with self._connect() as conn:
+                result = conn.execute('PRAGMA integrity_check').fetchone()
+                if result[0] != 'ok':
+                    import logging
+                    logging.warning(f'DB integrity check failed: {result[0]}')
+        except Exception as e:
+            import logging
+            logging.error(f'DB integrity check error: {e}')
+
+    def backup(self, backup_dir: Path | None = None) -> Path:
+        """Create a hot backup of the database using SQLite backup API.
+
+        Returns the path to the backup file.
+        """
+        import shutil
+        from datetime import datetime
+        backup_dir = backup_dir or self.data_dir / 'backups'
+        backup_dir.mkdir(parents=True, exist_ok=True)
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        backup_path = backup_dir / f'agent_sync_{timestamp}.db'
+
+        with self._lock:
+            src = sqlite3.connect(self.db_path)
+            dst = sqlite3.connect(backup_path)
+            src.backup(dst)
+            dst.close()
+            src.close()
+
+        # Keep only last 7 backups
+        backups = sorted(backup_dir.glob('agent_sync_*.db'))
+        for old in backups[:-7]:
+            old.unlink(missing_ok=True)
+
+        return backup_path
 
     def _connect(self) -> sqlite3.Connection:
         conn = sqlite3.connect(self.db_path, timeout=30, check_same_thread=False)

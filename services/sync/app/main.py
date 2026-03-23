@@ -479,6 +479,16 @@ def admin_system(request: Request):
     })
 
 
+@app.post('/admin/api/backup')
+def admin_api_backup():
+    """Create a hot backup of the database. Returns backup path."""
+    try:
+        backup_path = db.backup()
+        return {'status': 'ok', 'backup_path': str(backup_path), 'size_mb': round(backup_path.stat().st_size / 1024 / 1024, 2)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f'Backup failed: {e}')
+
+
 @app.get('/admin/ops', response_class=HTMLResponse)
 def admin_ops(
     request: Request,
