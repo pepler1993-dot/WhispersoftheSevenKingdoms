@@ -1,4 +1,7 @@
-# Core dependencies for the local pipeline
+# Monorepo runtime dependencies
+# Covers pipeline scripts + sync dashboard service on the server.
+
+# Shared / pipeline
 Pillow>=10.0.0
 Jinja2>=3.1.0
 requests>=2.31.0
@@ -6,6 +9,13 @@ PyYAML>=6.0.0
 pydub>=0.25.1
 numpy>=1.26.0
 scipy>=1.11.0
+python-multipart>=0.0.20
+
+# Sync dashboard service
+fastapi>=0.116.1
+uvicorn[standard]>=0.35.0
+httpx>=0.28.1
+pydantic>=2.0.0
 
 # YouTube upload
 google-api-python-client>=2.120.0
