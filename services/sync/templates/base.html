@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}Whispers Dashboard{% endblock %}</title>
+  <meta name="color-scheme" content="dark" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -12,39 +13,45 @@
 </head>
 <body>
 
-  <!-- Mobile top bar -->
   <div class="mobile-header">
-    <div class="mobile-brand">Whispers of the Seven Kingdoms</div>
+    <div>
+      <div class="mobile-brand">Whispers of the Seven Kingdoms</div>
+      <div class="mobile-subbrand">creative control for sleepy kingdoms</div>
+    </div>
   </div>
 
   <div class="layout">
-    <!-- Desktop sidebar -->
     <aside class="sidebar" id="sidebar">
-      <div class="brand">
+      <div class="brand brand-premium">
+        <div class="brand-kicker">Whispers Control</div>
         <div class="brand-name">Whispers of the<br/>Seven Kingdoms</div>
-        <div class="brand-sub">Control Panel</div>
+        <div class="brand-sub">startup-grade studio ops for ambient publishing</div>
       </div>
+
       <nav>
+        <div class="nav-group-label">Studio</div>
         <a href="/admin" class="nav-link {% if page == 'dashboard' %}active{% endif %}">
-          <i data-lucide="layout-dashboard"></i> Dashboard
+          <i data-lucide="sparkles"></i> Overview
         </a>
         <a href="/admin/pipeline" class="nav-link {% if page == 'pipeline' %}active{% endif %}">
-          <i data-lucide="clapperboard"></i> Pipeline
+          <i data-lucide="wand-sparkles"></i> Create
         </a>
         <a href="/admin/audio" class="nav-link {% if page == 'audio' %}active{% endif %}">
-          <i data-lucide="audio-lines"></i> Audio Generator
+          <i data-lucide="audio-lines"></i> Audio Lab
         </a>
-        <a href="/admin/tasks" class="nav-link {% if page == 'tasks' %}active{% endif %}">
-          <i data-lucide="list-checks"></i> Tasks
-        </a>
-        <a href="/admin/events" class="nav-link {% if page == 'events' %}active{% endif %}">
-          <i data-lucide="webhook"></i> Events
-        </a>
-        <a href="/admin/system" class="nav-link {% if page == 'system' %}active{% endif %}">
-          <i data-lucide="server"></i> System
+
+        <div class="nav-group-label">Operations</div>
+        <a href="/admin/ops" class="nav-link {% if page == 'ops' %}active{% endif %}">
+          <i data-lucide="activity"></i> Operations
         </a>
       </nav>
-      <div class="sidebar-version">v1.1.0</div>
+
+      <div class="sidebar-footer">
+        <div class="build-badge" data-tooltip="Version sichtbar im UI. Bei relevanten Änderungen bitte hochziehen.">
+          <span class="build-badge-label">Build</span>
+          <span class="build-badge-value">v1.1.0</span>
+        </div>
+      </div>
     </aside>
 
     <main class="content">
@@ -52,32 +59,23 @@
     </main>
   </div>
 
-  <!-- Mobile bottom tab bar -->
   <nav class="bottom-nav">
     <div class="bottom-nav-inner">
       <a href="/admin" class="bottom-nav-link {% if page == 'dashboard' %}active{% endif %}">
-        <i data-lucide="layout-dashboard"></i>
-        <span>Home</span>
+        <i data-lucide="sparkles"></i>
+        <span>Overview</span>
       </a>
       <a href="/admin/pipeline" class="bottom-nav-link {% if page == 'pipeline' %}active{% endif %}">
-        <i data-lucide="clapperboard"></i>
-        <span>Pipeline</span>
+        <i data-lucide="wand-sparkles"></i>
+        <span>Create</span>
       </a>
       <a href="/admin/audio" class="bottom-nav-link {% if page == 'audio' %}active{% endif %}">
         <i data-lucide="audio-lines"></i>
         <span>Audio</span>
       </a>
-      <a href="/admin/tasks" class="bottom-nav-link {% if page == 'tasks' %}active{% endif %}">
-        <i data-lucide="list-checks"></i>
-        <span>Tasks</span>
-      </a>
-      <a href="/admin/events" class="bottom-nav-link {% if page == 'events' %}active{% endif %}">
-        <i data-lucide="webhook"></i>
-        <span>Events</span>
-      </a>
-      <a href="/admin/system" class="bottom-nav-link {% if page == 'system' %}active{% endif %}">
-        <i data-lucide="server"></i>
-        <span>System</span>
+      <a href="/admin/ops" class="bottom-nav-link {% if page == 'ops' %}active{% endif %}">
+        <i data-lucide="activity"></i>
+        <span>Ops</span>
       </a>
     </div>
   </nav>

@@ -439,7 +439,7 @@ def admin_tasks(
     tasks = db.list_tasks_for_admin(phase=phase, owner=owner, query=q, include_done=include_done)
     return templates.TemplateResponse('tasks.html', {
         'request': request,
-        'page': 'tasks',
+        'page': 'ops',
         'tasks': tasks,
         'filters': {'phase': phase, 'owner': owner, 'q': q, 'include_done': include_done},
     })
@@ -452,7 +452,7 @@ def admin_task_detail(request: Request, task_id: str):
         raise HTTPException(status_code=404, detail='Task not found')
     return templates.TemplateResponse('task_detail.html', {
         'request': request,
-        'page': 'tasks',
+        'page': 'ops',
         'task_id': task_id,
         'detail': detail,
     })
@@ -463,7 +463,7 @@ def admin_events(request: Request, limit: int = Query(default=100, ge=1, le=500)
     events = db.list_github_events(limit=limit)
     return templates.TemplateResponse('events.html', {
         'request': request,
-        'page': 'events',
+        'page': 'ops',
         'events': events,
         'limit': limit,
     })
@@ -474,8 +474,37 @@ def admin_system(request: Request):
     system = db.get_system_summary()
     return templates.TemplateResponse('system.html', {
         'request': request,
-        'page': 'system',
+        'page': 'ops',
         'system': system,
+    })
+
+
+@app.get('/admin/ops', response_class=HTMLResponse)
+def admin_ops(
+    request: Request,
+    tab: str = Query(default='tasks'),
+    phase: str | None = Query(default=None),
+    owner: str | None = Query(default=None),
+    q: str | None = Query(default=None),
+    include_done: bool = Query(default=False),
+    limit: int = Query(default=100, ge=1, le=500),
+):
+    allowed_tabs = {'tasks', 'events', 'system'}
+    current_tab = tab if tab in allowed_tabs else 'tasks'
+    tasks = db.list_tasks_for_admin(phase=phase, owner=owner, query=q, include_done=include_done)
+    events = db.list_github_events(limit=limit)
+    system = db.get_system_summary()
+    summary = db.get_dashboard_summary()
+    return templates.TemplateResponse('ops.html', {
+        'request': request,
+        'page': 'ops',
+        'current_tab': current_tab,
+        'tasks': tasks,
+        'events': events,
+        'system': system,
+        'summary': summary,
+        'limit': limit,
+        'filters': {'phase': phase, 'owner': owner, 'q': q, 'include_done': include_done},
     })
 
 

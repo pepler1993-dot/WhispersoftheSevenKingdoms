@@ -10,9 +10,18 @@
 <div class="alert alert-error">⚠️ {{ error_message }}</div>
 {% endif %}
 
+<section class="workflow-steps panel panel-accent-blue">
+  <div class="workflow-step-pill active">1. Stil wählen</div>
+  <div class="workflow-step-pill">2. Audio bestimmen</div>
+  <div class="workflow-step-pill">3. Rendern</div>
+</section>
+
 <!-- House Selection -->
-<section class="panel">
-  <h2>Wähle ein Haus</h2>
+<section class="panel panel-accent-blue">
+  <div class="section-header-inline">
+    <h2>Wähle ein Haus</h2>
+    <span class="section-note" data-tooltip="Das Haus steuert Presets für Titel, Stimmung, Musikbrief und Thumbnail-Richtung.">Was passiert hier?</span>
+  </div>
   <div class="house-grid">
     {% for key, house in houses.items() %}
     <div class="house-card" data-house="{{ key }}" style="--house-color: {{ house.color }}; --house-bg: {{ house.bg_color }}">
@@ -30,6 +39,7 @@
 
     <div class="config-header">
       <div>
+        <div class="workflow-kicker">Step 2 · Configure</div>
         <h2 id="config-title-label">Konfiguration</h2>
         <p class="step-desc" id="config-house-info"></p>
       </div>
@@ -78,7 +88,7 @@
 
     <!-- Audio: Bibliothek oder neu generieren -->
     <div class="form-group library-audio-row">
-      <label>🎵 Audio Track</label>
+      <label>🎵 Audio Track <span class="inline-help" data-tooltip="Nimm vorhandenes Audio aus der Bibliothek oder starte einen neuen Generator-Job. Für zuverlässige Bedienung sollte am Ende genau eine Quelle klar ausgewählt sein.">ⓘ</span></label>
       <div class="audio-source-toggle">
         <button type="button" class="toggle-btn active" id="btn-library" onclick="showAudioSource('library')">📚 Aus Bibliothek</button>
         <button type="button" class="toggle-btn" id="btn-generate" onclick="showAudioSource('generate')">🚀 Neu generieren (Kaggle)</button>
@@ -139,7 +149,7 @@
 
     <!-- Thumbnail aus Bibliothek -->
     <div class="form-group library-audio-row">
-      <label for="library-thumbnail">🖼️ Thumbnail</label>
+      <label for="library-thumbnail">🖼️ Thumbnail <span class="inline-help" data-tooltip="Wenn du hier nichts auswählst, wird das Thumbnail automatisch aus dem Briefing generiert. Vorhandene Thumbnails aus der Bibliothek beschleunigen den Flow.">ⓘ</span></label>
       <select id="library-thumbnail" name="thumbnail_file" class="form-select" autocomplete="off">
         <option value="">— Auto-generieren —</option>
         {% for t in library_thumbnails %}
@@ -151,7 +161,7 @@
 
     <!-- Advanced Settings (collapsed) -->
     <details class="advanced-toggle" id="advanced">
-      <summary>⚙️ Erweiterte Einstellungen</summary>
+      <summary>⚙️ Erweiterte Einstellungen <span class="inline-help" data-tooltip="Nur anfassen, wenn du vom Preset abweichen willst. Die Defaults sind bewusst auf den typischen Sleep-Music-Flow abgestimmt.">ⓘ</span></summary>
       <div class="advanced-content">
         <div class="grid two">
           <div class="form-group">
@@ -159,17 +169,17 @@
             <input type="number" id="adv-minutes" class="form-input" value="42" min="1" max="720" />
           </div>
           <div class="form-group">
-            <label for="adv-loop">Loop (Stunden)</label>
+            <label for="adv-loop">Loop (Stunden) <span class="inline-help" data-tooltip="Verlängert das Ausgangsaudio per Looping auf die gewünschte Zielzeit. Mehr Stunden bedeuten nicht mehr echte Generierung, sondern längere Wiederverwendung mit Crossfades.">ⓘ</span></label>
             <input type="number" id="adv-loop" class="form-input" value="3" min="0" max="12" step="0.5" />
           </div>
         </div>
         <div class="grid two">
           <div class="form-group">
-            <label for="adv-crossfade">Crossfade (Sek)</label>
+            <label for="adv-crossfade">Crossfade (Sek) <span class="inline-help" data-tooltip="Übergangszeit zwischen zwei Loop-Segmenten. Hilft, harte Schnitte und hörbare Nähte zu vermeiden.">ⓘ</span></label>
             <input type="number" id="adv-crossfade" class="form-input" value="8" min="0" max="30" />
           </div>
           <div class="form-group">
-            <label for="adv-preset">Audio-Preset</label>
+            <label for="adv-preset">Audio-Preset <span class="inline-help" data-tooltip="Steuert das Post-Processing-Profil für den finalen Mix. Ambient ist der sichere Default für den aktuellen Use-Case.">ⓘ</span></label>
             <select id="adv-preset" class="form-select">
               <option value="ambient">🌙 Ambient</option>
               <option value="dark">🖤 Dark</option>
@@ -191,7 +201,7 @@
           <input type="text" id="adv-thumb-scene" class="form-input" />
         </div>
         <div class="form-group">
-          <div class="form-check">
+          <div class="form-check" data-tooltip="Rendert Bewegungen und Partikel. Sieht lebendiger aus, dauert aber länger als der statische Standard.">
             <input type="checkbox" name="animated" id="animated" value="true" />
             <label for="animated">🎬 Animiertes Video</label>
           </div>
@@ -199,7 +209,7 @@
             <input type="checkbox" name="public" id="public" value="true" />
             <label for="public">🌍 Öffentlich auf YouTube</label>
           </div>
-          <div class="form-check">
+          <div class="form-check" data-tooltip="Lässt EQ, Loudness, Limiter und andere Bearbeitungsschritte aus. Eigentlich nur für schnelle Tests oder Rohmaterial gedacht.">
             <input type="checkbox" name="skip_post_process" id="skip_post_process" value="true" />
             <label for="skip_post_process">⏭️ Post-Processing überspringen</label>
           </div>
@@ -214,6 +224,39 @@
 </section>
 
 <style>
+.workflow-steps {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.workflow-step-pill {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.workflow-step-pill.active {
+  background: linear-gradient(135deg, rgba(96,165,250,0.18), rgba(139,92,246,0.18));
+  color: #dbe9ff;
+  border-color: rgba(143,180,255,0.22);
+}
+.workflow-kicker {
+  color: #8fb4ff;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.68rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.inline-help {
+  color: #8fb4ff;
+  font-size: 0.8em;
+  margin-left: 4px;
+  cursor: help;
+}
 /* house grid */
 .house-grid {
   display: grid;

@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% block title %}Operations{% endblock %}
+{% block content %}
+<div class="page-header page-header-flex">
+  <div>
+    <h1>Operations</h1>
+    <div class="page-subtitle">Tasks, incoming events and system health in one place.</div>
+  </div>
+  <div class="header-actions">
+    <a href="/admin/tasks" class="btn btn-secondary btn-sm">Legacy Tasks</a>
+    <a href="/admin/events" class="btn btn-secondary btn-sm">Legacy Events</a>
+    <a href="/admin/system" class="btn btn-secondary btn-sm">Legacy System</a>
+  </div>
+</div>
+
+<section class="ops-summary-grid">
+  <div class="panel panel-accent-blue ops-metric">
+    <div class="label">Aktive Leases</div>
+    <div class="value">{{ summary.active_leases|length }}</div>
+    <div class="metric-help">Laufende Claims / Arbeit in progress</div>
+  </div>
+  <div class="panel panel-accent-purple ops-metric">
+    <div class="label">Recent Events</div>
+    <div class="value">{{ summary.recent_task_events|length }}</div>
+    <div class="metric-help">Letzte Task-Events im Speicher</div>
+  </div>
+  <div class="panel panel-accent-teal ops-metric">
+    <div class="label">GitHub Events</div>
+    <div class="value">{{ system.counts.github_events if system.counts else '—' }}</div>
+    <div class="metric-help">Webhook-Eingänge insgesamt</div>
+  </div>
+  <div class="panel panel-accent-gold ops-metric">
+    <div class="label">Tasks gesamt</div>
+    <div class="value">{{ system.counts.tasks if system.counts else '—' }}</div>
+    <div class="metric-help">Alle bekannten Tasks in der DB</div>
+  </div>
+</section>
+
+<div class="ops-tabs" role="tablist" aria-label="Operations Navigation">
+  <a href="/admin/ops?tab=tasks{% if filters.q %}&q={{ filters.q | urlencode }}{% endif %}{% if filters.owner %}&owner={{ filters.owner | urlencode }}{% endif %}{% if filters.phase %}&phase={{ filters.phase | urlencode }}{% endif %}{% if filters.include_done %}&include_done=true{% endif %}" class="ops-tab {% if current_tab == 'tasks' %}active{% endif %}">
+    <i data-lucide="list-checks"></i>
+    <span>Tasks</span>
+  </a>
+  <a href="/admin/ops?tab=events" class="ops-tab {% if current_tab == 'events' %}active{% endif %}">
+    <i data-lucide="webhook"></i>
+    <span>Events</span>
+  </a>
+  <a href="/admin/ops?tab=system" class="ops-tab {% if current_tab == 'system' %}active{% endif %}">
+    <i data-lucide="server-cog"></i>
+    <span>System</span>
+  </a>
+</div>
+
+{% if current_tab == 'tasks' %}
+<form method="get" class="filters panel inline-form ops-filter-bar">
+  <input type="hidden" name="tab" value="tasks" />
+  <input type="text" name="q" value="{{ filters.q or '' }}" placeholder="Task ID suchen" />
+  <input type="text" name="owner" value="{{ filters.owner or '' }}" placeholder="Owner / Agent" />
+  <input type="text" name="phase" value="{{ filters.phase or '' }}" placeholder="Phase" />
+  <label class="form-check compact" style="margin:0" data-tooltip="Zeigt auch bereits abgeschlossene Tasks an.">
+    <input type="checkbox" name="include_done" value="true" {% if filters.include_done %}checked{% endif %} />
+    include done
+  </label>
+  <button type="submit" class="btn btn-primary btn-sm">
+    <i data-lucide="search" style="width:14px;height:14px"></i> Filter
+  </button>
+</form>
+
+<section class="panel">
+  <div class="section-header-inline">
+    <h2>Task Queue</h2>
+    <span class="section-note" data-tooltip="Tasks repräsentieren interne Arbeitseinheiten und Lease-Zustände im Sync-Service.">Was ist das?</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Task</th>
+          <th>Phase</th>
+          <th>Owner</th>
+          <th>Lease until</th>
+          <th>Updated</th>
+          <th>Seq</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for task in tasks %}
+        <tr>
+          <td><a href="/admin/tasks/{{ task.task_id }}">{{ task.task_id }}</a></td>
+          <td><span class="badge {{ task.phase }}">{{ task.phase }}</span></td>
+          <td>{{ task.owner_agent or '—' }}</td>
+          <td>{{ task.lease_until or '—' }}</td>
+          <td>{{ task.updated_at }}</td>
+          <td>{{ task.latest_seq }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="empty-state">Keine Tasks gefunden</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% elif current_tab == 'events' %}
+<section class="panel">
+  <div class="section-header-inline">
+    <h2>Webhook Events</h2>
+    <span class="section-note" data-tooltip="Rohdaten eingehender GitHub-Webhooks. Nützlich für Debugging und Sync-Probleme.">Was ist das?</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Delivery</th>
+          <th>Event</th>
+          <th>Action</th>
+          <th>Repo</th>
+          <th>Sender</th>
+          <th>Received</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for event in events %}
+        <tr>
+          <td class="mono">{{ event.delivery_id[:12] }}&hellip;</td>
+          <td><span class="badge released">{{ event.event_type }}</span></td>
+          <td>{{ event.action }}</td>
+          <td>{{ event.repo }}</td>
+          <td>{{ event.sender }}</td>
+          <td>{{ event.received_at }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="empty-state">Keine Events</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% else %}
+<div class="grid two">
+  <section class="panel panel-accent-blue">
+    <div class="section-header-inline">
+      <h2>Datenbank</h2>
+      <span class="section-note" data-tooltip="Basiszustand des Sync-Services und der Admin-Datenbank.">Was ist das?</span>
+    </div>
+    <ul class="list">
+      <li>
+        <div class="label" style="margin-bottom:2px">Pfad</div>
+        <div class="mono" style="font-size:0.78rem;color:var(--text-secondary)">{{ system.db_path }}</div>
+      </li>
+      <li>
+        <div class="label" style="margin-bottom:2px">Letztes GitHub Event</div>
+        <div class="system-value">{{ system.latest_github_event_at or '—' }}</div>
+      </li>
+      <li>
+        <div class="label" style="margin-bottom:2px">Letztes Task Update</div>
+        <div class="system-value">{{ system.latest_task_update_at or '—' }}</div>
+      </li>
+    </ul>
+  </section>
+
+  <section class="panel panel-accent-teal">
+    <h2>Counts</h2>
+    <div class="cards" style="margin-bottom:0">
+      {% for key, value in system.counts.items() %}
+      <div class="card stat">
+        <div class="label">{{ key }}</div>
+        <div class="value">{{ value }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endif %}
+{% endblock %}
