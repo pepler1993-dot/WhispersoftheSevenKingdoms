@@ -108,7 +108,7 @@ def _safe_kernel_slug(raw: str) -> str:
     return slug[:50]
 
 
-def _patch_notebook(template_path: Path, dest_path: Path, track_name: str, prompts: list[str], minutes: int, clip_seconds: int) -> None:
+def _patch_notebook(template_path: Path, dest_path: Path, track_name: str, prompts: list[str], minutes: int, clip_seconds: int, model: str = 'medium') -> None:
     """Copy template notebook and patch the KONFIGURATION cell in place."""
     nb = json.loads(template_path.read_text(encoding='utf-8'))
 
@@ -142,6 +142,15 @@ print(f"📊 Geschätzte Gesamtlänge: {{estimated_minutes:.1f}} Min")
 print(f"🔁 {{len(PROMPTS)}} Prompt-Variationen")
 print(f"📤 Upload: {{UPLOAD_TARGET}}")
 '''
+
+    # Patch MODEL_NAME in model loading cell
+    model_name = f'facebook/musicgen-{model}'
+    for cell in nb['cells']:
+        if cell.get('cell_type') == 'code':
+            src = ''.join(cell['source'])
+            if 'MODEL_NAME' in src and 'musicgen' in src and 'from_pretrained' in src:
+                cell['source'] = [src.replace('facebook/musicgen-medium', model_name).replace('facebook/musicgen-small', model_name)]
+                break
 
     for cell in nb['cells']:
         if cell.get('cell_type') == 'code':
@@ -254,6 +263,7 @@ class KaggleGenerator(AudioGenerator):
                 prompts=prompts,
                 minutes=minutes,
                 clip_seconds=clip_seconds,
+                model=model,
             )
             db.append_audio_job_log(job_id, 'system', f'Notebook patched: track={slug}, minutes={minutes}, clips={clip_seconds}s, prompts={len(prompts)}', now_iso())
         except Exception as exc:
