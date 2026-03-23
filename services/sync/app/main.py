@@ -5,8 +5,10 @@ import hmac
 import json
 import shutil
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Any
+
+CET = timezone(timedelta(hours=1))
 
 import psutil
 from pathlib import Path
@@ -586,8 +588,8 @@ def admin_audio_job_cancel(job_id: str):
     job = db.get_audio_job(job_id)
     if not job:
         raise HTTPException(status_code=404, detail='Audio job not found')
-    db.update_audio_job(job_id, status='cancelled', finished_at=datetime.now(timezone.utc).isoformat(), error_message='Cancelled by user')
-    db.append_audio_job_log(job_id, 'system', 'Cancellation requested by user', datetime.now(timezone.utc).isoformat())
+    db.update_audio_job(job_id, status='cancelled', finished_at=datetime.now(CET).isoformat(), error_message='Cancelled by user')
+    db.append_audio_job_log(job_id, 'system', 'Cancellation requested by user', datetime.now(CET).isoformat())
     return RedirectResponse(url=f'/admin/audio/jobs/{job_id}', status_code=303)
 
 
@@ -817,7 +819,7 @@ def admin_pipeline_start(
     }
 
     run_id = uuid.uuid4().hex[:12]
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(CET).isoformat()
 
     db.create_run({
         'run_id': run_id,

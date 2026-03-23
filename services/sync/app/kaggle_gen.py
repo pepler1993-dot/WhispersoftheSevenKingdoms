@@ -8,7 +8,7 @@ import threading
 import time
 import uuid
 from abc import ABC, abstractmethod
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -29,8 +29,10 @@ POLL_INTERVAL = 30   # seconds between status polls
 MAX_POLL_ATTEMPTS = 240  # 2 hours max (240 * 30s)
 
 
+CET = timezone(timedelta(hours=1))
+
 def now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(CET).isoformat()
 
 
 def get_pipeline_upload_dir() -> Path:
