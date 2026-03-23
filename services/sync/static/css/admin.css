@@ -262,6 +262,14 @@ h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; }
   color: var(--gold);
 }
 
+.mobile-subbrand {
+  font-size: 0.64rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+
 .menu-toggle {
   display: none;
 }
@@ -1117,6 +1125,7 @@ pre {
 
 .ops-filter-bar {
   margin-bottom: 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
 }
 
 [data-tooltip] {
@@ -1237,7 +1246,11 @@ pre {
     align-items: stretch;
   }
 
-  .inline-form input, .inline-form button { width: 100%; }
+  .inline-form input, .inline-form button, .inline-form .form-check { width: 100%; }
+  .ops-filter-bar .form-check.compact {
+    justify-content: flex-start;
+    padding: 6px 2px;
+  }
 
   .status-header {
     flex-direction: column;
