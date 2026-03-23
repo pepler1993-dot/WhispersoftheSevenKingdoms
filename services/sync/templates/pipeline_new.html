@@ -512,10 +512,10 @@
             status.textContent = '';
             status.className = 'upload-status';
           }
-          assetsLine.textContent = 'Kein Audio für diesen Slug — wähle Bibliothek oder lade hoch';
+          assetsLine.textContent = 'Noch kein Audio vorhanden — wird beim Generieren erstellt';
         }
       })
-      .catch(() => { assetsLine.textContent = 'Assets-Check fehlgeschlagen'; });
+      .catch(() => { assetsLine.textContent = 'Assets konnten nicht geprüft werden'; });
   }
 
   if (librarySelect) {
