@@ -3,234 +3,581 @@
 {% block content %}
 <div class="page-header">
   <h1>Neuer Pipeline Run</h1>
-  <div class="page-subtitle">Assets hochladen und Rendering konfigurieren</div>
+  <div class="page-subtitle">Schritt für Schritt zum fertigen Video</div>
 </div>
 
-<div class="grid two">
-  <section class="panel panel-accent-blue">
-    <h2>1. Assets hochladen</h2>
+<!-- progress bar -->
+<div class="wizard-progress">
+  <div class="wizard-step active" data-step="1"><span class="step-num">1</span><span class="step-label">Basics</span></div>
+  <div class="wizard-connector"></div>
+  <div class="wizard-step" data-step="2"><span class="step-num">2</span><span class="step-label">Assets</span></div>
+  <div class="wizard-connector"></div>
+  <div class="wizard-step" data-step="3"><span class="step-num">3</span><span class="step-label">Music</span></div>
+  <div class="wizard-connector"></div>
+  <div class="wizard-step" data-step="4"><span class="step-num">4</span><span class="step-label">Thumbnail</span></div>
+  <div class="wizard-connector"></div>
+  <div class="wizard-step" data-step="5"><span class="step-num">5</span><span class="step-label">Pipeline</span></div>
+  <div class="wizard-connector"></div>
+  <div class="wizard-step" data-step="6"><span class="step-num">6</span><span class="step-label">Start</span></div>
+</div>
+
+<form method="post" action="/admin/pipeline/start" id="run-form">
+
+<!-- Step 1: Basics -->
+<section class="wizard-page active panel panel-accent-gold" data-step="1">
+  <h2><i data-lucide="file-text" style="width:18px;height:18px"></i> Grundeinstellungen</h2>
+  <p class="step-desc">Was soll dieses Video heißen und welches Haus/Theme hat es?</p>
+
+  <div class="form-group">
+    <label for="slug">Slug <span class="required">*</span></label>
+    <input type="text" name="slug" id="slug" class="form-input" required placeholder="z.B. whispers-of-winterfell" value="{{ prefill_slug or '' }}" />
+    <div class="form-hint">Eindeutiger Name für Dateien und URLs (keine Leerzeichen, Kleinbuchstaben)</div>
+  </div>
+  <div class="form-group">
+    <label for="title">Video-Titel <span class="required">*</span></label>
+    <input type="text" name="title" id="title" class="form-input" required placeholder="Whispers of Winterfell – 3 Hours Deep Sleep Music" />
+    <div class="form-hint">Der Titel der auf YouTube angezeigt wird</div>
+  </div>
+  <div class="form-group">
+    <label for="theme">Theme / Haus <span class="required">*</span></label>
+    <input type="text" name="theme" id="theme" class="form-input" required placeholder="Winterfell" />
+    <div class="form-hint">Das GoT-Haus oder der Ort – bestimmt Farben, Font und Stimmung</div>
+  </div>
+  <div class="form-group">
+    <label for="mood">Stimmung</label>
+    <textarea name="mood" id="mood" class="form-input" rows="2" placeholder="calm, cold, melancholic"></textarea>
+    <div class="form-hint">Komma-getrennte Stimmungen die den gesamten Track beschreiben</div>
+  </div>
+  <div class="form-group">
+    <label for="tags">YouTube-Tags</label>
+    <textarea name="tags" id="tags" class="form-input" rows="2" placeholder="sleep music, fantasy ambient, winterfell, game of thrones"></textarea>
+    <div class="form-hint">Zusätzliche Tags für YouTube SEO</div>
+  </div>
+
+  <div class="wizard-nav">
+    <div></div>
+    <button type="button" class="btn btn-primary wizard-next">Weiter <i data-lucide="arrow-right" style="width:16px;height:16px"></i></button>
+  </div>
+</section>
+
+<!-- Step 2: Assets -->
+<section class="wizard-page panel panel-accent-blue" data-step="2">
+  <h2><i data-lucide="upload" style="width:18px;height:18px"></i> Assets hochladen</h2>
+  <p class="step-desc">Audio-Datei und optionales Thumbnail hochladen. Das Audio kannst du auch vorher im Audio Generator erzeugen.</p>
+
+  <div class="upload-zone" id="zone-audio" data-type="audio">
+    <div class="upload-icon"><i data-lucide="music" style="width:32px;height:32px"></i></div>
+    <div class="upload-label">Audio-Datei (.mp3, .wav, .ogg)</div>
+    <div class="upload-hint">Klicken oder Datei hierher ziehen</div>
+    <input type="file" accept=".mp3,.wav,.ogg" />
+    <div class="upload-status" id="status-audio"></div>
+  </div>
+
+  <div class="upload-zone" id="zone-thumbnail" data-type="thumbnail">
+    <div class="upload-icon"><i data-lucide="image" style="width:32px;height:32px"></i></div>
+    <div class="upload-label">Thumbnail (.jpg, .png, .webp) &mdash; optional</div>
+    <div class="upload-hint">Wird automatisch generiert wenn keins hochgeladen wird</div>
+    <input type="file" accept=".jpg,.jpeg,.png,.webp" />
+    <div class="upload-status" id="status-thumbnail"></div>
+  </div>
+
+  <div class="assets-section">
+    <h3>Bereits vorhandene Assets</h3>
+    <div class="assets-list">
+      <div><strong>Songs:</strong> {{ assets.songs | join(', ') or 'keine' }}</div>
+      <div><strong>Thumbnails:</strong> {{ assets.thumbnails | join(', ') or 'keine' }}</div>
+      <div><strong>Metadata:</strong> {{ assets.metadata | join(', ') or 'wird automatisch erzeugt' }}</div>
+    </div>
+  </div>
+
+  <div style="margin-top:14px">
+    <a href="/admin/audio" class="btn btn-secondary btn-sm"><i data-lucide="sparkles" style="width:14px;height:14px"></i> Zum Audio Generator</a>
+  </div>
+
+  <div class="wizard-nav">
+    <button type="button" class="btn btn-secondary wizard-prev"><i data-lucide="arrow-left" style="width:16px;height:16px"></i> Zurück</button>
+    <button type="button" class="btn btn-primary wizard-next">Weiter <i data-lucide="arrow-right" style="width:16px;height:16px"></i></button>
+  </div>
+</section>
+
+<!-- Step 3: Music Brief -->
+<section class="wizard-page panel panel-accent-purple" data-step="3">
+  <h2><i data-lucide="music-2" style="width:18px;height:18px"></i> Music Brief</h2>
+  <p class="step-desc">Beschreibe den musikalischen Stil. Diese Infos fließen in die YouTube-Beschreibung und helfen bei der Prompt-Generierung.</p>
+
+  <div class="form-group">
+    <label for="music_style">Musik-Stil</label>
+    <input type="text" name="music_style" id="music_style" class="form-input" placeholder="fantasy sleep music, ambient piano" />
+    <div class="form-hint">Genre und Stil in wenigen Worten</div>
+  </div>
+  <div class="form-group">
+    <label for="music_influences">Einflüsse &amp; Atmosphäre</label>
+    <textarea name="music_influences" id="music_influences" class="form-input" rows="3" placeholder="cold north, ancient castle, night wind, soft strings, crackling fire"></textarea>
+    <div class="form-hint">Was soll man beim Hören fühlen/sehen? Komma-getrennt.</div>
+  </div>
+  <div class="grid two">
     <div class="form-group">
-      <label for="upload-slug">Slug</label>
-      <input type="text" id="upload-slug" class="form-input" placeholder="z.B. whispers-of-winterfell" />
+      <label for="music_tempo">Tempo</label>
+      <select name="music_tempo" id="music_tempo" class="form-select">
+        <option value="">— wählen —</option>
+        <option value="very slow">Sehr langsam (~40-50 BPM)</option>
+        <option value="slow" selected>Langsam (~50-70 BPM)</option>
+        <option value="moderate">Moderat (~70-100 BPM)</option>
+        <option value="fast">Schnell (~100+ BPM)</option>
+      </select>
     </div>
-
-    <div class="upload-zone" id="zone-audio" data-type="audio">
-      <div class="upload-icon"><i data-lucide="music" style="width:28px;height:28px"></i></div>
-      <div class="upload-label">Audio-Datei (.mp3, .wav, .ogg)</div>
-      <div class="upload-hint">Klicken oder Datei hierher ziehen</div>
-      <input type="file" accept=".mp3,.wav,.ogg" />
-      <div class="upload-status" id="status-audio"></div>
+    <div class="form-group">
+      <label for="music_energy">Energie</label>
+      <select name="music_energy" id="music_energy" class="form-select">
+        <option value="">— wählen —</option>
+        <option value="minimal">Minimal</option>
+        <option value="low" selected>Niedrig</option>
+        <option value="medium">Mittel</option>
+        <option value="high">Hoch</option>
+      </select>
     </div>
+  </div>
+  <div class="form-group">
+    <label for="music_avoid">Vermeiden</label>
+    <textarea name="music_avoid" id="music_avoid" class="form-input" rows="2" placeholder="epic battle drums, harsh percussion, vocals, sudden changes"></textarea>
+    <div class="form-hint">Was soll im Track NICHT vorkommen?</div>
+  </div>
+  <div class="form-group">
+    <label for="notes">Interne Notizen</label>
+    <textarea name="notes" id="notes" class="form-input" rows="2" placeholder="Notizen nur für uns, nicht öffentlich sichtbar"></textarea>
+  </div>
 
-    <div class="upload-zone" id="zone-thumbnail" data-type="thumbnail" style="margin-top:12px">
-      <div class="upload-icon"><i data-lucide="image" style="width:28px;height:28px"></i></div>
-      <div class="upload-label">Thumbnail (.jpg, .png, .webp) &mdash; optional</div>
-      <div class="upload-hint">Klicken oder Datei hierher ziehen</div>
-      <input type="file" accept=".jpg,.jpeg,.png,.webp" />
-      <div class="upload-status" id="status-thumbnail"></div>
+  <div class="wizard-nav">
+    <button type="button" class="btn btn-secondary wizard-prev"><i data-lucide="arrow-left" style="width:16px;height:16px"></i> Zurück</button>
+    <button type="button" class="btn btn-primary wizard-next">Weiter <i data-lucide="arrow-right" style="width:16px;height:16px"></i></button>
+  </div>
+</section>
+
+<!-- Step 4: Thumbnail Brief -->
+<section class="wizard-page panel panel-accent-teal" data-step="4">
+  <h2><i data-lucide="palette" style="width:18px;height:18px"></i> Thumbnail Brief</h2>
+  <p class="step-desc">Wie soll das Thumbnail aussehen? Falls du eins hochgeladen hast, werden diese Infos für die YouTube-Beschreibung verwendet.</p>
+
+  <div class="form-group">
+    <label for="thumbnail_scene">Szene</label>
+    <input type="text" name="thumbnail_scene" id="thumbnail_scene" class="form-input" placeholder="Winterfell at night in cold blue moonlight" />
+    <div class="form-hint">Hauptmotiv des Thumbnails in einem Satz</div>
+  </div>
+  <div class="form-group">
+    <label for="thumbnail_elements">Elemente</label>
+    <textarea name="thumbnail_elements" id="thumbnail_elements" class="form-input" rows="2" placeholder="snow, castle silhouette, soft fog, northern lights"></textarea>
+    <div class="form-hint">Einzelne visuelle Elemente, komma-getrennt</div>
+  </div>
+  <div class="form-group">
+    <label for="thumbnail_text">Text auf dem Thumbnail</label>
+    <input type="text" name="thumbnail_text" id="thumbnail_text" class="form-input" placeholder="Leer = Video-Titel wird verwendet" />
+    <div class="form-hint">Kurzer Text der auf dem Thumbnail erscheint</div>
+  </div>
+  <div class="form-group">
+    <label for="thumbnail_style">Stil</label>
+    <input type="text" name="thumbnail_style" id="thumbnail_style" class="form-input" placeholder="dark, clean, readable, atmospheric" />
+  </div>
+  <div class="form-group">
+    <label for="thumbnail_avoid">Vermeiden</label>
+    <textarea name="thumbnail_avoid" id="thumbnail_avoid" class="form-input" rows="2" placeholder="busy collage, tiny text, oversaturated colors"></textarea>
+  </div>
+
+  <div class="wizard-nav">
+    <button type="button" class="btn btn-secondary wizard-prev"><i data-lucide="arrow-left" style="width:16px;height:16px"></i> Zurück</button>
+    <button type="button" class="btn btn-primary wizard-next">Weiter <i data-lucide="arrow-right" style="width:16px;height:16px"></i></button>
+  </div>
+</section>
+
+<!-- Step 5: Pipeline Settings -->
+<section class="wizard-page panel panel-accent-crimson" data-step="5">
+  <h2><i data-lucide="settings" style="width:18px;height:18px"></i> Pipeline-Einstellungen</h2>
+  <p class="step-desc">Technische Einstellungen für Audio-Processing und Video-Rendering.</p>
+
+  <div class="grid two">
+    <div class="form-group">
+      <label for="minutes">Ziel-Dauer (Minuten)</label>
+      <input type="number" name="minutes" id="minutes" class="form-input" value="42" min="1" max="720" />
+      <div class="form-hint">Dauer des generierten Audio</div>
     </div>
-
-    <div class="assets-section">
-      <h3>Vorhandene Assets</h3>
-      <div class="assets-list">
-        <div><strong>Songs:</strong> {{ assets.songs | join(', ') or 'keine' }}</div>
-        <div><strong>Thumbnails:</strong> {{ assets.thumbnails | join(', ') or 'keine' }}</div>
-        <div><strong>Metadata:</strong> {{ assets.metadata | join(', ') or 'keine / wird beim Start automatisch erzeugt' }}</div>
-      </div>
+    <div class="form-group">
+      <label for="loop_hours">Loop auf Stunden</label>
+      <input type="number" name="loop_hours" id="loop_hours" class="form-input" value="3" min="0" max="12" step="0.5" />
+      <div class="form-hint">0 = kein Loop. Standard: 3h für Sleep Music</div>
     </div>
-  </section>
+  </div>
+  <div class="grid two">
+    <div class="form-group">
+      <label for="crossfade">Crossfade (Sekunden)</label>
+      <input type="number" name="crossfade" id="crossfade" class="form-input" value="8" min="0" max="30" />
+      <div class="form-hint">Überblendung zwischen Loops</div>
+    </div>
+    <div class="form-group">
+      <label for="audio_preset">Audio-Preset</label>
+      <select name="audio_preset" id="audio_preset" class="form-select">
+        <option value="ambient" selected>🌙 Ambient – warm, räumlich</option>
+        <option value="dark">🖤 Dark – tief, basslastig</option>
+        <option value="gentle">☁️ Gentle – leicht, sanft</option>
+        <option value="raw">🔇 Raw – nur Normalisierung</option>
+      </select>
+      <div class="form-hint">Post-Processing Preset (EQ, Reverb, Normalisierung)</div>
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="house">Renderer Theme Override</label>
+    <select name="house" id="house" class="form-select">
+      <option value="">&mdash; Theme aus Schritt 1 verwenden &mdash;</option>
+      {% for t in themes %}
+      <option value="{{ t }}">{{ t }}</option>
+      {% endfor %}
+    </select>
+    <div class="form-hint">Nur nötig wenn du ein anderes visuelles Theme als das Haus verwenden willst</div>
+  </div>
+  <div class="form-group">
+    <label for="duration_hint">Duration Hint (YouTube)</label>
+    <input type="text" name="duration_hint" id="duration_hint" class="form-input" value="long-form sleep track" />
+  </div>
 
-  <section class="panel panel-accent-gold">
-    <h2>2. Run + Metadaten konfigurieren</h2>
-    <form method="post" action="/admin/pipeline/start" id="run-form">
-      <div class="form-group">
-        <label for="slug">Slug</label>
-        <input type="text" name="slug" id="slug" class="form-input" required placeholder="z.B. whispers-of-winterfell" />
-      </div>
-      <div class="form-group">
-        <label for="title">Titel</label>
-        <input type="text" name="title" id="title" class="form-input" required placeholder="Whispers of Winterfell" />
-      </div>
-      <div class="form-group">
-        <label for="theme">Theme</label>
-        <input type="text" name="theme" id="theme" class="form-input" required placeholder="Winterfell" />
-      </div>
-      <div class="form-group">
-        <label for="mood">Mood(s)</label>
-        <textarea name="mood" id="mood" class="form-input" rows="2" placeholder="calm, cold, melancholic"></textarea>
-      </div>
-      <div class="form-group">
-        <label for="notes">Notes</label>
-        <textarea name="notes" id="notes" class="form-input" rows="2" placeholder="Interne Notizen für diesen Song"></textarea>
-      </div>
-      <div class="form-group">
-        <label for="duration_hint">Duration Hint</label>
-        <input type="text" name="duration_hint" id="duration_hint" class="form-input" value="long-form sleep track" />
-      </div>
-      <div class="form-group">
-        <label for="tags">Zusätzliche Tags</label>
-        <textarea name="tags" id="tags" class="form-input" rows="2" placeholder="sleep music, fantasy ambient, winterfell"></textarea>
-      </div>
+  <div class="wizard-options">
+    <div class="form-check">
+      <input type="checkbox" name="animated" id="animated" value="true" />
+      <label for="animated">🎬 Animiertes Video (Partikel + Kamera-Bewegung)</label>
+    </div>
+    <div class="form-check">
+      <input type="checkbox" name="public" id="public" value="true" />
+      <label for="public">🌍 Öffentlich auf YouTube hochladen</label>
+    </div>
+    <div class="form-check">
+      <input type="checkbox" name="skip_post_process" id="skip_post_process" value="true" />
+      <label for="skip_post_process">⏭️ Audio Post-Processing überspringen</label>
+    </div>
+  </div>
 
-      <h3 style="color:var(--muted);font-size:13px;text-transform:uppercase;margin:22px 0 10px">Music Brief</h3>
-      <div class="form-group">
-        <label for="music_style">Style</label>
-        <input type="text" name="music_style" id="music_style" class="form-input" placeholder="fantasy sleep music" />
-      </div>
-      <div class="form-group">
-        <label for="music_influences">Influences</label>
-        <textarea name="music_influences" id="music_influences" class="form-input" rows="3" placeholder="cold north, ancient castle, night wind, soft strings"></textarea>
-      </div>
-      <div class="grid two">
-        <div class="form-group">
-          <label for="music_tempo">Tempo</label>
-          <input type="text" name="music_tempo" id="music_tempo" class="form-input" placeholder="slow" />
-        </div>
-        <div class="form-group">
-          <label for="music_energy">Energy</label>
-          <input type="text" name="music_energy" id="music_energy" class="form-input" placeholder="low" />
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="music_avoid">Avoid</label>
-        <textarea name="music_avoid" id="music_avoid" class="form-input" rows="2" placeholder="epic battle drums, harsh percussion"></textarea>
-      </div>
+  <div class="wizard-nav">
+    <button type="button" class="btn btn-secondary wizard-prev"><i data-lucide="arrow-left" style="width:16px;height:16px"></i> Zurück</button>
+    <button type="button" class="btn btn-primary wizard-next">Weiter zur Übersicht <i data-lucide="arrow-right" style="width:16px;height:16px"></i></button>
+  </div>
+</section>
 
-      <h3 style="color:var(--muted);font-size:13px;text-transform:uppercase;margin:22px 0 10px">Thumbnail Brief</h3>
-      <div class="form-group">
-        <label for="thumbnail_scene">Scene</label>
-        <input type="text" name="thumbnail_scene" id="thumbnail_scene" class="form-input" placeholder="Winterfell at night in cold blue moonlight" />
-      </div>
-      <div class="form-group">
-        <label for="thumbnail_elements">Elements</label>
-        <textarea name="thumbnail_elements" id="thumbnail_elements" class="form-input" rows="2" placeholder="snow, castle silhouette, soft fog"></textarea>
-      </div>
-      <div class="form-group">
-        <label for="thumbnail_text">Thumbnail Text</label>
-        <input type="text" name="thumbnail_text" id="thumbnail_text" class="form-input" placeholder="leer = Titel verwenden" />
-      </div>
-      <div class="form-group">
-        <label for="thumbnail_style">Thumbnail Style</label>
-        <input type="text" name="thumbnail_style" id="thumbnail_style" class="form-input" placeholder="dark, clean, readable, atmospheric" />
-      </div>
-      <div class="form-group">
-        <label for="thumbnail_avoid">Thumbnail Avoid</label>
-        <textarea name="thumbnail_avoid" id="thumbnail_avoid" class="form-input" rows="2" placeholder="busy collage, tiny text, oversaturated colors"></textarea>
-      </div>
+<!-- Step 6: Review & Start -->
+<section class="wizard-page panel panel-accent-gold" data-step="6">
+  <h2><i data-lucide="check-circle" style="width:18px;height:18px"></i> Zusammenfassung</h2>
+  <p class="step-desc">Überprüfe deine Einstellungen und starte die Pipeline.</p>
 
-      <h3 style="color:var(--muted);font-size:13px;text-transform:uppercase;margin:22px 0 10px">Pipeline</h3>
-      <div class="form-group">
-        <label for="minutes">Ziel-Dauer (Minuten)</label>
-        <input type="number" name="minutes" id="minutes" class="form-input" value="42" min="1" max="720" />
-      </div>
-      <div class="form-group">
-        <label for="loop_hours">Loop auf Stunden (0 = kein Loop)</label>
-        <input type="number" name="loop_hours" id="loop_hours" class="form-input" value="0" min="0" max="12" step="0.5" />
-      </div>
-      <div class="form-group">
-        <label for="crossfade">Crossfade (Sekunden)</label>
-        <input type="number" name="crossfade" id="crossfade" class="form-input" value="8" min="0" max="30" />
-      </div>
-      <div class="form-group">
-        <label for="audio_preset">Audio-Preset</label>
-        <select name="audio_preset" id="audio_preset" class="form-select">
-          <option value="ambient" selected>Ambient</option>
-          <option value="dark">Dark</option>
-          <option value="gentle">Gentle</option>
-          <option value="raw">Raw</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="house">Renderer Theme / House Override (optional)</label>
-        <select name="house" id="house" class="form-select">
-          <option value="">&mdash; Theme aus Formular verwenden &mdash;</option>
-          {% for t in themes %}
-          <option value="{{ t }}">{{ t }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="form-group">
-        <div class="form-check">
-          <input type="checkbox" name="animated" id="animated" value="true" />
-          <label for="animated">Animiertes Video (Partikel + Kamera)</label>
-        </div>
-        <div class="form-check">
-          <input type="checkbox" name="public" id="public" value="true" />
-          <label for="public">Oeffentlich hochladen</label>
-        </div>
-        <div class="form-check">
-          <input type="checkbox" name="skip_post_process" id="skip_post_process" value="true" />
-          <label for="skip_post_process">Audio Post-Processing ueberspringen</label>
-        </div>
-      </div>
-      <button type="submit" class="btn btn-primary" style="width:100%;margin-top:8px">
-        <i data-lucide="play" style="width:16px;height:16px"></i> Pipeline starten
-      </button>
-    </form>
-  </section>
-</div>
+  <div class="review-grid">
+    <div class="review-section">
+      <h3>Basics</h3>
+      <div class="review-item"><span class="review-label">Slug</span><span class="review-value" id="rv-slug">—</span></div>
+      <div class="review-item"><span class="review-label">Titel</span><span class="review-value" id="rv-title">—</span></div>
+      <div class="review-item"><span class="review-label">Theme</span><span class="review-value" id="rv-theme">—</span></div>
+      <div class="review-item"><span class="review-label">Stimmung</span><span class="review-value" id="rv-mood">—</span></div>
+    </div>
+    <div class="review-section">
+      <h3>Music Brief</h3>
+      <div class="review-item"><span class="review-label">Stil</span><span class="review-value" id="rv-music-style">—</span></div>
+      <div class="review-item"><span class="review-label">Tempo</span><span class="review-value" id="rv-music-tempo">—</span></div>
+      <div class="review-item"><span class="review-label">Energie</span><span class="review-value" id="rv-music-energy">—</span></div>
+    </div>
+    <div class="review-section">
+      <h3>Pipeline</h3>
+      <div class="review-item"><span class="review-label">Dauer</span><span class="review-value" id="rv-minutes">—</span></div>
+      <div class="review-item"><span class="review-label">Loop</span><span class="review-value" id="rv-loop">—</span></div>
+      <div class="review-item"><span class="review-label">Crossfade</span><span class="review-value" id="rv-crossfade">—</span></div>
+      <div class="review-item"><span class="review-label">Preset</span><span class="review-value" id="rv-preset">—</span></div>
+      <div class="review-item"><span class="review-label">Optionen</span><span class="review-value" id="rv-options">—</span></div>
+    </div>
+  </div>
+
+  <div class="wizard-nav" style="margin-top:24px">
+    <button type="button" class="btn btn-secondary wizard-prev"><i data-lucide="arrow-left" style="width:16px;height:16px"></i> Zurück</button>
+    <button type="submit" class="btn btn-primary btn-launch">
+      <i data-lucide="rocket" style="width:18px;height:18px"></i> Pipeline starten!
+    </button>
+  </div>
+</section>
+
+</form>
+
+<style>
+/* wizard progress */
+.wizard-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 28px;
+  padding: 0 10px;
+  flex-wrap: wrap;
+}
+.wizard-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.25s var(--ease);
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
+.wizard-step:hover { border-color: var(--line-light); }
+.wizard-step.active {
+  background: var(--gold-glow);
+  border-color: var(--gold);
+}
+.wizard-step.done {
+  background: rgba(52,211,153,0.1);
+  border-color: var(--good);
+}
+.wizard-step.done .step-num {
+  background: var(--good);
+}
+.step-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--line);
+  color: var(--text);
+  font-size: 0.7rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.25s var(--ease);
+}
+.wizard-step.active .step-num {
+  background: var(--gold);
+  color: #0a0e18;
+}
+.step-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+  transition: color 0.25s var(--ease);
+}
+.wizard-step.active .step-label { color: var(--gold); }
+.wizard-step.done .step-label { color: var(--good); }
+.wizard-connector {
+  width: 24px;
+  height: 2px;
+  background: var(--line);
+  flex-shrink: 0;
+}
+
+/* wizard pages */
+.wizard-page { display: none; }
+.wizard-page.active { display: block; animation: fadeSlide 0.3s var(--ease); }
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* step description */
+.step-desc {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+/* form hints */
+.form-hint {
+  color: var(--muted);
+  font-size: 0.7rem;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.required { color: var(--bad); }
+
+/* wizard nav */
+.wizard-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+/* wizard options */
+.wizard-options {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  margin-top: 16px;
+}
+
+/* launch button */
+.btn-launch {
+  font-size: 1rem;
+  padding: 14px 32px;
+  box-shadow: 0 4px 24px rgba(212,168,69,0.3);
+}
+.btn-launch:hover {
+  box-shadow: 0 6px 32px rgba(212,168,69,0.4);
+  transform: translateY(-2px);
+}
+
+/* review grid */
+.review-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.review-section {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+}
+.review-section h3 {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+.review-section h3::before { display: none; }
+.review-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.82rem;
+}
+.review-item:last-child { border-bottom: none; }
+.review-label { color: var(--muted); }
+.review-value { color: var(--text); font-weight: 600; text-align: right; max-width: 60%; word-break: break-word; }
+
+@media (max-width: 768px) {
+  .wizard-progress { gap: 4px; }
+  .step-label { display: none; }
+  .wizard-connector { width: 12px; }
+  .wizard-step { padding: 6px 10px; }
+  .review-grid { grid-template-columns: 1fr; }
+}
+</style>
 
 <script>
 (function() {
-  const uploadSlug = document.getElementById('upload-slug');
-  const runSlug = document.getElementById('slug');
+  const pages = document.querySelectorAll('.wizard-page');
+  const steps = document.querySelectorAll('.wizard-step');
+  let current = 1;
+  const total = pages.length;
+
+  function showStep(n) {
+    if (n < 1 || n > total) return;
+
+    // validate required fields before advancing
+    if (n > current) {
+      const currentPage = document.querySelector(`.wizard-page[data-step="${current}"]`);
+      const requiredFields = currentPage.querySelectorAll('[required]');
+      let valid = true;
+      requiredFields.forEach(f => {
+        if (!f.value.trim()) { f.focus(); f.classList.add('invalid'); valid = false; }
+        else { f.classList.remove('invalid'); }
+      });
+      if (!valid) return;
+    }
+
+    current = n;
+    pages.forEach(p => p.classList.toggle('active', +p.dataset.step === n));
+    steps.forEach(s => {
+      const sn = +s.dataset.step;
+      s.classList.toggle('active', sn === n);
+      s.classList.toggle('done', sn < n);
+    });
+
+    // populate review on step 6
+    if (n === 6) populateReview();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // click on progress step
+  steps.forEach(s => s.addEventListener('click', () => {
+    const target = +s.dataset.step;
+    if (target <= current || target === current + 1) showStep(target);
+  }));
+
+  // next/prev buttons
+  document.querySelectorAll('.wizard-next').forEach(btn =>
+    btn.addEventListener('click', () => showStep(current + 1))
+  );
+  document.querySelectorAll('.wizard-prev').forEach(btn =>
+    btn.addEventListener('click', () => showStep(current - 1))
+  );
+
+  // auto-fill thumbnail text from title
   const title = document.getElementById('title');
   const thumbText = document.getElementById('thumbnail_text');
-
-  uploadSlug.addEventListener('input', function() {
-    if (!runSlug.dataset.manual) runSlug.value = this.value;
-  });
-  runSlug.addEventListener('input', function() { this.dataset.manual = '1'; });
-
   title.addEventListener('input', function() {
     if (!thumbText.dataset.manual && !thumbText.value.trim()) thumbText.value = this.value;
   });
   thumbText.addEventListener('input', function() { this.dataset.manual = '1'; });
 
+  // populate review
+  function populateReview() {
+    const v = id => (document.getElementById(id) || {}).value || '—';
+    const sel = id => { const el = document.getElementById(id); return el ? el.options[el.selectedIndex].text : '—'; };
+
+    document.getElementById('rv-slug').textContent = v('slug');
+    document.getElementById('rv-title').textContent = v('title');
+    document.getElementById('rv-theme').textContent = v('theme');
+    document.getElementById('rv-mood').textContent = v('mood') || '—';
+    document.getElementById('rv-music-style').textContent = v('music_style') || '—';
+    document.getElementById('rv-music-tempo').textContent = sel('music_tempo');
+    document.getElementById('rv-music-energy').textContent = sel('music_energy');
+    document.getElementById('rv-minutes').textContent = v('minutes') + ' Min';
+    document.getElementById('rv-loop').textContent = v('loop_hours') === '0' ? 'Kein Loop' : v('loop_hours') + 'h';
+    document.getElementById('rv-crossfade').textContent = v('crossfade') + 's';
+    document.getElementById('rv-preset').textContent = sel('audio_preset');
+
+    const opts = [];
+    if (document.getElementById('animated').checked) opts.push('Animiert');
+    if (document.getElementById('public').checked) opts.push('Öffentlich');
+    if (document.getElementById('skip_post_process').checked) opts.push('Kein Post-Processing');
+    document.getElementById('rv-options').textContent = opts.length ? opts.join(', ') : 'Standard';
+  }
+
+  // file upload
+  const slug = document.getElementById('slug');
   document.querySelectorAll('.upload-zone').forEach(zone => {
     const input = zone.querySelector('input[type="file"]');
     const type = zone.dataset.type;
-
     zone.addEventListener('click', e => { if (e.target.tagName !== 'INPUT') input.click(); });
     zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
     zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
     zone.addEventListener('drop', e => {
-      e.preventDefault();
-      zone.classList.remove('dragover');
+      e.preventDefault(); zone.classList.remove('dragover');
       if (e.dataTransfer.files.length) uploadFile(e.dataTransfer.files[0], type);
     });
     input.addEventListener('change', () => { if (input.files.length) uploadFile(input.files[0], type); });
   });
 
   function uploadFile(file, type) {
-    const slug = uploadSlug.value.trim();
-    if (!slug) { alert('Bitte zuerst einen Slug eingeben'); return; }
-
+    const s = slug.value.trim();
+    if (!s) { alert('Bitte zuerst einen Slug eingeben (Schritt 1)'); return; }
     const status = document.getElementById('status-' + type);
     status.textContent = 'Wird hochgeladen\u2026';
     status.className = 'upload-status';
-
     const fd = new FormData();
     fd.append('asset_type', type);
-    fd.append('slug', slug);
+    fd.append('slug', s);
     fd.append('file', file);
-
     fetch('/admin/pipeline/upload-asset', { method: 'POST', body: fd })
       .then(r => r.json().then(d => ({ ok: r.ok, data: d })))
       .then(({ ok, data }) => {
-        if (ok) {
-          status.textContent = 'Hochgeladen: ' + data.path;
-          status.className = 'upload-status success';
-        } else {
-          status.textContent = 'Fehler: ' + (data.detail || 'Unbekannt');
-          status.className = 'upload-status error';
-        }
+        status.textContent = ok ? '\u2705 ' + data.path : 'Fehler: ' + (data.detail || 'Unbekannt');
+        status.className = 'upload-status ' + (ok ? 'success' : 'error');
       })
-      .catch(() => {
-        status.textContent = 'Upload fehlgeschlagen';
-        status.className = 'upload-status error';
-      });
+      .catch(() => { status.textContent = 'Upload fehlgeschlagen'; status.className = 'upload-status error'; });
   }
+
+  // invalid field style
+  const style = document.createElement('style');
+  style.textContent = '.form-input.invalid, .form-select.invalid { border-color: var(--bad); box-shadow: 0 0 0 3px rgba(248,113,113,0.15); }';
+  document.head.appendChild(style);
 })();
 </script>
 {% endblock %}
