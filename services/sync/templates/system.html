@@ -1,23 +1,40 @@
 {% extends 'base.html' %}
 {% block title %}System{% endblock %}
 {% block content %}
-<h1>System</h1>
+<div class="page-header">
+  <h1>System</h1>
+  <div class="page-subtitle">Server-Status und Datenbank-Informationen</div>
+</div>
+
 <div class="grid two">
-  <section class="panel">
-    <h2>DB</h2>
-    <ul class="list mono">
-      <li>{{ system.db_path }}</li>
-      <li>Latest GitHub Event: {{ system.latest_github_event_at or '—' }}</li>
-      <li>Latest Task Update: {{ system.latest_task_update_at or '—' }}</li>
+  <section class="panel panel-accent-blue">
+    <h2>Datenbank</h2>
+    <ul class="list">
+      <li>
+        <div class="label" style="margin-bottom:2px">Pfad</div>
+        <div class="mono" style="font-size:0.78rem;color:var(--text-secondary)">{{ system.db_path }}</div>
+      </li>
+      <li>
+        <div class="label" style="margin-bottom:2px">Letztes GitHub Event</div>
+        <div class="system-value">{{ system.latest_github_event_at or '&mdash;' }}</div>
+      </li>
+      <li>
+        <div class="label" style="margin-bottom:2px">Letztes Task Update</div>
+        <div class="system-value">{{ system.latest_task_update_at or '&mdash;' }}</div>
+      </li>
     </ul>
   </section>
-  <section class="panel">
+
+  <section class="panel panel-accent-teal">
     <h2>Counts</h2>
-    <ul class="list mono">
+    <div class="cards" style="margin-bottom:0">
       {% for key, value in system.counts.items() %}
-      <li>{{ key }}: {{ value }}</li>
+      <div class="card stat">
+        <div class="label">{{ key }}</div>
+        <div class="value">{{ value }}</div>
+      </div>
       {% endfor %}
-    </ul>
+    </div>
   </section>
 </div>
 {% endblock %}

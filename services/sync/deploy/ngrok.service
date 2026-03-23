@@ -1,0 +1,16 @@
+[Unit]
+Description=ngrok tunnel for Agent Sync Service
+After=network-online.target agent-sync.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/local/bin/ngrok http 8000 --log=stdout
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

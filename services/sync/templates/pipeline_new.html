@@ -1,10 +1,13 @@
 {% extends 'base.html' %}
 {% block title %}Neuer Pipeline Run{% endblock %}
 {% block content %}
-<h1>Neuer Pipeline Run</h1>
+<div class="page-header">
+  <h1>Neuer Pipeline Run</h1>
+  <div class="page-subtitle">Assets hochladen und Rendering konfigurieren</div>
+</div>
 
 <div class="grid two">
-  <section class="panel">
+  <section class="panel panel-accent-blue">
     <h2>1. Assets hochladen</h2>
     <div class="form-group">
       <label for="upload-slug">Slug</label>
@@ -12,6 +15,7 @@
     </div>
 
     <div class="upload-zone" id="zone-audio" data-type="audio">
+      <div class="upload-icon"><i data-lucide="music" style="width:28px;height:28px"></i></div>
       <div class="upload-label">Audio-Datei (.mp3, .wav, .ogg)</div>
       <div class="upload-hint">Klicken oder Datei hierher ziehen</div>
       <input type="file" accept=".mp3,.wav,.ogg" />
@@ -19,15 +23,16 @@
     </div>
 
     <div class="upload-zone" id="zone-thumbnail" data-type="thumbnail" style="margin-top:12px">
-      <div class="upload-label">Thumbnail (.jpg, .png, .webp) — optional</div>
+      <div class="upload-icon"><i data-lucide="image" style="width:28px;height:28px"></i></div>
+      <div class="upload-label">Thumbnail (.jpg, .png, .webp) &mdash; optional</div>
       <div class="upload-hint">Klicken oder Datei hierher ziehen</div>
       <input type="file" accept=".jpg,.jpeg,.png,.webp" />
       <div class="upload-status" id="status-thumbnail"></div>
     </div>
 
-    <div style="margin-top:14px">
-      <h3 style="color:var(--muted);font-size:13px;text-transform:uppercase">Vorhandene Assets</h3>
-      <div style="font-size:13px;color:var(--muted)">
+    <div class="assets-section">
+      <h3>Vorhandene Assets</h3>
+      <div class="assets-list">
         <div><strong>Songs:</strong> {{ assets.songs | join(', ') or 'keine' }}</div>
         <div><strong>Thumbnails:</strong> {{ assets.thumbnails | join(', ') or 'keine' }}</div>
         <div><strong>Metadata:</strong> {{ assets.metadata | join(', ') or 'keine / wird beim Start automatisch erzeugt' }}</div>
@@ -35,7 +40,7 @@
     </div>
   </section>
 
-  <section class="panel">
+  <section class="panel panel-accent-gold">
     <h2>2. Run + Metadaten konfigurieren</h2>
     <form method="post" action="/admin/pipeline/start" id="run-form">
       <div class="form-group">
@@ -138,7 +143,7 @@
       <div class="form-group">
         <label for="house">Renderer Theme / House Override (optional)</label>
         <select name="house" id="house" class="form-select">
-          <option value="">— Theme aus Formular verwenden —</option>
+          <option value="">&mdash; Theme aus Formular verwenden &mdash;</option>
           {% for t in themes %}
           <option value="{{ t }}">{{ t }}</option>
           {% endfor %}
@@ -158,7 +163,9 @@
           <label for="skip_post_process">Audio Post-Processing ueberspringen</label>
         </div>
       </div>
-      <button type="submit" class="btn btn-primary" style="width:100%;margin-top:8px">Pipeline starten</button>
+      <button type="submit" class="btn btn-primary" style="width:100%;margin-top:8px">
+        <i data-lucide="play" style="width:16px;height:16px"></i> Pipeline starten
+      </button>
     </form>
   </section>
 </div>
@@ -184,7 +191,7 @@
     const input = zone.querySelector('input[type="file"]');
     const type = zone.dataset.type;
 
-    zone.addEventListener('click', () => input.click());
+    zone.addEventListener('click', e => { if (e.target.tagName !== 'INPUT') input.click(); });
     zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
     zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
     zone.addEventListener('drop', e => {
@@ -200,7 +207,7 @@
     if (!slug) { alert('Bitte zuerst einen Slug eingeben'); return; }
 
     const status = document.getElementById('status-' + type);
-    status.textContent = 'Wird hochgeladen...';
+    status.textContent = 'Wird hochgeladen\u2026';
     status.className = 'upload-status';
 
     const fd = new FormData();

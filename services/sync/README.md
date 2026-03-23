@@ -52,7 +52,7 @@ Danach:
 
 ### Update
 ```bash
-bash /opt/whispers/WhispersoftheSevenKingdoms/services/sync/deploy/update.sh
+bash /opt/whispers/WhispersoftheSevenKingdoms/agent-sync-service/deploy/update.sh
 ```
 Pullt den neuesten Stand, installiert Dependencies und startet den Service neu.
 
