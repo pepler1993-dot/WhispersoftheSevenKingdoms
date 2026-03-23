@@ -34,6 +34,7 @@ from app.pipeline_runner import (
     get_output_path,
     list_available_assets,
     list_available_themes,
+    list_library_tracks_for_pipeline,
     start_run_async,
     trigger_upload,
 )
@@ -629,12 +630,14 @@ def admin_pipeline_new(request: Request, slug: str | None = Query(default=None))
     assets = list_available_assets()
     themes = list_available_themes()
     houses = _load_house_templates()
+    library_tracks = list_library_tracks_for_pipeline(db)
     return templates.TemplateResponse('pipeline_new.html', {
         'request': request,
         'page': 'pipeline',
         'assets': assets,
         'themes': themes,
         'houses': houses,
+        'library_tracks': library_tracks,
         'prefill_slug': (slug or '').strip().lower(),
     })
 
@@ -751,7 +754,7 @@ def admin_pipeline_start(
         thumbnail_avoid=thumbnail_avoid,
     )
 
-    metadata_path = PIPELINE_DIR / 'upload' / 'metadata' / f'{slug}.json'
+    metadata_path = PIPELINE_DIR / 'data' / 'upload' / 'metadata' / f'{slug}.json'
     metadata_path.parent.mkdir(parents=True, exist_ok=True)
     metadata_path.write_text(json.dumps(metadata, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
 

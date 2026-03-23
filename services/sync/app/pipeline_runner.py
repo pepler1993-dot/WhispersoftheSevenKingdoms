@@ -211,6 +211,31 @@ def list_available_assets() -> dict[str, list[str]]:
     return result
 
 
+def list_library_tracks_for_pipeline(db: AgentSyncDB) -> list[dict[str, Any]]:
+    """Tracks under data/upload/songs (e.g. Kaggle downloads) for pipeline picker."""
+    song_names = sorted(list_available_assets()['songs'])
+    jobs = db.list_audio_jobs(limit=400)
+    title_by_slug: dict[str, str] = {}
+    for j in jobs:
+        if j.get('status') != 'complete' or not j.get('slug'):
+            continue
+        s = j['slug']
+        if s not in title_by_slug:
+            t = (j.get('title') or '').strip()
+            title_by_slug[s] = t if t else s
+
+    out: list[dict[str, Any]] = []
+    for name in song_names:
+        stem = Path(name).stem
+        title = title_by_slug.get(stem)
+        if title and title != stem:
+            label = f'{title} · {name}'
+        else:
+            label = name
+        out.append({'stem': stem, 'filename': name, 'label': label})
+    return out
+
+
 def list_available_themes() -> list[str]:
     bg_dir = PIPELINE_DIR / 'data' / 'assets' / 'backgrounds'
     if not bg_dir.exists():

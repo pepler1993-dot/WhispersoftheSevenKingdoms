@@ -44,15 +44,15 @@ fi
 echo "[3/6] Setting up Python venv..."
 python3 -m venv .venv
 .venv/bin/pip install --quiet --upgrade pip
-.venv/bin/pip install --quiet -r agent-sync-service/requirements.txt
+.venv/bin/pip install --quiet -r services/sync/requirements.txt
 
 # 4. Ensure data directory
 echo "[4/6] Ensuring data directory..."
-mkdir -p agent-sync-service/data
+mkdir -p services/sync/data
 
 # 5. Install systemd service
 echo "[5/6] Installing systemd service..."
-cp agent-sync-service/deploy/agent-sync.service /etc/systemd/system/${SERVICE_NAME}.service
+cp services/sync/deploy/agent-sync.service /etc/systemd/system/${SERVICE_NAME}.service
 systemctl daemon-reload
 systemctl enable ${SERVICE_NAME}
 
@@ -69,7 +69,7 @@ echo "    Change GITHUB_WEBHOOK_SECRET=CHANGE_ME"
 echo "    Then: systemctl daemon-reload"
 echo ""
 echo " 2. If migrating from old install, copy DB:"
-echo "    cp /old/path/data/agent_sync.db ${INSTALL_DIR}/agent-sync-service/data/"
+echo "    cp /old/path/data/agent_sync.db ${INSTALL_DIR}/services/sync/data/"
 echo ""
 echo " 3. Start the service:"
 echo "    systemctl start ${SERVICE_NAME}"

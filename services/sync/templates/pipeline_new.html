@@ -69,7 +69,19 @@
     <!-- Assets Info -->
     <div class="assets-mini" id="assets-info">
       <div class="assets-mini-label">Assets für <span id="assets-slug">—</span>:</div>
-      <div id="assets-status">Prüfe...</div>
+      <div id="assets-status">—</div>
+    </div>
+
+    <!-- Existing audio (Kaggle / data/upload/songs) -->
+    <div class="form-group library-audio-row">
+      <label for="library-audio">Vorhandenes Audio</label>
+      <select id="library-audio" class="form-select" autocomplete="off">
+        <option value="">— Aus Bibliothek wählen (z. B. Kaggle) oder unten hochladen —</option>
+        {% for t in library_tracks %}
+        <option value="{{ t.stem }}">{{ t.label }}</option>
+        {% endfor %}
+      </select>
+      <p class="step-desc">Liegt unter <code>data/upload/songs/</code>. Wähle einen Track → Slug wird auf den Dateinamen (ohne Endung) gesetzt; Upload entfällt.</p>
     </div>
 
     <!-- Upload Zone (compact) -->
@@ -310,6 +322,7 @@
 }
 
 .step-desc { color: var(--text-secondary); font-size: 0.85rem; }
+.library-audio-row code { font-size: 0.78em; color: var(--muted); }
 
 @media (max-width: 768px) {
   .house-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -331,8 +344,67 @@
   const moodContainer = document.getElementById('mood-tags');
   const moodInput = document.getElementById('mood-input');
   const titleInput = document.getElementById('title');
+  const librarySelect = document.getElementById('library-audio');
   let selectedHouse = null;
   let selectedMoods = new Set();
+
+  function slugMatchesSongFile(slug, songFilename) {
+    const base = songFilename.replace(/\.(mp3|wav|ogg)$/i, '');
+    return base.toLowerCase() === (slug || '').toLowerCase();
+  }
+
+  function setAudioStatusFromLibrary(stem) {
+    const status = document.getElementById('status-audio');
+    if (!stem) return;
+    status.textContent = '✅ Bibliothek';
+    status.className = 'upload-status success';
+    document.getElementById('assets-status').textContent = 'Audio: ' + stem + ' (Bibliothek)';
+  }
+
+  function refreshAudioForCurrentSlug() {
+    const slug = document.getElementById('slug').value;
+    const status = document.getElementById('status-audio');
+    const assetsLine = document.getElementById('assets-status');
+    if (!slug) {
+      assetsLine.textContent = '—';
+      return;
+    }
+    fetch('/admin/pipeline/assets')
+      .then(r => r.json())
+      .then(assets => {
+        const songs = assets.songs || [];
+        const hit = songs.find(fn => slugMatchesSongFile(slug, fn));
+        if (hit) {
+          if (librarySelect && librarySelect.value !== slug) {
+            const opt = [...librarySelect.options].find(o => o.value === slug);
+            if (opt) librarySelect.value = slug;
+          }
+          status.textContent = '✅';
+          status.className = 'upload-status success';
+          assetsLine.textContent = 'Audio: ' + hit;
+        } else {
+          if (!librarySelect || librarySelect.value !== slug) {
+            status.textContent = '';
+            status.className = 'upload-status';
+          }
+          assetsLine.textContent = 'Kein Audio für diesen Slug — wähle Bibliothek oder lade hoch';
+        }
+      })
+      .catch(() => { assetsLine.textContent = 'Assets-Check fehlgeschlagen'; });
+  }
+
+  if (librarySelect) {
+    librarySelect.addEventListener('change', () => {
+      const stem = librarySelect.value;
+      if (!stem) {
+        refreshAudioForCurrentSlug();
+        return;
+      }
+      document.getElementById('slug').value = stem;
+      document.getElementById('assets-slug').textContent = stem;
+      setAudioStatusFromLibrary(stem);
+    });
+  }
 
   // house card click
   cards.forEach(card => {
@@ -398,6 +470,12 @@
       configPanel.style.display = 'block';
       configPanel.style.borderTopColor = house.color || 'var(--gold)';
       setTimeout(() => configPanel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+
+      if (librarySelect) {
+        const opt = [...librarySelect.options].find(o => o.value === slugify(house.display_name));
+        librarySelect.value = opt ? opt.value : '';
+      }
+      refreshAudioForCurrentSlug();
     });
   });
 
@@ -467,6 +545,8 @@
       .then(({ ok, data }) => {
         status.textContent = ok ? '✅' : '❌';
         status.className = 'upload-status ' + (ok ? 'success' : 'error');
+        if (ok && librarySelect) librarySelect.value = '';
+        if (ok) refreshAudioForCurrentSlug();
       })
       .catch(() => { status.textContent = '❌'; status.className = 'upload-status error'; });
   }

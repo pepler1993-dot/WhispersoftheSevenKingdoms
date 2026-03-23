@@ -4,7 +4,7 @@ set -euo pipefail
 # ── Whispers Agent Sync Service – Quick Update ──
 #
 # Usage:
-#   bash /opt/whispers/WhispersoftheSevenKingdoms/agent-sync-service/deploy/update.sh
+#   bash /opt/whispers/WhispersoftheSevenKingdoms/services/sync/deploy/update.sh
 #   bash update.sh feature-branch    # update to specific branch
 #
 # What it does:
@@ -30,7 +30,7 @@ echo "Pulling latest..."
 git pull
 
 echo "Updating dependencies..."
-.venv/bin/pip install --quiet -r agent-sync-service/requirements.txt
+.venv/bin/pip install --quiet -r services/sync/requirements.txt
 
 echo "Restarting service..."
 systemctl restart ${SERVICE_NAME}
