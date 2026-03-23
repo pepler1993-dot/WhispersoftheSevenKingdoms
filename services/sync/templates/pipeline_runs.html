@@ -1,52 +1,155 @@
 {% extends 'base.html' %}
-{% block title %}Pipeline Runs{% endblock %}
+{% block title %}Videos{% endblock %}
 {% block content %}
 <div class="status-header">
   <div>
-    <h1>Pipeline Runs</h1>
-    <div class="page-subtitle">Alle bisherigen Rendering-Durchlaeufe</div>
+    <h1>Meine Videos</h1>
+    <div class="page-subtitle">Übersicht aller Videos und Pipeline-Runs</div>
   </div>
   <a href="/admin/pipeline/new" class="btn btn-primary">
-    <i data-lucide="plus" style="width:16px;height:16px"></i> Neuer Run
+    <i data-lucide="plus" style="width:18px;height:18px"></i> Neues Video
   </a>
 </div>
 
-<section class="panel">
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Run</th>
-          <th>Slug</th>
-          <th>Titel</th>
-          <th>Status</th>
-          <th>Erstellt</th>
-          <th>Dauer</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for run in runs %}
-        <tr>
-          <td><a href="/admin/pipeline/run/{{ run.run_id }}">{{ run.run_id[:8] }}&hellip;</a></td>
-          <td>{{ run.slug }}</td>
-          <td>{{ run.title or '&mdash;' }}</td>
-          <td><span class="badge {{ run.status }}">{{ run.status }}</span></td>
-          <td>{{ run.created_at[:16] if run.created_at else '&mdash;' }}</td>
-          <td>
-            {% if run.started_at and run.finished_at %}
-              {{ run.finished_at[:19] }}
-            {% elif run.started_at %}
-              <span style="color:var(--gold)">laufend&hellip;</span>
-            {% else %}
-              &mdash;
-            {% endif %}
-          </td>
-        </tr>
-        {% else %}
-        <tr><td colspan="6" class="empty-state">Noch keine Runs vorhanden</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</section>
+{% if runs %}
+<div class="video-grid">
+  {% for run in runs %}
+  <a href="/admin/pipeline/run/{{ run.run_id }}" class="video-card" style="--card-accent: {% if run.status == 'running' %}var(--good){% elif run.status == 'failed' %}var(--bad){% elif run.status == 'uploaded' %}var(--blue){% else %}var(--gold){% endif %}">
+    <div class="video-card-top">
+      <span class="badge {{ run.status }}">{{ run.status }}</span>
+      <span class="video-card-id">{{ run.run_id[:8] }}</span>
+    </div>
+    <div class="video-card-title">{{ run.title or run.slug }}</div>
+    <div class="video-card-slug">{{ run.slug }}</div>
+    {% if run.status == 'running' %}
+    <div class="video-card-progress">
+      <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+      <span class="progress-label">Läuft...</span>
+    </div>
+    {% endif %}
+    <div class="video-card-meta">
+      <span>{{ run.created_at[:16] if run.created_at else '—' }}</span>
+      {% if run.config and run.config.get('loop_hours') %}
+      <span>{{ run.config.loop_hours }}h</span>
+      {% endif %}
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state-box">
+  <div class="empty-state-icon">🎬</div>
+  <div class="empty-state-text">Noch keine Videos erstellt</div>
+  <a href="/admin/pipeline/new" class="btn btn-primary" style="margin-top:16px">
+    <i data-lucide="plus" style="width:16px;height:16px"></i> Erstes Video erstellen
+  </a>
+</div>
+{% endif %}
+
+<style>
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.video-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--card-accent, var(--gold));
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: all 0.25s var(--ease);
+  display: block;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.video-card:hover {
+  border-color: var(--card-accent, var(--gold));
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  color: var(--text);
+}
+
+.video-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.video-card-id {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.video-card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+
+.video-card-slug {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.video-card-progress {
+  margin: 12px 0;
+}
+
+.progress-bar {
+  height: 6px;
+  background: var(--surface);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--good), #3dd4bc);
+  border-radius: 3px;
+  animation: progress-pulse 2s ease-in-out infinite;
+}
+
+@keyframes progress-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.progress-label {
+  font-size: 0.7rem;
+  color: var(--good);
+  font-weight: 600;
+}
+
+.video-card-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--muted);
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.empty-state-box {
+  text-align: center;
+  padding: 60px 20px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.empty-state-icon { font-size: 3rem; margin-bottom: 12px; }
+.empty-state-text { color: var(--muted); font-size: 1rem; }
+
+@media (max-width: 768px) {
+  .video-grid { grid-template-columns: 1fr; }
+}
+</style>
 {% endblock %}

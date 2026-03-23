@@ -1,0 +1,282 @@
+{
+  "winterfell": {
+    "display_name": "Winterfell",
+    "sigil": "🐺",
+    "house": "Stark",
+    "color": "#82B4DC",
+    "bg_color": "#0F192D",
+    "moods": ["calm", "cold", "melancholic", "peaceful", "meditative"],
+    "default_mood": ["calm", "cold"],
+    "title_template": "Whispers of Winterfell – {duration} Deep Sleep & Relaxation Music",
+    "defaults": {
+      "minutes": 42,
+      "loop_hours": 3,
+      "crossfade": 8,
+      "audio_preset": "ambient",
+      "music_tempo": "slow",
+      "music_energy": "low"
+    },
+    "music_brief": {
+      "style": "nordic ambient sleep music",
+      "influences": ["frozen northern castle", "soft piano", "cold wind textures", "gentle strings", "crackling fireplace"],
+      "avoid": ["drums", "vocals", "sudden changes", "harsh percussion"]
+    },
+    "thumbnail_brief": {
+      "scene": "Winterfell at night in cold blue moonlight",
+      "style": "dark, atmospheric, cold tones",
+      "elements": ["snow", "castle silhouette", "soft fog", "moonlight"]
+    },
+    "prompts": [
+      "Gentle ambient sleep music inspired by a frozen northern castle. Soft piano melody over subtle string pads with cold wind textures. Calm, meditative, melancholic. No vocals, no drums.",
+      "Soft piano melody, winter night, gentle wind, peaceful and warm, medieval castle, sleep music, no vocals, no drums.",
+      "Gentle harp and piano, quiet snowfall, ancient castle ambience, calm and serene, deep sleep, no vocals, no drums.",
+      "Slow peaceful piano, crackling fireplace, warm medieval hall, soothing lullaby, sleep ambient, no vocals, no drums.",
+      "Soft strings and piano, cold winter night, gentle and melancholic, peaceful castle, sleep music, no vocals, no drums."
+    ]
+  },
+  "kings_landing": {
+    "display_name": "King's Landing",
+    "sigil": "👑",
+    "house": "Lannister",
+    "color": "#DCA850",
+    "bg_color": "#2D190A",
+    "moods": ["warm", "regal", "peaceful", "elegant", "calm"],
+    "default_mood": ["warm", "regal"],
+    "title_template": "Echoes of King's Landing – {duration} Deep Sleep & Relaxation Music",
+    "defaults": {
+      "minutes": 42,
+      "loop_hours": 3,
+      "crossfade": 8,
+      "audio_preset": "ambient",
+      "music_tempo": "slow",
+      "music_energy": "low"
+    },
+    "music_brief": {
+      "style": "warm ambient sleep music with mediterranean influences",
+      "influences": ["royal palace", "candlelit halls", "warm evening breeze", "gentle harp", "soft strings"],
+      "avoid": ["drums", "vocals", "sudden changes"]
+    },
+    "thumbnail_brief": {
+      "scene": "King's Landing palace at golden sunset",
+      "style": "warm, golden tones, regal",
+      "elements": ["golden light", "palace towers", "warm haze", "evening sky"]
+    },
+    "prompts": [
+      "Warm ambient music, gentle harp and soft strings, mediterranean night, royal palace, calm and regal, sleep music, no vocals.",
+      "Soft lute melody, warm evening breeze, ancient city ambience, peaceful and elegant, no vocals.",
+      "Gentle strings and flute, candlelit palace, warm night atmosphere, soothing royal music, no vocals.",
+      "Quiet harp melody, moonlit courtyard, warm stone walls, regal and peaceful, deep sleep, no vocals.",
+      "Soft chamber music, gentle night breeze, ancient palace, warm and calming, no vocals."
+    ]
+  },
+  "targaryen": {
+    "display_name": "Targaryen",
+    "sigil": "🐉",
+    "house": "Targaryen",
+    "color": "#C83C28",
+    "bg_color": "#280A0A",
+    "moods": ["dark", "ethereal", "mystical", "ancient", "vast"],
+    "default_mood": ["dark", "ethereal"],
+    "title_template": "Targaryen Dreams – {duration} Deep Sleep & Dark Ambient Music",
+    "defaults": {
+      "minutes": 42,
+      "loop_hours": 3,
+      "crossfade": 8,
+      "audio_preset": "dark",
+      "music_tempo": "very slow",
+      "music_energy": "low"
+    },
+    "music_brief": {
+      "style": "dark ethereal ambient, mystical sleep music",
+      "influences": ["ancient dragon lore", "deep drones", "mystical atmosphere", "soft choir pads"],
+      "avoid": ["drums", "vocals", "bright melodies", "sudden changes"]
+    },
+    "thumbnail_brief": {
+      "scene": "Dragon silhouette against a blood-red sky at night",
+      "style": "dark, dramatic, red and black tones",
+      "elements": ["dragon shadow", "fire glow", "dark clouds", "ancient ruins"]
+    },
+    "prompts": [
+      "Ethereal ambient music, mysterious and ancient, soft choir pads, dark but peaceful, deep sleep music, no vocals.",
+      "Haunting ambient, dragon inspired, deep drones, mystical atmosphere, calm and vast, no vocals.",
+      "Ethereal strings, ancient power, slow and meditative, dark ambient sleep music, no vocals.",
+      "Deep mystical pads, ancient temple atmosphere, vast and ethereal, peaceful darkness, no vocals.",
+      "Soft choir ambient, dragon flight, majestic and calm, deep sleep drone, no vocals."
+    ]
+  },
+  "the_wall": {
+    "display_name": "The Wall",
+    "sigil": "🧊",
+    "house": "Night's Watch",
+    "color": "#A0B8D0",
+    "bg_color": "#0A1420",
+    "moods": ["dark", "cold", "vast", "desolate", "meditative"],
+    "default_mood": ["dark", "cold"],
+    "title_template": "Beyond The Wall – {duration} Deep Sleep & Dark Ambient Music",
+    "defaults": {
+      "minutes": 42,
+      "loop_hours": 3,
+      "crossfade": 8,
+      "audio_preset": "dark",
+      "music_tempo": "very slow",
+      "music_energy": "minimal"
+    },
+    "music_brief": {
+      "style": "dark ambient, frozen landscape soundscape",
+      "influences": ["ice and wind", "vast emptiness", "deep drones", "distant horns", "frozen silence"],
+      "avoid": ["drums", "vocals", "bright melodies", "fast tempo"]
+    },
+    "thumbnail_brief": {
+      "scene": "The Wall towering in darkness with aurora borealis",
+      "style": "dark, icy, vast, minimal",
+      "elements": ["ice wall", "northern lights", "snow", "darkness"]
+    },
+    "prompts": [
+      "Dark ambient music, frozen wasteland, deep bass drones, howling wind, vast and desolate, sleep music, no vocals.",
+      "Icy ambient soundscape, distant horns, cold and mysterious, ancient frozen wall, deep sleep, no vocals.",
+      "Deep drones and wind textures, frozen night, vast emptiness, dark meditative ambient, no vocals.",
+      "Cold ambient pads, ice cracking, distant wolves, northern lights atmosphere, sleep music, no vocals.",
+      "Haunting wind ambient, frozen silence, deep bass, ancient ice, calm and desolate, no vocals."
+    ]
+  },
+  "highgarden": {
+    "display_name": "Highgarden",
+    "sigil": "🌹",
+    "house": "Tyrell",
+    "color": "#5CB870",
+    "bg_color": "#0A2810",
+    "moods": ["peaceful", "gentle", "warm", "light", "serene"],
+    "default_mood": ["peaceful", "gentle"],
+    "title_template": "Gardens of Highgarden – {duration} Gentle Sleep & Relaxation Music",
+    "defaults": {
+      "minutes": 42,
+      "loop_hours": 3,
+      "crossfade": 8,
+      "audio_preset": "gentle",
+      "music_tempo": "slow",
+      "music_energy": "low"
+    },
+    "music_brief": {
+      "style": "gentle pastoral ambient, garden soundscape",
+      "influences": ["blooming gardens", "birdsong", "gentle breeze", "soft flute", "flowing water"],
+      "avoid": ["drums", "vocals", "dark tones", "harsh sounds"]
+    },
+    "thumbnail_brief": {
+      "scene": "Beautiful garden at golden hour with roses",
+      "style": "warm, green, soft golden light",
+      "elements": ["roses", "garden paths", "soft sunlight", "green foliage"]
+    },
+    "prompts": [
+      "Gentle pastoral music, soft flute and harp, blooming garden, warm sunlight, peaceful and serene, sleep music, no vocals.",
+      "Light ambient with birdsong, flowing water, gentle breeze through flowers, calm and relaxing, no vocals.",
+      "Soft strings and woodwinds, garden atmosphere, warm and peaceful, gentle lullaby, no vocals.",
+      "Peaceful flute melody, roses and sunlight, calm garden ambience, soothing and light, no vocals.",
+      "Gentle harp arpeggios, warm breeze, nature sounds, tranquil garden, deep relaxation, no vocals."
+    ]
+  },
+  "dorne": {
+    "display_name": "Dorne",
+    "sigil": "☀️",
+    "house": "Martell",
+    "color": "#E8A030",
+    "bg_color": "#281A08",
+    "moods": ["warm", "exotic", "peaceful", "sandy", "mystical"],
+    "default_mood": ["warm", "exotic"],
+    "title_template": "Dornish Nights – {duration} Deep Sleep & Relaxation Music",
+    "defaults": {
+      "minutes": 42,
+      "loop_hours": 3,
+      "crossfade": 8,
+      "audio_preset": "ambient",
+      "music_tempo": "slow",
+      "music_energy": "low"
+    },
+    "music_brief": {
+      "style": "desert ambient, warm exotic sleep music",
+      "influences": ["desert night", "warm sand", "distant oud", "soft percussion shimmer", "starry sky"],
+      "avoid": ["heavy drums", "vocals", "cold tones", "sudden changes"]
+    },
+    "thumbnail_brief": {
+      "scene": "Desert palace under a starry night sky",
+      "style": "warm, sandy, exotic, orange tones",
+      "elements": ["sand dunes", "palace silhouette", "stars", "warm glow"]
+    },
+    "prompts": [
+      "Warm desert ambient, soft oud and gentle strings, starry night, peaceful oasis, exotic sleep music, no vocals.",
+      "Desert night soundscape, warm sand, distant melody, calm and exotic, deep relaxation, no vocals.",
+      "Soft exotic strings, warm breeze, ancient desert palace, peaceful and mystical, no vocals.",
+      "Gentle percussion shimmer and strings, warm night, desert tranquility, sleep ambient, no vocals.",
+      "Warm ambient pads, desert wind, soft melodic touches, exotic calm, deep sleep, no vocals."
+    ]
+  },
+  "godswood": {
+    "display_name": "Godswood",
+    "sigil": "🌳",
+    "house": "Old Gods",
+    "color": "#8B4513",
+    "bg_color": "#140A05",
+    "moods": ["meditative", "ancient", "spiritual", "peaceful", "mystical"],
+    "default_mood": ["meditative", "ancient"],
+    "title_template": "Godswood Meditation – {duration} Deep Sleep & Spiritual Music",
+    "defaults": {
+      "minutes": 42,
+      "loop_hours": 3,
+      "crossfade": 8,
+      "audio_preset": "ambient",
+      "music_tempo": "very slow",
+      "music_energy": "minimal"
+    },
+    "music_brief": {
+      "style": "spiritual meditation ambient, ancient forest soundscape",
+      "influences": ["weirwood tree", "ancient forest", "rustling leaves", "deep meditation", "spiritual drones"],
+      "avoid": ["drums", "vocals", "modern sounds", "fast tempo"]
+    },
+    "thumbnail_brief": {
+      "scene": "Ancient weirwood tree with red leaves in dark forest",
+      "style": "dark, mystical, natural, earth tones",
+      "elements": ["weirwood tree", "red leaves", "dark forest", "moss"]
+    },
+    "prompts": [
+      "Ancient forest ambient, deep meditation drones, rustling leaves, spiritual and calm, sacred tree, sleep music, no vocals.",
+      "Mystical forest soundscape, ancient wooden textures, deep and meditative, peaceful nature, no vocals.",
+      "Spiritual ambient, old gods atmosphere, gentle wind through ancient trees, deep relaxation, no vocals.",
+      "Deep meditation drones, forest night, ancient and sacred, calm and timeless, no vocals.",
+      "Gentle nature ambient, ancient grove, spiritual peace, soft wind, deep sleep meditation, no vocals."
+    ]
+  },
+  "castamere": {
+    "display_name": "Castamere",
+    "sigil": "🦁",
+    "house": "Lannister",
+    "color": "#C0392B",
+    "bg_color": "#1A0808",
+    "moods": ["dark", "melancholic", "haunting", "tragic", "somber"],
+    "default_mood": ["dark", "melancholic"],
+    "title_template": "Rains of Castamere – {duration} Deep Sleep & Melancholic Music",
+    "defaults": {
+      "minutes": 42,
+      "loop_hours": 3,
+      "crossfade": 8,
+      "audio_preset": "dark",
+      "music_tempo": "slow",
+      "music_energy": "low"
+    },
+    "music_brief": {
+      "style": "melancholic dark ambient, tragic beauty sleep music",
+      "influences": ["ruined castle", "rain", "distant cello", "echoing halls", "tragic memory"],
+      "avoid": ["fast tempo", "vocals", "bright melodies", "percussion"]
+    },
+    "thumbnail_brief": {
+      "scene": "Ruined castle in the rain at night",
+      "style": "dark, moody, rain, red accents",
+      "elements": ["ruins", "rain", "red banners", "darkness"]
+    },
+    "prompts": [
+      "Melancholic ambient, distant cello, rain sounds, ruined castle, haunting and beautiful, sleep music, no vocals.",
+      "Dark somber ambient, echoing stone halls, tragic beauty, gentle rain, deep sleep, no vocals.",
+      "Haunting strings, ancient ruins, melancholic and peaceful, soft rain textures, no vocals.",
+      "Slow cello melody, rain on stone, abandoned castle, tragic calm, deep relaxation, no vocals.",
+      "Dark ambient with gentle piano, rainy ruins, melancholic beauty, soothing sadness, no vocals."
+    ]
+  }
+}

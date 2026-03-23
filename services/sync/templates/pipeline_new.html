@@ -1,548 +1,445 @@
 {% extends 'base.html' %}
-{% block title %}Neuer Pipeline Run{% endblock %}
+{% block title %}Neues Video{% endblock %}
 {% block content %}
 <div class="page-header">
-  <h1>Neuer Pipeline Run</h1>
-  <div class="page-subtitle">Schritt für Schritt zum fertigen Video</div>
+  <h1>Neues Video erstellen</h1>
+  <div class="page-subtitle">Wähle ein Haus, passe den Titel an, drücke Go.</div>
 </div>
 
-<!-- progress bar -->
-<div class="wizard-progress">
-  <div class="wizard-step active" data-step="1"><span class="step-num">1</span><span class="step-label">Basics</span></div>
-  <div class="wizard-connector"></div>
-  <div class="wizard-step" data-step="2"><span class="step-num">2</span><span class="step-label">Assets</span></div>
-  <div class="wizard-connector"></div>
-  <div class="wizard-step" data-step="3"><span class="step-num">3</span><span class="step-label">Music</span></div>
-  <div class="wizard-connector"></div>
-  <div class="wizard-step" data-step="4"><span class="step-num">4</span><span class="step-label">Thumbnail</span></div>
-  <div class="wizard-connector"></div>
-  <div class="wizard-step" data-step="5"><span class="step-num">5</span><span class="step-label">Pipeline</span></div>
-  <div class="wizard-connector"></div>
-  <div class="wizard-step" data-step="6"><span class="step-num">6</span><span class="step-label">Start</span></div>
-</div>
-
-<form method="post" action="/admin/pipeline/start" id="run-form">
-
-<!-- Step 1: Basics -->
-<section class="wizard-page active panel panel-accent-gold" data-step="1">
-  <h2><i data-lucide="file-text" style="width:18px;height:18px"></i> Grundeinstellungen</h2>
-  <p class="step-desc">Was soll dieses Video heißen und welches Haus/Theme hat es?</p>
-
-  <div class="form-group">
-    <label for="slug">Slug <span class="required">*</span></label>
-    <input type="text" name="slug" id="slug" class="form-input" required placeholder="z.B. whispers-of-winterfell" value="{{ prefill_slug or '' }}" />
-    <div class="form-hint">Eindeutiger Name für Dateien und URLs (keine Leerzeichen, Kleinbuchstaben)</div>
-  </div>
-  <div class="form-group">
-    <label for="title">Video-Titel <span class="required">*</span></label>
-    <input type="text" name="title" id="title" class="form-input" required placeholder="Whispers of Winterfell – 3 Hours Deep Sleep Music" />
-    <div class="form-hint">Der Titel der auf YouTube angezeigt wird</div>
-  </div>
-  <div class="form-group">
-    <label for="theme">Theme / Haus <span class="required">*</span></label>
-    <input type="text" name="theme" id="theme" class="form-input" required placeholder="Winterfell" />
-    <div class="form-hint">Das GoT-Haus oder der Ort – bestimmt Farben, Font und Stimmung</div>
-  </div>
-  <div class="form-group">
-    <label for="mood">Stimmung</label>
-    <textarea name="mood" id="mood" class="form-input" rows="2" placeholder="calm, cold, melancholic"></textarea>
-    <div class="form-hint">Komma-getrennte Stimmungen die den gesamten Track beschreiben</div>
-  </div>
-  <div class="form-group">
-    <label for="tags">YouTube-Tags</label>
-    <textarea name="tags" id="tags" class="form-input" rows="2" placeholder="sleep music, fantasy ambient, winterfell, game of thrones"></textarea>
-    <div class="form-hint">Zusätzliche Tags für YouTube SEO</div>
-  </div>
-
-  <div class="wizard-nav">
-    <div></div>
-    <button type="button" class="btn btn-primary wizard-next">Weiter <i data-lucide="arrow-right" style="width:16px;height:16px"></i></button>
+<!-- House Selection -->
+<section class="panel">
+  <h2>Wähle ein Haus</h2>
+  <div class="house-grid">
+    {% for key, house in houses.items() %}
+    <div class="house-card" data-house="{{ key }}" style="--house-color: {{ house.color }}; --house-bg: {{ house.bg_color }}">
+      <div class="house-sigil">{{ house.sigil }}</div>
+      <div class="house-name">{{ house.display_name }}</div>
+      <div class="house-subtitle">{{ house.house }}</div>
+    </div>
+    {% endfor %}
   </div>
 </section>
 
-<!-- Step 2: Assets -->
-<section class="wizard-page panel panel-accent-blue" data-step="2">
-  <h2><i data-lucide="upload" style="width:18px;height:18px"></i> Assets hochladen</h2>
-  <p class="step-desc">Audio-Datei und optionales Thumbnail hochladen. Das Audio kannst du auch vorher im Audio Generator erzeugen.</p>
+<!-- Config (shown after house selection) -->
+<section class="panel panel-config" id="config-panel" style="display:none">
+  <form method="post" action="/admin/pipeline/start" id="run-form">
 
-  <div class="upload-zone" id="zone-audio" data-type="audio">
-    <div class="upload-icon"><i data-lucide="music" style="width:32px;height:32px"></i></div>
-    <div class="upload-label">Audio-Datei (.mp3, .wav, .ogg)</div>
-    <div class="upload-hint">Klicken oder Datei hierher ziehen</div>
-    <input type="file" accept=".mp3,.wav,.ogg" />
-    <div class="upload-status" id="status-audio"></div>
-  </div>
-
-  <div class="upload-zone" id="zone-thumbnail" data-type="thumbnail">
-    <div class="upload-icon"><i data-lucide="image" style="width:32px;height:32px"></i></div>
-    <div class="upload-label">Thumbnail (.jpg, .png, .webp) &mdash; optional</div>
-    <div class="upload-hint">Wird automatisch generiert wenn keins hochgeladen wird</div>
-    <input type="file" accept=".jpg,.jpeg,.png,.webp" />
-    <div class="upload-status" id="status-thumbnail"></div>
-  </div>
-
-  <div class="assets-section">
-    <h3>Bereits vorhandene Assets</h3>
-    <div class="assets-list">
-      <div><strong>Songs:</strong> {{ assets.songs | join(', ') or 'keine' }}</div>
-      <div><strong>Thumbnails:</strong> {{ assets.thumbnails | join(', ') or 'keine' }}</div>
-      <div><strong>Metadata:</strong> {{ assets.metadata | join(', ') or 'wird automatisch erzeugt' }}</div>
+    <div class="config-header">
+      <div>
+        <h2 id="config-title-label">Konfiguration</h2>
+        <p class="step-desc" id="config-house-info"></p>
+      </div>
     </div>
-  </div>
 
-  <div style="margin-top:14px">
-    <a href="/admin/audio" class="btn btn-secondary btn-sm"><i data-lucide="sparkles" style="width:14px;height:14px"></i> Zum Audio Generator</a>
-  </div>
-
-  <div class="wizard-nav">
-    <button type="button" class="btn btn-secondary wizard-prev"><i data-lucide="arrow-left" style="width:16px;height:16px"></i> Zurück</button>
-    <button type="button" class="btn btn-primary wizard-next">Weiter <i data-lucide="arrow-right" style="width:16px;height:16px"></i></button>
-  </div>
-</section>
-
-<!-- Step 3: Music Brief -->
-<section class="wizard-page panel panel-accent-purple" data-step="3">
-  <h2><i data-lucide="music-2" style="width:18px;height:18px"></i> Music Brief</h2>
-  <p class="step-desc">Beschreibe den musikalischen Stil. Diese Infos fließen in die YouTube-Beschreibung und helfen bei der Prompt-Generierung.</p>
-
-  <div class="form-group">
-    <label for="music_style">Musik-Stil</label>
-    <input type="text" name="music_style" id="music_style" class="form-input" placeholder="fantasy sleep music, ambient piano" />
-    <div class="form-hint">Genre und Stil in wenigen Worten</div>
-  </div>
-  <div class="form-group">
-    <label for="music_influences">Einflüsse &amp; Atmosphäre</label>
-    <textarea name="music_influences" id="music_influences" class="form-input" rows="3" placeholder="cold north, ancient castle, night wind, soft strings, crackling fire"></textarea>
-    <div class="form-hint">Was soll man beim Hören fühlen/sehen? Komma-getrennt.</div>
-  </div>
-  <div class="grid two">
+    <!-- Mood Tags -->
     <div class="form-group">
-      <label for="music_tempo">Tempo</label>
-      <select name="music_tempo" id="music_tempo" class="form-select">
-        <option value="">— wählen —</option>
-        <option value="very slow">Sehr langsam (~40-50 BPM)</option>
-        <option value="slow" selected>Langsam (~50-70 BPM)</option>
-        <option value="moderate">Moderat (~70-100 BPM)</option>
-        <option value="fast">Schnell (~100+ BPM)</option>
-      </select>
+      <label>Stimmung</label>
+      <div class="mood-tags" id="mood-tags"></div>
+      <input type="hidden" name="mood" id="mood-input" />
     </div>
+
+    <!-- Title -->
     <div class="form-group">
-      <label for="music_energy">Energie</label>
-      <select name="music_energy" id="music_energy" class="form-select">
-        <option value="">— wählen —</option>
-        <option value="minimal">Minimal</option>
-        <option value="low" selected>Niedrig</option>
-        <option value="medium">Mittel</option>
-        <option value="high">Hoch</option>
-      </select>
+      <label for="title">Video-Titel</label>
+      <input type="text" name="title" id="title" class="form-input" required placeholder="Wird automatisch generiert" />
     </div>
-  </div>
-  <div class="form-group">
-    <label for="music_avoid">Vermeiden</label>
-    <textarea name="music_avoid" id="music_avoid" class="form-input" rows="2" placeholder="epic battle drums, harsh percussion, vocals, sudden changes"></textarea>
-    <div class="form-hint">Was soll im Track NICHT vorkommen?</div>
-  </div>
-  <div class="form-group">
-    <label for="notes">Interne Notizen</label>
-    <textarea name="notes" id="notes" class="form-input" rows="2" placeholder="Notizen nur für uns, nicht öffentlich sichtbar"></textarea>
-  </div>
 
-  <div class="wizard-nav">
-    <button type="button" class="btn btn-secondary wizard-prev"><i data-lucide="arrow-left" style="width:16px;height:16px"></i> Zurück</button>
-    <button type="button" class="btn btn-primary wizard-next">Weiter <i data-lucide="arrow-right" style="width:16px;height:16px"></i></button>
-  </div>
-</section>
+    <!-- Hidden defaults (filled by JS from house template) -->
+    <input type="hidden" name="slug" id="slug" />
+    <input type="hidden" name="theme" id="theme" />
+    <input type="hidden" name="minutes" id="minutes" value="42" />
+    <input type="hidden" name="loop_hours" id="loop_hours" value="3" />
+    <input type="hidden" name="crossfade" id="crossfade" value="8" />
+    <input type="hidden" name="audio_preset" id="audio_preset" value="ambient" />
+    <input type="hidden" name="music_style" id="music_style" />
+    <input type="hidden" name="music_influences" id="music_influences" />
+    <input type="hidden" name="music_tempo" id="music_tempo" value="slow" />
+    <input type="hidden" name="music_energy" id="music_energy" value="low" />
+    <input type="hidden" name="music_avoid" id="music_avoid" />
+    <input type="hidden" name="thumbnail_scene" id="thumbnail_scene" />
+    <input type="hidden" name="thumbnail_elements" id="thumbnail_elements" />
+    <input type="hidden" name="thumbnail_text" id="thumbnail_text" />
+    <input type="hidden" name="thumbnail_style" id="thumbnail_style" />
+    <input type="hidden" name="thumbnail_avoid" id="thumbnail_avoid" />
+    <input type="hidden" name="notes" id="notes" />
+    <input type="hidden" name="tags" id="tags" />
+    <input type="hidden" name="duration_hint" id="duration_hint" value="long-form sleep track" />
+    <input type="hidden" name="house" id="house" />
 
-<!-- Step 4: Thumbnail Brief -->
-<section class="wizard-page panel panel-accent-teal" data-step="4">
-  <h2><i data-lucide="palette" style="width:18px;height:18px"></i> Thumbnail Brief</h2>
-  <p class="step-desc">Wie soll das Thumbnail aussehen? Falls du eins hochgeladen hast, werden diese Infos für die YouTube-Beschreibung verwendet.</p>
-
-  <div class="form-group">
-    <label for="thumbnail_scene">Szene</label>
-    <input type="text" name="thumbnail_scene" id="thumbnail_scene" class="form-input" placeholder="Winterfell at night in cold blue moonlight" />
-    <div class="form-hint">Hauptmotiv des Thumbnails in einem Satz</div>
-  </div>
-  <div class="form-group">
-    <label for="thumbnail_elements">Elemente</label>
-    <textarea name="thumbnail_elements" id="thumbnail_elements" class="form-input" rows="2" placeholder="snow, castle silhouette, soft fog, northern lights"></textarea>
-    <div class="form-hint">Einzelne visuelle Elemente, komma-getrennt</div>
-  </div>
-  <div class="form-group">
-    <label for="thumbnail_text">Text auf dem Thumbnail</label>
-    <input type="text" name="thumbnail_text" id="thumbnail_text" class="form-input" placeholder="Leer = Video-Titel wird verwendet" />
-    <div class="form-hint">Kurzer Text der auf dem Thumbnail erscheint</div>
-  </div>
-  <div class="form-group">
-    <label for="thumbnail_style">Stil</label>
-    <input type="text" name="thumbnail_style" id="thumbnail_style" class="form-input" placeholder="dark, clean, readable, atmospheric" />
-  </div>
-  <div class="form-group">
-    <label for="thumbnail_avoid">Vermeiden</label>
-    <textarea name="thumbnail_avoid" id="thumbnail_avoid" class="form-input" rows="2" placeholder="busy collage, tiny text, oversaturated colors"></textarea>
-  </div>
-
-  <div class="wizard-nav">
-    <button type="button" class="btn btn-secondary wizard-prev"><i data-lucide="arrow-left" style="width:16px;height:16px"></i> Zurück</button>
-    <button type="button" class="btn btn-primary wizard-next">Weiter <i data-lucide="arrow-right" style="width:16px;height:16px"></i></button>
-  </div>
-</section>
-
-<!-- Step 5: Pipeline Settings -->
-<section class="wizard-page panel panel-accent-crimson" data-step="5">
-  <h2><i data-lucide="settings" style="width:18px;height:18px"></i> Pipeline-Einstellungen</h2>
-  <p class="step-desc">Technische Einstellungen für Audio-Processing und Video-Rendering.</p>
-
-  <div class="grid two">
-    <div class="form-group">
-      <label for="minutes">Ziel-Dauer (Minuten)</label>
-      <input type="number" name="minutes" id="minutes" class="form-input" value="42" min="1" max="720" />
-      <div class="form-hint">Dauer des generierten Audio</div>
+    <!-- Assets Info -->
+    <div class="assets-mini" id="assets-info">
+      <div class="assets-mini-label">Assets für <span id="assets-slug">—</span>:</div>
+      <div id="assets-status">Prüfe...</div>
     </div>
-    <div class="form-group">
-      <label for="loop_hours">Loop auf Stunden</label>
-      <input type="number" name="loop_hours" id="loop_hours" class="form-input" value="3" min="0" max="12" step="0.5" />
-      <div class="form-hint">0 = kein Loop. Standard: 3h für Sleep Music</div>
-    </div>
-  </div>
-  <div class="grid two">
-    <div class="form-group">
-      <label for="crossfade">Crossfade (Sekunden)</label>
-      <input type="number" name="crossfade" id="crossfade" class="form-input" value="8" min="0" max="30" />
-      <div class="form-hint">Überblendung zwischen Loops</div>
-    </div>
-    <div class="form-group">
-      <label for="audio_preset">Audio-Preset</label>
-      <select name="audio_preset" id="audio_preset" class="form-select">
-        <option value="ambient" selected>🌙 Ambient – warm, räumlich</option>
-        <option value="dark">🖤 Dark – tief, basslastig</option>
-        <option value="gentle">☁️ Gentle – leicht, sanft</option>
-        <option value="raw">🔇 Raw – nur Normalisierung</option>
-      </select>
-      <div class="form-hint">Post-Processing Preset (EQ, Reverb, Normalisierung)</div>
-    </div>
-  </div>
-  <div class="form-group">
-    <label for="house">Renderer Theme Override</label>
-    <select name="house" id="house" class="form-select">
-      <option value="">&mdash; Theme aus Schritt 1 verwenden &mdash;</option>
-      {% for t in themes %}
-      <option value="{{ t }}">{{ t }}</option>
-      {% endfor %}
-    </select>
-    <div class="form-hint">Nur nötig wenn du ein anderes visuelles Theme als das Haus verwenden willst</div>
-  </div>
-  <div class="form-group">
-    <label for="duration_hint">Duration Hint (YouTube)</label>
-    <input type="text" name="duration_hint" id="duration_hint" class="form-input" value="long-form sleep track" />
-  </div>
 
-  <div class="wizard-options">
-    <div class="form-check">
-      <input type="checkbox" name="animated" id="animated" value="true" />
-      <label for="animated">🎬 Animiertes Video (Partikel + Kamera-Bewegung)</label>
+    <!-- Upload Zone (compact) -->
+    <div class="upload-compact" id="upload-section">
+      <div class="upload-zone-mini" id="zone-audio" data-type="audio">
+        <i data-lucide="music" style="width:20px;height:20px"></i>
+        <span>Audio hochladen</span>
+        <input type="file" accept=".mp3,.wav,.ogg" />
+        <div class="upload-status" id="status-audio"></div>
+      </div>
+      <div class="upload-zone-mini" id="zone-thumbnail" data-type="thumbnail">
+        <i data-lucide="image" style="width:20px;height:20px"></i>
+        <span>Thumbnail (optional)</span>
+        <input type="file" accept=".jpg,.jpeg,.png,.webp" />
+        <div class="upload-status" id="status-thumbnail"></div>
+      </div>
     </div>
-    <div class="form-check">
-      <input type="checkbox" name="public" id="public" value="true" />
-      <label for="public">🌍 Öffentlich auf YouTube hochladen</label>
-    </div>
-    <div class="form-check">
-      <input type="checkbox" name="skip_post_process" id="skip_post_process" value="true" />
-      <label for="skip_post_process">⏭️ Audio Post-Processing überspringen</label>
-    </div>
-  </div>
 
-  <div class="wizard-nav">
-    <button type="button" class="btn btn-secondary wizard-prev"><i data-lucide="arrow-left" style="width:16px;height:16px"></i> Zurück</button>
-    <button type="button" class="btn btn-primary wizard-next">Weiter zur Übersicht <i data-lucide="arrow-right" style="width:16px;height:16px"></i></button>
-  </div>
-</section>
+    <!-- Advanced Settings (collapsed) -->
+    <details class="advanced-toggle" id="advanced">
+      <summary>⚙️ Erweiterte Einstellungen</summary>
+      <div class="advanced-content">
+        <div class="grid two">
+          <div class="form-group">
+            <label for="adv-minutes">Dauer (Minuten)</label>
+            <input type="number" id="adv-minutes" class="form-input" value="42" min="1" max="720" />
+          </div>
+          <div class="form-group">
+            <label for="adv-loop">Loop (Stunden)</label>
+            <input type="number" id="adv-loop" class="form-input" value="3" min="0" max="12" step="0.5" />
+          </div>
+        </div>
+        <div class="grid two">
+          <div class="form-group">
+            <label for="adv-crossfade">Crossfade (Sek)</label>
+            <input type="number" id="adv-crossfade" class="form-input" value="8" min="0" max="30" />
+          </div>
+          <div class="form-group">
+            <label for="adv-preset">Audio-Preset</label>
+            <select id="adv-preset" class="form-select">
+              <option value="ambient">🌙 Ambient</option>
+              <option value="dark">🖤 Dark</option>
+              <option value="gentle">☁️ Gentle</option>
+              <option value="raw">🔇 Raw</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="adv-music-style">Musik-Stil</label>
+          <input type="text" id="adv-music-style" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label for="adv-influences">Einflüsse</label>
+          <textarea id="adv-influences" class="form-input" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="adv-thumb-scene">Thumbnail-Szene</label>
+          <input type="text" id="adv-thumb-scene" class="form-input" />
+        </div>
+        <div class="form-group">
+          <div class="form-check">
+            <input type="checkbox" name="animated" id="animated" value="true" />
+            <label for="animated">🎬 Animiertes Video</label>
+          </div>
+          <div class="form-check">
+            <input type="checkbox" name="public" id="public" value="true" />
+            <label for="public">🌍 Öffentlich auf YouTube</label>
+          </div>
+          <div class="form-check">
+            <input type="checkbox" name="skip_post_process" id="skip_post_process" value="true" />
+            <label for="skip_post_process">⏭️ Post-Processing überspringen</label>
+          </div>
+        </div>
+      </div>
+    </details>
 
-<!-- Step 6: Review & Start -->
-<section class="wizard-page panel panel-accent-gold" data-step="6">
-  <h2><i data-lucide="check-circle" style="width:18px;height:18px"></i> Zusammenfassung</h2>
-  <p class="step-desc">Überprüfe deine Einstellungen und starte die Pipeline.</p>
-
-  <div class="review-grid">
-    <div class="review-section">
-      <h3>Basics</h3>
-      <div class="review-item"><span class="review-label">Slug</span><span class="review-value" id="rv-slug">—</span></div>
-      <div class="review-item"><span class="review-label">Titel</span><span class="review-value" id="rv-title">—</span></div>
-      <div class="review-item"><span class="review-label">Theme</span><span class="review-value" id="rv-theme">—</span></div>
-      <div class="review-item"><span class="review-label">Stimmung</span><span class="review-value" id="rv-mood">—</span></div>
-    </div>
-    <div class="review-section">
-      <h3>Music Brief</h3>
-      <div class="review-item"><span class="review-label">Stil</span><span class="review-value" id="rv-music-style">—</span></div>
-      <div class="review-item"><span class="review-label">Tempo</span><span class="review-value" id="rv-music-tempo">—</span></div>
-      <div class="review-item"><span class="review-label">Energie</span><span class="review-value" id="rv-music-energy">—</span></div>
-    </div>
-    <div class="review-section">
-      <h3>Pipeline</h3>
-      <div class="review-item"><span class="review-label">Dauer</span><span class="review-value" id="rv-minutes">—</span></div>
-      <div class="review-item"><span class="review-label">Loop</span><span class="review-value" id="rv-loop">—</span></div>
-      <div class="review-item"><span class="review-label">Crossfade</span><span class="review-value" id="rv-crossfade">—</span></div>
-      <div class="review-item"><span class="review-label">Preset</span><span class="review-value" id="rv-preset">—</span></div>
-      <div class="review-item"><span class="review-label">Optionen</span><span class="review-value" id="rv-options">—</span></div>
-    </div>
-  </div>
-
-  <div class="wizard-nav" style="margin-top:24px">
-    <button type="button" class="btn btn-secondary wizard-prev"><i data-lucide="arrow-left" style="width:16px;height:16px"></i> Zurück</button>
-    <button type="submit" class="btn btn-primary btn-launch">
-      <i data-lucide="rocket" style="width:18px;height:18px"></i> Pipeline starten!
+    <button type="submit" class="btn btn-primary btn-launch" id="launch-btn">
+      <i data-lucide="rocket" style="width:20px;height:20px"></i> Video erstellen
     </button>
-  </div>
+  </form>
 </section>
-
-</form>
 
 <style>
-/* wizard progress */
-.wizard-progress {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  margin-bottom: 28px;
-  padding: 0 10px;
-  flex-wrap: wrap;
+/* house grid */
+.house-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
 }
-.wizard-step {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  border-radius: 999px;
+.house-card {
+  background: var(--house-bg, var(--panel));
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px 16px;
+  text-align: center;
   cursor: pointer;
-  transition: all 0.25s var(--ease);
-  background: var(--panel);
-  border: 1px solid var(--line);
+  transition: all 0.3s var(--ease);
+  position: relative;
+  overflow: hidden;
 }
-.wizard-step:hover { border-color: var(--line-light); }
-.wizard-step.active {
-  background: var(--gold-glow);
-  border-color: var(--gold);
+.house-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--house-color, var(--gold));
+  opacity: 0.5;
+  transition: opacity 0.3s var(--ease);
 }
-.wizard-step.done {
-  background: rgba(52,211,153,0.1);
-  border-color: var(--good);
+.house-card:hover {
+  border-color: var(--house-color, var(--gold));
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
 }
-.wizard-step.done .step-num {
-  background: var(--good);
+.house-card:hover::before { opacity: 1; }
+.house-card.selected {
+  border-color: var(--house-color, var(--gold));
+  box-shadow: 0 0 20px color-mix(in srgb, var(--house-color) 30%, transparent),
+              0 8px 30px rgba(0,0,0,0.3);
 }
-.step-num {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--line);
-  color: var(--text);
-  font-size: 0.7rem;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.25s var(--ease);
-}
-.wizard-step.active .step-num {
-  background: var(--gold);
-  color: #0a0e18;
-}
-.step-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--muted);
-  transition: color 0.25s var(--ease);
-}
-.wizard-step.active .step-label { color: var(--gold); }
-.wizard-step.done .step-label { color: var(--good); }
-.wizard-connector {
-  width: 24px;
-  height: 2px;
-  background: var(--line);
-  flex-shrink: 0;
-}
+.house-card.selected::before { opacity: 1; height: 4px; }
+.house-sigil { font-size: 2.2rem; margin-bottom: 8px; }
+.house-name { font-size: 0.9rem; font-weight: 700; color: var(--text); }
+.house-subtitle { font-size: 0.7rem; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
 
-/* wizard pages */
-.wizard-page { display: none; }
-.wizard-page.active { display: block; animation: fadeSlide 0.3s var(--ease); }
+/* config panel */
+.panel-config {
+  animation: fadeSlide 0.35s var(--ease);
+  border-top: 3px solid var(--gold);
+}
 @keyframes fadeSlide {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
 }
+.config-header { margin-bottom: 20px; }
+.config-header .step-desc { margin-top: 4px; }
 
-/* step description */
-.step-desc {
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-  margin-bottom: 20px;
-  line-height: 1.5;
-}
-
-/* form hints */
-.form-hint {
-  color: var(--muted);
-  font-size: 0.7rem;
-  margin-top: 4px;
-  line-height: 1.4;
-}
-
-.required { color: var(--bad); }
-
-/* wizard nav */
-.wizard-nav {
+/* mood tags */
+.mood-tags {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 28px;
-  padding-top: 20px;
-  border-top: 1px solid var(--line);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.mood-tag {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+  user-select: none;
+}
+.mood-tag:hover { border-color: var(--text-secondary); color: var(--text); }
+.mood-tag.active {
+  background: var(--gold-glow);
+  border-color: var(--gold);
+  color: var(--gold);
 }
 
-/* wizard options */
-.wizard-options {
+/* assets mini bar */
+.assets-mini {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
-  padding: 16px;
-  margin-top: 16px;
+  padding: 12px 16px;
+  margin: 16px 0;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
+.assets-mini-label { color: var(--muted); white-space: nowrap; }
+#assets-status { color: var(--text-secondary); }
 
-/* launch button */
+/* compact upload */
+.upload-compact {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.upload-zone-mini {
+  border: 2px dashed var(--line);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.upload-zone-mini:hover { border-color: var(--gold); background: var(--gold-glow); }
+.upload-zone-mini input[type="file"] { display: none; }
+.upload-zone-mini .upload-status { font-size: 0.75rem; }
+.upload-zone-mini .upload-status.success { color: var(--good); }
+.upload-zone-mini .upload-status.error { color: var(--bad); }
+
+/* advanced */
+.advanced-toggle {
+  margin: 16px 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.advanced-toggle summary {
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--surface);
+  list-style: none;
+  transition: color 0.2s var(--ease);
+}
+.advanced-toggle summary:hover { color: var(--text); }
+.advanced-toggle summary::-webkit-details-marker { display: none; }
+.advanced-content { padding: 16px; }
+
+/* launch */
 .btn-launch {
-  font-size: 1rem;
-  padding: 14px 32px;
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 16px 32px;
+  margin-top: 8px;
   box-shadow: 0 4px 24px rgba(212,168,69,0.3);
 }
 .btn-launch:hover {
-  box-shadow: 0 6px 32px rgba(212,168,69,0.4);
+  box-shadow: 0 6px 32px rgba(212,168,69,0.45);
   transform: translateY(-2px);
 }
 
-/* review grid */
-.review-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
-}
-.review-section {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  padding: 16px;
-}
-.review-section h3 {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--gold);
-  margin-bottom: 12px;
-}
-.review-section h3::before { display: none; }
-.review-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 6px 0;
-  border-bottom: 1px solid var(--line);
-  font-size: 0.82rem;
-}
-.review-item:last-child { border-bottom: none; }
-.review-label { color: var(--muted); }
-.review-value { color: var(--text); font-weight: 600; text-align: right; max-width: 60%; word-break: break-word; }
+.step-desc { color: var(--text-secondary); font-size: 0.85rem; }
 
 @media (max-width: 768px) {
-  .wizard-progress { gap: 4px; }
-  .step-label { display: none; }
-  .wizard-connector { width: 12px; }
-  .wizard-step { padding: 6px 10px; }
-  .review-grid { grid-template-columns: 1fr; }
+  .house-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .house-card { padding: 18px 12px; }
+  .house-sigil { font-size: 1.8rem; }
+  .upload-compact { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 400px) {
+  .house-grid { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 
 <script>
 (function() {
-  const pages = document.querySelectorAll('.wizard-page');
-  const steps = document.querySelectorAll('.wizard-step');
-  let current = 1;
-  const total = pages.length;
+  const houses = {{ houses | tojson }};
+  const cards = document.querySelectorAll('.house-card');
+  const configPanel = document.getElementById('config-panel');
+  const moodContainer = document.getElementById('mood-tags');
+  const moodInput = document.getElementById('mood-input');
+  const titleInput = document.getElementById('title');
+  let selectedHouse = null;
+  let selectedMoods = new Set();
 
-  function showStep(n) {
-    if (n < 1 || n > total) return;
+  // house card click
+  cards.forEach(card => {
+    card.addEventListener('click', () => {
+      const key = card.dataset.house;
+      const house = houses[key];
+      if (!house) return;
 
-    // validate required fields before advancing
-    if (n > current) {
-      const currentPage = document.querySelector(`.wizard-page[data-step="${current}"]`);
-      const requiredFields = currentPage.querySelectorAll('[required]');
-      let valid = true;
-      requiredFields.forEach(f => {
-        if (!f.value.trim()) { f.focus(); f.classList.add('invalid'); valid = false; }
-        else { f.classList.remove('invalid'); }
-      });
-      if (!valid) return;
-    }
+      // deselect previous
+      cards.forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedHouse = key;
 
-    current = n;
-    pages.forEach(p => p.classList.toggle('active', +p.dataset.step === n));
-    steps.forEach(s => {
-      const sn = +s.dataset.step;
-      s.classList.toggle('active', sn === n);
-      s.classList.toggle('done', sn < n);
+      // fill hidden fields
+      document.getElementById('slug').value = slugify(house.display_name);
+      document.getElementById('theme').value = house.display_name;
+      document.getElementById('house').value = key;
+      document.getElementById('assets-slug').textContent = slugify(house.display_name);
+
+      // defaults
+      const d = house.defaults || {};
+      document.getElementById('minutes').value = d.minutes || 42;
+      document.getElementById('loop_hours').value = d.loop_hours || 3;
+      document.getElementById('crossfade').value = d.crossfade || 8;
+      document.getElementById('audio_preset').value = d.audio_preset || 'ambient';
+      document.getElementById('music_tempo').value = d.music_tempo || 'slow';
+      document.getElementById('music_energy').value = d.music_energy || 'low';
+
+      // advanced fields
+      document.getElementById('adv-minutes').value = d.minutes || 42;
+      document.getElementById('adv-loop').value = d.loop_hours || 3;
+      document.getElementById('adv-crossfade').value = d.crossfade || 8;
+      document.getElementById('adv-preset').value = d.audio_preset || 'ambient';
+
+      // music brief
+      const mb = house.music_brief || {};
+      document.getElementById('music_style').value = mb.style || '';
+      document.getElementById('adv-music-style').value = mb.style || '';
+      document.getElementById('music_influences').value = (mb.influences || []).join(', ');
+      document.getElementById('adv-influences').value = (mb.influences || []).join(', ');
+      document.getElementById('music_avoid').value = (mb.avoid || []).join(', ');
+
+      // thumbnail brief
+      const tb = house.thumbnail_brief || {};
+      document.getElementById('thumbnail_scene').value = tb.scene || '';
+      document.getElementById('adv-thumb-scene').value = tb.scene || '';
+      document.getElementById('thumbnail_style').value = tb.style || '';
+      document.getElementById('thumbnail_elements').value = (tb.elements || []).join(', ');
+
+      // title
+      const duration = (d.loop_hours || 3) + ' Hours';
+      titleInput.value = (house.title_template || '').replace('{duration}', duration) || house.display_name;
+      document.getElementById('thumbnail_text').value = titleInput.value;
+
+      // moods
+      buildMoodTags(house.moods || [], house.default_mood || []);
+
+      // config header
+      document.getElementById('config-title-label').innerHTML = house.sigil + ' ' + house.display_name;
+      document.getElementById('config-house-info').textContent = 'House ' + house.house + ' – alle Einstellungen vorausgefüllt';
+
+      // show config
+      configPanel.style.display = 'block';
+      configPanel.style.borderTopColor = house.color || 'var(--gold)';
+      setTimeout(() => configPanel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
     });
-
-    // populate review on step 6
-    if (n === 6) populateReview();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  // click on progress step
-  steps.forEach(s => s.addEventListener('click', () => {
-    const target = +s.dataset.step;
-    if (target <= current || target === current + 1) showStep(target);
-  }));
-
-  // next/prev buttons
-  document.querySelectorAll('.wizard-next').forEach(btn =>
-    btn.addEventListener('click', () => showStep(current + 1))
-  );
-  document.querySelectorAll('.wizard-prev').forEach(btn =>
-    btn.addEventListener('click', () => showStep(current - 1))
-  );
-
-  // auto-fill thumbnail text from title
-  const title = document.getElementById('title');
-  const thumbText = document.getElementById('thumbnail_text');
-  title.addEventListener('input', function() {
-    if (!thumbText.dataset.manual && !thumbText.value.trim()) thumbText.value = this.value;
   });
-  thumbText.addEventListener('input', function() { this.dataset.manual = '1'; });
 
-  // populate review
-  function populateReview() {
-    const v = id => (document.getElementById(id) || {}).value || '—';
-    const sel = id => { const el = document.getElementById(id); return el ? el.options[el.selectedIndex].text : '—'; };
-
-    document.getElementById('rv-slug').textContent = v('slug');
-    document.getElementById('rv-title').textContent = v('title');
-    document.getElementById('rv-theme').textContent = v('theme');
-    document.getElementById('rv-mood').textContent = v('mood') || '—';
-    document.getElementById('rv-music-style').textContent = v('music_style') || '—';
-    document.getElementById('rv-music-tempo').textContent = sel('music_tempo');
-    document.getElementById('rv-music-energy').textContent = sel('music_energy');
-    document.getElementById('rv-minutes').textContent = v('minutes') + ' Min';
-    document.getElementById('rv-loop').textContent = v('loop_hours') === '0' ? 'Kein Loop' : v('loop_hours') + 'h';
-    document.getElementById('rv-crossfade').textContent = v('crossfade') + 's';
-    document.getElementById('rv-preset').textContent = sel('audio_preset');
-
-    const opts = [];
-    if (document.getElementById('animated').checked) opts.push('Animiert');
-    if (document.getElementById('public').checked) opts.push('Öffentlich');
-    if (document.getElementById('skip_post_process').checked) opts.push('Kein Post-Processing');
-    document.getElementById('rv-options').textContent = opts.length ? opts.join(', ') : 'Standard';
+  function slugify(text) {
+    return text.toLowerCase()
+      .replace(/['']/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
   }
+
+  function buildMoodTags(moods, defaults) {
+    selectedMoods = new Set(defaults);
+    moodContainer.innerHTML = '';
+    const allMoods = [...new Set([...moods, 'festive', 'epic', 'dreamy', 'warm', 'dark', 'ancient'])];
+    allMoods.forEach(mood => {
+      const tag = document.createElement('span');
+      tag.className = 'mood-tag' + (selectedMoods.has(mood) ? ' active' : '');
+      tag.textContent = mood;
+      tag.addEventListener('click', () => {
+        if (selectedMoods.has(mood)) { selectedMoods.delete(mood); tag.classList.remove('active'); }
+        else { selectedMoods.add(mood); tag.classList.add('active'); }
+        moodInput.value = [...selectedMoods].join(', ');
+      });
+      moodContainer.appendChild(tag);
+    });
+    moodInput.value = [...selectedMoods].join(', ');
+  }
+
+  // sync advanced → hidden
+  document.getElementById('adv-minutes').addEventListener('input', function() { document.getElementById('minutes').value = this.value; });
+  document.getElementById('adv-loop').addEventListener('input', function() { document.getElementById('loop_hours').value = this.value; });
+  document.getElementById('adv-crossfade').addEventListener('input', function() { document.getElementById('crossfade').value = this.value; });
+  document.getElementById('adv-preset').addEventListener('change', function() { document.getElementById('audio_preset').value = this.value; });
+  document.getElementById('adv-music-style').addEventListener('input', function() { document.getElementById('music_style').value = this.value; });
+  document.getElementById('adv-influences').addEventListener('input', function() { document.getElementById('music_influences').value = this.value; });
+  document.getElementById('adv-thumb-scene').addEventListener('input', function() { document.getElementById('thumbnail_scene').value = this.value; });
+
+  // title → thumbnail text sync
+  titleInput.addEventListener('input', function() { document.getElementById('thumbnail_text').value = this.value; });
 
   // file upload
-  const slug = document.getElementById('slug');
-  document.querySelectorAll('.upload-zone').forEach(zone => {
+  document.querySelectorAll('.upload-zone-mini').forEach(zone => {
     const input = zone.querySelector('input[type="file"]');
     const type = zone.dataset.type;
     zone.addEventListener('click', e => { if (e.target.tagName !== 'INPUT') input.click(); });
@@ -556,10 +453,10 @@
   });
 
   function uploadFile(file, type) {
-    const s = slug.value.trim();
-    if (!s) { alert('Bitte zuerst einen Slug eingeben (Schritt 1)'); return; }
+    const s = document.getElementById('slug').value;
+    if (!s) { alert('Bitte zuerst ein Haus wählen'); return; }
     const status = document.getElementById('status-' + type);
-    status.textContent = 'Wird hochgeladen\u2026';
+    status.textContent = 'Uploading...';
     status.className = 'upload-status';
     const fd = new FormData();
     fd.append('asset_type', type);
@@ -568,16 +465,23 @@
     fetch('/admin/pipeline/upload-asset', { method: 'POST', body: fd })
       .then(r => r.json().then(d => ({ ok: r.ok, data: d })))
       .then(({ ok, data }) => {
-        status.textContent = ok ? '\u2705 ' + data.path : 'Fehler: ' + (data.detail || 'Unbekannt');
+        status.textContent = ok ? '✅' : '❌';
         status.className = 'upload-status ' + (ok ? 'success' : 'error');
       })
-      .catch(() => { status.textContent = 'Upload fehlgeschlagen'; status.className = 'upload-status error'; });
+      .catch(() => { status.textContent = '❌'; status.className = 'upload-status error'; });
   }
 
-  // invalid field style
-  const style = document.createElement('style');
-  style.textContent = '.form-input.invalid, .form-select.invalid { border-color: var(--bad); box-shadow: 0 0 0 3px rgba(248,113,113,0.15); }';
-  document.head.appendChild(style);
+  {% if prefill_slug %}
+  // auto-select house from prefill slug
+  const prefill = '{{ prefill_slug }}';
+  for (const [key, house] of Object.entries(houses)) {
+    if (slugify(house.display_name) === prefill) {
+      const card = document.querySelector(`[data-house="${key}"]`);
+      if (card) card.click();
+      break;
+    }
+  }
+  {% endif %}
 })();
 </script>
 {% endblock %}

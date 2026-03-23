@@ -40,6 +40,29 @@ from app.pipeline_runner import (
 from app.store import AgentSyncDB
 
 
+HOUSE_TEMPLATES_PATH = Path(__file__).resolve().parent.parent / 'data' / 'house_templates.json'
+
+
+def _load_house_templates() -> dict[str, Any]:
+    if not HOUSE_TEMPLATES_PATH.exists():
+        return {}
+    try:
+        return json.loads(HOUSE_TEMPLATES_PATH.read_text(encoding='utf-8'))
+    except Exception:
+        return {}
+
+
+def _get_house_template(name: str) -> dict[str, Any] | None:
+    tpl = _load_house_templates()
+    key = name.strip().lower().replace("'", "'").replace(' ', '_')
+    if key in tpl:
+        return tpl[key]
+    for k, v in tpl.items():
+        if v.get('display_name', '').lower() == name.strip().lower():
+            return v
+    return None
+
+
 class ClaimRequest(BaseModel):
     agent_id: str = Field(min_length=1, max_length=128)
     lease_seconds: int = Field(default=DEFAULT_LEASE_SECONDS, ge=30, le=3600)
@@ -501,23 +524,36 @@ def _build_song_metadata(
 @app.get('/admin/pipeline', response_class=HTMLResponse)
 def admin_pipeline(request: Request):
     runs = db.list_runs(limit=100)
+    houses = _load_house_templates()
     return templates.TemplateResponse('pipeline_runs.html', {
         'request': request,
         'page': 'pipeline',
         'runs': runs,
+        'houses': houses,
     })
 
 
 @app.get('/admin/pipeline/new', response_class=HTMLResponse)
-def admin_pipeline_new(request: Request):
+def admin_pipeline_new(request: Request, slug: str | None = Query(default=None)):
     assets = list_available_assets()
     themes = list_available_themes()
+    houses = _load_house_templates()
     return templates.TemplateResponse('pipeline_new.html', {
         'request': request,
         'page': 'pipeline',
         'assets': assets,
         'themes': themes,
+        'houses': houses,
+        'prefill_slug': (slug or '').strip().lower(),
     })
+
+
+@app.get('/admin/api/house/{name}')
+def api_house_template(name: str):
+    tpl = _get_house_template(name)
+    if not tpl:
+        raise HTTPException(status_code=404, detail='House template not found')
+    return tpl
 
 
 @app.post('/admin/pipeline/upload-asset')
