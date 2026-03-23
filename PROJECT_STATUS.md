@@ -13,9 +13,9 @@ Haus wählen → Audio generieren (Kaggle) → Thumbnail → Video → Metadaten
 ## 👥 Team
 | Wer | Rolle | Modell |
 |---|---|---|
-| Smith | Publishing, Metadaten, Upload, Reviews, Code | Claude Opus 4 |
-| Pako | Video-Rendering, Pipeline, Kaggle-Integration | (wird neu konfiguriert) |
-| Jarvis | Dokumentation | Step-3.5-Flash |
+| Smith | Publishing, Reviews, DB-Robustheit, Code | Claude Opus 4 |
+| Pako | UI/Produktlogik, GPU-Worker-Begleitung, Reviews | (wird neu konfiguriert) |
+| Jarvis | Dokumentation / Diátaxis-Struktur | Step-3.5-Flash |
 | Iwan | Projektleitung | Mensch |
 | Kevin (@Kpepz189) | Infrastruktur, Proxmox, Server | Mensch |
 | Eddi (@xDisslike) | Sync-Service, Koordination, OpenClaw | Mensch |
@@ -60,11 +60,11 @@ Haus wählen → Audio generieren (Kaggle) → Thumbnail → Video → Metadaten
 ## 🔶 Nächste Schritte
 
 ### JETZT
-1. **GPU-Worker priorisieren** – VM 104 steht, Debian ist installiert, GPU im Gast sichtbar; jetzt `nvidia-smi` sauber zum Laufen bringen
+1. **GPU-Worker priorisieren** – Pako begleitet Kevin jetzt direkt bei VM 104 / Treiber / `nvidia-smi`
 2. **Lokalen Audio-Worker evaluieren** – danach Python-Umgebung + Modellstack + erster Mini-Test
 3. **Audio-Strategie finalisieren** – Kaggle nicht mehr als Fundament betrachten; lokaler Worker zuerst, Colab als Übergangspfad mitdenken
-4. **UI-Feinschliff auf echter Nutzung** – neue Overview/Create/Audio/Operations-Struktur ist live, jetzt Asset-/Fehlermeldungen, Mobile und Microcopy weiter härten
-5. **Dokumentation/Betrieb** – Versionierung konsequent weiterführen, PROJECT_STATUS + Setup-/Deploy-Doku aktuell halten
+4. **Dokumentation parallel aufbauen** – Jarvis übernimmt Diátaxis-Struktur (Tutorial / How-to / Reference / Explanation)
+5. **DB-Robustheit** – Smith bearbeitet WAL / Recovery / Persistenz / Backup-Themen
 
 ### SPÄTER
 - Providerfähiges Audio Lab (Local Worker / Colab / evtl. API)

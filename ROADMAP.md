@@ -141,6 +141,7 @@ Die **UI ist deutlich reifer**, aber der **kritische nächste Hebel** ist jetzt 
 - [ ] Versionierung konsequent bei Dashboard-Änderungen durchziehen
 - [ ] Fehlerbehandlung für Assets / Jobs / Uploads weiter verbessern
 - [ ] SSH-Tunnel stabilisieren (Cloudflare Tunnel evaluieren)
+- [ ] Diátaxis-Doku aufbauen (wird an Jarvis übergeben)
 
 ### Ergebnis
 - Neue Agenten oder Menschen können schneller übernehmen
@@ -153,7 +154,8 @@ Die **UI ist deutlich reifer**, aber der **kritische nächste Hebel** ist jetzt 
 1. **GPU-Worker fixen** bis `nvidia-smi` läuft
 2. **lokalen Mini-Test** mit dem finalistischen Modell-Stack machen
 3. **Audio-Strategie schriftlich festzurren**
-4. Danach erst weitere größere UI-/Produktlogik-Runden
+4. **Diátaxis-Doku parallel aufbauen** (durch Jarvis übernommen)
+5. Danach erst weitere größere UI-/Produktlogik-Runden
 
 ### Für die Audio-Seite
 - Wenn lokaler Worker läuft: darauf fokussieren
@@ -182,6 +184,11 @@ Erst muss die Audio-Erzeugung auf stabile Beine.
   - lokaler GPU-Worker zuerst
   - Audio-Strategie dann finalisieren
   - UI danach mit echtem Nutzungsfeedback weiter polieren
+
+### Rollenwechsel 23.03. spätabends
+- **Kevin** verschiebt den GPU-Worker nicht „wann anders“, sondern wird ab jetzt direkt von **Pako** bei der Einrichtung begleitet.
+- **Jarvis** übernimmt stattdessen Pakos verbleibende Doku-/Strukturaufgaben.
+- **Smith** bleibt auf DB-/Robustheits-Themen.
 
 ---
 
