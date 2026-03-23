@@ -72,32 +72,28 @@
       <div id="assets-status">—</div>
     </div>
 
-    <!-- Existing audio (Kaggle / data/upload/songs) -->
+    <!-- Audio aus Bibliothek (Kaggle / data/upload/songs) -->
     <div class="form-group library-audio-row">
-      <label for="library-audio">Vorhandenes Audio</label>
+      <label for="library-audio">🎵 Audio Track</label>
       <select id="library-audio" class="form-select" autocomplete="off">
-        <option value="">— Aus Bibliothek wählen (z. B. Kaggle) oder unten hochladen —</option>
+        <option value="">— Audio aus Bibliothek wählen —</option>
         {% for t in library_tracks %}
         <option value="{{ t.stem }}">{{ t.label }}</option>
         {% endfor %}
       </select>
-      <p class="step-desc">Liegt unter <code>data/upload/songs/</code>. Wähle einen Track → Slug wird auf den Dateinamen (ohne Endung) gesetzt; Upload entfällt.</p>
+      <p class="step-desc">Tracks aus <code>data/upload/songs/</code> (z.B. Kaggle-Downloads)</p>
     </div>
 
-    <!-- Upload Zone (compact) -->
-    <div class="upload-compact" id="upload-section">
-      <div class="upload-zone-mini" id="zone-audio" data-type="audio">
-        <i data-lucide="music" style="width:20px;height:20px"></i>
-        <span>Audio hochladen</span>
-        <input type="file" accept=".mp3,.wav,.ogg" />
-        <div class="upload-status" id="status-audio"></div>
-      </div>
-      <div class="upload-zone-mini" id="zone-thumbnail" data-type="thumbnail">
-        <i data-lucide="image" style="width:20px;height:20px"></i>
-        <span>Thumbnail (optional)</span>
-        <input type="file" accept=".jpg,.jpeg,.png,.webp" />
-        <div class="upload-status" id="status-thumbnail"></div>
-      </div>
+    <!-- Thumbnail aus Bibliothek -->
+    <div class="form-group library-audio-row">
+      <label for="library-thumbnail">🖼️ Thumbnail</label>
+      <select id="library-thumbnail" name="thumbnail_file" class="form-select" autocomplete="off">
+        <option value="">— Auto-generieren —</option>
+        {% for t in library_thumbnails %}
+        <option value="{{ t }}">{{ t }}</option>
+        {% endfor %}
+      </select>
+      <p class="step-desc">Vorhandene Thumbnails aus <code>data/output/thumbnails/</code></p>
     </div>
 
     <!-- Advanced Settings (collapsed) -->
@@ -259,33 +255,7 @@
 .assets-mini-label { color: var(--muted); white-space: nowrap; }
 #assets-status { color: var(--text-secondary); }
 
-/* compact upload */
-.upload-compact {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-.upload-zone-mini {
-  border: 2px dashed var(--line);
-  border-radius: var(--radius-sm);
-  padding: 16px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s var(--ease);
-  color: var(--muted);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-size: 0.82rem;
-  font-weight: 600;
-}
-.upload-zone-mini:hover { border-color: var(--gold); background: var(--gold-glow); }
-.upload-zone-mini input[type="file"] { display: none; }
-.upload-zone-mini .upload-status { font-size: 0.75rem; }
-.upload-zone-mini .upload-status.success { color: var(--good); }
-.upload-zone-mini .upload-status.error { color: var(--bad); }
+/* library selects */
 
 /* advanced */
 .advanced-toggle {
@@ -516,40 +486,7 @@
   // title → thumbnail text sync
   titleInput.addEventListener('input', function() { document.getElementById('thumbnail_text').value = this.value; });
 
-  // file upload
-  document.querySelectorAll('.upload-zone-mini').forEach(zone => {
-    const input = zone.querySelector('input[type="file"]');
-    const type = zone.dataset.type;
-    zone.addEventListener('click', e => { if (e.target.tagName !== 'INPUT') input.click(); });
-    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
-    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
-    zone.addEventListener('drop', e => {
-      e.preventDefault(); zone.classList.remove('dragover');
-      if (e.dataTransfer.files.length) uploadFile(e.dataTransfer.files[0], type);
-    });
-    input.addEventListener('change', () => { if (input.files.length) uploadFile(input.files[0], type); });
-  });
-
-  function uploadFile(file, type) {
-    const s = document.getElementById('slug').value;
-    if (!s) { alert('Bitte zuerst ein Haus wählen'); return; }
-    const status = document.getElementById('status-' + type);
-    status.textContent = 'Uploading...';
-    status.className = 'upload-status';
-    const fd = new FormData();
-    fd.append('asset_type', type);
-    fd.append('slug', s);
-    fd.append('file', file);
-    fetch('/admin/pipeline/upload-asset', { method: 'POST', body: fd })
-      .then(r => r.json().then(d => ({ ok: r.ok, data: d })))
-      .then(({ ok, data }) => {
-        status.textContent = ok ? '✅' : '❌';
-        status.className = 'upload-status ' + (ok ? 'success' : 'error');
-        if (ok && librarySelect) librarySelect.value = '';
-        if (ok) refreshAudioForCurrentSlug();
-      })
-      .catch(() => { status.textContent = '❌'; status.className = 'upload-status error'; });
-  }
+  // No file upload – audio + thumbnails come from library only
 
   {% if prefill_slug %}
   // auto-select house from prefill slug

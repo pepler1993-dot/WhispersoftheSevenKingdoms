@@ -668,6 +668,9 @@ def admin_pipeline_new(request: Request, slug: str | None = Query(default=None))
     themes = list_available_themes()
     houses = _load_house_templates()
     library_tracks = list_library_tracks_for_pipeline(db)
+    # Thumbnails from data/output/thumbnails/
+    thumb_dir = Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'output' / 'thumbnails'
+    library_thumbnails = sorted(f.name for f in thumb_dir.iterdir() if f.is_file() and f.suffix in {'.jpg', '.jpeg', '.png', '.webp'}) if thumb_dir.exists() else []
     return templates.TemplateResponse('pipeline_new.html', {
         'request': request,
         'page': 'pipeline',
@@ -675,6 +678,7 @@ def admin_pipeline_new(request: Request, slug: str | None = Query(default=None))
         'themes': themes,
         'houses': houses,
         'library_tracks': library_tracks,
+        'library_thumbnails': library_thumbnails,
         'prefill_slug': (slug or '').strip().lower(),
     })
 
