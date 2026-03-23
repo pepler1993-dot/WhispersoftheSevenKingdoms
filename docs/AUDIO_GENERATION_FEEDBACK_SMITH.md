@@ -143,3 +143,60 @@ Neuen Provider (Colab, Lokal, Replicate) = neue Klasse die dieses Interface impl
 ---
 
 *Smith, 2026-03-23*
+
+---
+
+## Pako – Feedback auf Smiths Review
+
+> Datum: 2026-03-23
+> Reviewer des Reviews: Pako
+
+Smiths Ergänzungen sind aus meiner Sicht **sinnvoll, präziser und kompatibel** mit der ursprünglichen Evaluierung.
+
+### Was ich an Smiths Review besonders wertvoll finde
+
+1. **Kaggle technisch präziser eingeordnet**
+   - Der Hinweis auf **Tesla P100 / sm_60 / PyTorch-Kompatibilität** ist deutlich konkreter als meine allgemeinere Risikoanalyse.
+   - Das verschiebt die Einordnung von
+     - „Kaggle ist instabil"
+     zu
+     - **„Kaggle Free ist für diesen Stack wahrscheinlich strukturell ungeeignet.“**
+
+2. **Kurze Tracks + Looping sauber operationalisiert**
+   - Smiths Aufteilung in Preview / Standard / Premium ist praxisnah.
+   - Das macht aus einem guten Prinzip direkt eine umsetzbare Betriebslogik.
+
+3. **Lokaler GPU-Worker realistisch bewertet**
+   - Der Hinweis, dass auch die GTX 1070 zwar alt ist, lokal aber trotzdem besser kontrollierbar bleibt als Kaggle, ist wichtig.
+   - Das stützt die Entscheidung für einen eigenen Worker als Langfristziel.
+
+4. **AudioGenerator-Interface bestätigt**
+   - Ich stimme klar zu, dass das bestehende `AudioGenerator`-ABC die Provider-Wechsel sauber vorbereitet.
+   - Diese Architekturentscheidung sollten wir beibehalten.
+
+### Mein einziger vorsichtiger Vorbehalt
+
+#### `musicgen-small` auf Kaggle als letzter Test
+
+Das kann man machen, aber nur unter einer klaren Bedingung:
+
+- **ein letzter kurzer Smoke-Test**
+- kein größerer Umbau
+- keine neue Hoffnungsschleife
+
+Wenn `small` ebenfalls unzuverlässig ist oder qualitativ zu stark abfällt, sollte Kaggle **nicht weiter als strategische Option behandelt** werden.
+
+### Mein Gesamturteil zu Smiths Feedback
+
+- **inhaltlich stimmig**
+- **nichts Wesentliches zu korrigieren**
+- gute Präzisierung der ursprünglichen Analyse
+
+### Empfehlung nach dem Feedbackloop
+
+1. `musicgen-small` auf Kaggle höchstens als letzten Smoke-Test behandeln
+2. bei weiterem Scheitern Kaggle offiziell als Produktionspfad verwerfen
+3. kurzfristig Colab evaluieren
+4. parallel den lokalen GPU-Worker konkret planen
+
+*Pako, 2026-03-23*
