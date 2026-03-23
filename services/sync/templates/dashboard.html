@@ -6,6 +6,28 @@
   <div class="page-subtitle">System-Uebersicht und aktuelle Aktivitaet</div>
 </div>
 
+<div class="cards" id="server-stats">
+  <div class="card stat">
+    <div class="label">🖥️ CPU</div>
+    <div class="value" id="stat-cpu">–</div>
+    <div class="stat-bar"><div class="stat-bar-fill cpu-bar" id="bar-cpu"></div></div>
+  </div>
+  <div class="card stat">
+    <div class="label">🧠 RAM</div>
+    <div class="value" id="stat-ram">–</div>
+    <div class="stat-bar"><div class="stat-bar-fill ram-bar" id="bar-ram"></div></div>
+  </div>
+  <div class="card stat">
+    <div class="label">💾 Disk</div>
+    <div class="value" id="stat-disk">–</div>
+    <div class="stat-bar"><div class="stat-bar-fill disk-bar" id="bar-disk"></div></div>
+  </div>
+  <div class="card stat">
+    <div class="label">⚡ Load</div>
+    <div class="value" id="stat-load">–</div>
+  </div>
+</div>
+
 <div class="cards">
   {% for phase, count in summary.phase_counts.items() %}
   <div class="card stat">
@@ -14,6 +36,30 @@
   </div>
   {% endfor %}
 </div>
+
+<script>
+async function refreshStats() {
+  try {
+    const r = await fetch('/admin/api/server-stats');
+    const d = await r.json();
+    document.getElementById('stat-cpu').textContent = d.cpu.percent + '%';
+    document.getElementById('stat-ram').textContent = d.memory.used_gb.toFixed(1) + ' / ' + d.memory.total_gb.toFixed(1) + ' GB';
+    document.getElementById('stat-disk').textContent = d.disk.used_gb.toFixed(1) + ' / ' + d.disk.total_gb.toFixed(1) + ' GB';
+    document.getElementById('stat-load').textContent = d.cpu.load_1m + ' / ' + d.cpu.load_5m + ' / ' + d.cpu.load_15m;
+    document.getElementById('bar-cpu').style.width = d.cpu.percent + '%';
+    document.getElementById('bar-ram').style.width = d.memory.percent + '%';
+    document.getElementById('bar-disk').style.width = d.disk.percent + '%';
+    // Color coding
+    ['cpu','ram','disk'].forEach(k => {
+      const bar = document.getElementById('bar-' + k);
+      const val = parseFloat(bar.style.width);
+      bar.className = 'stat-bar-fill ' + k + '-bar' + (val > 90 ? ' critical' : val > 70 ? ' warning' : '');
+    });
+  } catch(e) { console.error('Stats fetch failed', e); }
+}
+refreshStats();
+setInterval(refreshStats, 5000);
+</script>
 
 <div class="grid two">
   <section class="panel panel-accent-teal">

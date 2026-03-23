@@ -3,10 +3,12 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+import shutil
 import uuid
 from datetime import datetime, timezone
 from typing import Any
 
+import psutil
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, Header, HTTPException, Query, Request, UploadFile
@@ -468,6 +470,36 @@ def admin_system(request: Request):
         'page': 'system',
         'system': system,
     })
+
+
+@app.get('/admin/api/server-stats')
+def admin_server_stats():
+    cpu_percent = psutil.cpu_percent(interval=0.5)
+    mem = psutil.virtual_memory()
+    disk = shutil.disk_usage('/')
+    load1, load5, load15 = psutil.getloadavg()
+    boot_time = datetime.fromtimestamp(psutil.boot_time(), tz=timezone.utc).isoformat()
+    return {
+        'cpu': {
+            'percent': cpu_percent,
+            'cores': psutil.cpu_count(),
+            'load_1m': round(load1, 2),
+            'load_5m': round(load5, 2),
+            'load_15m': round(load15, 2),
+        },
+        'memory': {
+            'total_gb': round(mem.total / (1024**3), 2),
+            'used_gb': round(mem.used / (1024**3), 2),
+            'percent': mem.percent,
+        },
+        'disk': {
+            'total_gb': round(disk.total / (1024**3), 2),
+            'used_gb': round(disk.used / (1024**3), 2),
+            'free_gb': round(disk.free / (1024**3), 2),
+            'percent': round(disk.used / disk.total * 100, 1),
+        },
+        'boot_time': boot_time,
+    }
 
 
 # ── audio generator ──
