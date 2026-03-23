@@ -1,5 +1,5 @@
 # PROJECT STATUS – Whispers of the Seven Kingdoms
-> Letzte Aktualisierung: 2026-03-23T14:00:01Z
+> Letzte Aktualisierung: 2026-03-23T20:00:01Z
 > Aktualisiert von: Smith
 
 **Agents: Lest diese Datei zuerst. Sie enthält alles was ihr wissen müsst.**
@@ -149,8 +149,29 @@ data/output/youtube/                ← Fertige Videos + Metadaten
 *Diese Datei wird bei jedem Meilenstein aktualisiert. Smith pflegt sie.*
 *Automatisches Backup alle 6h per Cron.*
 
-## 🕐 Letzte Commits (auto-generated 2026-03-23T14:00:01Z)
+
+## 🕐 Letzte Commits (auto-generated 2026-03-23T20:00:01Z)
 ```
+0f15590 feat(kaggle): pass model parameter through to notebook (small/medium)
+6bb4ca1 docs: add pako feedback to smith review
+e85dc10 docs: Smith's review and feedback on audio generation alternatives
+fbb21f8 docs: evaluate alternatives to kaggle audio generation
+70204c2 chore: bump version to v1.1.0 (Kaggle integration, server stats, activity timeline)
+d511da8 fix(musicgen): full device-agnostic notebook, clean CPU fallback for P100
+996e68a fix(musicgen): downgrade to torch 2.2.2+cu118 for P100, fix DEVICE reference
+52c1d04 fix(kaggle): force T4 GPU type, revert CPU fallback (caused device mismatch)
+b7a0f4a fix(musicgen): use Kaggle preinstalled PyTorch, auto CPU fallback for P100
+430d8ab feat(ui): add version badge v1.0.0 in sidebar + versioning rules in PROJECT_STATUS
+608e21b fix(musicgen): use torch 2.4.1+cu118 (available on Kaggle, supports P100)
+f528f91 fix(musicgen): install P100-compatible PyTorch (CUDA 11.8) in notebook
+8159648 fix(pipeline): fix undefined status display, add clearer phase descriptions
+6cb7756 fix: use CET (UTC+1) timestamps instead of UTC
+74e668c fix(kaggle): parse real kernel slug from push output, fix 403 on status poll
+aa5e498 feat(pipeline): live progress tracker for Kaggle audio generation
+1a458cd fix(pipeline): friendly error when audio missing, redirect back with message
+e894e42 feat(pipeline): integrate Kaggle audio generation directly into house selection
+6d446e2 feat(pipeline): remove uploads, use library-only for audio + thumbnails
+eab6b03 auto: update PROJECT_STATUS.md (2026-03-23T14:00:01Z)
 4b1efe8 feat(dashboard): activity timeline (recent pipeline runs + audio jobs)
 9410eb9 feat(dashboard): simplify load average to emoji status (😴→😊→😤→🔥→💀)
 ab1f8f1 fix(dashboard): fix gauge text rotation - rotate only rings, not text
@@ -158,12 +179,5 @@ b4e823e feat(dashboard): fancy gauge rings for server stats (CPU/RAM/Disk/Load)
 9003a4e feat(dashboard): live server stats widget (CPU, RAM, Disk, Load)
 8b8f1f3 feat(pipeline): vorhandene Audio-Tracks aus Bibliothek waehlen
 34e1076 fix(requirements): include sync service runtime deps
-5a0f2ac docs: update PROJECT_STATUS.md with current state (23.03.2026)
-c48fd0c feat(kaggle_gen): replace MVP guard with real Kaggle orchestration
-175cf98 feat(dashboard): one-click video creation UI
-a8d4867 feat(dashboard): step-by-step pipeline wizard UI
-51d172d Cherry-pick UI redesign + deploy scripts from fix/restore-pipeline-improvements
-5eb2d83 Merge PR: Dashboard metadata form (replaces JSON upload) – reviewed by Smith
-61a6b0e feat(dashboard): configure pipeline metadata in UI
 ```
 ---
