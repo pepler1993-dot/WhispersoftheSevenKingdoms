@@ -113,8 +113,44 @@ setInterval(refreshStats, 5000);
 </script>
 
 <div class="grid two">
+  <section class="panel panel-accent-crimson">
+    <h2>🎬 Letzte Pipeline Runs</h2>
+    <ul class="list">
+      {% for run in recent_runs %}
+      <li class="timeline-item">
+        <a href="/admin/pipeline/run/{{ run.run_id }}">{{ run.title or run.slug }}</a>
+        <div class="timeline-meta">
+          <span class="badge badge-{{ run.status }}">{{ run.status }}</span>
+          <span class="timeline-time">{{ run.created_at[:16] if run.created_at else '–' }}</span>
+        </div>
+      </li>
+      {% else %}
+      <li class="empty-state">Noch keine Pipeline Runs</li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="panel panel-accent-purple">
+    <h2>🎵 Letzte Audio Jobs</h2>
+    <ul class="list">
+      {% for job in recent_audio %}
+      <li class="timeline-item">
+        <a href="/admin/audio/jobs/{{ job.job_id }}">{{ job.title or job.slug }}</a>
+        <div class="timeline-meta">
+          <span class="badge badge-{{ job.status }}">{{ job.status }}</span>
+          <span class="timeline-time">{{ job.created_at[:16] if job.created_at else '–' }}</span>
+        </div>
+      </li>
+      {% else %}
+      <li class="empty-state">Noch keine Audio Jobs – starte einen im Audio Generator!</li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+
+<div class="grid two">
   <section class="panel panel-accent-teal">
-    <h2>Aktive Leases</h2>
+    <h2>📋 Aktive Leases</h2>
     <ul class="list">
       {% for task in summary.active_leases %}
       <li>
@@ -128,35 +164,11 @@ setInterval(refreshStats, 5000);
     </ul>
   </section>
 
-  <section class="panel panel-accent-crimson">
-    <h2>Stale Tasks</h2>
-    <ul class="list">
-      {% for task in summary.stale_tasks %}
-      <li><a href="/admin/tasks/{{ task.task_id }}">{{ task.task_id }}</a></li>
-      {% else %}
-      <li class="empty-state">Keine stale Tasks</li>
-      {% endfor %}
-    </ul>
-  </section>
-</div>
-
-<div class="grid two">
   <section class="panel panel-accent-blue">
-    <h2>Letzte Task-Events</h2>
+    <h2>📡 Letzte Events</h2>
     <ul class="list mono">
-      {% for event in summary.recent_task_events[:10] %}
-      <li>#{{ event.seq }} {{ event.task_id }} &mdash; {{ event.event_type }} / {{ event.action }}</li>
-      {% else %}
-      <li class="empty-state">Keine Events</li>
-      {% endfor %}
-    </ul>
-  </section>
-
-  <section class="panel panel-accent-purple">
-    <h2>Letzte GitHub Events</h2>
-    <ul class="list mono">
-      {% for event in summary.recent_github_events[:10] %}
-      <li>{{ event.delivery_id }} &mdash; {{ event.event_type }} / {{ event.action }}</li>
+      {% for event in summary.recent_task_events[:5] %}
+      <li>#{{ event.seq }} {{ event.task_id }} &mdash; {{ event.event_type }}</li>
       {% else %}
       <li class="empty-state">Keine Events</li>
       {% endfor %}

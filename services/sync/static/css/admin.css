@@ -1074,3 +1074,16 @@ pre {
 .load-status { font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 8px; }
 @media (max-width: 768px) { .server-stats-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 400px) { .server-stats-grid { grid-template-columns: 1fr 1fr; } .gauge-ring { width: 80px; height: 80px; } }
+
+/* Timeline items */
+.timeline-item { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; }
+.timeline-item a { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.timeline-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.timeline-time { font-size: 0.75rem; color: rgba(255,255,255,0.4); }
+.badge-queued { background: #6b7280; }
+.badge-pushing, .badge-running { background: #3b82f6; }
+.badge-rendered, .badge-complete { background: #10b981; }
+.badge-failed, .badge-error { background: #ef4444; }
+.badge-cancelled { background: #f59e0b; }
+.badge-uploading, .badge-downloading { background: #8b5cf6; }
+.badge-uploaded { background: #06b6d4; }

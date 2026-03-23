@@ -414,10 +414,15 @@ def get_task(task_id: str) -> dict[str, Any]:
 @app.get('/admin', response_class=HTMLResponse)
 def admin_dashboard(request: Request):
     summary = db.get_dashboard_summary()
+    # Activity timeline: recent pipeline runs + audio jobs
+    recent_runs = db.list_runs(limit=5)
+    recent_audio = db.list_audio_jobs(limit=5)
     return templates.TemplateResponse('dashboard.html', {
         'request': request,
         'page': 'dashboard',
         'summary': summary,
+        'recent_runs': recent_runs,
+        'recent_audio': recent_audio,
     })
 
 
