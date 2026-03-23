@@ -22,6 +22,19 @@
 </div>
 {% endif %}
 
+{% if job.status == 'complete' and job.output_path %}
+<div class="panel panel-accent-teal">
+  <div class="section-header-inline">
+    <h2>🎧 Audio Preview</h2>
+    <span class="section-note">Anhören bevor es in die Pipeline geht</span>
+  </div>
+  <audio controls preload="metadata" style="width:100%; margin-top:12px;">
+    <source src="/admin/audio/stream/{{ job.job_id }}" type="audio/wav">
+    Dein Browser unterstützt kein Audio-Playback.
+  </audio>
+</div>
+{% endif %}
+
 <div class="panel">
   <h2>Konfiguration</h2>
   <div class="config-grid">

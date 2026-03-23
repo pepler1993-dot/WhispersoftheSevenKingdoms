@@ -108,7 +108,7 @@
       <label>🎵 Audio Track <span class="inline-help" data-tooltip="Nimm vorhandenes Audio aus der Bibliothek oder starte einen neuen Generator-Job. Für zuverlässige Bedienung sollte am Ende genau eine Quelle klar ausgewählt sein.">ⓘ</span></label>
       <div class="audio-source-toggle">
         <button type="button" class="toggle-btn active" id="btn-library" onclick="showAudioSource('library')">📚 Aus Bibliothek</button>
-        <button type="button" class="toggle-btn" id="btn-generate" onclick="showAudioSource('generate')">🚀 Neu generieren (Kaggle)</button>
+        <button type="button" class="toggle-btn" id="btn-generate" onclick="showAudioSource('generate')">🚀 Neu generieren</button>
       </div>
 
       <!-- Option A: Existing track -->
@@ -148,7 +148,7 @@
             </div>
           </div>
           <button type="button" class="btn btn-generate" id="btn-start-gen" onclick="startKaggleGen()" disabled>
-            🎵 Track generieren auf Kaggle
+            🎵 Track generieren
           </button>
           <div id="gen-status" class="gen-status" style="display:none"></div>
           <div id="gen-progress" class="gen-progress" style="display:none">
@@ -696,7 +696,7 @@
           const jobId = loc.split('/').pop();
           document.getElementById('audio_job_id').value = jobId;
           statusEl.innerHTML = '✅ Job gestartet! <a href="' + loc + '" target="_blank">Job-Details →</a><br>Track wird nach Fertigstellung automatisch in die Bibliothek gelegt.';
-          btn.textContent = '✅ Job läuft auf Kaggle';
+          btn.textContent = '✅ Job läuft...';
           pollJobStatus(jobId);
           return;
         }
@@ -705,7 +705,7 @@
       .catch(err => {
         statusEl.innerHTML = '❌ ' + err.message;
         btn.disabled = false;
-        btn.textContent = '🎵 Track generieren auf Kaggle';
+        btn.textContent = '🎵 Track generieren';
       });
   };
 
@@ -726,8 +726,8 @@
 
     const phases = {
       'queued': { text: '📋 In der Warteschlange...', pct: 5 },
-      'pushing': { text: '📤 Wird zu Kaggle hochgeladen...', pct: 15 },
-      'running': { text: '🔥 Kaggle GPU generiert Audio... (kann bis 45 Min dauern)', pct: 40 },
+      'pushing': { text: '📤 Wird vorbereitet...', pct: 15 },
+      'running': { text: '🔥 Audio wird generiert...', pct: 40 },
       'downloading': { text: '📥 Track wird heruntergeladen...', pct: 85 },
       'complete': { text: '✅ Fertig!', pct: 100 },
       'error': { text: '❌ Fehler', pct: 0 },
@@ -792,7 +792,7 @@
             clearInterval(timerIv);
             statusEl.innerHTML = '❌ ' + (d.error_message || 'Fehler aufgetreten');
             document.getElementById('btn-start-gen').disabled = false;
-            document.getElementById('btn-start-gen').textContent = '🎵 Track generieren auf Kaggle';
+            document.getElementById('btn-start-gen').textContent = '🎵 Track generieren';
           }
         })
         .catch(() => {});

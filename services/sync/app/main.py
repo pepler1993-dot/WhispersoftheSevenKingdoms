@@ -603,6 +603,18 @@ def admin_audio_job_detail(request: Request, job_id: str):
     })
 
 
+@app.get('/admin/audio/stream/{job_id}')
+def admin_audio_stream(job_id: str):
+    """Stream audio file for in-browser playback."""
+    job = db.get_audio_job(job_id)
+    if not job or not job.get('output_path'):
+        raise HTTPException(status_code=404, detail='Audio file not found')
+    audio_path = Path(job['output_path'])
+    if not audio_path.exists():
+        raise HTTPException(status_code=404, detail='Audio file missing from disk')
+    return FileResponse(audio_path, media_type='audio/wav', filename=audio_path.name)
+
+
 @app.get('/admin/audio/jobs/{job_id}/logs')
 def admin_audio_job_logs(job_id: str, after_id: int = Query(default=0, ge=0)):
     job = db.get_audio_job(job_id)
