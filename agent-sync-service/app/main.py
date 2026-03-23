@@ -446,6 +446,58 @@ ALLOWED_THUMB_EXT = {'.jpg', '.jpeg', '.png', '.webp'}
 MAX_UPLOAD_SIZE = 500 * 1024 * 1024  # 500 MB
 
 
+def _split_text_list(value: str | None) -> list[str]:
+    if not value:
+        return []
+    normalized = value.replace('\r', '\n').replace(',', '\n')
+    return [item.strip() for item in normalized.split('\n') if item.strip()]
+
+
+def _build_song_metadata(
+    slug: str,
+    title: str,
+    theme: str,
+    mood: str | None,
+    notes: str | None,
+    duration_hint: str | None,
+    tags: str | None,
+    music_style: str | None,
+    music_influences: str | None,
+    music_tempo: str | None,
+    music_energy: str | None,
+    music_avoid: str | None,
+    thumbnail_scene: str | None,
+    thumbnail_elements: str | None,
+    thumbnail_text: str | None,
+    thumbnail_style: str | None,
+    thumbnail_avoid: str | None,
+) -> dict[str, Any]:
+    return {
+        'slug': slug,
+        'title': title,
+        'platform': 'youtube',
+        'theme': theme,
+        'mood': _split_text_list(mood) or ['calm'],
+        'notes': (notes or '').strip(),
+        'duration_hint': (duration_hint or '').strip() or 'long-form sleep track',
+        'tags': _split_text_list(tags),
+        'music_brief': {
+            'style': (music_style or '').strip(),
+            'influences': _split_text_list(music_influences),
+            'tempo': (music_tempo or '').strip(),
+            'energy': (music_energy or '').strip(),
+            'avoid': _split_text_list(music_avoid),
+        },
+        'thumbnail_brief': {
+            'scene': (thumbnail_scene or '').strip(),
+            'elements': _split_text_list(thumbnail_elements),
+            'text': (thumbnail_text or '').strip() or title,
+            'style': (thumbnail_style or '').strip(),
+            'avoid': _split_text_list(thumbnail_avoid),
+        },
+    }
+
+
 @app.get('/admin/pipeline', response_class=HTMLResponse)
 def admin_pipeline(request: Request):
     runs = db.list_runs(limit=100)
@@ -490,21 +542,13 @@ async def admin_pipeline_upload_asset(
         if ext not in ALLOWED_THUMB_EXT:
             raise HTTPException(status_code=400, detail=f'Thumbnail must be {", ".join(ALLOWED_THUMB_EXT)}')
         target = upload_dir / 'thumbnails' / f'{slug}{ext}'
-    elif asset_type == 'metadata':
-        target = upload_dir / 'metadata' / f'{slug}.json'
     else:
-        raise HTTPException(status_code=400, detail='asset_type must be audio, thumbnail, or metadata')
+        raise HTTPException(status_code=400, detail='asset_type must be audio or thumbnail')
 
     target.parent.mkdir(parents=True, exist_ok=True)
     content = await file.read()
     if len(content) > MAX_UPLOAD_SIZE:
         raise HTTPException(status_code=413, detail='File too large (max 500MB)')
-
-    if asset_type == 'metadata':
-        try:
-            json.loads(content)
-        except json.JSONDecodeError:
-            raise HTTPException(status_code=400, detail='Metadata must be valid JSON')
 
     target.write_bytes(content)
     return {'ok': True, 'path': str(target.relative_to(PIPELINE_DIR)), 'size': len(content)}
@@ -518,7 +562,8 @@ def admin_pipeline_assets():
 @app.post('/admin/pipeline/start')
 def admin_pipeline_start(
     slug: str = Form(...),
-    title: str = Form(''),
+    title: str = Form(...),
+    theme: str = Form(...),
     minutes: int = Form(42),
     loop_hours: float = Form(0),
     crossfade: int = Form(8),
@@ -527,15 +572,30 @@ def admin_pipeline_start(
     public: bool = Form(False),
     skip_post_process: bool = Form(False),
     mood: str = Form(''),
+    notes: str = Form(''),
+    duration_hint: str = Form('long-form sleep track'),
+    tags: str = Form(''),
+    music_style: str = Form(''),
+    music_influences: str = Form(''),
+    music_tempo: str = Form(''),
+    music_energy: str = Form(''),
+    music_avoid: str = Form(''),
+    thumbnail_scene: str = Form(''),
+    thumbnail_elements: str = Form(''),
+    thumbnail_text: str = Form(''),
+    thumbnail_style: str = Form(''),
+    thumbnail_avoid: str = Form(''),
     house: str = Form(''),
 ):
     slug = slug.strip().lower()
+    title = title.strip()
+    theme = theme.strip()
     if not slug:
         raise HTTPException(status_code=400, detail='Slug is required')
-
-    metadata_path = PIPELINE_DIR / 'upload' / 'metadata' / f'{slug}.json'
-    if not metadata_path.exists():
-        raise HTTPException(status_code=400, detail=f'Metadata file missing: upload/metadata/{slug}.json')
+    if not title:
+        raise HTTPException(status_code=400, detail='Title is required')
+    if not theme:
+        raise HTTPException(status_code=400, detail='Theme is required')
 
     audio_found = any(
         (PIPELINE_DIR / 'upload' / 'songs' / f'{slug}{ext}').exists()
@@ -543,6 +603,30 @@ def admin_pipeline_start(
     )
     if not audio_found:
         raise HTTPException(status_code=400, detail=f'Audio file missing: upload/songs/{slug}.*')
+
+    metadata = _build_song_metadata(
+        slug=slug,
+        title=title,
+        theme=theme,
+        mood=mood,
+        notes=notes,
+        duration_hint=duration_hint,
+        tags=tags,
+        music_style=music_style,
+        music_influences=music_influences,
+        music_tempo=music_tempo,
+        music_energy=music_energy,
+        music_avoid=music_avoid,
+        thumbnail_scene=thumbnail_scene,
+        thumbnail_elements=thumbnail_elements,
+        thumbnail_text=thumbnail_text,
+        thumbnail_style=thumbnail_style,
+        thumbnail_avoid=thumbnail_avoid,
+    )
+
+    metadata_path = PIPELINE_DIR / 'upload' / 'metadata' / f'{slug}.json'
+    metadata_path.parent.mkdir(parents=True, exist_ok=True)
+    metadata_path.write_text(json.dumps(metadata, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
 
     config = {
         'minutes': minutes,
@@ -553,18 +637,12 @@ def admin_pipeline_start(
         'public': public,
         'skip_post_process': skip_post_process,
         'mood': mood or None,
-        'house': house or None,
+        'house': house or theme or None,
+        'metadata': metadata,
     }
 
     run_id = uuid.uuid4().hex[:12]
     now = datetime.now(timezone.utc).isoformat()
-
-    if not title:
-        try:
-            meta = json.loads(metadata_path.read_text(encoding='utf-8'))
-            title = meta.get('title', slug.replace('-', ' ').title())
-        except Exception:
-            title = slug.replace('-', ' ').title()
 
     db.create_run({
         'run_id': run_id,

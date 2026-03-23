@@ -25,34 +25,95 @@
       <div class="upload-status" id="status-thumbnail"></div>
     </div>
 
-    <div class="upload-zone" id="zone-metadata" data-type="metadata" style="margin-top:12px">
-      <div class="upload-label">Metadata (.json)</div>
-      <div class="upload-hint">Klicken oder Datei hierher ziehen</div>
-      <input type="file" accept=".json" />
-      <div class="upload-status" id="status-metadata"></div>
-    </div>
-
     <div style="margin-top:14px">
       <h3 style="color:var(--muted);font-size:13px;text-transform:uppercase">Vorhandene Assets</h3>
       <div style="font-size:13px;color:var(--muted)">
         <div><strong>Songs:</strong> {{ assets.songs | join(', ') or 'keine' }}</div>
         <div><strong>Thumbnails:</strong> {{ assets.thumbnails | join(', ') or 'keine' }}</div>
-        <div><strong>Metadata:</strong> {{ assets.metadata | join(', ') or 'keine' }}</div>
+        <div><strong>Metadata:</strong> {{ assets.metadata | join(', ') or 'keine / wird beim Start automatisch erzeugt' }}</div>
       </div>
     </div>
   </section>
 
   <section class="panel">
-    <h2>2. Run konfigurieren</h2>
+    <h2>2. Run + Metadaten konfigurieren</h2>
     <form method="post" action="/admin/pipeline/start" id="run-form">
       <div class="form-group">
         <label for="slug">Slug</label>
         <input type="text" name="slug" id="slug" class="form-input" required placeholder="z.B. whispers-of-winterfell" />
       </div>
       <div class="form-group">
-        <label for="title">Titel (optional, wird aus Metadata gelesen)</label>
-        <input type="text" name="title" id="title" class="form-input" placeholder="Titel des Videos" />
+        <label for="title">Titel</label>
+        <input type="text" name="title" id="title" class="form-input" required placeholder="Whispers of Winterfell" />
       </div>
+      <div class="form-group">
+        <label for="theme">Theme</label>
+        <input type="text" name="theme" id="theme" class="form-input" required placeholder="Winterfell" />
+      </div>
+      <div class="form-group">
+        <label for="mood">Mood(s)</label>
+        <textarea name="mood" id="mood" class="form-input" rows="2" placeholder="calm, cold, melancholic"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="notes">Notes</label>
+        <textarea name="notes" id="notes" class="form-input" rows="2" placeholder="Interne Notizen für diesen Song"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="duration_hint">Duration Hint</label>
+        <input type="text" name="duration_hint" id="duration_hint" class="form-input" value="long-form sleep track" />
+      </div>
+      <div class="form-group">
+        <label for="tags">Zusätzliche Tags</label>
+        <textarea name="tags" id="tags" class="form-input" rows="2" placeholder="sleep music, fantasy ambient, winterfell"></textarea>
+      </div>
+
+      <h3 style="color:var(--muted);font-size:13px;text-transform:uppercase;margin:22px 0 10px">Music Brief</h3>
+      <div class="form-group">
+        <label for="music_style">Style</label>
+        <input type="text" name="music_style" id="music_style" class="form-input" placeholder="fantasy sleep music" />
+      </div>
+      <div class="form-group">
+        <label for="music_influences">Influences</label>
+        <textarea name="music_influences" id="music_influences" class="form-input" rows="3" placeholder="cold north, ancient castle, night wind, soft strings"></textarea>
+      </div>
+      <div class="grid two">
+        <div class="form-group">
+          <label for="music_tempo">Tempo</label>
+          <input type="text" name="music_tempo" id="music_tempo" class="form-input" placeholder="slow" />
+        </div>
+        <div class="form-group">
+          <label for="music_energy">Energy</label>
+          <input type="text" name="music_energy" id="music_energy" class="form-input" placeholder="low" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="music_avoid">Avoid</label>
+        <textarea name="music_avoid" id="music_avoid" class="form-input" rows="2" placeholder="epic battle drums, harsh percussion"></textarea>
+      </div>
+
+      <h3 style="color:var(--muted);font-size:13px;text-transform:uppercase;margin:22px 0 10px">Thumbnail Brief</h3>
+      <div class="form-group">
+        <label for="thumbnail_scene">Scene</label>
+        <input type="text" name="thumbnail_scene" id="thumbnail_scene" class="form-input" placeholder="Winterfell at night in cold blue moonlight" />
+      </div>
+      <div class="form-group">
+        <label for="thumbnail_elements">Elements</label>
+        <textarea name="thumbnail_elements" id="thumbnail_elements" class="form-input" rows="2" placeholder="snow, castle silhouette, soft fog"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="thumbnail_text">Thumbnail Text</label>
+        <input type="text" name="thumbnail_text" id="thumbnail_text" class="form-input" placeholder="leer = Titel verwenden" />
+      </div>
+      <div class="form-group">
+        <label for="thumbnail_style">Thumbnail Style</label>
+        <input type="text" name="thumbnail_style" id="thumbnail_style" class="form-input" placeholder="dark, clean, readable, atmospheric" />
+      </div>
+      <div class="form-group">
+        <label for="thumbnail_avoid">Thumbnail Avoid</label>
+        <textarea name="thumbnail_avoid" id="thumbnail_avoid" class="form-input" rows="2" placeholder="busy collage, tiny text, oversaturated colors"></textarea>
+      </div>
+
+      <h3 style="color:var(--muted);font-size:13px;text-transform:uppercase;margin:22px 0 10px">Pipeline</h3>
       <div class="form-group">
         <label for="minutes">Ziel-Dauer (Minuten)</label>
         <input type="number" name="minutes" id="minutes" class="form-input" value="42" min="1" max="720" />
@@ -75,17 +136,13 @@
         </select>
       </div>
       <div class="form-group">
-        <label for="house">Theme / House (optional)</label>
+        <label for="house">Renderer Theme / House Override (optional)</label>
         <select name="house" id="house" class="form-select">
-          <option value="">— aus Metadata —</option>
+          <option value="">— Theme aus Formular verwenden —</option>
           {% for t in themes %}
           <option value="{{ t }}">{{ t }}</option>
           {% endfor %}
         </select>
-      </div>
-      <div class="form-group">
-        <label for="mood">Mood (optional)</label>
-        <input type="text" name="mood" id="mood" class="form-input" placeholder="z.B. melancholic, epic" />
       </div>
       <div class="form-group">
         <div class="form-check">
@@ -110,11 +167,18 @@
 (function() {
   const uploadSlug = document.getElementById('upload-slug');
   const runSlug = document.getElementById('slug');
+  const title = document.getElementById('title');
+  const thumbText = document.getElementById('thumbnail_text');
 
   uploadSlug.addEventListener('input', function() {
     if (!runSlug.dataset.manual) runSlug.value = this.value;
   });
   runSlug.addEventListener('input', function() { this.dataset.manual = '1'; });
+
+  title.addEventListener('input', function() {
+    if (!thumbText.dataset.manual && !thumbText.value.trim()) thumbText.value = this.value;
+  });
+  thumbText.addEventListener('input', function() { this.dataset.manual = '1'; });
 
   document.querySelectorAll('.upload-zone').forEach(zone => {
     const input = zone.querySelector('input[type="file"]');

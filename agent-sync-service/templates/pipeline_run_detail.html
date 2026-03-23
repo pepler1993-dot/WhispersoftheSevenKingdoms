@@ -43,6 +43,10 @@
     {% if run.config.get('house') %}
     <div class="config-item"><div class="label">House/Theme</div><div class="value">{{ run.config.house }}</div></div>
     {% endif %}
+    {% if run.config.get('metadata') %}
+    <div class="config-item"><div class="label">Theme</div><div class="value">{{ run.config.metadata.theme }}</div></div>
+    <div class="config-item"><div class="label">Mood</div><div class="value">{{ run.config.metadata.mood | join(', ') }}</div></div>
+    {% endif %}
     {% endif %}
     <div class="config-item"><div class="label">Gestartet</div><div class="value" style="font-size:13px">{{ run.started_at[:19] if run.started_at else '—' }}</div></div>
     <div class="config-item"><div class="label">Beendet</div><div class="value" style="font-size:13px">{{ run.finished_at[:19] if run.finished_at else '—' }}</div></div>
