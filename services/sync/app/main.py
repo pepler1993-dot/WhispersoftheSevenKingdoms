@@ -663,7 +663,7 @@ def admin_pipeline(request: Request):
 
 
 @app.get('/admin/pipeline/new', response_class=HTMLResponse)
-def admin_pipeline_new(request: Request, slug: str | None = Query(default=None)):
+def admin_pipeline_new(request: Request, slug: str | None = Query(default=None), error: str | None = Query(default=None)):
     assets = list_available_assets()
     themes = list_available_themes()
     houses = _load_house_templates()
@@ -680,6 +680,7 @@ def admin_pipeline_new(request: Request, slug: str | None = Query(default=None))
         'library_tracks': library_tracks,
         'library_thumbnails': library_thumbnails,
         'prefill_slug': (slug or '').strip().lower(),
+        'error_message': error or '',
     })
 
 
@@ -773,7 +774,10 @@ def admin_pipeline_start(
         for ext in ALLOWED_AUDIO_EXT
     )
     if not audio_found:
-        raise HTTPException(status_code=400, detail=f'Audio file missing: upload/songs/{slug}.*')
+        return RedirectResponse(
+            url=f'/admin/pipeline/new?slug={slug}&error=Kein+Audio-Track+für+"{slug}"+gefunden.+Generiere+zuerst+einen+Track+über+"Neu+generieren+(Kaggle)".',
+            status_code=303,
+        )
 
     metadata = _build_song_metadata(
         slug=slug,

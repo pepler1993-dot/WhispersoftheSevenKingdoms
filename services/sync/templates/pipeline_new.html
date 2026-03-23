@@ -6,6 +6,10 @@
   <div class="page-subtitle">Wähle ein Haus, passe den Titel an, drücke Go.</div>
 </div>
 
+{% if error_message %}
+<div class="alert alert-error">⚠️ {{ error_message }}</div>
+{% endif %}
+
 <!-- House Selection -->
 <section class="panel">
   <h2>Wähle ein Haus</h2>
@@ -295,6 +299,9 @@
 }
 .assets-mini-label { color: var(--muted); white-space: nowrap; }
 #assets-status { color: var(--text-secondary); }
+
+/* alerts */
+.alert-error { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.4); color: #fca5a5; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem; }
 
 /* audio source toggle */
 .audio-source-toggle { display: flex; gap: 8px; margin-bottom: 12px; }
