@@ -95,8 +95,8 @@ Die **UI ist deutlich reifer**, aber der **kritische nächste Hebel** ist jetzt 
 - [ ] Optional: DB-Export als JSON für manuelles Backup
 
 ### Verantwortlich
-- **Smith:** DB-Backup-Cron + WAL-Modus + Recovery-Check implementieren
-- **Kevin:** Persistentes Volume auf Proxmox einrichten
+- **Smith:** ✅ DB-Backup-Cron + WAL-Modus + Recovery-Check (erledigt, `f299d36`)
+- **Kevin:** Persistentes Volume auf Proxmox einrichten (**LATER** – macht Kevin wenn GPU-Worker steht)
 
 ### Ergebnis
 - Kein Datenverlust mehr bei Restarts
