@@ -98,6 +98,17 @@ data/upload/songs/                  ← Generierte Audio-Dateien
 data/output/youtube/                ← Fertige Videos + Metadaten
 ```
 
+## 🔖 Versionierung (PFLICHT für alle Agents!)
+- **Aktuelle Version:** `v1.0.0`
+- **Datei:** `services/sync/templates/base.html` → `sidebar-version`
+- **Format:** SemVer (`vMAJOR.MINOR.PATCH`)
+- **Regel:** Bei JEDER Änderung am Dashboard/Sync-Service **muss** die Version hochgezählt werden:
+  - **PATCH** (z.B. v1.0.1): Bugfixes, kleine Anpassungen
+  - **MINOR** (z.B. v1.1.0): Neue Features, UI-Änderungen
+  - **MAJOR** (z.B. v2.0.0): Breaking Changes, großes Redesign
+- **Wer:** Smith, Pako, Jarvis – jeder der Code ändert, zählt die Version hoch!
+- **Wo sichtbar:** Sidebar unten links im Dashboard
+
 ## 📋 Entscheidungen (FINAL)
 - MusicGen-medium für GoT-Sound
 - Kaggle Free GPU für Audio (30h/Woche ≈ 40 Tracks)
