@@ -1,17 +1,21 @@
 {% extends 'base.html' %}
 {% block title %}Neuer Pipeline Run{% endblock %}
 {% block content %}
-<h1>Neuer Pipeline Run</h1>
+<div class="page-header">
+  <h1>Neuer Pipeline Run</h1>
+  <div class="page-subtitle">Assets hochladen und Rendering konfigurieren</div>
+</div>
 
 <div class="grid two">
-  <section class="panel">
-    <h2>1. Assets hochladen</h2>
+  <section class="panel panel-accent-blue">
+    <h2>Assets hochladen</h2>
     <div class="form-group">
       <label for="upload-slug">Slug</label>
       <input type="text" id="upload-slug" class="form-input" placeholder="z.B. whispers-of-winterfell" />
     </div>
 
     <div class="upload-zone" id="zone-audio" data-type="audio">
+      <div class="upload-icon"><i data-lucide="music" style="width:28px;height:28px"></i></div>
       <div class="upload-label">Audio-Datei (.mp3, .wav, .ogg)</div>
       <div class="upload-hint">Klicken oder Datei hierher ziehen</div>
       <input type="file" accept=".mp3,.wav,.ogg" />
@@ -19,6 +23,7 @@
     </div>
 
     <div class="upload-zone" id="zone-thumbnail" data-type="thumbnail">
+      <div class="upload-icon"><i data-lucide="image" style="width:28px;height:28px"></i></div>
       <div class="upload-label">Thumbnail (.jpg, .png, .webp) &mdash; optional</div>
       <div class="upload-hint">Klicken oder Datei hierher ziehen</div>
       <input type="file" accept=".jpg,.jpeg,.png,.webp" />
@@ -26,14 +31,15 @@
     </div>
 
     <div class="upload-zone" id="zone-metadata" data-type="metadata">
+      <div class="upload-icon"><i data-lucide="file-json" style="width:28px;height:28px"></i></div>
       <div class="upload-label">Metadata (.json)</div>
       <div class="upload-hint">Klicken oder Datei hierher ziehen</div>
       <input type="file" accept=".json" />
       <div class="upload-status" id="status-metadata"></div>
     </div>
 
-    <div style="margin-top:16px" class="panel" style="padding:14px">
-      <h3 style="color:var(--muted);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em">Vorhandene Assets</h3>
+    <div class="assets-section">
+      <h3>Vorhandene Assets</h3>
       <div class="assets-list">
         <div><strong>Songs:</strong> {{ assets.songs | join(', ') or 'keine' }}</div>
         <div><strong>Thumbnails:</strong> {{ assets.thumbnails | join(', ') or 'keine' }}</div>
@@ -42,8 +48,8 @@
     </div>
   </section>
 
-  <section class="panel">
-    <h2>2. Run konfigurieren</h2>
+  <section class="panel panel-accent-gold">
+    <h2>Run konfigurieren</h2>
     <form method="post" action="/admin/pipeline/start" id="run-form">
       <div class="form-group">
         <label for="slug">Slug</label>
@@ -101,7 +107,9 @@
           <label for="skip_post_process">Audio Post-Processing ueberspringen</label>
         </div>
       </div>
-      <button type="submit" class="btn btn-primary" style="width:100%;margin-top:8px">Pipeline starten</button>
+      <button type="submit" class="btn btn-primary" style="width:100%;margin-top:8px">
+        <i data-lucide="play" style="width:16px;height:16px"></i> Pipeline starten
+      </button>
     </form>
   </section>
 </div>
@@ -120,7 +128,9 @@
     var input = zone.querySelector('input[type="file"]');
     var type = zone.dataset.type;
 
-    zone.addEventListener('click', function() { input.click(); });
+    zone.addEventListener('click', function(e) {
+      if (e.target.tagName !== 'INPUT') input.click();
+    });
     zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.classList.add('dragover'); });
     zone.addEventListener('dragleave', function() { zone.classList.remove('dragover'); });
     zone.addEventListener('drop', function(e) {

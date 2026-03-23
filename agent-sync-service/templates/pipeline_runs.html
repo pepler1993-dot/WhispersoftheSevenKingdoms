@@ -2,8 +2,13 @@
 {% block title %}Pipeline Runs{% endblock %}
 {% block content %}
 <div class="status-header">
-  <h1>Pipeline Runs</h1>
-  <a href="/admin/pipeline/new" class="btn btn-primary">+ Neuer Run</a>
+  <div>
+    <h1>Pipeline Runs</h1>
+    <div class="page-subtitle">Alle bisherigen Rendering-Durchlaeufe</div>
+  </div>
+  <a href="/admin/pipeline/new" class="btn btn-primary">
+    <i data-lucide="plus" style="width:16px;height:16px"></i> Neuer Run
+  </a>
 </div>
 
 <section class="panel">
@@ -31,7 +36,7 @@
             {% if run.started_at and run.finished_at %}
               {{ run.finished_at[:19] }}
             {% elif run.started_at %}
-              <span style="color:var(--accent)">laufend&hellip;</span>
+              <span style="color:var(--gold)">laufend&hellip;</span>
             {% else %}
               &mdash;
             {% endif %}

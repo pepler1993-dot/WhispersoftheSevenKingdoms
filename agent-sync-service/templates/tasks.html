@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 {% block title %}Tasks{% endblock %}
 {% block content %}
-<h1>Tasks</h1>
+<div class="page-header">
+  <h1>Tasks</h1>
+  <div class="page-subtitle">Alle Tasks und deren aktueller Status</div>
+</div>
 
 <form method="get" class="filters panel inline-form">
   <input type="text" name="q" value="{{ filters.q or '' }}" placeholder="task_id suchen" />
@@ -11,7 +14,9 @@
     <input type="checkbox" name="include_done" value="true" {% if filters.include_done %}checked{% endif %} />
     include done
   </label>
-  <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+  <button type="submit" class="btn btn-primary btn-sm">
+    <i data-lucide="search" style="width:14px;height:14px"></i> Filter
+  </button>
 </form>
 
 <section class="panel">
@@ -24,7 +29,7 @@
           <th>owner</th>
           <th>lease_until</th>
           <th>updated_at</th>
-          <th>latest_seq</th>
+          <th>seq</th>
         </tr>
       </thead>
       <tbody>

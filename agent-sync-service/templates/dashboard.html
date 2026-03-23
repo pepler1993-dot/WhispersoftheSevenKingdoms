@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-<h1>Dashboard</h1>
+<div class="page-header">
+  <h1>Dashboard</h1>
+  <div class="page-subtitle">System-Uebersicht und aktuelle Aktivitaet</div>
+</div>
 
 <div class="cards">
   {% for phase, count in summary.phase_counts.items() %}
@@ -13,7 +16,7 @@
 </div>
 
 <div class="grid two">
-  <section class="panel">
+  <section class="panel panel-accent-teal">
     <h2>Aktive Leases</h2>
     <ul class="list">
       {% for task in summary.active_leases %}
@@ -28,7 +31,7 @@
     </ul>
   </section>
 
-  <section class="panel">
+  <section class="panel panel-accent-crimson">
     <h2>Stale Tasks</h2>
     <ul class="list">
       {% for task in summary.stale_tasks %}
@@ -41,7 +44,7 @@
 </div>
 
 <div class="grid two">
-  <section class="panel">
+  <section class="panel panel-accent-blue">
     <h2>Letzte Task-Events</h2>
     <ul class="list mono">
       {% for event in summary.recent_task_events[:10] %}
@@ -52,7 +55,7 @@
     </ul>
   </section>
 
-  <section class="panel">
+  <section class="panel panel-accent-purple">
     <h2>Letzte GitHub Events</h2>
     <ul class="list mono">
       {% for event in summary.recent_github_events[:10] %}

@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 {% block title %}Events{% endblock %}
 {% block content %}
-<h1>GitHub Events</h1>
+<div class="page-header">
+  <h1>GitHub Events</h1>
+  <div class="page-subtitle">Eingehende Webhook-Events von GitHub</div>
+</div>
 
 <section class="panel">
   <div class="table-wrap">
@@ -20,7 +23,7 @@
         {% for event in events %}
         <tr>
           <td class="mono">{{ event.delivery_id[:12] }}&hellip;</td>
-          <td>{{ event.event_type }}</td>
+          <td><span class="badge released">{{ event.event_type }}</span></td>
           <td>{{ event.action }}</td>
           <td>{{ event.repo }}</td>
           <td>{{ event.sender }}</td>

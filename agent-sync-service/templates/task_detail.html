@@ -1,28 +1,31 @@
 {% extends 'base.html' %}
-{% block title %}Task Detail{% endblock %}
+{% block title %}Task {{ task_id }}{% endblock %}
 {% block content %}
 <div class="status-header">
   <h1>Task Detail</h1>
-  <a href="/admin/tasks" class="btn btn-secondary btn-sm">&larr; Alle Tasks</a>
+  <a href="/admin/tasks" class="btn btn-secondary btn-sm">
+    <i data-lucide="arrow-left" style="width:14px;height:14px"></i> Alle Tasks
+  </a>
 </div>
 
-<div class="panel" style="margin-bottom:16px">
-  <strong style="color:var(--accent)">{{ task_id }}</strong>
+<div class="panel panel-accent-gold" style="margin-bottom:16px">
+  <div class="label" style="margin-bottom:4px">Task ID</div>
+  <div class="mono" style="font-size:0.9rem;color:var(--gold);font-weight:600">{{ task_id }}</div>
 </div>
 
 <div class="grid two">
-  <section class="panel">
+  <section class="panel panel-accent-blue">
     <h2>State</h2>
     <pre>{{ detail.state | tojson(indent=2) }}</pre>
   </section>
-  <section class="panel">
+  <section class="panel panel-accent-purple">
     <h2>Snapshot</h2>
     <pre>{{ detail.snapshot | tojson(indent=2) }}</pre>
   </section>
 </div>
 
 <div class="grid two">
-  <section class="panel">
+  <section class="panel panel-accent-teal">
     <h2>Task Events</h2>
     <ul class="list mono">
       {% for event in detail.task_events %}
@@ -32,7 +35,7 @@
       {% endfor %}
     </ul>
   </section>
-  <section class="panel">
+  <section class="panel panel-accent-crimson">
     <h2>GitHub Events</h2>
     <ul class="list mono">
       {% for event in detail.github_events %}

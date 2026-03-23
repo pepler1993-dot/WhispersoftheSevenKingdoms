@@ -8,53 +8,72 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/css/admin.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
+
+  <!-- Mobile top bar -->
   <div class="mobile-header">
     <div class="mobile-brand">Whispers of the Seven Kingdoms</div>
-    <button class="menu-toggle" id="menu-toggle" aria-label="Menu">&#9776;</button>
   </div>
-  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
   <div class="layout">
+    <!-- Desktop sidebar -->
     <aside class="sidebar" id="sidebar">
-      <div class="brand">Whispers of the<br/>Seven Kingdoms</div>
+      <div class="brand">
+        <div class="brand-name">Whispers of the<br/>Seven Kingdoms</div>
+        <div class="brand-sub">Control Panel</div>
+      </div>
       <nav>
         <a href="/admin" class="nav-link {% if page == 'dashboard' %}active{% endif %}">
-          <i class="nav-icon">&#9673;</i> Dashboard
+          <i data-lucide="layout-dashboard"></i> Dashboard
         </a>
         <a href="/admin/pipeline" class="nav-link {% if page == 'pipeline' %}active{% endif %}">
-          <i class="nav-icon">&#9654;</i> Pipeline
+          <i data-lucide="clapperboard"></i> Pipeline
         </a>
         <a href="/admin/tasks" class="nav-link {% if page == 'tasks' %}active{% endif %}">
-          <i class="nav-icon">&#9744;</i> Tasks
+          <i data-lucide="list-checks"></i> Tasks
         </a>
         <a href="/admin/events" class="nav-link {% if page == 'events' %}active{% endif %}">
-          <i class="nav-icon">&#9889;</i> Events
+          <i data-lucide="webhook"></i> Events
         </a>
         <a href="/admin/system" class="nav-link {% if page == 'system' %}active{% endif %}">
-          <i class="nav-icon">&#9881;</i> System
+          <i data-lucide="server"></i> System
         </a>
       </nav>
     </aside>
+
     <main class="content">
       {% block content %}{% endblock %}
     </main>
   </div>
-  <script>
-  (function() {
-    var toggle = document.getElementById('menu-toggle');
-    var sidebar = document.getElementById('sidebar');
-    var overlay = document.getElementById('sidebar-overlay');
-    function open() { sidebar.classList.add('open'); overlay.classList.add('open'); }
-    function close() { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
-    toggle.addEventListener('click', function() {
-      sidebar.classList.contains('open') ? close() : open();
-    });
-    overlay.addEventListener('click', close);
-    sidebar.querySelectorAll('.nav-link').forEach(function(link) {
-      link.addEventListener('click', close);
-    });
-  })();
-  </script>
+
+  <!-- Mobile bottom tab bar -->
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <a href="/admin" class="bottom-nav-link {% if page == 'dashboard' %}active{% endif %}">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Home</span>
+      </a>
+      <a href="/admin/pipeline" class="bottom-nav-link {% if page == 'pipeline' %}active{% endif %}">
+        <i data-lucide="clapperboard"></i>
+        <span>Pipeline</span>
+      </a>
+      <a href="/admin/tasks" class="bottom-nav-link {% if page == 'tasks' %}active{% endif %}">
+        <i data-lucide="list-checks"></i>
+        <span>Tasks</span>
+      </a>
+      <a href="/admin/events" class="bottom-nav-link {% if page == 'events' %}active{% endif %}">
+        <i data-lucide="webhook"></i>
+        <span>Events</span>
+      </a>
+      <a href="/admin/system" class="bottom-nav-link {% if page == 'system' %}active{% endif %}">
+        <i data-lucide="server"></i>
+        <span>System</span>
+      </a>
+    </div>
+  </nav>
+
+  <script>lucide.createIcons();</script>
 </body>
 </html>
