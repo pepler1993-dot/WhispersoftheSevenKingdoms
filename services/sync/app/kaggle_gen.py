@@ -268,7 +268,7 @@ class KaggleGenerator(AudioGenerator):
 
         metadata = {
             'id': kernel_ref,
-            'title': f'Whispers – {slug}',
+            'title': kernel_slug,  # match title to slug to avoid Kaggle rename
             'code_file': 'MusicGen_Kaggle.ipynb',
             'language': 'python',
             'kernel_type': 'notebook',
@@ -299,8 +299,20 @@ class KaggleGenerator(AudioGenerator):
             db.append_audio_job_log(job_id, 'system', reason, now_iso())
             return
 
+        # Parse real kernel URL from push output to get correct slug
+        push_output = push_result.stdout + push_result.stderr
+        real_kernel_ref = kernel_ref  # fallback
+        # Look for URL like https://www.kaggle.com/code/username/kernel-slug
+        import re as _re
+        url_match = _re.search(r'kaggle\.com/code/([a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+)', push_output)
+        if url_match:
+            real_kernel_ref = url_match.group(1)
+            if real_kernel_ref != kernel_ref:
+                db.append_audio_job_log(job_id, 'system', f'Kaggle assigned slug: {real_kernel_ref} (was {kernel_ref})', now_iso())
+                db.update_audio_job(job_id, kernel_ref=real_kernel_ref)
+
         db.update_audio_job(job_id, status='running')
-        db.append_audio_job_log(job_id, 'system', f'Kernel pushed. Polling status for {kernel_ref} …', now_iso())
+        db.append_audio_job_log(job_id, 'system', f'Kernel pushed. Polling status for {real_kernel_ref} …', now_iso())
 
         # ── 5. Poll kaggle kernels status ─────────────────────────────────────
         final_status: str | None = None
@@ -308,7 +320,7 @@ class KaggleGenerator(AudioGenerator):
             time.sleep(POLL_INTERVAL)
 
             status_result = _run_subprocess(
-                [self.kaggle_bin, 'kernels', 'status', kernel_ref],
+                [self.kaggle_bin, 'kernels', 'status', real_kernel_ref],
                 log_prefix=f'poll #{attempt}',
                 job_id=job_id,
                 db=db,
@@ -342,7 +354,7 @@ class KaggleGenerator(AudioGenerator):
         db.update_audio_job(job_id, status='downloading')
 
         dl_result = _run_subprocess(
-            [self.kaggle_bin, 'kernels', 'output', kernel_ref, '-p', str(output_dir)],
+            [self.kaggle_bin, 'kernels', 'output', real_kernel_ref, '-p', str(output_dir)],
             log_prefix='kaggle kernels output',
             job_id=job_id,
             db=db,
