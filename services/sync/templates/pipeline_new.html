@@ -124,6 +124,14 @@
             🎵 Track generieren auf Kaggle
           </button>
           <div id="gen-status" class="gen-status" style="display:none"></div>
+          <div id="gen-progress" class="gen-progress" style="display:none">
+            <div class="progress-header">
+              <span class="progress-phase" id="progress-phase">⏳ Vorbereitung...</span>
+              <span class="progress-time" id="progress-time">0:00</span>
+            </div>
+            <div class="progress-bar-outer"><div class="progress-bar-inner" id="progress-bar"></div></div>
+            <div class="progress-logs" id="progress-logs"></div>
+          </div>
         </div>
       </div>
       <input type="hidden" name="audio_job_id" id="audio_job_id" />
@@ -321,6 +329,18 @@
 .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; }
 .gen-status { margin-top: 12px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 6px; font-size: 0.85rem; color: var(--text-secondary); }
 .gen-status a { color: var(--gold); }
+
+/* progress tracker */
+.gen-progress { margin-top: 16px; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 16px; border: 1px solid rgba(255,255,255,0.08); }
+.progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.progress-phase { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+.progress-time { font-size: 0.85rem; font-weight: 700; color: var(--gold); font-variant-numeric: tabular-nums; }
+.progress-bar-outer { width: 100%; height: 10px; background: rgba(255,255,255,0.08); border-radius: 5px; overflow: hidden; margin-bottom: 12px; }
+.progress-bar-inner { height: 100%; width: 0%; background: linear-gradient(90deg, #3b82f6, #8b5cf6); border-radius: 5px; transition: width 1s ease; }
+.progress-logs { max-height: 150px; overflow-y: auto; font-family: monospace; font-size: 0.75rem; color: rgba(255,255,255,0.5); }
+.progress-logs .log-line { padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+.progress-logs::-webkit-scrollbar { width: 4px; }
+.progress-logs::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
 
 /* advanced */
 .advanced-toggle {
@@ -619,27 +639,93 @@
       });
   };
 
+  let _genStartTime = null;
+  let _lastLogId = 0;
+
   function pollJobStatus(jobId) {
     const statusEl = document.getElementById('gen-status');
+    const progressEl = document.getElementById('gen-progress');
+    const phaseEl = document.getElementById('progress-phase');
+    const timeEl = document.getElementById('progress-time');
+    const barEl = document.getElementById('progress-bar');
+    const logsEl = document.getElementById('progress-logs');
+    
+    progressEl.style.display = 'block';
+    _genStartTime = Date.now();
+    _lastLogId = 0;
+
+    const phases = {
+      'queued': { text: '📋 In der Warteschlange...', pct: 5 },
+      'pushing': { text: '📤 Wird zu Kaggle hochgeladen...', pct: 15 },
+      'running': { text: '🔥 Kaggle GPU generiert...', pct: 40 },
+      'downloading': { text: '📥 Track wird heruntergeladen...', pct: 85 },
+      'complete': { text: '✅ Fertig!', pct: 100 },
+      'error': { text: '❌ Fehler', pct: 0 },
+      'cancelled': { text: '🚫 Abgebrochen', pct: 0 },
+    };
+
+    function updateTimer() {
+      if (!_genStartTime) return;
+      const s = Math.floor((Date.now() - _genStartTime) / 1000);
+      const m = Math.floor(s / 60);
+      const sec = s % 60;
+      timeEl.textContent = m + ':' + (sec < 10 ? '0' : '') + sec;
+    }
+    const timerIv = setInterval(updateTimer, 1000);
+
     const iv = setInterval(() => {
-      fetch('/admin/audio/jobs/' + jobId + '/logs?after_id=0')
+      fetch('/admin/audio/jobs/' + jobId + '/logs?after_id=' + _lastLogId)
         .then(r => r.json())
         .then(d => {
+          // Update phase
+          const phase = phases[d.status] || { text: '⏳ ' + d.status, pct: 20 };
+          phaseEl.textContent = phase.text;
+          
+          // Animate progress bar
+          if (d.status === 'running') {
+            // Slowly fill from 40 to 80 over time
+            const elapsed = (Date.now() - _genStartTime) / 1000;
+            const runPct = Math.min(80, 40 + (elapsed / 2700) * 40); // ~45min for full track
+            barEl.style.width = runPct + '%';
+          } else {
+            barEl.style.width = phase.pct + '%';
+          }
+
+          // Color bar
+          if (d.status === 'error' || d.status === 'cancelled') {
+            barEl.style.background = 'linear-gradient(90deg, #ef4444, #f87171)';
+          } else if (d.status === 'complete') {
+            barEl.style.background = 'linear-gradient(90deg, #10b981, #34d399)';
+          }
+
+          // Append new logs
+          if (d.logs && d.logs.length > 0) {
+            d.logs.forEach(log => {
+              if (log.id > _lastLogId) _lastLogId = log.id;
+              const line = document.createElement('div');
+              line.className = 'log-line';
+              line.textContent = (log.timestamp || '').substring(11, 19) + ' ' + log.message;
+              logsEl.appendChild(line);
+              logsEl.scrollTop = logsEl.scrollHeight;
+            });
+          }
+
           if (d.status === 'complete') {
             clearInterval(iv);
-            statusEl.innerHTML = '✅ Track fertig! Wähle ihn jetzt in der Bibliothek aus oder starte die Pipeline direkt.';
+            clearInterval(timerIv);
+            statusEl.innerHTML = '✅ Track fertig! Seite wird neu geladen...';
             document.getElementById('btn-start-gen').textContent = '✅ Track generiert!';
-            // Refresh library dropdown
-            location.reload();
-          } else if (d.status === 'error') {
+            setTimeout(() => location.reload(), 2000);
+          } else if (d.status === 'error' || d.status === 'cancelled') {
             clearInterval(iv);
-            statusEl.innerHTML = '❌ Fehler: ' + (d.error_message || 'Unbekannter Fehler');
+            clearInterval(timerIv);
+            statusEl.innerHTML = '❌ ' + (d.error_message || 'Fehler aufgetreten');
             document.getElementById('btn-start-gen').disabled = false;
             document.getElementById('btn-start-gen').textContent = '🎵 Track generieren auf Kaggle';
           }
         })
         .catch(() => {});
-    }, 15000);
+    }, 10000);
   }
 
   {% if prefill_slug %}
