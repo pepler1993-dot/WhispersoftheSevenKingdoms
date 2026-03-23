@@ -1058,11 +1058,21 @@ pre {
   .bottom-nav-link { padding: 6px 8px; font-size: 0.55rem; }
 }
 
-/* Server Stats Bars */
-.stat-bar { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-top: 6px; overflow: hidden; }
-.stat-bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease, background 0.3s ease; min-width: 2px; }
-.cpu-bar { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
-.ram-bar { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
-.disk-bar { background: linear-gradient(90deg, #10b981, #34d399); }
-.stat-bar-fill.warning { background: linear-gradient(90deg, #f59e0b, #fbbf24) !important; }
-.stat-bar-fill.critical { background: linear-gradient(90deg, #ef4444, #f87171) !important; }
+/* Server Stats – Gauge Rings */
+.server-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.gauge-card { background: var(--card-bg, rgba(255,255,255,0.05)); border-radius: 12px; padding: 20px 12px 16px; text-align: center; border: 1px solid rgba(255,255,255,0.08); }
+.gauge-ring { width: 100px; height: 100px; margin: 0 auto 8px; }
+.gauge-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.gauge-bg { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 8; }
+.gauge-fill { fill: none; stroke: #10b981; stroke-width: 8; stroke-linecap: round; transition: stroke-dasharray 0.8s ease, stroke 0.4s ease; }
+.gauge-value { fill: #fff; font-size: 28px; font-weight: 700; text-anchor: middle; dominant-baseline: middle; }
+.gauge-unit { fill: rgba(255,255,255,0.5); font-size: 12px; text-anchor: middle; }
+.gauge-label { font-size: 0.85rem; font-weight: 600; color: rgba(255,255,255,0.8); margin-bottom: 2px; }
+.gauge-detail { font-size: 0.75rem; color: rgba(255,255,255,0.45); }
+.load-card { display: flex; flex-direction: column; justify-content: center; }
+.load-values { display: flex; justify-content: space-around; padding: 12px 0 8px; }
+.load-item { text-align: center; }
+.load-number { display: block; font-size: 1.5rem; font-weight: 700; color: #fff; }
+.load-period { font-size: 0.7rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; }
+@media (max-width: 768px) { .server-stats-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 400px) { .server-stats-grid { grid-template-columns: 1fr 1fr; } .gauge-ring { width: 80px; height: 80px; } }

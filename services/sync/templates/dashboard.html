@@ -6,25 +6,60 @@
   <div class="page-subtitle">System-Uebersicht und aktuelle Aktivitaet</div>
 </div>
 
-<div class="cards" id="server-stats">
-  <div class="card stat">
-    <div class="label">🖥️ CPU</div>
-    <div class="value" id="stat-cpu">–</div>
-    <div class="stat-bar"><div class="stat-bar-fill cpu-bar" id="bar-cpu"></div></div>
+<div class="server-stats-grid" id="server-stats">
+  <div class="gauge-card">
+    <div class="gauge-ring" id="gauge-cpu">
+      <svg viewBox="0 0 120 120">
+        <circle cx="60" cy="60" r="52" class="gauge-bg"/>
+        <circle cx="60" cy="60" r="52" class="gauge-fill" id="ring-cpu" stroke-dasharray="0 327"/>
+        <text x="60" y="55" class="gauge-value" id="text-cpu">–</text>
+        <text x="60" y="72" class="gauge-unit">%</text>
+      </svg>
+    </div>
+    <div class="gauge-label">🖥️ CPU</div>
+    <div class="gauge-detail" id="detail-cpu">– Cores</div>
   </div>
-  <div class="card stat">
-    <div class="label">🧠 RAM</div>
-    <div class="value" id="stat-ram">–</div>
-    <div class="stat-bar"><div class="stat-bar-fill ram-bar" id="bar-ram"></div></div>
+  <div class="gauge-card">
+    <div class="gauge-ring" id="gauge-ram">
+      <svg viewBox="0 0 120 120">
+        <circle cx="60" cy="60" r="52" class="gauge-bg"/>
+        <circle cx="60" cy="60" r="52" class="gauge-fill" id="ring-ram" stroke-dasharray="0 327"/>
+        <text x="60" y="55" class="gauge-value" id="text-ram">–</text>
+        <text x="60" y="72" class="gauge-unit">%</text>
+      </svg>
+    </div>
+    <div class="gauge-label">🧠 RAM</div>
+    <div class="gauge-detail" id="detail-ram">– / – GB</div>
   </div>
-  <div class="card stat">
-    <div class="label">💾 Disk</div>
-    <div class="value" id="stat-disk">–</div>
-    <div class="stat-bar"><div class="stat-bar-fill disk-bar" id="bar-disk"></div></div>
+  <div class="gauge-card">
+    <div class="gauge-ring" id="gauge-disk">
+      <svg viewBox="0 0 120 120">
+        <circle cx="60" cy="60" r="52" class="gauge-bg"/>
+        <circle cx="60" cy="60" r="52" class="gauge-fill" id="ring-disk" stroke-dasharray="0 327"/>
+        <text x="60" y="55" class="gauge-value" id="text-disk">–</text>
+        <text x="60" y="72" class="gauge-unit">%</text>
+      </svg>
+    </div>
+    <div class="gauge-label">💾 Disk</div>
+    <div class="gauge-detail" id="detail-disk">– / – GB</div>
   </div>
-  <div class="card stat">
-    <div class="label">⚡ Load</div>
-    <div class="value" id="stat-load">–</div>
+  <div class="gauge-card load-card">
+    <div class="load-values">
+      <div class="load-item">
+        <span class="load-number" id="load-1">–</span>
+        <span class="load-period">1m</span>
+      </div>
+      <div class="load-item">
+        <span class="load-number" id="load-5">–</span>
+        <span class="load-period">5m</span>
+      </div>
+      <div class="load-item">
+        <span class="load-number" id="load-15">–</span>
+        <span class="load-period">15m</span>
+      </div>
+    </div>
+    <div class="gauge-label">⚡ Load Average</div>
+    <div class="gauge-detail" id="detail-uptime">Uptime: –</div>
   </div>
 </div>
 
@@ -38,23 +73,37 @@
 </div>
 
 <script>
+const CIRC = 2 * Math.PI * 52; // ~326.7
+function setGauge(id, percent) {
+  const ring = document.getElementById('ring-' + id);
+  const text = document.getElementById('text-' + id);
+  const p = Math.min(100, Math.max(0, percent));
+  const dash = (p / 100) * CIRC;
+  ring.setAttribute('stroke-dasharray', dash + ' ' + CIRC);
+  text.textContent = Math.round(p);
+  // Color
+  const color = p > 90 ? '#ef4444' : p > 70 ? '#f59e0b' : p > 50 ? '#3b82f6' : '#10b981';
+  ring.style.stroke = color;
+}
+function timeSince(isoStr) {
+  const s = Math.floor((Date.now() - new Date(isoStr).getTime()) / 1000);
+  const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60);
+  return (d ? d + 'd ' : '') + h + 'h ' + m + 'm';
+}
 async function refreshStats() {
   try {
     const r = await fetch('/admin/api/server-stats');
     const d = await r.json();
-    document.getElementById('stat-cpu').textContent = d.cpu.percent + '%';
-    document.getElementById('stat-ram').textContent = d.memory.used_gb.toFixed(1) + ' / ' + d.memory.total_gb.toFixed(1) + ' GB';
-    document.getElementById('stat-disk').textContent = d.disk.used_gb.toFixed(1) + ' / ' + d.disk.total_gb.toFixed(1) + ' GB';
-    document.getElementById('stat-load').textContent = d.cpu.load_1m + ' / ' + d.cpu.load_5m + ' / ' + d.cpu.load_15m;
-    document.getElementById('bar-cpu').style.width = d.cpu.percent + '%';
-    document.getElementById('bar-ram').style.width = d.memory.percent + '%';
-    document.getElementById('bar-disk').style.width = d.disk.percent + '%';
-    // Color coding
-    ['cpu','ram','disk'].forEach(k => {
-      const bar = document.getElementById('bar-' + k);
-      const val = parseFloat(bar.style.width);
-      bar.className = 'stat-bar-fill ' + k + '-bar' + (val > 90 ? ' critical' : val > 70 ? ' warning' : '');
-    });
+    setGauge('cpu', d.cpu.percent);
+    setGauge('ram', d.memory.percent);
+    setGauge('disk', d.disk.percent);
+    document.getElementById('detail-cpu').textContent = d.cpu.cores + ' Cores';
+    document.getElementById('detail-ram').textContent = d.memory.used_gb.toFixed(1) + ' / ' + d.memory.total_gb.toFixed(1) + ' GB';
+    document.getElementById('detail-disk').textContent = d.disk.used_gb.toFixed(1) + ' / ' + d.disk.total_gb.toFixed(1) + ' GB';
+    document.getElementById('load-1').textContent = d.cpu.load_1m;
+    document.getElementById('load-5').textContent = d.cpu.load_5m;
+    document.getElementById('load-15').textContent = d.cpu.load_15m;
+    document.getElementById('detail-uptime').textContent = 'Uptime: ' + timeSince(d.boot_time);
   } catch(e) { console.error('Stats fetch failed', e); }
 }
 refreshStats();
