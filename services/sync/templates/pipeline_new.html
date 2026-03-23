@@ -72,16 +72,57 @@
       <div id="assets-status">—</div>
     </div>
 
-    <!-- Audio aus Bibliothek (Kaggle / data/upload/songs) -->
+    <!-- Audio: Bibliothek oder neu generieren -->
     <div class="form-group library-audio-row">
-      <label for="library-audio">🎵 Audio Track</label>
-      <select id="library-audio" class="form-select" autocomplete="off">
-        <option value="">— Audio aus Bibliothek wählen —</option>
-        {% for t in library_tracks %}
-        <option value="{{ t.stem }}">{{ t.label }}</option>
-        {% endfor %}
-      </select>
-      <p class="step-desc">Tracks aus <code>data/upload/songs/</code> (z.B. Kaggle-Downloads)</p>
+      <label>🎵 Audio Track</label>
+      <div class="audio-source-toggle">
+        <button type="button" class="toggle-btn active" id="btn-library" onclick="showAudioSource('library')">📚 Aus Bibliothek</button>
+        <button type="button" class="toggle-btn" id="btn-generate" onclick="showAudioSource('generate')">🚀 Neu generieren (Kaggle)</button>
+      </div>
+
+      <!-- Option A: Existing track -->
+      <div id="audio-library" class="audio-source">
+        <select id="library-audio" class="form-select" autocomplete="off">
+          <option value="">— Audio aus Bibliothek wählen —</option>
+          {% for t in library_tracks %}
+          <option value="{{ t.stem }}">{{ t.label }}</option>
+          {% endfor %}
+        </select>
+        <p class="step-desc">Tracks aus <code>data/upload/songs/</code></p>
+      </div>
+
+      <!-- Option B: Generate new track via Kaggle -->
+      <div id="audio-generate" class="audio-source" style="display:none">
+        <div class="generate-card">
+          <div class="generate-info">
+            <span id="gen-house-icon">🏰</span>
+            <div>
+              <div class="gen-title" id="gen-house-name">Wähle zuerst ein Haus</div>
+              <div class="gen-detail" id="gen-prompts-info">–</div>
+            </div>
+          </div>
+          <div class="generate-settings">
+            <div class="grid two">
+              <div class="form-group">
+                <label for="gen-minutes">Dauer (Min)</label>
+                <input type="number" id="gen-minutes" class="form-input" value="42" min="1" max="120" />
+              </div>
+              <div class="form-group">
+                <label for="gen-model">Modell</label>
+                <select id="gen-model" class="form-select">
+                  <option value="medium" selected>MusicGen Medium</option>
+                  <option value="small">MusicGen Small (schneller)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-generate" id="btn-start-gen" onclick="startKaggleGen()" disabled>
+            🎵 Track generieren auf Kaggle
+          </button>
+          <div id="gen-status" class="gen-status" style="display:none"></div>
+        </div>
+      </div>
+      <input type="hidden" name="audio_job_id" id="audio_job_id" />
     </div>
 
     <!-- Thumbnail aus Bibliothek -->
@@ -255,7 +296,24 @@
 .assets-mini-label { color: var(--muted); white-space: nowrap; }
 #assets-status { color: var(--text-secondary); }
 
-/* library selects */
+/* audio source toggle */
+.audio-source-toggle { display: flex; gap: 8px; margin-bottom: 12px; }
+.toggle-btn { padding: 8px 16px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.2s var(--ease); }
+.toggle-btn:hover { border-color: var(--text-secondary); color: var(--text); }
+.toggle-btn.active { background: var(--gold-glow); border-color: var(--gold); color: var(--gold); }
+
+/* generate card */
+.generate-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 16px; }
+.generate-info { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.generate-info span:first-child { font-size: 2rem; }
+.gen-title { font-weight: 700; font-size: 1rem; color: var(--text); }
+.gen-detail { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+.generate-settings { margin-bottom: 16px; }
+.btn-generate { width: 100%; padding: 12px; font-size: 0.95rem; font-weight: 700; border-radius: 8px; border: none; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: #fff; cursor: pointer; transition: all 0.2s var(--ease); }
+.btn-generate:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(59,130,246,0.4); }
+.btn-generate:disabled { opacity: 0.5; cursor: not-allowed; }
+.gen-status { margin-top: 12px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 6px; font-size: 0.85rem; color: var(--text-secondary); }
+.gen-status a { color: var(--gold); }
 
 /* advanced */
 .advanced-toggle {
@@ -446,6 +504,7 @@
         librarySelect.value = opt ? opt.value : '';
       }
       refreshAudioForCurrentSlug();
+      updateGenerateCard(house);
     });
   });
 
@@ -486,7 +545,95 @@
   // title → thumbnail text sync
   titleInput.addEventListener('input', function() { document.getElementById('thumbnail_text').value = this.value; });
 
-  // No file upload – audio + thumbnails come from library only
+  // Audio source toggle
+  window.showAudioSource = function(mode) {
+    document.getElementById('audio-library').style.display = mode === 'library' ? 'block' : 'none';
+    document.getElementById('audio-generate').style.display = mode === 'generate' ? 'block' : 'none';
+    document.getElementById('btn-library').classList.toggle('active', mode === 'library');
+    document.getElementById('btn-generate').classList.toggle('active', mode === 'generate');
+  };
+
+  // Update generate card when house is selected
+  function updateGenerateCard(house) {
+    const icon = document.getElementById('gen-house-icon');
+    const name = document.getElementById('gen-house-name');
+    const info = document.getElementById('gen-prompts-info');
+    const btn = document.getElementById('btn-start-gen');
+    if (!house) { btn.disabled = true; return; }
+    icon.textContent = house.sigil || '🏰';
+    name.textContent = house.display_name + ' – Audio Track';
+    const pc = (house.prompts || []).length;
+    info.textContent = pc + ' Prompts · ' + (house.defaults?.minutes || 42) + ' Min · MusicGen Medium';
+    btn.disabled = false;
+  }
+
+  // Start Kaggle generation
+  window.startKaggleGen = function() {
+    if (!selectedHouse) return alert('Bitte zuerst ein Haus wählen');
+    const house = houses[selectedHouse];
+    const slug = document.getElementById('slug').value;
+    const minutes = document.getElementById('gen-minutes').value;
+    const model = document.getElementById('gen-model').value;
+    const prompts = (house.prompts || []).join('\n');
+    const statusEl = document.getElementById('gen-status');
+    const btn = document.getElementById('btn-start-gen');
+
+    btn.disabled = true;
+    btn.textContent = '⏳ Wird gestartet...';
+    statusEl.style.display = 'block';
+    statusEl.innerHTML = '⏳ Kaggle-Job wird erstellt...';
+
+    const fd = new FormData();
+    fd.append('slug', slug);
+    fd.append('title', house.display_name + ' Sleep Music');
+    fd.append('prompt_text', prompts);
+    fd.append('preset_name', '');
+    fd.append('minutes', minutes);
+    fd.append('model', model);
+    fd.append('clip_seconds', '30');
+
+    fetch('/admin/audio/generate', { method: 'POST', body: fd, redirect: 'manual' })
+      .then(r => {
+        if (r.type === 'opaqueredirect' || r.status === 303) {
+          const loc = r.headers.get('Location') || '';
+          const jobId = loc.split('/').pop();
+          document.getElementById('audio_job_id').value = jobId;
+          statusEl.innerHTML = '✅ Job gestartet! <a href="' + loc + '" target="_blank">Job-Details →</a><br>Track wird nach Fertigstellung automatisch in die Bibliothek gelegt.';
+          btn.textContent = '✅ Job läuft auf Kaggle';
+          pollJobStatus(jobId);
+          return;
+        }
+        return r.json().then(d => { throw new Error(d.detail || 'Fehler'); });
+      })
+      .catch(err => {
+        statusEl.innerHTML = '❌ ' + err.message;
+        btn.disabled = false;
+        btn.textContent = '🎵 Track generieren auf Kaggle';
+      });
+  };
+
+  function pollJobStatus(jobId) {
+    const statusEl = document.getElementById('gen-status');
+    const iv = setInterval(() => {
+      fetch('/admin/audio/jobs/' + jobId + '/logs?after_id=0')
+        .then(r => r.json())
+        .then(d => {
+          if (d.status === 'complete') {
+            clearInterval(iv);
+            statusEl.innerHTML = '✅ Track fertig! Wähle ihn jetzt in der Bibliothek aus oder starte die Pipeline direkt.';
+            document.getElementById('btn-start-gen').textContent = '✅ Track generiert!';
+            // Refresh library dropdown
+            location.reload();
+          } else if (d.status === 'error') {
+            clearInterval(iv);
+            statusEl.innerHTML = '❌ Fehler: ' + (d.error_message || 'Unbekannter Fehler');
+            document.getElementById('btn-start-gen').disabled = false;
+            document.getElementById('btn-start-gen').textContent = '🎵 Track generieren auf Kaggle';
+          }
+        })
+        .catch(() => {});
+    }, 15000);
+  }
 
   {% if prefill_slug %}
   // auto-select house from prefill slug
