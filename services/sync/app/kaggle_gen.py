@@ -276,6 +276,7 @@ class KaggleGenerator(AudioGenerator):
             'kernel_type': 'notebook',
             'is_private': 'true',
             'enable_gpu': 'true',
+            'gpu_type': 'T4',  # Force T4 instead of random P100
             'enable_internet': 'true',
             'dataset_sources': [],
             'competition_sources': [],
