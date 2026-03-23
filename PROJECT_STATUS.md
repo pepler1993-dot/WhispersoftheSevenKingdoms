@@ -1,5 +1,5 @@
 # PROJECT STATUS – Whispers of the Seven Kingdoms
-> Letzte Aktualisierung: 2026-03-23 11:57 UTC
+> Letzte Aktualisierung: 2026-03-23T14:00:01Z
 > Aktualisiert von: Smith
 
 **Agents: Lest diese Datei zuerst. Sie enthält alles was ihr wissen müsst.**
@@ -137,3 +137,22 @@ data/output/youtube/                ← Fertige Videos + Metadaten
 ---
 *Diese Datei wird bei jedem Meilenstein aktualisiert. Smith pflegt sie.*
 *Automatisches Backup alle 6h per Cron.*
+
+## 🕐 Letzte Commits (auto-generated 2026-03-23T14:00:01Z)
+```
+4b1efe8 feat(dashboard): activity timeline (recent pipeline runs + audio jobs)
+9410eb9 feat(dashboard): simplify load average to emoji status (😴→😊→😤→🔥→💀)
+ab1f8f1 fix(dashboard): fix gauge text rotation - rotate only rings, not text
+b4e823e feat(dashboard): fancy gauge rings for server stats (CPU/RAM/Disk/Load)
+9003a4e feat(dashboard): live server stats widget (CPU, RAM, Disk, Load)
+8b8f1f3 feat(pipeline): vorhandene Audio-Tracks aus Bibliothek waehlen
+34e1076 fix(requirements): include sync service runtime deps
+5a0f2ac docs: update PROJECT_STATUS.md with current state (23.03.2026)
+c48fd0c feat(kaggle_gen): replace MVP guard with real Kaggle orchestration
+175cf98 feat(dashboard): one-click video creation UI
+a8d4867 feat(dashboard): step-by-step pipeline wizard UI
+51d172d Cherry-pick UI redesign + deploy scripts from fix/restore-pipeline-improvements
+5eb2d83 Merge PR: Dashboard metadata form (replaces JSON upload) – reviewed by Smith
+61a6b0e feat(dashboard): configure pipeline metadata in UI
+```
+---
