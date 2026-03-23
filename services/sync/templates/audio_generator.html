@@ -1,14 +1,23 @@
 {% extends 'base.html' %}
 {% block title %}Audio Generator{% endblock %}
 {% block content %}
-<div class="page-header">
-  <h1>Audio Generator</h1>
-  <div class="page-subtitle">Kaggle-gestützte Audio-Generierung als eigener Workflow vor der Pipeline</div>
+<div class="page-header page-header-flex">
+  <div>
+    <h1>Audio Lab</h1>
+    <div class="page-subtitle">Generierung, Health-Check und Job-History für Audio vor der eigentlichen Video-Pipeline.</div>
+  </div>
+  <div class="header-actions">
+    <a href="/admin/pipeline" class="btn btn-secondary btn-sm">Zur Create-Seite</a>
+    <a href="/admin/ops" class="btn btn-secondary btn-sm">Operations</a>
+  </div>
 </div>
 
 <div class="grid two">
   <section class="panel panel-accent-blue">
-    <h2>Generator Status</h2>
+    <div class="section-header-inline">
+      <h2>Generator Status</h2>
+      <span class="section-note" data-tooltip="Hier sieht man, ob Provider, CLI, Token und Zielpfade grundsätzlich bereit sind. Grün heißt nicht automatisch, dass jeder Run erfolgreich sein wird — nur dass die Startbedingungen stimmen.">Was bedeutet das?</span>
+    </div>
     <div class="config-grid">
       <div class="config-item"><div class="label">Provider</div><div class="value">{{ health.provider }}</div></div>
       <div class="config-item"><div class="label">CLI</div><div class="value">{{ 'ok' if health.kaggle_bin else 'fehlt' }}</div></div>
@@ -18,9 +27,9 @@
     </div>
     <div style="margin-top:12px;color:var(--text-secondary);font-size:14px">
       {% if health.available %}
-        Generator ist grundsätzlich konfiguriert. Die aktuelle Implementierung baut bereits den sauberen Job-Unterbau und stoppt noch vor dem echten Remote-Run.
+        Generator ist grundsätzlich startklar. Der Run hängt ab hier trotzdem noch von Provider-Runtime, Modell und Remote-Execution ab — also bereit, aber nicht magisch unfehlbar.
       {% else %}
-        Generator ist noch nicht vollständig bereit. Ohne Kaggle CLI, Token, Upload-Ziel und Notebook-Template läuft hier nichts außer ehrlichen Fehlermeldungen.
+        Generator ist noch nicht vollständig bereit. Ohne CLI, Token, Upload-Ziel und Template läuft hier nichts außer ehrlichen Fehlermeldungen.
       {% endif %}
     </div>
   </section>

@@ -1071,6 +1071,40 @@ pre {
   font-weight: 600;
 }
 
+/* ── overview / create / ops hub / tooltips ── */
+
+.overview-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.overview-callout {
+  margin-bottom: 0;
+}
+
+.step-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent 60%);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+.step-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.step-card h3 {
+  font-size: 1rem;
+  margin-bottom: 0;
+}
+
 /* ── ops hub / tooltips ── */
 
 .ops-summary-grid {
@@ -1167,6 +1201,7 @@ pre {
   .content { padding: 24px 20px; }
   .config-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
   .ops-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .overview-strip { grid-template-columns: 1fr; }
 }
 
 /* ── responsive: mobile ── */
@@ -1219,6 +1254,7 @@ pre {
 
   .config-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .ops-summary-grid { grid-template-columns: 1fr; gap: 10px; }
+  .overview-strip { grid-template-columns: 1fr; gap: 10px; }
 
   .action-bar { gap: 8px; }
 

@@ -1,9 +1,16 @@
 {% extends 'base.html' %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-<div class="page-header">
-  <h1>Dashboard</h1>
-  <div class="page-subtitle">System-Uebersicht und aktuelle Aktivitaet</div>
+<div class="page-header page-header-flex">
+  <div>
+    <h1>Overview</h1>
+    <div class="page-subtitle">Die schnelle Lage: was läuft, was hängt, was zuletzt passiert ist.</div>
+  </div>
+  <div class="header-actions">
+    <a href="/admin/pipeline" class="btn btn-primary btn-sm">Neues Video</a>
+    <a href="/admin/audio" class="btn btn-secondary btn-sm">Audio Jobs</a>
+    <a href="/admin/ops" class="btn btn-secondary btn-sm">Operations</a>
+  </div>
 </div>
 
 <div class="server-stats-grid" id="server-stats">
@@ -56,6 +63,24 @@
     <div class="gauge-detail" id="detail-uptime">Uptime: –</div>
   </div>
 </div>
+
+<section class="overview-strip">
+  <div class="panel panel-accent-gold overview-callout">
+    <div class="label">Jetzt wichtig</div>
+    <div class="value">{{ summary.active_leases|length }}</div>
+    <div class="metric-help">aktive Tasks mit Lease</div>
+  </div>
+  <div class="panel panel-accent-crimson overview-callout">
+    <div class="label">Pipeline Runs</div>
+    <div class="value">{{ recent_runs|length }}</div>
+    <div class="metric-help">letzte sichtbare Durchläufe</div>
+  </div>
+  <div class="panel panel-accent-purple overview-callout">
+    <div class="label">Audio Jobs</div>
+    <div class="value">{{ recent_audio|length }}</div>
+    <div class="metric-help">zuletzt gestartete Generierungen</div>
+  </div>
+</section>
 
 <div class="cards">
   {% for phase, count in summary.phase_counts.items() %}
@@ -150,7 +175,10 @@ setInterval(refreshStats, 5000);
 
 <div class="grid two">
   <section class="panel panel-accent-teal">
-    <h2>📋 Aktive Leases</h2>
+    <div class="section-header-inline">
+      <h2>📋 Active Tasks</h2>
+      <a class="section-note" href="/admin/ops?tab=tasks">Zu Operations</a>
+    </div>
     <ul class="list">
       {% for task in summary.active_leases %}
       <li>
@@ -165,7 +193,10 @@ setInterval(refreshStats, 5000);
   </section>
 
   <section class="panel panel-accent-blue">
-    <h2>📡 Letzte Events</h2>
+    <div class="section-header-inline">
+      <h2>📡 Recent Task Events</h2>
+      <a class="section-note" href="/admin/ops?tab=events">Zu Operations</a>
+    </div>
     <ul class="list mono">
       {% for event in summary.recent_task_events[:5] %}
       <li>#{{ event.seq }} {{ event.task_id }} &mdash; {{ event.event_type }}</li>
