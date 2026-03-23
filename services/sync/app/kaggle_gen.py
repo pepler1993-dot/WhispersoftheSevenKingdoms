@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -408,7 +409,16 @@ class KaggleGenerator(AudioGenerator):
         db.append_audio_job_log(job_id, 'system', f'Job complete. Output: {dest}', now_iso())
 
 
-def get_audio_generator() -> AudioGenerator:
+def get_audio_generator(provider: str | None = None) -> AudioGenerator:
+    """Return the configured audio generator.
+
+    Provider selection: env AUDIO_PROVIDER or explicit argument.
+    Options: 'kaggle' (default), 'stable-audio-local'
+    """
+    chosen = provider or os.environ.get('AUDIO_PROVIDER', 'kaggle')
+    if chosen == 'stable-audio-local':
+        from app.stable_audio_gen import StableAudioGenerator
+        return StableAudioGenerator()
     return KaggleGenerator()
 
 
