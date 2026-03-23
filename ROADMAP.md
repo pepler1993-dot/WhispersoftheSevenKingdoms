@@ -1,114 +1,140 @@
 # 🗺️ ROADMAP – Whispers of the Seven Kingdoms
-> Stand: 22.03.2026
+> Stand: 23.03.2026 (aktualisiert nach Pair-Thinking von Pako + Smith)
 
 ---
 
-## Meilensteine
+## Aktuelle Lage in einem Satz
 
-```
-März 2026                    April 2026                    Mai-Juni 2026               Juli-Sept 2026
-    │                            │                             │                           │
-    ▼                            ▼                             ▼                           ▼
-┌─────────┐              ┌──────────────┐              ┌──────────────┐            ┌──────────────┐
-│ PHASE 1 │───────────▶ │   PHASE 2    │───────────▶ │   PHASE 3    │─────────▶ │   PHASE 4    │
-│Foundation│              │Multiplikation│              │ Skalierung   │            │  Wachstum    │
-└─────────┘              └──────────────┘              └──────────────┘            └──────────────┘
-```
+Die **UI ist deutlich reifer**, aber der **kritische nächste Hebel** ist jetzt nicht mehr Design, sondern der **lokale GPU-Worker** als stabiler Audio-Pfad.
 
 ---
 
-### 🏁 M1 – Erster Song Live (Woche 1-2)
-- [ ] Song "Whispers of Winterfell" generieren (Kaggle/Proxmox)
-- [ ] Pipeline durchlaufen: `pipeline.py --slug whispers-of-winterfell`
-- [ ] Erster YouTube Upload
-- [ ] GPU-Passthrough auf Kevins Proxmox einrichten
-- [ ] Pipeline-Fehlerhandling dokumentiert
-- **Ergebnis:** 1 Song auf YouTube ✅
+## Prioritäten ab jetzt
+
+## P0 – GPU-Worker funktionsfähig machen
+**Ziel:** Lokale Audio-Generierung als ernsthafte Alternative zu Kaggle zum Laufen bringen.
+
+### Offen
+- [ ] `nvidia-smi` in VM 104 sauber zum Laufen bringen
+- [ ] Nouveau-/Treiber-Konflikte final auflösen
+- [ ] Python-Umgebung im Worker aufsetzen
+- [ ] Modellentscheidung für lokalen Worker finalisieren
+- [ ] ersten lokalen Audio-Test fahren
+- [ ] Erfolg/Misserfolg sauber dokumentieren
+
+### Ergebnis
+- Ein lokaler Worker kann Audio generieren oder ist technisch sauber als ungeeignet evaluiert.
 
 ---
 
-### 📈 M2 – Shorts, Streaming & Growth Engine (Woche 2-4)
-- [ ] Shorts-Pipeline bauen (`scripts/shorts/generate_shorts.py`)
-  - Auto-Cut: 10-15 × 60s Clips pro Song
-  - Jeder Short mit Hinweis auf Full Video
-- [ ] DistroKid Account → Songs auf Spotify, Apple Music, Amazon
-- [ ] 4 weitere Songs generieren (King's Landing, Targaryen, Highgarden, Castamere)
-- [ ] SEO-Automatisierung in Metadaten-Generator
-  - Titel-Format: `{Name} | 3 Hours Deep Sleep Music | Fantasy Ambient`
-  - Auto-Tags: sleep music, fantasy, ambient, GoT keywords
-  - Upload-Timing: 18-20 Uhr UTC
-- [ ] Reddit Post-Draft Generator (`scripts/marketing/reddit_draft.py`)
-  - Pro Song ein fertiger Post für r/sleep, r/gameofthrones, r/Fantasy
-- [ ] Playlist-Automatisierung im YouTube Upload Script
-- [ ] Performance-Tracking einrichten (JSON: Views, CTR, Watchtime)
-- **Ziel:** 50-75 Shorts online, 200-500h Watchtime
-- **Ergebnis:** 5 Songs live, Shorts laufen, Musik auf Streaming-Plattformen
+## P1 – Audio-Strategie finalisieren
+**Ziel:** Nicht mehr zwischen Kaggle, Hoffnung und Nebenpfaden treiben.
+
+### Entscheidungen, die jetzt fallen müssen
+- [ ] Kaggle als Produktionspfad verwerfen oder nur als Fallback markieren
+- [ ] Stable Audio Open vs. anderer lokaler Stack final bewerten
+- [ ] kurze Tracks + Looping als Standard-Produktionslogik festschreiben oder verwerfen
+- [ ] Provider-Strategie für `AudioGenerator` dokumentieren
+
+### Ergebnis
+- Ein klarer, schriftlich festgehaltener Audio-Pfad für die nächsten Wochen
 
 ---
 
-### 🚀 M3 – Zweiter Kanal (Monat 2-3)
-- [ ] "Whispers of Middle Earth" Kanal erstellen
-- [ ] LotR-Themes: Shire, Rivendell, Mordor, Rohan, Minas Tirith
-- [ ] Automatische Song-Generierung via Proxmox GPU (Cron)
-- [ ] Weitere GoT-Themes: Braavos, Iron Islands, Dragonstone
-- **Ergebnis:** 2 aktive Kanäle, lokale GPU, kein Cloud-Limit
+## P2 – UI-Feinschliff auf Basis echter Nutzung
+**Ziel:** Das Dashboard soll nicht nur hübscher, sondern produktiver sein.
+
+### Schon erledigt
+- [x] Top-Level-Navigation verschlankt
+- [x] `Operations` Hub eingeführt
+- [x] `Overview / Create / Audio Lab / Operations`
+- [x] erste Tooltips / Microcopy / Mobile-Verbesserungen
+- [x] Create-Seite strukturell besser in Schritte gegliedert
+
+### Noch offen
+- [ ] restliches Inline-CSS aus `pipeline_new.html` rausziehen
+- [ ] Asset-/Fehlermeldungen menschlicher formulieren
+- [ ] mobile Ansicht gezielt auf echter Nutzung testen
+- [ ] letzte UI-Inkonsistenzen glätten
+- [ ] Operations um Problemansicht erweitern (`blocked`, `stale`, `failed`, `action needed`)
+
+### Ergebnis
+- UI ist nicht nur neu, sondern betriebssicher und konsistent
 
 ---
 
-### 👑 M4 – Monetarisierung (Monat 3-6)
-- [ ] YouTube Partner Program (1000 Subs + 4000h Watchtime)
-  - Sleep Music Vorteil: 1 View = 3h Watchtime → nur ~1.333 Views nötig
-- [ ] 24/7 YouTube Livestream Radio
-- [ ] A/B-Testing Thumbnails
-- [ ] Kollaborationen mit anderen Ambient/Sleep-Kanälen
-- [ ] Discord Community (ab 500+ Subs)
-- [ ] Drittes Universum evaluieren
-- **Ergebnis:** Erste Einnahmen, wachsende Community
+## P3 – Produktlogik verbessern
+**Ziel:** Weniger doppelte Eingaben, mehr Studio-Flow.
+
+### Offen
+- [ ] Hauswahl stärker mit Audio-Generierung koppeln
+- [ ] Audio-Quelle intelligenter vorbelegen
+- [ ] Defaults stärker nutzen, weniger manuelle Felder
+- [ ] Create-Flow weiter in Richtung
+  1. Stil
+  2. Audio
+  3. Visuals
+  4. Launch
+
+### Ergebnis
+- Weniger Formulararbeit, mehr produktisierte Bedienung
 
 ---
 
-## 📊 Wachstums-Prognose
+## P4 – Betriebsreife / Dokumentation
+**Ziel:** Weniger implizites Wissen, weniger Agenten-Amnesie.
 
-| Monat | Subs | Watchtime | Shorts | Songs |
-|-------|------|-----------|--------|-------|
-| 1 | 50-100 | 200-500h | 15-30 | 1-2 |
-| 2 | 200-400 | 1000-2000h | 50-75 | 5 |
-| 3 | 500-800 | 2500-3500h | 100+ | 8+ |
-| 4 | 1000+ ✅ | 4000h+ ✅ | 120+ | 10+ |
+### Offen
+- [ ] `PROJECT_STATUS.md` aktuell halten
+- [ ] Setup-/Deploy-Doku für Worker und Dashboard ergänzen
+- [ ] Versionierung konsequent bei Dashboard-Änderungen durchziehen
+- [ ] Fehlerbehandlung für Assets / Jobs / Uploads weiter verbessern
 
-## 🤖 Was die Pipeline automatisch macht
-
-```
-Song (MP3) rein
-    ↓
-├── Thumbnail (haus-spezifischer Font + Background)
-├── Full Video (3h, 1080p, Partikeleffekte)
-├── 10-15 Shorts (auto-cut, 60s)
-├── Metadaten (SEO-Titel, Tags, Beschreibung)
-├── Reddit Post-Draft
-├── DistroKid Export
-└── YouTube Upload + Playlist-Einsortierung
-    ↓
-Alles online 🚀
-```
+### Ergebnis
+- Neue Agenten oder Menschen können schneller übernehmen
 
 ---
 
-## Revenue Ziele
+## Konkrete nächste Schritte (empfohlen)
 
-| Zeitraum | Ziel |
-|----------|------|
-| Monat 3 | YouTube Monetarisierung freigeschaltet |
-| Monat 6 | 50-200€/Monat (AdSense + Streaming) |
-| Monat 12 | 200-1000€/Monat (Multi-Kanal) |
-| Jahr 2 | 1000€+/Monat (Netzwerk) |
+### Unmittelbar als Team
+1. **GPU-Worker fixen** bis `nvidia-smi` läuft
+2. **lokalen Mini-Test** mit dem finalistischen Modell-Stack machen
+3. **Audio-Strategie schriftlich festzurren**
+4. Danach erst weitere größere UI-/Produktlogik-Runden
 
----
-
-## Aktuelle Priorität
-
-**→ M1: Ersten Song live bringen. Alles andere kommt danach.**
+### Für die Audio-Seite
+- Wenn lokaler Worker läuft: darauf fokussieren
+- Wenn lokaler Worker scheitert: Colab als Übergangspfad ernsthaft evaluieren
+- Kaggle nur noch als Test-/Fallback-Pfad betrachten, nicht als Glaubenssystem
 
 ---
 
-*Detaillierter Plan: EXPANSION_PLAN_FINAL.md | Ideen: IDEAS.md*
+## Nicht mehr Hauptpriorität
+Diese Punkte sind wichtig, aber nicht mehr P0:
+- noch schickeres Styling
+- weitere Dashboard-Spielereien
+- neue Growth-/Marketing-Features
+- Shorts / Streaming / Reddit / SEO-Ausbau
+
+Erst muss die Audio-Erzeugung auf stabile Beine.
+
+---
+
+## Entscheidungsnotiz
+
+### Aktuelles Pair-Thinking-Fazit
+- **Pako:** UI ist jetzt nicht mehr die Hauptbaustelle
+- **Smith:** Struktur stimmt, UI ist auf gutem Weg, Technikpfad muss jetzt liefern
+- **Gemeinsame Empfehlung:**
+  - lokaler GPU-Worker zuerst
+  - Audio-Strategie dann finalisieren
+  - UI danach mit echtem Nutzungsfeedback weiter polieren
+
+---
+
+## Nordstern
+
+**Haus wählen → Audio stabil erzeugen → visuell rendern → reviewen → veröffentlichen**
+
+Alles, was diesen Kernpfad nicht stabiler macht, ist aktuell zweitrangig.

@@ -60,18 +60,19 @@ Haus wählen → Audio generieren (Kaggle) → Thumbnail → Video → Metadaten
 ## 🔶 Nächste Schritte
 
 ### JETZT
-1. **SSH-Tunnel stabilisieren** – bore crasht alle 3-4 Min; Cloudflare Tunnel als Alternative evaluieren
-2. **Kaggle-Integration deployen** – Code ist auf main, muss auf Server deployed werden
-3. **Kaggle CLI auf Server installieren** + API Token einrichten
-4. **Erster End-to-End-Test** – Haus wählen → Kaggle generiert → Audio downloaded → Pipeline → YouTube
-5. **Google API Deps installieren** – `pip install -r requirements.txt` im Server-venv
+1. **GPU-Worker priorisieren** – VM 104 steht, Debian ist installiert, GPU im Gast sichtbar; jetzt `nvidia-smi` sauber zum Laufen bringen
+2. **Lokalen Audio-Worker evaluieren** – danach Python-Umgebung + Modellstack + erster Mini-Test
+3. **Audio-Strategie finalisieren** – Kaggle nicht mehr als Fundament betrachten; lokaler Worker zuerst, Colab als Übergangspfad mitdenken
+4. **UI-Feinschliff auf echter Nutzung** – neue Overview/Create/Audio/Operations-Struktur ist live, jetzt Asset-/Fehlermeldungen, Mobile und Microcopy weiter härten
+5. **Dokumentation/Betrieb** – Versionierung konsequent weiterführen, PROJECT_STATUS + Setup-/Deploy-Doku aktuell halten
 
 ### SPÄTER
-- GPU-Passthrough auf Kevins Proxmox (GTX 1070) für lokale Generierung
-- YouTube Analytics im Dashboard
+- Providerfähiges Audio Lab (Local Worker / Colab / evtl. API)
+- Operations um Problemansicht erweitern (`blocked`, `stale`, `failed`, `action needed`)
 - Animated Renderer (30s Segmente → Loop auf 3h)
+- YouTube Analytics im Dashboard
 - SEO-Optimierung für YouTube-Metadaten
-- README.md Update mit Setup-Anleitung
+- README / Setup-Anleitungen ausbauen
 
 ## 📁 Wichtige Pfade (Monorepo)
 ```
@@ -99,7 +100,7 @@ data/output/youtube/                ← Fertige Videos + Metadaten
 ```
 
 ## 🔖 Versionierung (PFLICHT für alle Agents!)
-- **Aktuelle Version:** `v1.0.0`
+- **Aktuelle Version:** `v1.2.0`
 - **Datei:** `services/sync/templates/base.html` → `sidebar-version`
 - **Format:** SemVer (`vMAJOR.MINOR.PATCH`)
 - **Regel:** Bei JEDER Änderung am Dashboard/Sync-Service **muss** die Version hochgezählt werden:
