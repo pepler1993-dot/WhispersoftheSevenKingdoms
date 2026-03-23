@@ -81,14 +81,66 @@ Die **UI ist deutlich reifer**, aber der **kritische nächste Hebel** ist jetzt 
 
 ---
 
-## P4 – Betriebsreife / Dokumentation
+## P4 – Datenbank-Robustheit
+**Ziel:** DB überlebt Container-/VM-Restarts ohne Datenverlust.
+
+### Problem
+- SQLite DB liegt aktuell nur im Container-Dateisystem
+- Bei LXC Restart / Neuinstallation → alles weg (Jobs, Events, Runs)
+
+### Maßnahmen
+- [ ] DB-Pfad auf persistentes Volume legen (Proxmox mount point oder bind mount)
+- [ ] Automatisches DB-Backup (cron → tägliches Kopieren auf hdd-backup)
+- [ ] DB-Recovery-Check beim Service-Start (Integritätscheck + WAL-Modus)
+- [ ] Optional: DB-Export als JSON für manuelles Backup
+
+### Verantwortlich
+- **Smith:** DB-Backup-Cron + WAL-Modus + Recovery-Check implementieren
+- **Kevin:** Persistentes Volume auf Proxmox einrichten
+
+### Ergebnis
+- Kein Datenverlust mehr bei Restarts
+
+---
+
+## P5 – Dokumentation nach Diátaxis Framework
+**Ziel:** Professionelle, strukturierte Doku die für Menschen UND Agenten funktioniert.
+
+### Diátaxis Quadranten
+1. **Tutorials** – Schritt-für-Schritt Einstieg ("Dein erstes Video erstellen")
+2. **How-to Guides** – Aufgabenorientiert ("Neuen Audio-Provider hinzufügen")
+3. **Reference** – Technische Referenz (API, DB-Schema, Architektur)
+4. **Explanation** – Hintergründe ("Warum kurze Tracks + Looping?")
+
+### Aufgabenverteilung
+- **Pako:** Tutorials + How-to Guides (er kennt die Architektur am besten)
+  - [ ] Tutorial: "Erstes Video von A bis Z"
+  - [ ] How-to: "Neuen Audio-Provider implementieren"
+  - [ ] How-to: "Dashboard lokal aufsetzen"
+  - [ ] How-to: "GPU-Worker einrichten"
+- **Smith:** Reference + Explanation
+  - [ ] Reference: API-Endpoints Übersicht
+  - [ ] Reference: DB-Schema + Tabellen
+  - [ ] Reference: Umgebungsvariablen + Konfiguration
+  - [ ] Explanation: Audio-Strategie (Warum Stable Audio Open?)
+  - [ ] Explanation: Pipeline-Architektur
+- **Jarvis:** Zusammenführung + Navigation (`docs/index.md`)
+  - [ ] Docs-Index mit Quadranten-Navigation
+  - [ ] Cross-Links zwischen den Quadranten
+
+### Ergebnis
+- Jeder neue Agent/Mensch kann das Projekt in 15 Min verstehen
+
+---
+
+## P6 – Betriebsreife / Sonstiges
 **Ziel:** Weniger implizites Wissen, weniger Agenten-Amnesie.
 
 ### Offen
 - [ ] `PROJECT_STATUS.md` aktuell halten
-- [ ] Setup-/Deploy-Doku für Worker und Dashboard ergänzen
 - [ ] Versionierung konsequent bei Dashboard-Änderungen durchziehen
 - [ ] Fehlerbehandlung für Assets / Jobs / Uploads weiter verbessern
+- [ ] SSH-Tunnel stabilisieren (Cloudflare Tunnel evaluieren)
 
 ### Ergebnis
 - Neue Agenten oder Menschen können schneller übernehmen
