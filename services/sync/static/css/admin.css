@@ -479,6 +479,18 @@ h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; }
 .badge.failed::before { background: #fca5a5; }
 .badge.cancelled { background: #2a1f33; color: #c4b5fd; }
 .badge.cancelled::before { background: #c4b5fd; }
+.badge.queued,
+.badge.pushing,
+.badge.downloading { background: #3d2b0a; color: #fcd34d; }
+.badge.queued::before,
+.badge.pushing::before,
+.badge.downloading::before { background: #fcd34d; }
+.badge.complete,
+.badge.completed { background: #0d3320; color: #6ee7a8; }
+.badge.complete::before,
+.badge.completed::before { background: #6ee7a8; }
+.badge.error { background: #3d0d0d; color: #fca5a5; }
+.badge.error::before { background: #fca5a5; }
 
 @keyframes dot-pulse {
   0%, 100% { opacity: 1; transform: scale(1); }

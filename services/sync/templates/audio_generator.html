@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block title %}Audio Generator{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Audio Generator</h1>
+  <div class="page-subtitle">Kaggle-gestützte Audio-Generierung als eigener Workflow vor der Pipeline</div>
+</div>
+
+<div class="grid two">
+  <section class="panel panel-accent-blue">
+    <h2>Generator Status</h2>
+    <div class="config-grid">
+      <div class="config-item"><div class="label">Provider</div><div class="value">{{ health.provider }}</div></div>
+      <div class="config-item"><div class="label">CLI</div><div class="value">{{ 'ok' if health.kaggle_bin else 'fehlt' }}</div></div>
+      <div class="config-item"><div class="label">Token</div><div class="value">{{ 'ok' if health.token_present else 'fehlt' }}</div></div>
+      <div class="config-item"><div class="label">Template</div><div class="value">{{ 'ok' if health.template_present else 'fehlt' }}</div></div>
+      <div class="config-item"><div class="label">Upload Dir</div><div class="value">{{ 'ok' if health.upload_dir_present else 'fehlt' }}</div></div>
+    </div>
+    <div style="margin-top:12px;color:var(--text-secondary);font-size:14px">
+      {% if health.available %}
+        Generator ist grundsätzlich konfiguriert. Die aktuelle Implementierung baut bereits den sauberen Job-Unterbau und stoppt noch vor dem echten Remote-Run.
+      {% else %}
+        Generator ist noch nicht vollständig bereit. Ohne Kaggle CLI, Token, Upload-Ziel und Notebook-Template läuft hier nichts außer ehrlichen Fehlermeldungen.
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="panel panel-accent-gold">
+    <h2>Neuen Audio-Job starten</h2>
+    <form method="post" action="/admin/audio/generate">
+      <div class="form-group">
+        <label for="slug">Slug</label>
+        <input type="text" name="slug" id="slug" class="form-input" required placeholder="z.B. whispers-of-winterfell" />
+      </div>
+      <div class="form-group">
+        <label for="title">Titel</label>
+        <input type="text" name="title" id="title" class="form-input" placeholder="Whispers of Winterfell" />
+      </div>
+      <div class="grid two">
+        <div class="form-group">
+          <label for="minutes">Ziel-Dauer (Minuten)</label>
+          <input type="number" name="minutes" id="minutes" class="form-input" value="42" min="1" max="180" />
+        </div>
+        <div class="form-group">
+          <label for="clip_seconds">Clip-Länge</label>
+          <input type="number" name="clip_seconds" id="clip_seconds" class="form-input" value="30" min="10" max="60" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="model">Model</label>
+        <select name="model" id="model" class="form-select">
+          <option value="small">small</option>
+          <option value="medium" selected>medium</option>
+          <option value="large">large</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="preset_name">Preset</label>
+        <select name="preset_name" id="preset_name" class="form-select">
+          <option value="">— kein Preset —</option>
+          {% for preset in presets %}
+          <option value="{{ preset.name }}">{{ preset.name }} ({{ preset.category }} / {{ preset.house }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="prompt_text">Prompt(s)</label>
+        <textarea name="prompt_text" id="prompt_text" class="form-input" rows="8" placeholder="Eine Zeile pro Prompt. Wenn leer, wird das gewählte Preset verwendet."></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%"><i data-lucide="sparkles" style="width:16px;height:16px"></i> Audio-Job anlegen</button>
+    </form>
+  </section>
+</div>
+
+<section class="panel" style="margin-top:18px">
+  <div class="status-header">
+    <h2>Letzte Audio-Jobs</h2>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Job</th>
+        <th>Slug</th>
+        <th>Model</th>
+        <th>Status</th>
+        <th>Preset</th>
+        <th>Erstellt</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for job in jobs %}
+      <tr>
+        <td><a href="/admin/audio/jobs/{{ job.job_id }}">{{ job.job_id }}</a></td>
+        <td>{{ job.slug }}</td>
+        <td>{{ job.model or '—' }}</td>
+        <td><span class="badge {{ job.status }}">{{ job.status }}</span></td>
+        <td>{{ job.preset_name or 'custom' }}</td>
+        <td>{{ job.created_at[:19] if job.created_at else '—' }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6">Noch keine Audio-Jobs vorhanden</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

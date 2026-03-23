@@ -38,6 +38,13 @@ from app.pipeline_runner import (
     trigger_upload,
 )
 from app.store import AgentSyncDB
+from app.kaggle_gen import (
+    create_audio_job,
+    find_prompt_preset,
+    get_audio_generator_health,
+    list_prompt_presets,
+    recover_interrupted_jobs,
+)
 
 
 HOUSE_TEMPLATES_PATH = Path(__file__).resolve().parent.parent / 'data' / 'house_templates.json'
@@ -460,6 +467,90 @@ def admin_system(request: Request):
         'page': 'system',
         'system': system,
     })
+
+
+# ── audio generator ──
+
+@app.get('/admin/audio', response_class=HTMLResponse)
+def admin_audio(request: Request):
+    health = get_audio_generator_health()
+    presets = list_prompt_presets()
+    jobs = db.list_audio_jobs(limit=100)
+    return templates.TemplateResponse('audio_generator.html', {
+        'request': request,
+        'page': 'audio',
+        'health': health,
+        'presets': presets,
+        'jobs': jobs,
+    })
+
+
+@app.post('/admin/audio/generate')
+def admin_audio_generate(
+    slug: str = Form(...),
+    title: str = Form(''),
+    prompt_text: str = Form(''),
+    preset_name: str = Form(''),
+    minutes: int = Form(42),
+    model: str = Form('medium'),
+    clip_seconds: int = Form(30),
+):
+    slug = slug.strip().lower()
+    title = title.strip() or slug.replace('-', ' ').title()
+    preset_name = preset_name.strip()
+    prompt_text = prompt_text.strip()
+
+    if not slug:
+        raise HTTPException(status_code=400, detail='Slug is required')
+    if not prompt_text and not preset_name:
+        raise HTTPException(status_code=400, detail='Provide prompt text or choose a preset')
+    if preset_name and not find_prompt_preset(preset_name):
+        raise HTTPException(status_code=400, detail='Unknown preset selected')
+
+    job_id = create_audio_job(
+        slug=slug,
+        title=title,
+        prompt_text=prompt_text,
+        preset_name=preset_name or None,
+        minutes=minutes,
+        model=model,
+        clip_seconds=clip_seconds,
+        db=db,
+    )
+    return RedirectResponse(url=f'/admin/audio/jobs/{job_id}', status_code=303)
+
+
+@app.get('/admin/audio/jobs/{job_id}', response_class=HTMLResponse)
+def admin_audio_job_detail(request: Request, job_id: str):
+    job = db.get_audio_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail='Audio job not found')
+    logs = db.get_audio_job_logs(job_id, limit=1000)
+    return templates.TemplateResponse('audio_job_detail.html', {
+        'request': request,
+        'page': 'audio',
+        'job': job,
+        'logs': logs,
+    })
+
+
+@app.get('/admin/audio/jobs/{job_id}/logs')
+def admin_audio_job_logs(job_id: str, after_id: int = Query(default=0, ge=0)):
+    job = db.get_audio_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail='Audio job not found')
+    logs = db.get_audio_job_logs(job_id, after_id=after_id)
+    return {'logs': logs, 'status': job['status'], 'error_message': job.get('error_message')}
+
+
+@app.post('/admin/audio/jobs/{job_id}/cancel')
+def admin_audio_job_cancel(job_id: str):
+    job = db.get_audio_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail='Audio job not found')
+    db.update_audio_job(job_id, status='cancelled', finished_at=datetime.now(timezone.utc).isoformat(), error_message='Cancelled by user')
+    db.append_audio_job_log(job_id, 'system', 'Cancellation requested by user', datetime.now(timezone.utc).isoformat())
+    return RedirectResponse(url=f'/admin/audio/jobs/{job_id}', status_code=303)
 
 
 # ── pipeline control panel ──

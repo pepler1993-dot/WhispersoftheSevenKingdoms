@@ -110,6 +110,37 @@ class AgentSyncDB:
                     created_at TEXT NOT NULL
                 );
                 CREATE INDEX IF NOT EXISTS idx_pipeline_run_logs_run_id ON pipeline_run_logs(run_id);
+
+                CREATE TABLE IF NOT EXISTS audio_jobs (
+                    job_id TEXT PRIMARY KEY,
+                    slug TEXT NOT NULL,
+                    title TEXT,
+                    provider TEXT NOT NULL DEFAULT 'kaggle',
+                    preset_name TEXT,
+                    prompt_text TEXT,
+                    prompts_json TEXT,
+                    minutes INTEGER,
+                    model TEXT,
+                    clip_seconds INTEGER,
+                    status TEXT NOT NULL DEFAULT 'queued',
+                    kernel_ref TEXT,
+                    output_path TEXT,
+                    started_at TEXT,
+                    finished_at TEXT,
+                    error_message TEXT,
+                    created_at TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS idx_audio_jobs_status ON audio_jobs(status);
+                CREATE INDEX IF NOT EXISTS idx_audio_jobs_created_at ON audio_jobs(created_at);
+
+                CREATE TABLE IF NOT EXISTS audio_job_logs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    job_id TEXT NOT NULL,
+                    stream TEXT NOT NULL DEFAULT 'system',
+                    message TEXT NOT NULL,
+                    created_at TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS idx_audio_job_logs_job_id ON audio_job_logs(job_id);
                 '''
             )
             conn.commit()
@@ -631,6 +662,102 @@ class AgentSyncDB:
             'status': row['status'],
             'config': json.loads(row['config_json']) if row['config_json'] else {},
             'pid': row['pid'],
+            'started_at': row['started_at'],
+            'finished_at': row['finished_at'],
+            'error_message': row['error_message'],
+            'created_at': row['created_at'],
+        }
+
+    # ── audio jobs ──
+
+    def create_audio_job(self, job: dict[str, Any]) -> None:
+        with self._lock:
+            with self._connect() as conn:
+                conn.execute(
+                    '''
+                    INSERT INTO audio_jobs (
+                        job_id, slug, title, provider, preset_name, prompt_text, prompts_json,
+                        minutes, model, clip_seconds, status, kernel_ref, output_path,
+                        started_at, finished_at, error_message, created_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ''',
+                    (
+                        job['job_id'], job['slug'], job.get('title'), job.get('provider', 'kaggle'),
+                        job.get('preset_name'), job.get('prompt_text'), json.dumps(job.get('prompts', []), ensure_ascii=False),
+                        job.get('minutes'), job.get('model'), job.get('clip_seconds'), job.get('status', 'queued'),
+                        job.get('kernel_ref'), job.get('output_path'), job.get('started_at'), job.get('finished_at'),
+                        job.get('error_message'), job['created_at'],
+                    ),
+                )
+                conn.commit()
+
+    def update_audio_job(self, job_id: str, **fields: Any) -> None:
+        if not fields:
+            return
+        set_clauses = []
+        params: list[Any] = []
+        for key, value in fields.items():
+            set_clauses.append(f'{key} = ?')
+            params.append(value)
+        params.append(job_id)
+        with self._lock:
+            with self._connect() as conn:
+                conn.execute(f"UPDATE audio_jobs SET {', '.join(set_clauses)} WHERE job_id = ?", params)
+                conn.commit()
+
+    def get_audio_job(self, job_id: str) -> dict[str, Any] | None:
+        with self._connect() as conn:
+            row = conn.execute('SELECT * FROM audio_jobs WHERE job_id = ?', (job_id,)).fetchone()
+        return self._row_to_audio_job(row) if row else None
+
+    def list_audio_jobs(self, limit: int = 50) -> list[dict[str, Any]]:
+        with self._connect() as conn:
+            rows = conn.execute('SELECT * FROM audio_jobs ORDER BY created_at DESC LIMIT ?', (limit,)).fetchall()
+        return [self._row_to_audio_job(row) for row in rows]
+
+    def list_audio_jobs_by_status(self, statuses: list[str]) -> list[dict[str, Any]]:
+        if not statuses:
+            return []
+        placeholders = ', '.join('?' for _ in statuses)
+        with self._connect() as conn:
+            rows = conn.execute(
+                f'SELECT * FROM audio_jobs WHERE status IN ({placeholders}) ORDER BY created_at DESC',
+                tuple(statuses),
+            ).fetchall()
+        return [self._row_to_audio_job(row) for row in rows]
+
+    def append_audio_job_log(self, job_id: str, stream: str, message: str, created_at: str) -> None:
+        with self._lock:
+            with self._connect() as conn:
+                conn.execute(
+                    'INSERT INTO audio_job_logs (job_id, stream, message, created_at) VALUES (?, ?, ?, ?)',
+                    (job_id, stream, message, created_at),
+                )
+                conn.commit()
+
+    def get_audio_job_logs(self, job_id: str, after_id: int = 0, limit: int = 500) -> list[dict[str, Any]]:
+        with self._connect() as conn:
+            rows = conn.execute(
+                'SELECT * FROM audio_job_logs WHERE job_id = ? AND id > ? ORDER BY id ASC LIMIT ?',
+                (job_id, after_id, limit),
+            ).fetchall()
+        return [{'id': r['id'], 'stream': r['stream'], 'message': r['message'], 'created_at': r['created_at']} for r in rows]
+
+    def _row_to_audio_job(self, row: sqlite3.Row) -> dict[str, Any]:
+        return {
+            'job_id': row['job_id'],
+            'slug': row['slug'],
+            'title': row['title'],
+            'provider': row['provider'],
+            'preset_name': row['preset_name'],
+            'prompt_text': row['prompt_text'],
+            'prompts': json.loads(row['prompts_json']) if row['prompts_json'] else [],
+            'minutes': row['minutes'],
+            'model': row['model'],
+            'clip_seconds': row['clip_seconds'],
+            'status': row['status'],
+            'kernel_ref': row['kernel_ref'],
+            'output_path': row['output_path'],
             'started_at': row['started_at'],
             'finished_at': row['finished_at'],
             'error_message': row['error_message'],

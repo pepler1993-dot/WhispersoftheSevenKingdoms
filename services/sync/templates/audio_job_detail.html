@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}Audio Job {{ job.job_id }}{% endblock %}
+{% block content %}
+<div class="status-header">
+  <h1>{{ job.title or job.slug }}</h1>
+  <span class="badge {{ job.status }}">{{ job.status }}</span>
+</div>
+
+<div class="action-bar">
+  <a href="/admin/audio" class="btn btn-secondary btn-sm">Alle Audio-Jobs</a>
+  <a href="/admin/pipeline/new?slug={{ job.slug }}" class="btn btn-primary btn-sm">Zur Pipeline</a>
+  {% if job.status in ('queued', 'pushing', 'running') %}
+    <form method="post" action="/admin/audio/jobs/{{ job.job_id }}/cancel" style="margin:0">
+      <button type="submit" class="btn btn-danger btn-sm">Abbrechen</button>
+    </form>
+  {% endif %}
+</div>
+
+{% if job.error_message %}
+<div class="panel" style="border-color:var(--bad)">
+  <strong style="color:var(--bad)">Fehler:</strong> {{ job.error_message }}
+</div>
+{% endif %}
+
+<div class="panel">
+  <h2>Konfiguration</h2>
+  <div class="config-grid">
+    <div class="config-item"><div class="label">Job ID</div><div class="value">{{ job.job_id }}</div></div>
+    <div class="config-item"><div class="label">Slug</div><div class="value">{{ job.slug }}</div></div>
+    <div class="config-item"><div class="label">Model</div><div class="value">{{ job.model or '—' }}</div></div>
+    <div class="config-item"><div class="label">Minuten</div><div class="value">{{ job.minutes or '—' }}</div></div>
+    <div class="config-item"><div class="label">Clip</div><div class="value">{{ job.clip_seconds or '—' }}</div></div>
+    <div class="config-item"><div class="label">Preset</div><div class="value">{{ job.preset_name or 'custom' }}</div></div>
+    <div class="config-item"><div class="label">Kernel Ref</div><div class="value">{{ job.kernel_ref or '—' }}</div></div>
+    <div class="config-item"><div class="label">Output</div><div class="value">{{ job.output_path or '—' }}</div></div>
+  </div>
+
+  {% if job.prompts %}
+  <div style="margin-top:18px">
+    <div class="label" style="margin-bottom:8px">Prompts</div>
+    <pre>{% for prompt in job.prompts %}{{ prompt }}{% if not loop.last %}
+
+{% endif %}{% endfor %}</pre>
+  </div>
+  {% endif %}
+</div>
+
+<div class="panel">
+  <h2>Logs</h2>
+  <div class="log-viewer" id="log-viewer">
+    {% for log in logs %}
+    <div class="log-line {{ log.stream }}">{{ log.message }}</div>
+    {% else %}
+    <div class="log-line system">Warte auf Logs...</div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+(function() {
+  const status = '{{ job.status }}';
+  const jobId = '{{ job.job_id }}';
+  const viewer = document.getElementById('log-viewer');
+  let lastId = {{ logs[-1].id if logs else 0 }};
+  let polling = ['queued', 'pushing', 'running', 'downloading'].includes(status);
+
+  function pollLogs() {
+    if (!polling) return;
+    fetch('/admin/audio/jobs/' + jobId + '/logs?after_id=' + lastId)
+      .then(r => r.json())
+      .then(data => {
+        if (data.logs && data.logs.length > 0) {
+          data.logs.forEach(log => {
+            const div = document.createElement('div');
+            div.className = 'log-line ' + log.stream;
+            div.textContent = log.message;
+            viewer.appendChild(div);
+            lastId = log.id;
+          });
+          viewer.scrollTop = viewer.scrollHeight;
+        }
+        if (!['queued', 'pushing', 'running', 'downloading'].includes(data.status)) {
+          polling = false;
+          setTimeout(() => location.reload(), 1000);
+        }
+        if (polling) setTimeout(pollLogs, 2000);
+      })
+      .catch(() => { if (polling) setTimeout(pollLogs, 5000); });
+  }
+
+  if (polling) {
+    viewer.scrollTop = viewer.scrollHeight;
+    setTimeout(pollLogs, 2000);
+  }
+})();
+</script>
+{% endblock %}
