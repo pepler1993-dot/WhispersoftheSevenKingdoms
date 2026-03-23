@@ -657,11 +657,12 @@
     const phases = {
       'queued': { text: '📋 In der Warteschlange...', pct: 5 },
       'pushing': { text: '📤 Wird zu Kaggle hochgeladen...', pct: 15 },
-      'running': { text: '🔥 Kaggle GPU generiert...', pct: 40 },
+      'running': { text: '🔥 Kaggle GPU generiert Audio... (kann bis 45 Min dauern)', pct: 40 },
       'downloading': { text: '📥 Track wird heruntergeladen...', pct: 85 },
       'complete': { text: '✅ Fertig!', pct: 100 },
       'error': { text: '❌ Fehler', pct: 0 },
       'cancelled': { text: '🚫 Abgebrochen', pct: 0 },
+      'undefined': { text: '⏳ Wird vorbereitet...', pct: 10 },
     };
 
     function updateTimer() {
@@ -678,7 +679,7 @@
         .then(r => r.json())
         .then(d => {
           // Update phase
-          const phase = phases[d.status] || { text: '⏳ ' + d.status, pct: 20 };
+          const phase = phases[d.status] || phases[String(d.status)] || { text: '⏳ Status: ' + (d.status || 'wird geladen...'), pct: 10 };
           phaseEl.textContent = phase.text;
           
           // Animate progress bar
