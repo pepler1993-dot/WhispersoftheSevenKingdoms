@@ -1069,10 +1069,8 @@ pre {
 .gauge-unit { fill: rgba(255,255,255,0.5); font-size: 12px; text-anchor: middle; }
 .gauge-label { font-size: 0.85rem; font-weight: 600; color: rgba(255,255,255,0.8); margin-bottom: 2px; }
 .gauge-detail { font-size: 0.75rem; color: rgba(255,255,255,0.45); }
-.load-card { display: flex; flex-direction: column; justify-content: center; }
-.load-values { display: flex; justify-content: space-around; padding: 12px 0 8px; }
-.load-item { text-align: center; }
-.load-number { display: block; font-size: 1.5rem; font-weight: 700; color: #fff; }
-.load-period { font-size: 0.7rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; }
+.load-card { display: flex; flex-direction: column; justify-content: center; align-items: center; }
+.load-emoji { font-size: 3.5rem; line-height: 1; margin-bottom: 4px; }
+.load-status { font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 8px; }
 @media (max-width: 768px) { .server-stats-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 400px) { .server-stats-grid { grid-template-columns: 1fr 1fr; } .gauge-ring { width: 80px; height: 80px; } }
