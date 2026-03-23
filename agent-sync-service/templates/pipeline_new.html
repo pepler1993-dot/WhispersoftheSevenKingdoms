@@ -18,23 +18,23 @@
       <div class="upload-status" id="status-audio"></div>
     </div>
 
-    <div class="upload-zone" id="zone-thumbnail" data-type="thumbnail" style="margin-top:12px">
-      <div class="upload-label">Thumbnail (.jpg, .png, .webp) — optional</div>
+    <div class="upload-zone" id="zone-thumbnail" data-type="thumbnail">
+      <div class="upload-label">Thumbnail (.jpg, .png, .webp) &mdash; optional</div>
       <div class="upload-hint">Klicken oder Datei hierher ziehen</div>
       <input type="file" accept=".jpg,.jpeg,.png,.webp" />
       <div class="upload-status" id="status-thumbnail"></div>
     </div>
 
-    <div class="upload-zone" id="zone-metadata" data-type="metadata" style="margin-top:12px">
+    <div class="upload-zone" id="zone-metadata" data-type="metadata">
       <div class="upload-label">Metadata (.json)</div>
       <div class="upload-hint">Klicken oder Datei hierher ziehen</div>
       <input type="file" accept=".json" />
       <div class="upload-status" id="status-metadata"></div>
     </div>
 
-    <div style="margin-top:14px">
-      <h3 style="color:var(--muted);font-size:13px;text-transform:uppercase">Vorhandene Assets</h3>
-      <div style="font-size:13px;color:var(--muted)">
+    <div style="margin-top:16px" class="panel" style="padding:14px">
+      <h3 style="color:var(--muted);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em">Vorhandene Assets</h3>
+      <div class="assets-list">
         <div><strong>Songs:</strong> {{ assets.songs | join(', ') or 'keine' }}</div>
         <div><strong>Thumbnails:</strong> {{ assets.thumbnails | join(', ') or 'keine' }}</div>
         <div><strong>Metadata:</strong> {{ assets.metadata | join(', ') or 'keine' }}</div>
@@ -77,7 +77,7 @@
       <div class="form-group">
         <label for="house">Theme / House (optional)</label>
         <select name="house" id="house" class="form-select">
-          <option value="">— aus Metadata —</option>
+          <option value="">&mdash; aus Metadata &mdash;</option>
           {% for t in themes %}
           <option value="{{ t }}">{{ t }}</option>
           {% endfor %}
@@ -108,54 +108,54 @@
 
 <script>
 (function() {
-  const uploadSlug = document.getElementById('upload-slug');
-  const runSlug = document.getElementById('slug');
+  var uploadSlug = document.getElementById('upload-slug');
+  var runSlug = document.getElementById('slug');
 
   uploadSlug.addEventListener('input', function() {
     if (!runSlug.dataset.manual) runSlug.value = this.value;
   });
   runSlug.addEventListener('input', function() { this.dataset.manual = '1'; });
 
-  document.querySelectorAll('.upload-zone').forEach(zone => {
-    const input = zone.querySelector('input[type="file"]');
-    const type = zone.dataset.type;
+  document.querySelectorAll('.upload-zone').forEach(function(zone) {
+    var input = zone.querySelector('input[type="file"]');
+    var type = zone.dataset.type;
 
-    zone.addEventListener('click', () => input.click());
-    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
-    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
-    zone.addEventListener('drop', e => {
+    zone.addEventListener('click', function() { input.click(); });
+    zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.classList.add('dragover'); });
+    zone.addEventListener('dragleave', function() { zone.classList.remove('dragover'); });
+    zone.addEventListener('drop', function(e) {
       e.preventDefault();
       zone.classList.remove('dragover');
       if (e.dataTransfer.files.length) uploadFile(e.dataTransfer.files[0], type);
     });
-    input.addEventListener('change', () => { if (input.files.length) uploadFile(input.files[0], type); });
+    input.addEventListener('change', function() { if (input.files.length) uploadFile(input.files[0], type); });
   });
 
   function uploadFile(file, type) {
-    const slug = uploadSlug.value.trim();
+    var slug = uploadSlug.value.trim();
     if (!slug) { alert('Bitte zuerst einen Slug eingeben'); return; }
 
-    const status = document.getElementById('status-' + type);
-    status.textContent = 'Wird hochgeladen...';
+    var status = document.getElementById('status-' + type);
+    status.textContent = 'Wird hochgeladen\u2026';
     status.className = 'upload-status';
 
-    const fd = new FormData();
+    var fd = new FormData();
     fd.append('asset_type', type);
     fd.append('slug', slug);
     fd.append('file', file);
 
     fetch('/admin/pipeline/upload-asset', { method: 'POST', body: fd })
-      .then(r => r.json().then(d => ({ ok: r.ok, data: d })))
-      .then(({ ok, data }) => {
-        if (ok) {
-          status.textContent = 'Hochgeladen: ' + data.path;
+      .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+      .then(function(res) {
+        if (res.ok) {
+          status.textContent = 'Hochgeladen: ' + res.data.path;
           status.className = 'upload-status success';
         } else {
-          status.textContent = 'Fehler: ' + (data.detail || 'Unbekannt');
+          status.textContent = 'Fehler: ' + (res.data.detail || 'Unbekannt');
           status.className = 'upload-status error';
         }
       })
-      .catch(() => {
+      .catch(function() {
         status.textContent = 'Upload fehlgeschlagen';
         status.className = 'upload-status error';
       });

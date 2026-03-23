@@ -3,42 +3,45 @@
 {% block content %}
 <div class="status-header">
   <h1>Pipeline Runs</h1>
-  <a href="/admin/pipeline/new" class="btn btn-primary">Neuer Run</a>
+  <a href="/admin/pipeline/new" class="btn btn-primary">+ Neuer Run</a>
 </div>
+
 <section class="panel">
-  <table>
-    <thead>
-      <tr>
-        <th>Run</th>
-        <th>Slug</th>
-        <th>Titel</th>
-        <th>Status</th>
-        <th>Erstellt</th>
-        <th>Dauer</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for run in runs %}
-      <tr>
-        <td><a href="/admin/pipeline/run/{{ run.run_id }}">{{ run.run_id }}</a></td>
-        <td>{{ run.slug }}</td>
-        <td>{{ run.title or '—' }}</td>
-        <td><span class="badge {{ run.status }}">{{ run.status }}</span></td>
-        <td>{{ run.created_at[:19] if run.created_at else '—' }}</td>
-        <td>
-          {% if run.started_at and run.finished_at %}
-            {{ run.finished_at[:19] }}
-          {% elif run.started_at %}
-            laufend...
-          {% else %}
-            —
-          {% endif %}
-        </td>
-      </tr>
-      {% else %}
-      <tr><td colspan="6">Noch keine Runs vorhanden</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Run</th>
+          <th>Slug</th>
+          <th>Titel</th>
+          <th>Status</th>
+          <th>Erstellt</th>
+          <th>Dauer</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for run in runs %}
+        <tr>
+          <td><a href="/admin/pipeline/run/{{ run.run_id }}">{{ run.run_id[:8] }}&hellip;</a></td>
+          <td>{{ run.slug }}</td>
+          <td>{{ run.title or '&mdash;' }}</td>
+          <td><span class="badge {{ run.status }}">{{ run.status }}</span></td>
+          <td>{{ run.created_at[:16] if run.created_at else '&mdash;' }}</td>
+          <td>
+            {% if run.started_at and run.finished_at %}
+              {{ run.finished_at[:19] }}
+            {% elif run.started_at %}
+              <span style="color:var(--accent)">laufend&hellip;</span>
+            {% else %}
+              &mdash;
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="empty-state">Noch keine Runs vorhanden</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </section>
 {% endblock %}

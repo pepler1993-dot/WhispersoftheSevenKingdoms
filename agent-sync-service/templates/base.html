@@ -3,24 +3,58 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}agent-sync-service Admin{% endblock %}</title>
+  <title>{% block title %}Whispers Dashboard{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/css/admin.css" />
 </head>
 <body>
+  <div class="mobile-header">
+    <div class="mobile-brand">Whispers of the Seven Kingdoms</div>
+    <button class="menu-toggle" id="menu-toggle" aria-label="Menu">&#9776;</button>
+  </div>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
   <div class="layout">
-    <aside class="sidebar">
-      <div class="brand">agent-sync-service</div>
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">Whispers of the<br/>Seven Kingdoms</div>
       <nav>
-        <a href="/admin" class="nav-link {% if page == 'dashboard' %}active{% endif %}">Dashboard</a>
-        <a href="/admin/pipeline" class="nav-link {% if page == 'pipeline' %}active{% endif %}">Pipeline</a>
-        <a href="/admin/tasks" class="nav-link {% if page == 'tasks' %}active{% endif %}">Tasks</a>
-        <a href="/admin/events" class="nav-link {% if page == 'events' %}active{% endif %}">Events</a>
-        <a href="/admin/system" class="nav-link {% if page == 'system' %}active{% endif %}">System</a>
+        <a href="/admin" class="nav-link {% if page == 'dashboard' %}active{% endif %}">
+          <i class="nav-icon">&#9673;</i> Dashboard
+        </a>
+        <a href="/admin/pipeline" class="nav-link {% if page == 'pipeline' %}active{% endif %}">
+          <i class="nav-icon">&#9654;</i> Pipeline
+        </a>
+        <a href="/admin/tasks" class="nav-link {% if page == 'tasks' %}active{% endif %}">
+          <i class="nav-icon">&#9744;</i> Tasks
+        </a>
+        <a href="/admin/events" class="nav-link {% if page == 'events' %}active{% endif %}">
+          <i class="nav-icon">&#9889;</i> Events
+        </a>
+        <a href="/admin/system" class="nav-link {% if page == 'system' %}active{% endif %}">
+          <i class="nav-icon">&#9881;</i> System
+        </a>
       </nav>
     </aside>
     <main class="content">
       {% block content %}{% endblock %}
     </main>
   </div>
+  <script>
+  (function() {
+    var toggle = document.getElementById('menu-toggle');
+    var sidebar = document.getElementById('sidebar');
+    var overlay = document.getElementById('sidebar-overlay');
+    function open() { sidebar.classList.add('open'); overlay.classList.add('open'); }
+    function close() { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
+    toggle.addEventListener('click', function() {
+      sidebar.classList.contains('open') ? close() : open();
+    });
+    overlay.addEventListener('click', close);
+    sidebar.querySelectorAll('.nav-link').forEach(function(link) {
+      link.addEventListener('click', close);
+    });
+  })();
+  </script>
 </body>
 </html>

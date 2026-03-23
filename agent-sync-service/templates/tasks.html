@@ -2,30 +2,46 @@
 {% block title %}Tasks{% endblock %}
 {% block content %}
 <h1>Tasks</h1>
+
 <form method="get" class="filters panel inline-form">
   <input type="text" name="q" value="{{ filters.q or '' }}" placeholder="task_id suchen" />
   <input type="text" name="owner" value="{{ filters.owner or '' }}" placeholder="owner" />
   <input type="text" name="phase" value="{{ filters.phase or '' }}" placeholder="phase" />
-  <label><input type="checkbox" name="include_done" value="true" {% if filters.include_done %}checked{% endif %}/> include done</label>
-  <button type="submit">Filter</button>
+  <label class="form-check" style="margin:0">
+    <input type="checkbox" name="include_done" value="true" {% if filters.include_done %}checked{% endif %} />
+    include done
+  </label>
+  <button type="submit" class="btn btn-primary btn-sm">Filter</button>
 </form>
+
 <section class="panel">
-  <table>
-    <thead><tr><th>task_id</th><th>phase</th><th>owner</th><th>lease_until</th><th>updated_at</th><th>latest_seq</th></tr></thead>
-    <tbody>
-      {% for task in tasks %}
-      <tr>
-        <td><a href="/admin/tasks/{{ task.task_id }}">{{ task.task_id }}</a></td>
-        <td><span class="badge {{ task.phase }}">{{ task.phase }}</span></td>
-        <td>{{ task.owner_agent or '—' }}</td>
-        <td>{{ task.lease_until or '—' }}</td>
-        <td>{{ task.updated_at }}</td>
-        <td>{{ task.latest_seq }}</td>
-      </tr>
-      {% else %}
-      <tr><td colspan="6">Keine Tasks gefunden</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>task_id</th>
+          <th>phase</th>
+          <th>owner</th>
+          <th>lease_until</th>
+          <th>updated_at</th>
+          <th>latest_seq</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for task in tasks %}
+        <tr>
+          <td><a href="/admin/tasks/{{ task.task_id }}">{{ task.task_id }}</a></td>
+          <td><span class="badge {{ task.phase }}">{{ task.phase }}</span></td>
+          <td>{{ task.owner_agent or '&mdash;' }}</td>
+          <td>{{ task.lease_until or '&mdash;' }}</td>
+          <td>{{ task.updated_at }}</td>
+          <td>{{ task.latest_seq }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="empty-state">Keine Tasks gefunden</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </section>
 {% endblock %}

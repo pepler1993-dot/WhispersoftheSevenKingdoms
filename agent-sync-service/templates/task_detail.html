@@ -1,8 +1,15 @@
 {% extends 'base.html' %}
 {% block title %}Task Detail{% endblock %}
 {% block content %}
-<h1>Task Detail</h1>
-<div class="panel"><strong>{{ task_id }}</strong></div>
+<div class="status-header">
+  <h1>Task Detail</h1>
+  <a href="/admin/tasks" class="btn btn-secondary btn-sm">&larr; Alle Tasks</a>
+</div>
+
+<div class="panel" style="margin-bottom:16px">
+  <strong style="color:var(--accent)">{{ task_id }}</strong>
+</div>
+
 <div class="grid two">
   <section class="panel">
     <h2>State</h2>
@@ -13,6 +20,7 @@
     <pre>{{ detail.snapshot | tojson(indent=2) }}</pre>
   </section>
 </div>
+
 <div class="grid two">
   <section class="panel">
     <h2>Task Events</h2>
@@ -20,7 +28,7 @@
       {% for event in detail.task_events %}
       <li>#{{ event.seq }} {{ event.event_type }} / {{ event.action }}</li>
       {% else %}
-      <li>Keine Task-Events</li>
+      <li class="empty-state">Keine Task-Events</li>
       {% endfor %}
     </ul>
   </section>
@@ -28,9 +36,9 @@
     <h2>GitHub Events</h2>
     <ul class="list mono">
       {% for event in detail.github_events %}
-      <li>{{ event.delivery_id }} — {{ event.event_type }} / {{ event.action }}</li>
+      <li>{{ event.delivery_id }} &mdash; {{ event.event_type }} / {{ event.action }}</li>
       {% else %}
-      <li>Keine GitHub Events</li>
+      <li class="empty-state">Keine GitHub Events</li>
       {% endfor %}
     </ul>
   </section>

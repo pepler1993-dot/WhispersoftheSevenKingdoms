@@ -2,20 +2,21 @@
 {% block title %}System{% endblock %}
 {% block content %}
 <h1>System</h1>
+
 <div class="grid two">
   <section class="panel">
-    <h2>DB</h2>
+    <h2>Datenbank</h2>
     <ul class="list mono">
       <li>{{ system.db_path }}</li>
-      <li>Latest GitHub Event: {{ system.latest_github_event_at or '—' }}</li>
-      <li>Latest Task Update: {{ system.latest_task_update_at or '—' }}</li>
+      <li>Latest GitHub Event: {{ system.latest_github_event_at or '&mdash;' }}</li>
+      <li>Latest Task Update: {{ system.latest_task_update_at or '&mdash;' }}</li>
     </ul>
   </section>
   <section class="panel">
     <h2>Counts</h2>
     <ul class="list mono">
       {% for key, value in system.counts.items() %}
-      <li>{{ key }}: {{ value }}</li>
+      <li><strong>{{ key }}:</strong> {{ value }}</li>
       {% endfor %}
     </ul>
   </section>
