@@ -1,479 +1,229 @@
-# Technische Pipeline – Whispers of the Seven Kingdoms
+# PIPELINE – aktueller Produktionspfad
 
-Ziel: Aus einer Song-Idee ein veröffentlichungsfertiges Audio-/Video-Paket erzeugen und dieses mit möglichst wenig manueller Arbeit auf Plattformen wie YouTube bereitstellen.
-
----
-
-## 1. Gesamtüberblick
-
-Die Pipeline besteht aus 8 Stufen:
-
-1. **Idee & Planung**
-2. **Song-Erstellung**
-3. **Audio-Finalisierung**
-4. **Visual- und Video-Erstellung**
-5. **Metadaten-Erstellung**
-6. **Qualitätsprüfung**
-7. **Publikationsvorbereitung**
-8. **Upload & Veröffentlichung**
-
-Langfristiges Ziel:
-Ein fertiger Song landet in einem definierten Input-Ordner, dazu kommen wenige Metadaten – der Rest läuft standardisiert oder automatisiert.
+Ziel dieser Seite: den **real existierenden** Pipeline-Stand beschreiben, nicht Wunschdenken von vor drei Umbauten.
 
 ---
 
-## 2. Zielstruktur im Repository
+## Kurzüberblick
 
-Empfohlene Struktur:
+Der aktuelle Kernpfad lautet:
+
+**Slug wählen → Audio bereitstellen → Metadaten laden → optional Thumbnail erzeugen → Video rendern → QA laufen lassen → optional YouTube-Upload**
+
+Zentrale Datei:
+- `pipeline/pipeline.py`
+
+---
+
+## Relevante Verzeichnisse
 
 ```text
-input/
-  songs/
-  artwork/
-  metadata/
+pipeline/
+  pipeline.py
+  scripts/audio/
+  scripts/metadata/
+  scripts/publish/
+  scripts/qa/
+  scripts/thumbnails/
+  scripts/video/
 
-work/
-  audio/
-  video/
-  thumbnails/
-  publish/
+data/upload/songs/
+data/upload/metadata/
+data/upload/thumbnails/
+data/upload/done/
 
-output/
-  youtube/
-  spotify/
-  soundcloud/
-
-templates/
-  descriptions/
-  thumbnails/
-  metadata/
-
-scripts/
-  audio/
-  video/
-  metadata/
-  publish/
-  qa/
-
-docs/
-  platform-guides/
-```
-
-### Bedeutung
-- **input/** → Rohmaterial vom Team
-- **work/** → Zwischenstände, Render, temporäre Artefakte
-- **output/** → finale exportierte Pakete pro Plattform
-- **templates/** → Vorlagen für Beschreibungen, Titel, Metadaten, Thumbnails
-- **scripts/** → Automatisierung
-- **docs/** → Dokumentation und Plattformregeln
-
----
-
-## 3. Pipeline im Detail
-
-## 3.1 Idee & Planung
-
-### Ziel
-Eine lose Song-Idee in ein klar definiertes Produktionsobjekt verwandeln.
-
-### Input
-- Thema (z. B. Winterfell, House Stark, The Wall, Daenerys, King's Landing)
-- Stimmung (ruhig, düster, warm, mystisch, melancholisch)
-- Format (reines Audio / YouTube-Video / Shorts-Teaser)
-- Zielplattformen
-
-### Output
-Eine strukturierte Projektdatei, z. B. JSON oder YAML:
-
-```json
-{
-  "title": "Whispers of Winterfell",
-  "theme": "House Stark",
-  "mood": ["calm", "cold", "melancholic"],
-  "duration_target": "02:30:00",
-  "platforms": ["youtube"],
-  "tags": ["sleep music", "fantasy ambience", "game of thrones inspired"]
-}
-```
-
-### Technische Arbeitspakete
-- Standard für Song-Metadaten definieren
-- Vorlage für Song-Briefing erstellen
-- Namensschema definieren
-- Pflichtfelder festlegen
-
----
-
-## 3.2 Song-Erstellung
-
-### Ziel
-Das eigentliche Audio erzeugen oder sammeln.
-
-### Mögliche Varianten
-- manuell komponiert
-- mit DAW produziert
-- mit KI-Musiktool erzeugt
-- Kombination aus Loops, Instrumenten, Ambience und Voice-Elementen
-
-### Input
-- Song-Briefing
-- Audioquellen / Stems / Midis / Render
-
-### Output
-- Rohmix oder erste Master-Datei
-- optionale Einzelspuren / Stems
-
-### Technische Arbeitspakete
-- Standard-Eingangsformate definieren (`wav`, `flac`, ggf. `mp3` nur als Ausnahme)
-- Konvention für Dateinamen definieren
-- Input-Ordner für neue Songs festlegen
-- Optional: Validierungsskript für Dateiformate und Pflichtdateien
-
----
-
-## 3.3 Audio-Finalisierung
-
-### Ziel
-Das Audio für Veröffentlichung und Weiterverarbeitung stabilisieren.
-
-### Schritte
-- Lautstärke prüfen
-- Clipping prüfen
-- Intro/Outro prüfen
-- Export in Ziel-Formate
-- Loop-Tauglichkeit prüfen, falls relevant
-
-### Output
-- Master-Audio (`wav`)
-- Plattformversion (`mp3`, optional `aac`)
-- technische Metadaten (Dauer, Bitrate, Sample-Rate)
-
-### Technische Arbeitspakete
-- Audio-QA-Checkliste definieren
-- Exportprofile definieren
-- Skript für technische Audio-Analyse vorbereiten
-- Dateinamen-Regeln für finale Exporte festlegen
-
-### Sinnvolle Prüfungen
-- Sample-Rate
-- Lautheit/LUFS
-- Peak-Level
-- Dateilänge
-- Stereo/Mono
-- defekte oder leere Dateien
-
----
-
-## 3.4 Visual- und Video-Erstellung
-
-### Ziel
-Aus Audio + Artwork ein veröffentlichbares Video erzeugen.
-
-### Mögliche Assets
-- Cover-Art
-- animierter Hintergrund
-- leichter Partikel-/Nebel-Effekt
-- statisches Bild mit Audio
-- Thumbnail
-
-### Output
-- YouTube-Video-Datei
-- Thumbnail-Datei
-- optionale Kurzclips für Social Media
-
-### Technische Arbeitspakete
-- Thumbnail-Spezifikation definieren
-- Video-Template definieren
-- ffmpeg-basierte Render-Pipeline planen
-- optional Motion-Template-Struktur festlegen
-- Intro/Outro-Regeln definieren
-
-### Automatisierungsidee
-Mit einem Skript:
-- Audio-Datei einlesen
-- Hintergrundbild auswählen
-- Titel-Overlay generieren
-- Video rendern
-- Thumbnail exportieren
-
----
-
-## 3.5 Metadaten-Erstellung
-
-### Ziel
-Alle Texte und Plattformdaten automatisch oder halbautomatisch erzeugen.
-
-### Benötigte Metadaten
-- Titel
-- Beschreibung
-- Tags/Keywords
-- Kapitelmarken (optional)
-- Playlist-Zuordnung
-- Plattform-spezifische Kurztexte
-- Veröffentlichungsdatum / Scheduling
-
-### Output
-Beispielsweise als JSON:
-
-```json
-{
-  "title": "Whispers of Winterfell | Game of Thrones Inspired Sleep Music",
-  "description": "Drift into the cold silence of the North with this Game of Thrones inspired sleep track...",
-  "tags": ["sleep music", "fantasy sleep", "winterfell ambience"],
-  "youtube": {
-    "privacy": "private",
-    "playlist": "Sleep Music"
-  }
-}
-```
-
-### Technische Arbeitspakete
-- Metadaten-Schema definieren
-- Beschreibungsvorlagen schreiben
-- Titelregeln festlegen
-- Tag-Bibliothek pflegen
-- Playlist-Mapping dokumentieren
-
----
-
-## 3.6 Qualitätsprüfung
-
-### Ziel
-Vor Upload verhindern, dass Müll automatisiert live geht.
-
-### Prüfbereiche
-- Sind alle Pflichtdateien vorhanden?
-- Stimmen Dateinamen und Struktur?
-- Ist Audio abspielbar?
-- Ist Video renderbar und vollständig?
-- Ist Thumbnail vorhanden?
-- Sind Titel/Beschreibung nicht leer?
-- Sind Plattformfelder gültig?
-
-### Technische Arbeitspakete
-- QA-Checkliste dokumentieren
-- Preflight-Skript bauen
-- Fehlerklassen definieren:
-  - blockierend
-  - Warnung
-  - Info
-
-### Ergebnis
-Eine Freigabe-Datei oder ein Report, z. B.:
-
-```json
-{
-  "status": "pass",
-  "warnings": [],
-  "errors": []
-}
+data/output/youtube/
+data/work/jobs/
 ```
 
 ---
 
-## 3.7 Publikationsvorbereitung
+## Minimaler Input
 
-### Ziel
-Plattformfähige Upload-Pakete bauen.
+Jeder Lauf hängt an einem gemeinsamen **Slug**.
 
-### Output pro Plattform
+Beispiel:
 
-#### YouTube
-- Video-Datei
-- Thumbnail
-- Titel
-- Beschreibung
-- Tags
-- Playlist-Ziel
-- Sichtbarkeit / Terminierung
+```text
+data/upload/songs/whispers-of-winterfell.wav
+data/upload/metadata/whispers-of-winterfell.json
+```
 
-#### Spotify / SoundCloud
-- Audio-Datei
-- Cover-Art
-- Titel
-- Beschreibung
-- Genre / Tags
-- Veröffentlichungsdaten
+Optional:
 
-### Technische Arbeitspakete
-- Plattformprofile definieren
-- Export-Mapping pro Plattform dokumentieren
-- Ordnerstruktur für fertige Upload-Pakete definieren
+```text
+data/upload/thumbnails/whispers-of-winterfell.jpg
+```
+
+Der Slug ist der gemeinsame Schlüssel zwischen Audio, Thumbnail, Metadaten und Job-Status.
 
 ---
 
-## 3.8 Upload & Veröffentlichung
+## Was `pipeline/pipeline.py` aktuell kann
 
-### Ziel
-Den finalen Upload reproduzierbar und möglichst automatisiert durchführen.
+### 1. Audio finden
+Unterstützte Endungen:
+- `.mp3`
+- `.wav`
+- `.ogg`
 
-### YouTube
-Mögliche Wege:
-- manuell im Browser
-- per offizieller YouTube API
-- halbautomatisch: Metadaten generieren, Upload manuell
+### 2. Metadaten laden
+Pflicht ist eine JSON-Datei unter:
+- `data/upload/metadata/<slug>.json`
 
-### SoundCloud / Spotify
-- prüfen, welche APIs oder Distributionswege praktikabel sind
-- ggf. Drittanbieter/Distributor nötig
+### 3. optional Audio loopen
+Für kurze Ausgangstracks kann die Laufzeit künstlich verlängert werden:
+- `--loop-hours`
+- `--crossfade`
 
-### Technische Arbeitspakete
-- YouTube-Upload-Strategie festlegen
-- API-Zugang / OAuth sauber dokumentieren
-- Secrets-Management definieren
-- Retry-Strategie und Fehlerlogging festlegen
-- Upload-Logs speichern
+### 4. optional Audio post-processen
+Standardmäßig läuft Audio-Postprocessing, sofern nicht deaktiviert:
+- `--audio-preset`
+- `--skip-post-process`
 
-### Wichtig
-Automatisierte Uploads brauchen saubere Authentifizierung. Tokens oder Zugangsdaten gehören **nicht** ins Repo.
+### 5. Thumbnail bereitstellen
+- vorhandenes Thumbnail verwenden
+- oder automatisch generieren
 
----
+### 6. Metadaten für Output erzeugen
+Output typischerweise:
+- `data/output/youtube/<slug>/metadata.json`
 
-## 4. Technische Arbeitspakete nach Bereichen
+### 7. Video rendern
+Zwei Pfade:
+- **statisch** mit `render.py`
+- **animiert** mit `render_animated.py` und `--animated`
 
-## A. Datenmodell & Struktur
-- [ ] Verzeichnisstruktur anlegen
-- [ ] Metadaten-Schema definieren (`song.json` oder `song.yaml`)
-- [ ] Namenskonventionen dokumentieren
-- [ ] Pflichtdateien je Song definieren
+### 8. QA / Preflight ausführen
+Aktuell über:
+- `pipeline/scripts/qa/preflight_metadata_report.py`
 
-## B. Audio-Pipeline
-- [ ] Audio-Eingabeformate festlegen
-- [ ] QA-Kriterien für Audio dokumentieren
-- [ ] Exportprofile definieren
-- [ ] Skript für Audio-Validierung planen
+### 9. optional Upload zu YouTube
+Nur wenn **nicht** `--skip-upload` gesetzt ist.
 
-## C. Video-Pipeline
-- [ ] Standard für Hintergrundgrafiken definieren
-- [ ] Thumbnail-Spezifikation dokumentieren
-- [ ] Video-Rendering mit `ffmpeg` konzipieren
-- [ ] Template für lange YouTube-Videos festlegen
-- [ ] Optional: Shorts-/Teaser-Template definieren
-
-## D. Metadaten-Automation
-- [ ] Titel-Template entwerfen
-- [ ] Beschreibungsvorlagen erstellen
-- [ ] Tag-System definieren
-- [ ] Playlist-Zuordnung dokumentieren
-- [ ] Scheduling-Felder festlegen
-
-## E. QA & Freigabe
-- [ ] Preflight-Check definieren
-- [ ] Fehler-Report-Format definieren
-- [ ] Manuelle Reviewpunkte dokumentieren
-- [ ] Freigabeschritt vor Upload festlegen
-
-## F. Publishing
-- [ ] Zielplattformen priorisieren
-- [ ] YouTube zuerst konkretisieren
-- [ ] OAuth/API-Ansatz dokumentieren
-- [ ] Upload-Logik spezifizieren
-- [ ] Secrets außerhalb des Repos verwalten
-
-## G. Projektorganisation
-- [ ] Rollen im Team festhalten
-- [ ] Branch-Strategie konsequent nutzen
-- [ ] PR-Review-Routine etablieren
-- [ ] Dokumentation regelmäßig aktualisieren
+### 10. Quellen nach `done/` verschieben
+Wenn nicht `--skip-done-move` gesetzt ist.
 
 ---
 
-## 5. Empfohlene Reihenfolge für die Umsetzung
+## Typische Kommandos
 
-### Phase 1 – Fundament
-1. Repository-Struktur anlegen
-2. Metadaten-Schema definieren
-3. Pflichtdateien und Naming festlegen
-4. YouTube als erste Zielplattform priorisieren
+### Standard-Testlauf ohne Upload
 
-### Phase 2 – Produktionspipeline
-5. Audio-QA standardisieren
-6. Thumbnail- und Video-Template definieren
-7. Render-Skript für Video-Prototyp bauen
-8. Beschreibung/Titel automatisch generieren
+```bash
+python pipeline/pipeline.py --slug whispers-of-winterfell --minutes 42 --skip-upload
+```
 
-### Phase 3 – Uploadpipeline
-9. Upload-Paketstruktur definieren
-10. YouTube-Upload manuell reproduzierbar machen
-11. Danach API-/OAuth-Automatisierung ergänzen
-12. Logging und Fehlerbehandlung einbauen
+### Öffentlich hochladen
 
-### Phase 4 – Erweiterung
-13. Spotify/SoundCloud prüfen
-14. Shorts/Teaser ergänzen
-15. Feedbackschleife und Performance-Auswertung einbauen
+```bash
+python pipeline/pipeline.py --slug whispers-of-winterfell --minutes 42 --public
+```
 
----
+### 20 Minuten Quelle zu 3 Stunden loopen
 
-## 6. Minimale erste Version (MVP)
+```bash
+python pipeline/pipeline.py --slug whispers-of-winterfell --minutes 20 --loop-hours 3 --skip-upload
+```
 
-Damit das Projekt nicht in Architektur-Pornografie versinkt, hier eine realistische erste Version:
+### Animierten Renderer erzwingen
 
-### MVP-Workflow
-1. Song als fertige `wav`/`mp3` in `input/songs/` legen
-2. Cover-Bild in `input/artwork/` legen
-3. `song.json` mit Titel, Beschreibung, Tags ausfüllen
-4. Skript rendert daraus ein simples YouTube-Video
-5. Skript erzeugt Thumbnail und Upload-Paket
-6. Upload zunächst manuell oder halbautomatisch
+```bash
+python pipeline/pipeline.py --slug whispers-of-winterfell --minutes 42 --animated --skip-upload
+```
 
-### Vorteil
-- schnell testbar
-- wenig moving parts
-- gute Basis für spätere Vollautomatisierung
+### Nur vorbereiten / trocken testen
+
+```bash
+python pipeline/pipeline.py --slug whispers-of-winterfell --minutes 42 --dry-run --skip-upload
+```
 
 ---
 
-## 7. Offene Entscheidungen
+## Wichtige Outputs
 
-Diese Punkte müssen noch vom Team entschieden werden:
-- Welche Tools erzeugen die Songs?
-- Werden Songs rein manuell oder teilweise KI-basiert erstellt?
-- Welche Videooptik soll Standard werden?
-- Erst nur YouTube oder direkt Multi-Plattform?
-- Vollautomatischer Upload oder zunächst manuell mit vorbereiteten Assets?
-- Welches Secrets-Management wird genutzt?
+### Fertige YouTube-Artefakte
 
----
+```text
+data/output/youtube/<slug>/
+```
 
-## 8. Empfehlung
+Dort liegen typischerweise:
+- `video.mp4`
+- `metadata.json`
+- `thumbnail.jpg` oder vorhandenes Asset
 
-Sinnvolle nächste konkrete Schritte:
-1. **YouTube als erste Zielplattform festlegen**
-2. **ein `song.json`-Schema definieren**
-3. **eine feste Ordnerstruktur anlegen**
-4. **einen ersten ffmpeg-Prototyp für Audio+Bild→Video bauen**
-5. **erst danach Upload-Automatisierung anfassen**
+### Laufstatus
 
-Sonst baut ihr euch zuerst einen Raumhafen und merkt danach, dass noch nicht mal ein Fahrrad existiert.
+```text
+data/work/jobs/<slug>/status.json
+```
 
----
-
-## Aktueller Stand (Stand: 2026-03-21)
-
-| Stufe | Status | Bemerkung |
-|---|---|---|
-| 1. Idee & Planung | ✅ | Schema + Briefing-Vorlage existiert |
-| 2. Song-Erstellung | ✅ | MusicGen-Pipeline fertig (`publishing/musicgen/`) |
-| 3. Audio-Finalisierung | ✅ | `merge.py` mit Crossfade |
-| 4. Video-Erstellung | ❌ | Script fehlt (Pako #7) |
-| 5. Metadaten | 🔶 | Templates da, Generator fehlt (Smith #8) |
-| 6. QA | ✅ | Preflight + Validierung existiert (`scripts/qa/`) |
-| 7. Publikationsvorbereitung | 🔶 | Teilweise (Templates unter `publishing/`) |
-| 8. Upload | ❌ | YouTube-Script fehlt (Smith #9) |
-
-Legende: ✅ erledigt | 🔶 teilweise | ❌ offen
+Phasen werden dort fortgeschrieben, z. B.:
+- `audio_ready`
+- `audio_processed`
+- `thumbnail_ready`
+- `metadata_ready`
+- `rendered`
+- `qa_passed`
+- `uploaded`
+- `done`
 
 ---
 
-## 9. Weiterführende Automatisierung
+## Beziehung zum Dashboard
 
-Für eine schrittweise Analyse der konkreten Automatisierung pro Einzelschritt siehe:
-- `AUTOMATION.md`
+Das Dashboard unter `services/sync/` ist die Bedienoberfläche.
+Die Pipeline unter `pipeline/` ist der eigentliche Produktionspfad.
 
-Dort ist pro Pipeline-Stufe dokumentiert:
-- was voll automatisierbar ist
-- was nur halbautomatisch sinnvoll ist
-- was man bewusst manuell prüfen sollte
-- welche Skripte und Tools sich anbieten
-- welche Reihenfolge für den Ausbau realistisch ist
+Praktisch heißt das:
+- Dashboard sammelt Eingaben, zeigt Jobs, Status und Operations
+- Pipeline verarbeitet Dateien und erzeugt Artefakte
+
+---
+
+## Beziehung zur Audio-Erzeugung
+
+Audio ist aktuell der heikelste Teil des Gesamtsystems.
+
+Es gibt oder gab mehrere Pfade:
+- Kaggle-basierte Erzeugung
+- lokale Worker / GPU-VM
+- vorbereitete Stable-Audio-/Provider-Ansätze
+
+Für die Pipeline selbst ist das zweitrangig, **solange am Ende eine gültige Audio-Datei im Upload-Ordner liegt**.
+
+---
+
+## Was diese Seite bewusst nicht tut
+
+Diese Seite erklärt **nicht**:
+- die Architekturgeschichte des Projekts
+- warum bestimmte Audio-Strategien bevorzugt wurden
+- jede UI-Seite im Dashboard
+
+Dafür sind andere Dokus zuständig:
+- `PROJECT_STATUS.md`
+- `ROADMAP.md`
+- Explanation-Dokumente unter `docs/`
+
+---
+
+## Bekannte Schwachstellen
+
+- ältere Doku referenziert noch alte Root-`scripts/`-Pfade
+- Audio-Seite ist strategisch noch nicht final stabil
+- manche QA-/Reference-Dokus hängen noch hinter dem echten Code her
+
+---
+
+## Praktische Empfehlung
+
+Wenn du nur wissen willst, ob die Pipeline funktioniert:
+1. gültigen Slug wählen
+2. Audio + Metadata bereitstellen
+3. `--skip-upload` Testlauf fahren
+4. `data/output/youtube/<slug>/` prüfen
+5. `data/work/jobs/<slug>/status.json` lesen
+
+Das ist der kürzeste Weg zur Wahrheit.

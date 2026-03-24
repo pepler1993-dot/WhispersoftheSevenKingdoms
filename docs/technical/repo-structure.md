@@ -1,55 +1,167 @@
-# Repo-Struktur – technisches Grundgerüst
+# Repo-Struktur – aktueller Monorepo-Stand
 
-## Ziel
-Die Struktur soll zwischen Rohmaterial, Zwischenständen, Templates, Skripten und finalen Outputs sauber trennen.
+## Zweck
+Diese Seite beschreibt die **real relevante Struktur** des aktuellen Repositories.
+Nicht jede historische Schicht, sondern das, woran man sich beim Arbeiten orientieren sollte.
 
-## Verzeichnisse
+---
+
+## Top-Level-Überblick
 
 ```text
-input/
-  songs/
-  artwork/
-  metadata/
+services/sync/                 Dashboard / FastAPI / Operations
+pipeline/                      End-to-end Pipeline + Produktionsskripte
+musicgen/                      Audio-Generator-bezogene Tools / Notebooks
 
-work/
-  audio/
-  video/
-  thumbnails/
-  publish/
+data/
+  upload/                      Eingangsdateien für Pipeline-Läufe
+  output/                      erzeugte Artefakte
+  work/                        Status, Jobs, Zwischenstände
+  assets/                      Hintergründe / Assets
 
-output/
-  youtube/
-  spotify/
-  soundcloud/
+schemas/                       JSON-Schemata
+scripts/                       einzelne Hilfsskripte außerhalb der Kernpipeline
 
-templates/
-  metadata/
-  descriptions/
-  thumbnails/
-
-schemas/
-
-docs/
-  technical/
-  platform-guides/
-
-scripts/
-  metadata/
-  qa/
-  video/
-  publish/
+docs/                          Projektdokumentation
+README.md                      Repo-Einstieg
+PROJECT_STATUS.md              operative Wahrheit / aktueller Stand
+ROADMAP.md                     priorisierte nächste Schritte
+requirements.txt               gemeinsame Python-Abhängigkeiten
 ```
 
-## Bedeutung
-- `input/` → angelieferte Quelldateien
-- `work/` → Zwischenstände und temporäre Verarbeitung
-- `output/` → finale Pakete pro Plattform
-- `templates/` → Vorlagen für Metadata, Texte und Visual-Regeln
-- `schemas/` → maschinenlesbare Regeln
-- `docs/technical/` → technische Entscheidungen und Standards
-- `scripts/` → spätere CLI- und Pipeline-Werkzeuge
+---
 
-## Verhältnis zu `upload/`
-`upload/` bleibt als pragmatische Übergabestruktur für den aktuellen einfachen Workflow bestehen.
+## Wichtige Bereiche im Detail
 
-Die größere Zielstruktur ist für den PoC-Ausbau und die spätere saubere Pipeline gedacht.
+## `services/sync/`
+
+Der Dashboard-/Control-Panel-Bereich.
+
+Wichtig:
+- `app/main.py` → FastAPI-Einstieg
+- `app/store.py` → SQLite / Persistenz
+- `app/kaggle_gen.py` → Kaggle-Audio-Integration
+- `app/stable_audio_gen.py` → lokaler/alternativer Audio-Pfad
+- `templates/` → UI-Templates
+- `deploy/` → systemd / Setup / Update
+
+Nutzen:
+- Bedienoberfläche
+- Job-Ansicht
+- Operations / System / Status
+- Audio-Generator-Workflows
+
+---
+
+## `pipeline/`
+
+Der eigentliche Produktionspfad.
+
+Wichtig:
+- `pipeline.py` → Orchestrierung
+- `scripts/audio/` → Looping / Postprocessing
+- `scripts/thumbnails/` → Thumbnail-Erzeugung
+- `scripts/video/` → Render-Pfade
+- `scripts/metadata/` → Metadata-Generierung / Validierung
+- `scripts/qa/` → Preflight / Checks
+- `scripts/publish/` → YouTube-Upload
+
+---
+
+## `musicgen/`
+
+Audio-Erzeugungsnahe Tools und Artefakte.
+
+Beispiele:
+- `generate.py`
+- `merge.py`
+- `prompts.json`
+- `MusicGen_Colab.ipynb`
+
+Dieser Bereich ist strategisch wichtig, aber die endgültige Produktionswahrheit liegt aktuell nicht allein hier.
+
+---
+
+## `data/`
+
+Hier landen operative Dateien.
+
+### `data/upload/`
+Eingabe für Pipeline-Läufe:
+
+```text
+data/upload/songs/
+data/upload/metadata/
+data/upload/thumbnails/
+data/upload/done/
+```
+
+### `data/output/`
+Ausgabe-Artefakte, z. B.:
+
+```text
+data/output/youtube/
+```
+
+### `data/work/`
+Arbeitsstände, Statusdateien, Reports:
+
+```text
+data/work/jobs/
+data/work/publish/
+data/work/video/
+data/work/thumbnails/
+```
+
+### `data/assets/`
+Projekt-Assets, z. B. Hintergrundbilder für Renderer.
+
+---
+
+## `schemas/`
+
+Maschinenlesbare Regeln, z. B.:
+- `schemas/song.schema.json`
+
+---
+
+## `docs/`
+
+Die Projektdokumentation wird schrittweise nach Diátaxis organisiert:
+- Tutorials
+- Guides
+- Reference
+- Explanation
+
+Siehe:
+- `docs/README.md`
+- `docs/DOCS_AUDIT.md`
+
+---
+
+## Historische Stolperfallen
+
+Ältere Dokumente oder Commits sprechen teils noch von:
+- `input/`
+- `output/`
+- `work/`
+- `templates/`
+- `scripts/` direkt im Root
+- `publishing/musicgen/`
+- `agent-sync-service/`
+
+Das kann als historischer Kontext relevant sein, ist aber **nicht** die beste Orientierung für den aktuellen Stand.
+
+---
+
+## Praktische Faustregel
+
+Wenn du neu ins Repo kommst, orientiere dich zuerst an:
+1. `README.md`
+2. `PROJECT_STATUS.md`
+3. `docs/README.md`
+4. `services/sync/`
+5. `pipeline/`
+6. `data/`
+
+Sonst verläufst du dich schnell in den Sedimenten früherer Ausbaustufen.

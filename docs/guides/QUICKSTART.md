@@ -1,119 +1,243 @@
 # QUICKSTART – Whispers of the Seven Kingdoms
 
-**Ziel:** In 5 Minuten einen fertigen Song auf YouTube haben (sofern API Keys vorhanden).
+**Ziel:** Das Projekt lokal starten und einen ersten Pipeline-Test ohne Blindflug durchführen.
+
+Diese Anleitung ist bewusst pragmatisch. Kein Architekturroman, sondern der schnellste sinnvolle Einstieg in den aktuellen Monorepo-Stand.
 
 ---
 
-## Was du brauchst
+## Was du am Ende erreicht hast
 
-- Python 3.10+
-- Hugging Face Token (HF_TOKEN) für MusicGen
-- YouTube OAuth2 Credentials (`credentials.json`)
-- FFmpeg installiert
-- Repository geklont: `git clone https://github.com/pepler1993-dot/WhispersoftheSevenKingdoms.git`
+Wenn alles klappt, kannst du danach:
+- das Repo lokal starten
+- das Dashboard ausführen
+- einen Pipeline-Test mit vorhandenem Audio und Metadaten anstoßen
+- verstehen, wo Input, Output und Statusdateien liegen
 
 ---
 
-## 1. Environment vorbereiten
+## Voraussetzungen
+
+Minimum:
+- Python **3.11+**
+- `ffmpeg`
+- geklontes Repo
+
+Optional, aber oft relevant:
+- Google OAuth Credentials für echten YouTube-Upload
+- GPU / Kaggle / lokaler Worker für Audio-Erzeugung
+
+---
+
+## 1. Repository klonen
 
 ```bash
+git clone https://github.com/pepler1993-dot/WhispersoftheSevenKingdoms.git
 cd WhispersoftheSevenKingdoms
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -r publishing/musicgen/requirements.txt
-pip install pillow  # für Thumbnails
-```
-
-FFmpeg check: `ffmpeg -version` muss funktionieren.
-
----
-
-## 2. Tokens setzen
-
-```bash
-export HF_TOKEN="hf_..."
-# YouTube credentials.json ins Repo-Root legen (oder Pfad angeben)
 ```
 
 ---
 
-## 3. Song-Idee definieren
+## 2. Python-Umgebung aufsetzen
 
-Erstelle `input/metadata/my-song.json` basierend auf `templates/metadata/example.song.json`.
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+```
 
-Mindestfelder:
+Wenn du nur Teilbereiche nutzt, kann es zusätzliche Spezial-Dependencies geben. Für den normalen Einstieg reicht erst mal das Root-`requirements.txt`.
 
-```json
-{
-  "title": "Whispers of Winterfell",
-  "theme": "winterfell",
-  "mood": "calm",
-  "duration_target": "08:00:00",
-  "platforms": ["youtube"],
-  "tags": ["sleep music", "winterfell ambient", "game of thrones"]
-}
+---
+
+## 3. `ffmpeg` installieren
+
+Ubuntu / Debian:
+
+```bash
+sudo apt update
+sudo apt install -y ffmpeg
+```
+
+Check:
+
+```bash
+ffmpeg -version
+```
+
+Wenn das nicht geht, brauchst du mit Video-Rendering gar nicht erst weiterzumachen.
+
+---
+
+## 4. Überblick über die aktuelle Struktur
+
+Die aktuell relevanten Pfade sind:
+
+```text
+services/sync/                 Dashboard / FastAPI
+pipeline/                      Orchestrierung + Render/Publish-Skripte
+musicgen/                      Audio-Generator-bezogene Tools / Notebooks
+
+data/upload/songs/             Eingangs-Audio
+data/upload/metadata/          Eingangs-Metadaten
+data/upload/thumbnails/        optionale Thumbnails
+
+data/output/youtube/           finale YouTube-Artefakte
+
+data/work/jobs/                Statusdateien pro Lauf
+```
+
+Wichtig: ältere Docs sprechen teilweise noch von `input/`, `output/` oder `scripts/` direkt im Root. Das ist für den aktuellen Stand **nicht mehr die Hauptwahrheit**.
+
+---
+
+## 5. Dashboard lokal starten
+
+```bash
+source .venv/bin/activate
+uvicorn services.sync.app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+Dann öffnen:
+- `http://127.0.0.1:8000`
+
+Was du dort sehen solltest:
+- Dashboard / Overview
+- Pipeline/Create
+- Audio Generator
+- Operations/System-Bereiche je nach aktuellem Stand
+
+---
+
+## 6. Ersten Pipeline-Test fahren
+
+### Benötigte Dateien
+
+Für einen Slug, z. B. `whispers-of-winterfell`:
+
+```text
+data/upload/songs/whispers-of-winterfell.mp3
+oder
+data/upload/songs/whispers-of-winterfell.wav
+
++ data/upload/metadata/whispers-of-winterfell.json
+```
+
+Optional:
+
+```text
+data/upload/thumbnails/whispers-of-winterfell.jpg
+```
+
+Wenn kein Thumbnail vorhanden ist, kann die Pipeline eins erzeugen.
+
+---
+
+## 7. Testlauf ohne Upload
+
+```bash
+source .venv/bin/activate
+python pipeline/pipeline.py --slug whispers-of-winterfell --minutes 42 --skip-upload
+```
+
+Das macht im Kern:
+1. Audio finden
+2. Metadaten laden
+3. optional Audio post-processen
+4. Thumbnail übernehmen oder erzeugen
+5. Metadaten für YouTube generieren
+6. Video rendern
+7. QA/Preflight laufen lassen
+8. Statusdatei aktualisieren
+
+Output typischerweise hier:
+
+```text
+data/output/youtube/whispers-of-winterfell/
+```
+
+Status typischerweise hier:
+
+```text
+data/work/jobs/whispers-of-winterfell/status.json
 ```
 
 ---
 
-## 4. Pipeline durchlaufen (Einzeiliger Befehl folgt – bis dahin manuelle Schritte)
+## 8. Weitere nützliche Varianten
 
-### 4.1 Musik generieren
+### Längere Version durch Looping
 
 ```bash
-python publishing/musicgen/generate.py --prompt "Winterfell peaceful piano and wind, Game of Thrones style" --duration 480
-# Output: publishing/musicgen/output/*.wav
+python pipeline/pipeline.py --slug whispers-of-winterfell --minutes 20 --loop-hours 3 --skip-upload
 ```
 
-### 4.2 Metadaten generieren
+### Animierten Renderer verwenden
 
 ```bash
-python scripts/metadata/metadata_gen.py --input input/metadata/my-song.json --output upload/metadata/
+python pipeline/pipeline.py --slug whispers-of-winterfell --minutes 42 --animated --skip-upload
 ```
 
-### 4.3 Thumbnail erzeugen
+### Audio-Postprocessing überspringen
 
 ```bash
-python scripts/thumbnails/generate_thumbnail.py --title "Whispers of Winterfell" --theme winterfell
-# Output: output/thumbnails/whispers-of-winterfell.jpg
-```
-
-### 4.4 Video rendern
-
-```bash
-python scripts/video/render.py \
-  --audio publishing/musicgen/output/track.wav \
-  --image output/thumbnails/whispers-of-winterfell.jpg \
-  --output output/youtube/whispers-of-winterfell.mp4
-```
-
-### 4.5 Upload (optional, wenn YouTube konfiguriert)
-
-```bash
-python scripts/publish/youtube_upload.py \
-  --video output/youtube/whispers-of-winterfell.mp4 \
-  --metadata upload/metadata/my-song.json
+python pipeline/pipeline.py --slug whispers-of-winterfell --minutes 42 --skip-post-process --skip-upload
 ```
 
 ---
 
-## 5. Fertig
+## 9. Echten YouTube-Upload vorbereiten
 
-Video liegt in `output/youtube/`. Bei Upload erscheint es auf dem Kanal.
+Dafür brauchst du:
+- Google Cloud Projekt
+- aktivierte YouTube Data API v3
+- OAuth Client vom Typ Desktop App
+
+Credential-Datei:
+- `client_secret.json` im Repo
+- oder per Umgebungsvariable
+
+Beispiel:
+
+```bash
+export GOOGLE_CLIENT_SECRET=/pfad/zu/client_secret.json
+```
+
+Danach kann die Pipeline ohne `--skip-upload` genutzt werden.
+
+**Wichtig:** Secrets gehören nicht ins Repo. Wenn doch jemand sowas committed: rotieren, nicht schönreden.
 
 ---
 
-## Fehler & Hilfe
+## Typische Fehler
 
-- **FFmpeg nicht gefunden**: `sudo apt-get install ffmpeg` (Linux) oder Homebrew (macOS)
-- **MusicGen timeout**: Token prüfen, ggf. Colab verwenden
-- **YouTube Upload fehlschlägt**: `credentials.json` prüfen, OAuth2 Consent Screen in Google Cloud Console
-- **Weitere Infos**: siehe `README.md`, `PIPELINE.md`, `CONTRIBUTING.md`
+### `ffmpeg` nicht gefunden
+Installieren und Shell neu laden.
+
+### Audio fehlt für den Slug
+Dann liegt die Datei nicht in `data/upload/songs/` oder heißt anders als die Metadata-Datei.
+
+### Metadaten fehlen
+Die Pipeline erwartet `data/upload/metadata/<slug>.json`.
+
+### Dashboard startet nicht
+Meist fehlen Python-Abhängigkeiten oder der Startpfad ist falsch.
+
+### YouTube-Upload scheitert
+OAuth / Credentials / lokaler Token prüfen.
 
 ---
 
-## Für Fortgeschrittene
+## Was du als Nächstes lesen solltest
 
-- Orchestrierungsskript: `scripts/orchestrate.py` (in Arbeit – #10)
-- Batch-Verarbeitung: mehrere `song.json` in `input/metadata/` ablegen und Skript laufen lassen
-- Proxmox GPU: siehe Issue #22
+- [`PIPELINE.md`](PIPELINE.md)
+- [`AUTOMATION.md`](AUTOMATION.md)
+- [`../technical/repo-structure.md`](../technical/repo-structure.md)
+- [`../../PROJECT_STATUS.md`](../../PROJECT_STATUS.md)
+
+---
+
+## In einem Satz
+
+Wenn du nur schnell sinnvoll einsteigen willst: **Venv, ffmpeg, Dashboard starten, Test-Run mit `pipeline/pipeline.py` fahren, Output unter `data/output/youtube/` prüfen.**
