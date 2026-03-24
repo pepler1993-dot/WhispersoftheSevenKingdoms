@@ -51,7 +51,7 @@
     </div>
   </div>
   <div class="docs-card-grid">
-    {% for item in section.items %}
+    {% for item in section['items'] %}
     <a href="/admin/docs/{{ item.slug }}" class="docs-card">
       <div class="docs-card-top">
         <span class="badge docs-kind">{{ item.kind }}</span>
