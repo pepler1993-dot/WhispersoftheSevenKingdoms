@@ -1,34 +1,30 @@
 {% extends 'base.html' %}
 {% block title %}Doku{% endblock %}
 {% block content %}
-<div class="docs-hero panel panel-accent-gold">
-  <div class="docs-hero-copy">
-    <div class="docs-kicker">Whispers Docs</div>
-    <h1>Doku für Anwender & Team</h1>
-    <div class="page-subtitle">Für Eddi, Kevin und Iwan: schnell finden, wie das System läuft, wie man es bedient und wo die wichtigen Dinge liegen.</div>
-    <form method="get" action="/admin/docs" class="docs-search">
-      <input type="text" name="q" value="{{ query }}" class="form-input" placeholder="Suche nach Pipeline, Upload, Dashboard, Architektur ..." />
-      <button type="submit" class="btn btn-primary">Suchen</button>
-    </form>
+<div class="page-header page-header-flex">
+  <div>
+    <h1>Doku</h1>
+    <div class="page-subtitle">Für Eddi, Kevin und Iwan: die wichtigsten Anleitungen, Referenzen und Hintergründe an einem Ort.</div>
   </div>
-  <div class="docs-hero-side">
-    <div class="docs-stat-card">
-      <div class="label">Quick Access</div>
-      <div class="value">{{ quicklinks|length }}</div>
-      <div class="metric-help">direkte Einstiege</div>
-    </div>
+  <div class="header-actions">
+    <a href="/admin/pipeline" class="btn btn-primary btn-sm">Zur Pipeline</a>
+    <a href="/admin/ops" class="btn btn-secondary btn-sm">Operations</a>
   </div>
 </div>
 
-<section class="panel panel-accent-blue">
+<section class="panel panel-accent-gold">
   <div class="section-header-inline">
     <div>
-      <h2>Schnelle Einstiege</h2>
-      <div class="page-subtitle">Die häufigsten Wege ohne Umweg durch den Wust.</div>
+      <h2>Schnelleinstieg</h2>
+      <div class="page-subtitle">Ohne Umweg direkt zu den häufigsten Themen.</div>
     </div>
   </div>
-  <div class="docs-quicklinks-grid">
-    {% for item in quicklinks %}
+  <form method="get" action="/admin/docs" class="docs-search">
+    <input type="text" name="q" value="{{ query | default('', true) }}" class="form-input" placeholder="Suche nach Pipeline, Upload, Dashboard, Architektur ..." />
+    <button type="submit" class="btn btn-primary">Suchen</button>
+  </form>
+  <div class="docs-quicklinks-grid" style="margin-top:14px">
+    {% for item in quicklinks | default([], true) %}
     <a href="{{ item.href }}" class="docs-quicklink">
       <i data-lucide="{{ item.icon }}"></i>
       <span>{{ item.title }}</span>
@@ -46,7 +42,7 @@
 </section>
 {% endif %}
 
-{% for section in sections %}
+{% for section in sections | default([], true) %}
 <section class="panel panel-accent-blue docs-section">
   <div class="section-header-inline">
     <div>
