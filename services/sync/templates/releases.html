@@ -9,12 +9,12 @@
 </div>
 
 {% for release in releases %}
-<div class="panel" style="margin-bottom: 18px;">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+<div class="panel release-panel" style="margin-bottom: 18px;">
+  <div class="release-head">
     <h2 style="margin:0; font-size:1.3rem;">{{ release.tag }}</h2>
     <span class="badge" style="font-size:0.8rem;">{{ release.date }}</span>
   </div>
-  <div style="line-height:1.7;">
+  <div class="release-body" style="line-height:1.7;">
     {{ release.body | safe }}
   </div>
 </div>

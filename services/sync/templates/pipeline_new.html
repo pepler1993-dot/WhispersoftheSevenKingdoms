@@ -450,14 +450,53 @@
 .library-audio-row code { font-size: 0.78em; color: var(--muted); }
 
 @media (max-width: 768px) {
+  .workflow-steps {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .workflow-step-pill {
+    width: 100%;
+    text-align: center;
+  }
   .house-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .house-card { padding: 18px 12px; }
   .house-sigil { font-size: 1.8rem; }
   .upload-compact { grid-template-columns: 1fr; }
+  .assets-mini,
+  .generate-info,
+  .progress-header,
+  .audio-source-toggle {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .toggle-btn {
+    width: 100%;
+    text-align: center;
+  }
+  .generate-card,
+  .advanced-content,
+  .step-card {
+    padding: 14px;
+  }
+  .gen-title {
+    font-size: 0.92rem;
+  }
+  .gen-detail,
+  .step-desc {
+    font-size: 0.78rem;
+  }
+  .progress-logs {
+    max-height: 120px;
+  }
+  .btn-launch {
+    padding: 14px 18px;
+    font-size: 0.95rem;
+  }
 }
 
 @media (max-width: 400px) {
-  .house-grid { grid-template-columns: repeat(2, 1fr); }
+  .house-grid { grid-template-columns: 1fr; }
+  .house-card { padding: 16px 12px; }
 }
 </style>
 
