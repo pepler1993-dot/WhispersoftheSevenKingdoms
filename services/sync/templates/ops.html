@@ -4,35 +4,35 @@
 <div class="page-header page-header-flex">
   <div>
     <h1>Operations</h1>
-    <div class="page-subtitle">Alles, was im Maschinenraum los ist — Tasks, Events und Systemzustand an einem Ort.</div>
+    <div class="page-subtitle">Projektsteuerung für Eddi, Kevin und Iwan — verständlich statt Maschinenraum-Rohdaten.</div>
   </div>
   <div class="header-actions">
-    <a href="/admin/tasks" class="btn btn-secondary btn-sm">Legacy Tasks</a>
-    <a href="/admin/events" class="btn btn-secondary btn-sm">Legacy Events</a>
-    <a href="/admin/system" class="btn btn-secondary btn-sm">Legacy System</a>
+    <a href="/admin/tasks" class="btn btn-secondary btn-sm">Task-Ansicht</a>
+    <a href="/admin/events" class="btn btn-secondary btn-sm">Event-Ansicht</a>
+    <a href="/admin/system" class="btn btn-secondary btn-sm">System</a>
   </div>
 </div>
 
 <section class="ops-summary-grid">
   <div class="panel panel-accent-blue ops-metric">
-    <div class="label">Aktive Leases</div>
+    <div class="label">Aktiv in Arbeit</div>
     <div class="value">{{ summary.active_leases|length }}</div>
-    <div class="metric-help">Laufende Claims / Arbeit in progress</div>
+    <div class="metric-help">Tasks, an denen gerade aktiv gearbeitet wird</div>
   </div>
   <div class="panel panel-accent-purple ops-metric">
-    <div class="label">Recent Events</div>
+    <div class="label">Letzte Ereignisse</div>
     <div class="value">{{ summary.recent_task_events|length }}</div>
-    <div class="metric-help">Letzte Task-Events im Speicher</div>
+    <div class="metric-help">frisch eingegangene Task-Ereignisse</div>
   </div>
   <div class="panel panel-accent-teal ops-metric">
     <div class="label">GitHub Events</div>
     <div class="value">{{ system.counts.github_events if system.counts else '—' }}</div>
-    <div class="metric-help">Webhook-Eingänge insgesamt</div>
+    <div class="metric-help">eingegangene Webhook-Events insgesamt</div>
   </div>
   <div class="panel panel-accent-gold ops-metric">
     <div class="label">Tasks gesamt</div>
-    <div class="value">{{ system.counts.tasks if system.counts else '—' }}</div>
-    <div class="metric-help">Alle bekannten Tasks in der DB</div>
+    <div class="value">{{ system.counts.task_states if system.counts else '—' }}</div>
+    <div class="metric-help">bekannte Aufgaben im Sync-Service</div>
   </div>
 </section>
 
@@ -54,44 +54,49 @@
 {% if current_tab == 'tasks' %}
 <form method="get" class="filters panel inline-form ops-filter-bar">
   <input type="hidden" name="tab" value="tasks" />
-  <input type="text" name="q" value="{{ filters.q or '' }}" placeholder="Task ID suchen" />
-  <input type="text" name="owner" value="{{ filters.owner or '' }}" placeholder="Owner / Agent" />
-  <input type="text" name="phase" value="{{ filters.phase or '' }}" placeholder="Phase" />
-  <label class="form-check compact" style="margin:0" data-tooltip="Zeigt auch bereits abgeschlossene Tasks an.">
+  <input type="text" name="q" value="{{ filters.q or '' }}" placeholder="Issue- oder Task-ID suchen" />
+  <input type="text" name="owner" value="{{ filters.owner or '' }}" placeholder="Agent / Bearbeiter" />
+  <input type="text" name="phase" value="{{ filters.phase or '' }}" placeholder="Status (working, released, done ...)" />
+  <label class="form-check compact" style="margin:0" data-tooltip="Zeigt auch bereits erledigte Tasks an.">
     <input type="checkbox" name="include_done" value="true" {% if filters.include_done %}checked{% endif %} />
-    include done
+    erledigte zeigen
   </label>
   <button type="submit" class="btn btn-primary btn-sm">
-    <i data-lucide="search" style="width:14px;height:14px"></i> Filter
+    <i data-lucide="search" style="width:14px;height:14px"></i> Filtern
   </button>
 </form>
 
 <section class="panel">
   <div class="section-header-inline">
-    <h2>Task Queue</h2>
-    <span class="section-note" data-tooltip="Tasks repräsentieren interne Arbeitseinheiten und Lease-Zustände im Sync-Service.">Was ist das?</span>
+    <div>
+      <h2>Aufgabenübersicht</h2>
+      <div class="page-subtitle">Wer arbeitet woran, was ist erledigt und was wurde zuletzt gemacht?</div>
+    </div>
   </div>
   <div class="table-wrap">
     <table>
       <thead>
         <tr>
-          <th>Task</th>
-          <th>Phase</th>
-          <th>Owner</th>
-          <th>Lease until</th>
-          <th>Updated</th>
-          <th>Seq</th>
+          <th>Aufgabe</th>
+          <th>Status</th>
+          <th>Zuletzt von</th>
+          <th>Zusammenfassung</th>
+          <th>Letzte Änderung</th>
+          <th>Lease bis</th>
         </tr>
       </thead>
       <tbody>
         {% for task in tasks %}
         <tr>
-          <td><a href="/admin/tasks/{{ task.task_id }}">{{ task.task_id }}</a></td>
+          <td>
+            <a href="/admin/tasks/{{ task.task_id }}">{{ task.display_title }}</a>
+            <div class="metric-help" style="margin-top:4px">{{ task.task_id }}</div>
+          </td>
           <td><span class="badge {{ task.phase }}">{{ task.phase }}</span></td>
-          <td>{{ task.owner_agent or '—' }}</td>
-          <td>{{ task.lease_until or '—' }}</td>
-          <td>{{ task.updated_at }}</td>
-          <td>{{ task.latest_seq }}</td>
+          <td>{{ task.last_agent }}</td>
+          <td style="white-space:normal; min-width:260px">{{ task.summary }}</td>
+          <td>{{ task.updated_at_display }}</td>
+          <td>{{ task.lease_until_display }}</td>
         </tr>
         {% else %}
         <tr><td colspan="6" class="empty-state">Keine Tasks gefunden</td></tr>
@@ -103,33 +108,33 @@
 {% elif current_tab == 'events' %}
 <section class="panel">
   <div class="section-header-inline">
-    <h2>Webhook Events</h2>
-    <span class="section-note" data-tooltip="Rohdaten eingehender GitHub-Webhooks. Nützlich für Debugging und Sync-Probleme.">Was ist das?</span>
+    <div>
+      <h2>GitHub-Ereignisse</h2>
+      <div class="page-subtitle">Was von GitHub tatsächlich beim Service angekommen ist.</div>
+    </div>
   </div>
   <div class="table-wrap">
     <table>
       <thead>
         <tr>
-          <th>Delivery</th>
-          <th>Event</th>
-          <th>Action</th>
-          <th>Repo</th>
-          <th>Sender</th>
-          <th>Received</th>
+          <th>Task</th>
+          <th>Ereignis</th>
+          <th>Aktion</th>
+          <th>Von</th>
+          <th>Zeit (Berlin)</th>
         </tr>
       </thead>
       <tbody>
         {% for event in events %}
         <tr>
-          <td class="mono">{{ event.delivery_id[:12] }}&hellip;</td>
-          <td><span class="badge released">{{ event.event_type }}</span></td>
-          <td>{{ event.action }}</td>
-          <td>{{ event.repo }}</td>
-          <td>{{ event.sender }}</td>
-          <td>{{ event.received_at }}</td>
+          <td>{{ event.task_id or '—' }}</td>
+          <td>{{ event.event_type }}</td>
+          <td>{{ event.action or '—' }}</td>
+          <td>{{ event.sender or '—' }}</td>
+          <td>{{ event.received_at_display }}</td>
         </tr>
         {% else %}
-        <tr><td colspan="6" class="empty-state">Keine Events</td></tr>
+        <tr><td colspan="5" class="empty-state">Keine Events</td></tr>
         {% endfor %}
       </tbody>
     </table>
@@ -139,27 +144,29 @@
 <div class="grid two">
   <section class="panel panel-accent-blue">
     <div class="section-header-inline">
-      <h2>Datenbank</h2>
-      <span class="section-note" data-tooltip="Basiszustand des Sync-Services und der Admin-Datenbank.">Was ist das?</span>
+      <div>
+        <h2>Systemzustand</h2>
+        <div class="page-subtitle">Basisinfos zum laufenden Sync-Service.</div>
+      </div>
     </div>
     <ul class="list">
       <li>
-        <div class="label" style="margin-bottom:2px">Pfad</div>
+        <div class="label" style="margin-bottom:2px">Datenbank</div>
         <div class="mono" style="font-size:0.78rem;color:var(--text-secondary)">{{ system.db_path }}</div>
       </li>
       <li>
         <div class="label" style="margin-bottom:2px">Letztes GitHub Event</div>
-        <div class="system-value">{{ system.latest_github_event_at or '—' }}</div>
+        <div class="system-value">{{ system.latest_github_event_at_display }}</div>
       </li>
       <li>
         <div class="label" style="margin-bottom:2px">Letztes Task Update</div>
-        <div class="system-value">{{ system.latest_task_update_at or '—' }}</div>
+        <div class="system-value">{{ system.latest_task_update_at_display }}</div>
       </li>
     </ul>
   </section>
 
   <section class="panel panel-accent-teal">
-    <h2>Counts</h2>
+    <h2>Zähler</h2>
     <div class="cards" style="margin-bottom:0">
       {% for key, value in system.counts.items() %}
       <div class="card stat">
