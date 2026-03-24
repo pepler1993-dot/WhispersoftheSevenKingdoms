@@ -1373,6 +1373,8 @@ pre {
   .cards { grid-template-columns: repeat(2, 1fr); }
   .config-grid { grid-template-columns: 1fr; }
   .bottom-nav-link { padding: 6px 8px; font-size: 0.55rem; }
+  .page-subtitle { font-size: 0.78rem; }
+  .btn { width: 100%; }
 }
 
 /* Server Stats – Gauge Rings */
@@ -1528,6 +1530,19 @@ pre {
   color: var(--gold-light);
 }
 .docs-quicklink .lucide {
+  width: 18px;
+  height: 18px;
+}
+.docs-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+@media (max-width: 768px) {
+  .docs-hero { grid-template-columns: 1fr; }
+  .docs-search { flex-direction: column; }
+}
+de {
   width: 18px;
   height: 18px;
 }

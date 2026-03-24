@@ -6,7 +6,7 @@
   <span class="badge {{ job.status }}">{{ job.status }}</span>
 </div>
 
-<div class="action-bar">
+<div class="action-bar detail-actions-stack">
   <a href="/admin/audio" class="btn btn-secondary btn-sm">Alle Audio-Jobs</a>
   <a href="/admin/pipeline/new?slug={{ job.slug }}" class="btn btn-primary btn-sm">Zur Pipeline</a>
   {% if job.status in ('queued', 'pushing', 'running') %}
