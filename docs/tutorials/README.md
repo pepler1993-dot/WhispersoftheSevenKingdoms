@@ -33,3 +33,6 @@ Ein Tutorial soll:
 - keine Architektur-Abhandlung sein
 
 Wenn Erklärung nötig ist, lieber auf `docs/explanation/` oder andere passende Stellen verlinken.
+
+- [`dashboard-local-start.md`](dashboard-local-start.md)
+- [`song-to-output.md`](song-to-output.md)

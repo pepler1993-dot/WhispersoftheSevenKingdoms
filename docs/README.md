@@ -7,6 +7,7 @@ Die Doku wird auf das **Diátaxis-Framework** umgebaut, damit man nicht erst Arc
 - **Projektstatus / operative Wahrheit**: [`../PROJECT_STATUS.md`](../PROJECT_STATUS.md)
 - **Roadmap / nächste Prioritäten**: [`../ROADMAP.md`](../ROADMAP.md)
 - **Repository-Überblick**: [`../README.md`](../README.md)
+- **Changelog**: [`../CHANGELOG.md`](../CHANGELOG.md)
 - **Doku-Audit / Migrationsstand**: [`DOCS_AUDIT.md`](DOCS_AUDIT.md)
 
 ---
@@ -44,6 +45,7 @@ Arbeitsregeln und Betriebswissen für Agenten, die im Projekt aktiv Änderungen 
 Lookup-Material: technische Fakten, Formate, Konventionen, Templates.
 
 - [`reference/README.md`](reference/README.md)
+- [`reference/architecture-diagram.md`](reference/architecture-diagram.md)
 - [`technical/repo-structure.md`](technical/repo-structure.md) ⚠️ veraltet
 - [`technical/metadata.md`](technical/metadata.md)
 - [`technical/validation.md`](technical/validation.md)

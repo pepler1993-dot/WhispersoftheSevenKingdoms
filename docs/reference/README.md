@@ -20,3 +20,5 @@ Hier steht nicht "wie man etwas lernt", sondern "wie etwas definiert ist".
 
 ## Migrationsziel
 Die Inhalte werden schrittweise so aufbereitet, dass ein Contributor technische Fakten schnell nachschlagen kann, ohne sich erst durch Strategie- oder Tutorialtext zu wühlen.
+
+- `architecture-diagram.md` (High-Level-Systemübersicht)

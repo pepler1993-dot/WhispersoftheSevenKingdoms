@@ -13,3 +13,8 @@ Dieser Index bündelt die "Warum?"-Dokumente des Projekts.
 ## Noch zu tun
 - Audio-Entscheidungsdokumente zusammenführen
 - klare Trennung zwischen Evaluation, Feedback und finaler Entscheidung herstellen
+
+
+## Legacy / Appendix
+Diese älteren Dokumente bleiben bewusst erhalten, auch wenn die primären Einstiege jetzt unter `docs/explanation/` liegen.
+Nicht löschen, solange ihr den Kontext noch braucht.
