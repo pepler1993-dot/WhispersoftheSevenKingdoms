@@ -73,7 +73,7 @@ def _build_docs_nav() -> dict[str, Any]:
     return {
         'getting-started': {
             'title': 'Getting Started',
-            'subtitle': 'Schneller Einstieg für Anwender und Mitwirkende.',
+            'subtitle': 'Schneller Einstieg für Eddi, Kevin und Iwan.',
             'items': [
                 {'slug': 'quickstart', 'title': 'Quickstart', 'path': DOCS_ROOT / 'guides' / 'QUICKSTART.md', 'kind': 'Guide'},
                 {'slug': 'first-local-pipeline-run', 'title': 'First Local Pipeline Run', 'path': DOCS_ROOT / 'tutorials' / 'first-local-pipeline-run.md', 'kind': 'Tutorial'},
@@ -82,11 +82,12 @@ def _build_docs_nav() -> dict[str, Any]:
         },
         'workflow': {
             'title': 'Workflow & Bedienung',
-            'subtitle': 'Wie man mit Pipeline und Dashboard arbeitet.',
+            'subtitle': 'Wie man mit Dashboard, Pipeline und Output arbeitet.',
             'items': [
                 {'slug': 'pipeline', 'title': 'Pipeline Guide', 'path': DOCS_ROOT / 'guides' / 'PIPELINE.md', 'kind': 'Guide'},
                 {'slug': 'automation', 'title': 'Automation', 'path': DOCS_ROOT / 'guides' / 'AUTOMATION.md', 'kind': 'Guide'},
                 {'slug': 'song-to-output', 'title': 'Vom Song zum Output-Artefakt', 'path': DOCS_ROOT / 'tutorials' / 'song-to-output.md', 'kind': 'Tutorial'},
+                {'slug': 'contributing', 'title': 'Contributing', 'path': DOCS_ROOT / 'guides' / 'CONTRIBUTING.md', 'kind': 'Guide'},
             ],
         },
         'reference': {
@@ -99,6 +100,7 @@ def _build_docs_nav() -> dict[str, Any]:
                 {'slug': 'preflight', 'title': 'Preflight', 'path': DOCS_ROOT / 'technical' / 'preflight.md', 'kind': 'Reference'},
                 {'slug': 'upload-completeness', 'title': 'Upload Completeness', 'path': DOCS_ROOT / 'technical' / 'upload-completeness.md', 'kind': 'Reference'},
                 {'slug': 'architecture-diagram', 'title': 'Architecture Diagram', 'path': DOCS_ROOT / 'reference' / 'architecture-diagram.md', 'kind': 'Reference'},
+                {'slug': 'architecture-overview-ref', 'title': 'Architecture Overview', 'path': DOCS_ROOT / 'explanation' / 'architecture-overview.md', 'kind': 'Overview'},
             ],
         },
         'explanation': {
@@ -687,8 +689,9 @@ def admin_server_stats():
 
 
 @app.get('/admin/docs', response_class=HTMLResponse)
-def admin_docs(request: Request):
+def admin_docs(request: Request, q: str | None = Query(default=None)):
     nav = _build_docs_nav()
+    query = (q or '').strip().lower()
     sections = []
     for key, section in nav.items():
         items = []
@@ -703,9 +706,19 @@ def admin_docs(request: Request):
                         break
             except Exception:
                 pass
+            haystack = ' '.join([item['title'], item['kind'], summary, section['title'], section['subtitle']]).lower()
+            if query and query not in haystack:
+                continue
             items.append({**item, 'summary': summary})
-        sections.append({'key': key, 'title': section['title'], 'subtitle': section['subtitle'], 'items': items})
-    return templates.TemplateResponse('docs.html', {'request': request, 'page': 'docs', 'sections': sections})
+        if items:
+            sections.append({'key': key, 'title': section['title'], 'subtitle': section['subtitle'], 'items': items})
+    quicklinks = [
+        {'title': 'Quickstart', 'href': '/admin/docs/quickstart', 'icon': 'rocket'},
+        {'title': 'Pipeline Guide', 'href': '/admin/docs/pipeline', 'icon': 'clapperboard'},
+        {'title': 'Dashboard lokal starten', 'href': '/admin/docs/dashboard-local-start', 'icon': 'monitor-play'},
+        {'title': 'Architecture Diagram', 'href': '/admin/docs/architecture-diagram', 'icon': 'network'},
+    ]
+    return templates.TemplateResponse('docs.html', {'request': request, 'page': 'docs', 'sections': sections, 'query': q or '', 'quicklinks': quicklinks})
 
 
 @app.get('/admin/docs/{slug}', response_class=HTMLResponse)

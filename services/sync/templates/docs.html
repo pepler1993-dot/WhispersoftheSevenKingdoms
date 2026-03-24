@@ -1,16 +1,50 @@
 {% extends 'base.html' %}
 {% block title %}Doku{% endblock %}
 {% block content %}
-<div class="page-header page-header-flex">
-  <div>
-    <h1>Doku</h1>
-    <div class="page-subtitle">Die Anwender-Sicht im Dashboard: sauber gegliedert, direkt klickbar, ohne Markdown-Wüste.</div>
+<div class="docs-hero panel panel-accent-gold">
+  <div class="docs-hero-copy">
+    <div class="docs-kicker">Whispers Docs</div>
+    <h1>Doku für Anwender & Team</h1>
+    <div class="page-subtitle">Für Eddi, Kevin und Iwan: schnell finden, wie das System läuft, wie man es bedient und wo die wichtigen Dinge liegen.</div>
+    <form method="get" action="/admin/docs" class="docs-search">
+      <input type="text" name="q" value="{{ query }}" class="form-input" placeholder="Suche nach Pipeline, Upload, Dashboard, Architektur ..." />
+      <button type="submit" class="btn btn-primary">Suchen</button>
+    </form>
   </div>
-  <div class="header-actions">
-    <a href="/admin/pipeline" class="btn btn-primary btn-sm">Zur Pipeline</a>
-    <a href="/admin" class="btn btn-secondary btn-sm">Overview</a>
+  <div class="docs-hero-side">
+    <div class="docs-stat-card">
+      <div class="label">Quick Access</div>
+      <div class="value">{{ quicklinks|length }}</div>
+      <div class="metric-help">direkte Einstiege</div>
+    </div>
   </div>
 </div>
+
+<section class="panel panel-accent-blue">
+  <div class="section-header-inline">
+    <div>
+      <h2>Schnelle Einstiege</h2>
+      <div class="page-subtitle">Die häufigsten Wege ohne Umweg durch den Wust.</div>
+    </div>
+  </div>
+  <div class="docs-quicklinks-grid">
+    {% for item in quicklinks %}
+    <a href="{{ item.href }}" class="docs-quicklink">
+      <i data-lucide="{{ item.icon }}"></i>
+      <span>{{ item.title }}</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+{% if query and not sections %}
+<section class="panel panel-accent-crimson">
+  <div class="empty-state">
+    <div class="empty-state-icon">🔎</div>
+    Keine Doku-Treffer für <strong>{{ query }}</strong>.
+  </div>
+</section>
+{% endif %}
 
 {% for section in sections %}
 <section class="panel panel-accent-blue docs-section">

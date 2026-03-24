@@ -3,11 +3,13 @@
 {% block content %}
 <div class="page-header page-header-flex">
   <div>
+    <div class="docs-kicker">{{ doc.section_title }}</div>
     <h1>{{ doc.title }}</h1>
-    <div class="page-subtitle">{{ doc.kind }} · {{ doc.section_title }}</div>
+    <div class="page-subtitle">{{ doc.kind }} · Anwender-/Teamsicht im Dashboard</div>
   </div>
   <div class="header-actions">
     <a href="/admin/docs" class="btn btn-secondary btn-sm">← Zur Doku</a>
+    <a href="/admin/pipeline" class="btn btn-primary btn-sm">Zur Pipeline</a>
   </div>
 </div>
 
@@ -16,4 +18,3 @@
     {{ doc_html | safe }}
   </article>
 </section>
-{% endblock %}
