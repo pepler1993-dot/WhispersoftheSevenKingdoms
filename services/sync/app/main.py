@@ -177,7 +177,8 @@ def _markdown_to_html(md: str) -> str:
             if not in_ul:
                 out.append('<ul>')
                 in_ul = True
-            out.append(f'<li>{_render_inline_md(re.sub(r"^[-*]\s+", "", stripped))}</li>')
+            li_text = re.sub(r"^[-*]\s+", "", stripped)
+            out.append(f'<li>{_render_inline_md(li_text)}</li>')
         elif re.match(r'^\d+\.\s+', stripped):
             if in_ul:
                 out.append('</ul>')
@@ -185,7 +186,8 @@ def _markdown_to_html(md: str) -> str:
             if not in_ol:
                 out.append('<ol>')
                 in_ol = True
-            out.append(f'<li>{_render_inline_md(re.sub(r"^\d+\.\s+", "", stripped))}</li>')
+            li_text = re.sub(r"^\d+\.\s+", "", stripped)
+            out.append(f'<li>{_render_inline_md(li_text)}</li>')
         elif stripped.startswith('> '):
             close_lists()
             out.append(f'<blockquote>{_render_inline_md(stripped[2:])}</blockquote>')
