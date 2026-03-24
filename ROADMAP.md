@@ -1,11 +1,11 @@
 # 🗺️ ROADMAP – Whispers of the Seven Kingdoms
-> Stand: 23.03.2026 (aktualisiert nach Pair-Thinking von Pako + Smith)
+> Stand: 24.03.2026 (aktualisiert von Smith nach Review aller Fortschritte)
 
 ---
 
 ## Aktuelle Lage in einem Satz
 
-Die **UI ist deutlich reifer**, aber der **kritische nächste Hebel** ist jetzt nicht mehr Design, sondern der **lokale GPU-Worker** als stabiler Audio-Pfad.
+GPU-Worker Hardware ist ready (nvidia-smi ✅, PyTorch ✅), aber **SSH-Zugang blockiert** die letzten Schritte. Doku wächst parallel stark (Diátaxis + Dashboard-Integration). Webhooks sind gefixt.
 
 ---
 
@@ -14,12 +14,19 @@ Die **UI ist deutlich reifer**, aber der **kritische nächste Hebel** ist jetzt 
 ## P0 – GPU-Worker funktionsfähig machen
 **Ziel:** Lokale Audio-Generierung als ernsthafte Alternative zu Kaggle zum Laufen bringen.
 
-### Offen
-- [ ] `nvidia-smi` in VM 104 sauber zum Laufen bringen
-- [ ] Nouveau-/Treiber-Konflikte final auflösen
-- [ ] Python-Umgebung im Worker aufsetzen
-- [ ] Modellentscheidung für lokalen Worker finalisieren
-- [ ] ersten lokalen Audio-Test fahren
+### Erledigt ✅
+- [x] `nvidia-smi` in GPU-VM sauber zum Laufen gebracht (GTX 1070, 8GB VRAM, CUDA 12.4)
+- [x] Nouveau-/Treiber-Konflikte gelöst (Kernel 6.12.74 → 6.12.73 Downgrade)
+- [x] PyTorch CUDA 12.1 installiert (`torch-2.5.1+cu121`)
+- [x] Python venv unter `/opt/musicgen-worker/.venv`
+
+### Offen – blockiert durch SSH-Key
+- [ ] SSH-Key von LXC 103 erneut auf GPU-VM eintragen (**Kevin, manuell via noVNC**)
+- [ ] CUDA Dependencies installieren (nvidia-cublas-cu12, nvidia-cudnn-cu12, etc.)
+- [ ] Audio-Libs installieren (soundfile, scipy, einops)
+- [ ] stable-audio-tools / stable-audio-open installieren
+- [ ] Worker-Script erstellen (Jobs von Pipeline entgegennehmen)
+- [ ] Ersten lokalen Audio-Test fahren
 - [ ] Erfolg/Misserfolg sauber dokumentieren
 
 ### Ergebnis
@@ -44,12 +51,15 @@ Die **UI ist deutlich reifer**, aber der **kritische nächste Hebel** ist jetzt 
 ## P2 – UI-Feinschliff auf Basis echter Nutzung
 **Ziel:** Das Dashboard soll nicht nur hübscher, sondern produktiver sein.
 
-### Schon erledigt
+### Erledigt ✅
 - [x] Top-Level-Navigation verschlankt
 - [x] `Operations` Hub eingeführt
 - [x] `Overview / Create / Audio Lab / Operations`
 - [x] erste Tooltips / Microcopy / Mobile-Verbesserungen
 - [x] Create-Seite strukturell besser in Schritte gegliedert
+- [x] Server Stats Widget (CPU/RAM/Disk/Load mit Gauge-Ringen)
+- [x] Activity Timeline (Pipeline Runs + Audio Jobs)
+- [x] Doku-Sektion im Dashboard mit Suchfeld + Quicklinks (24.03)
 
 ### Noch offen
 - [ ] restliches Inline-CSS aus `pipeline_new.html` rausziehen
@@ -63,40 +73,31 @@ Die **UI ist deutlich reifer**, aber der **kritische nächste Hebel** ist jetzt 
 
 ---
 
-## P3 – Produktlogik verbessern
-**Ziel:** Weniger doppelte Eingaben, mehr Studio-Flow.
+## P3 – Produktlogik verbessern + Shorts
+**Ziel:** Weniger doppelte Eingaben, mehr Studio-Flow. Shorts als neuer Output-Kanal.
 
 ### Offen
 - [ ] Hauswahl stärker mit Audio-Generierung koppeln
 - [ ] Audio-Quelle intelligenter vorbelegen
 - [ ] Defaults stärker nutzen, weniger manuelle Felder
-- [ ] Create-Flow weiter in Richtung
-  1. Stil
-  2. Audio
-  3. Visuals
-  4. Launch
+- [ ] Create-Flow weiter in Richtung: Stil → Audio → Visuals → Launch
+- [ ] **YouTube Shorts Pipeline** evaluieren und planen (Pako erstellt Entwurf)
 
 ### Ergebnis
 - Weniger Formulararbeit, mehr produktisierte Bedienung
+- Shorts als zusätzlicher Content-Kanal
 
 ---
 
 ## P4 – Datenbank-Robustheit
 **Ziel:** DB überlebt Container-/VM-Restarts ohne Datenverlust.
 
-### Problem
-- SQLite DB liegt aktuell nur im Container-Dateisystem
-- Bei LXC Restart / Neuinstallation → alles weg (Jobs, Events, Runs)
+### Erledigt ✅
+- [x] DB-Backup-Cron + WAL-Modus + Recovery-Check (Smith, `f299d36`)
 
-### Maßnahmen
-- [ ] DB-Pfad auf persistentes Volume legen (Proxmox mount point oder bind mount)
-- [ ] Automatisches DB-Backup (cron → tägliches Kopieren auf hdd-backup)
-- [ ] DB-Recovery-Check beim Service-Start (Integritätscheck + WAL-Modus)
+### Noch offen
+- [ ] DB-Pfad auf persistentes Volume legen (Kevin, wenn GPU-Worker steht)
 - [ ] Optional: DB-Export als JSON für manuelles Backup
-
-### Verantwortlich
-- **Smith:** ✅ DB-Backup-Cron + WAL-Modus + Recovery-Check (erledigt, `f299d36`)
-- **Kevin:** Persistentes Volume auf Proxmox einrichten (**LATER** – macht Kevin wenn GPU-Worker steht)
 
 ### Ergebnis
 - Kein Datenverlust mehr bei Restarts
@@ -106,89 +107,65 @@ Die **UI ist deutlich reifer**, aber der **kritische nächste Hebel** ist jetzt 
 ## P5 – Dokumentation nach Diátaxis Framework
 **Ziel:** Professionelle, strukturierte Doku die für Menschen UND Agenten funktioniert.
 
-### Diátaxis Quadranten
-1. **Tutorials** – Schritt-für-Schritt Einstieg ("Dein erstes Video erstellen")
-2. **How-to Guides** – Aufgabenorientiert ("Neuen Audio-Provider hinzufügen")
-3. **Reference** – Technische Referenz (API, DB-Schema, Architektur)
-4. **Explanation** – Hintergründe ("Warum kurze Tracks + Looping?")
+### Erledigt ✅
+- [x] Docs-Struktur im Repo angelegt (tutorials/, guides/, reference/, explanation/, technical/)
+- [x] Dashboard-Integration: Doku-Sektion mit Navbar, Suchfeld, Quicklinks
+- [x] CHANGELOG.md erstellt (Jarvis)
+- [x] Architecture Diagram erstellt (Jarvis)
+- [x] Agenten-Doku begonnen (Pako – wie Agents mit dem Projekt arbeiten)
+- [x] Audio-Strategie-Feedback dokumentiert (Smith + Jarvis)
+
+### Noch offen
+- [ ] Tutorial: "Erstes Video von A bis Z"
+- [ ] How-to: "Neuen Audio-Provider implementieren"
+- [ ] How-to: "GPU-Worker einrichten"
+- [ ] Reference: API-Endpoints Übersicht
+- [ ] Reference: DB-Schema + Tabellen
+- [ ] Reference: Umgebungsvariablen + Konfiguration
+- [ ] Explanation: Pipeline-Architektur
+- [ ] Agenten-Doku vervollständigen (Sync Service Protokoll, Push-Workflow, Regeln)
 
 ### Aufgabenverteilung
-- **Pako:** Tutorials + How-to Guides (er kennt die Architektur am besten)
-  - [ ] Tutorial: "Erstes Video von A bis Z"
-  - [ ] How-to: "Neuen Audio-Provider implementieren"
-  - [ ] How-to: "Dashboard lokal aufsetzen"
-  - [ ] How-to: "GPU-Worker einrichten"
-- **Smith:** Reference + Explanation
-  - [ ] Reference: API-Endpoints Übersicht
-  - [ ] Reference: DB-Schema + Tabellen
-  - [ ] Reference: Umgebungsvariablen + Konfiguration
-  - [ ] Explanation: Audio-Strategie (Warum Stable Audio Open?)
-  - [ ] Explanation: Pipeline-Architektur
-- **Jarvis:** Zusammenführung + Navigation (`docs/index.md`)
-  - [ ] Docs-Index mit Quadranten-Navigation
-  - [ ] Cross-Links zwischen den Quadranten
+- **Pako:** Tutorials + How-to Guides + Agenten-Doku + Dashboard-Integration
+- **Smith:** Reference + Explanation + Reviews
+- **Jarvis:** CHANGELOG, Architecture, Zusammenführung
 
 ### Ergebnis
 - Jeder neue Agent/Mensch kann das Projekt in 15 Min verstehen
 
 ---
 
-## P6 – Betriebsreife / Sonstiges
-**Ziel:** Weniger implizites Wissen, weniger Agenten-Amnesie.
+## P6 – Betriebsreife / Infrastruktur
+**Ziel:** Weniger implizites Wissen, stabile Infrastruktur.
 
-### Offen
-- [ ] `PROJECT_STATUS.md` aktuell halten
+### Erledigt ✅
+- [x] GitHub Webhooks gefixt (Secret-Mismatch behoben, Duplikat-Hook entfernt)
+- [x] PROJECT_STATUS.md Auto-Update Cron (3x täglich, Berliner Winterzeit)
+- [x] Backup-Cron alle 6h
+- [x] Sync Service Pflicht für alle Agents (Issues = Tasks)
+
+### Noch offen
+- [ ] SSH-Tunnel stabilisieren (bore als systemd Service ODER Cloudflare Tunnel evaluieren)
 - [ ] Versionierung konsequent bei Dashboard-Änderungen durchziehen
-- [ ] Fehlerbehandlung für Assets / Jobs / Uploads weiter verbessern
-- [ ] SSH-Tunnel stabilisieren (Cloudflare Tunnel evaluieren)
-- [ ] Diátaxis-Doku aufbauen (wird an Jarvis übergeben)
+- [ ] bore-Tunnel Port-Problem lösen (ändert sich bei jedem Restart)
 
 ### Ergebnis
 - Neue Agenten oder Menschen können schneller übernehmen
 
 ---
 
-## Konkrete nächste Schritte (empfohlen)
+## Konkrete nächste Schritte
 
-### Unmittelbar als Team
-1. **GPU-Worker fixen** bis `nvidia-smi` läuft
-2. **lokalen Mini-Test** mit dem finalistischen Modell-Stack machen
-3. **Audio-Strategie schriftlich festzurren**
-4. **Diátaxis-Doku parallel aufbauen** (durch Jarvis übernommen)
-5. Danach erst weitere größere UI-/Produktlogik-Runden
+### Unmittelbar (heute/morgen)
+1. **Kevin:** SSH-Key auf GPU-VM eintragen → Smith kann weiter einrichten
+2. **Smith:** CUDA Dependencies + stable-audio installieren sobald SSH geht
+3. **Pako:** Shorts-Plan finalisieren + Doku weiter ausbauen
+4. **Jarvis:** Webhook-Cleanup (Duplikat entfernen) + Doku-Beiträge
 
-### Für die Audio-Seite
-- Wenn lokaler Worker läuft: darauf fokussieren
-- Wenn lokaler Worker scheitert: Colab als Übergangspfad ernsthaft evaluieren
-- Kaggle nur noch als Test-/Fallback-Pfad betrachten, nicht als Glaubenssystem
-
----
-
-## Nicht mehr Hauptpriorität
-Diese Punkte sind wichtig, aber nicht mehr P0:
-- noch schickeres Styling
-- weitere Dashboard-Spielereien
-- neue Growth-/Marketing-Features
-- Shorts / Streaming / Reddit / SEO-Ausbau
-
-Erst muss die Audio-Erzeugung auf stabile Beine.
-
----
-
-## Entscheidungsnotiz
-
-### Aktuelles Pair-Thinking-Fazit
-- **Pako:** UI ist jetzt nicht mehr die Hauptbaustelle
-- **Smith:** Struktur stimmt, UI ist auf gutem Weg, Technikpfad muss jetzt liefern
-- **Gemeinsame Empfehlung:**
-  - lokaler GPU-Worker zuerst
-  - Audio-Strategie dann finalisieren
-  - UI danach mit echtem Nutzungsfeedback weiter polieren
-
-### Rollenwechsel 23.03. spätabends
-- **Kevin** verschiebt den GPU-Worker nicht „wann anders“, sondern wird ab jetzt direkt von **Pako** bei der Einrichtung begleitet.
-- **Jarvis** übernimmt stattdessen Pakos verbleibende Doku-/Strukturaufgaben.
-- **Smith** bleibt auf DB-/Robustheits-Themen.
+### Diese Woche
+5. Ersten lokalen Audio-Test auf GPU-VM fahren
+6. Audio-Strategie schriftlich festzurren
+7. Agenten-Doku fertigstellen
 
 ---
 
