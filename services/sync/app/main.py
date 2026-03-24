@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import hashlib
+import html
+import re
 import hmac
 import json
 import shutil
@@ -53,6 +55,7 @@ from app.kaggle_gen import (
 
 
 HOUSE_TEMPLATES_PATH = Path(__file__).resolve().parent.parent / 'data' / 'house_templates.json'
+DOCS_ROOT = Path(__file__).resolve().parents[3] / 'docs'
 
 
 def _load_house_templates() -> dict[str, Any]:
@@ -63,6 +66,137 @@ def _load_house_templates() -> dict[str, Any]:
     except Exception:
         return {}
 
+
+
+
+def _build_docs_nav() -> dict[str, Any]:
+    return {
+        'getting-started': {
+            'title': 'Getting Started',
+            'subtitle': 'Schneller Einstieg für Anwender und Mitwirkende.',
+            'items': [
+                {'slug': 'quickstart', 'title': 'Quickstart', 'path': DOCS_ROOT / 'guides' / 'QUICKSTART.md', 'kind': 'Guide'},
+                {'slug': 'first-local-pipeline-run', 'title': 'First Local Pipeline Run', 'path': DOCS_ROOT / 'tutorials' / 'first-local-pipeline-run.md', 'kind': 'Tutorial'},
+                {'slug': 'dashboard-local-start', 'title': 'Dashboard lokal starten', 'path': DOCS_ROOT / 'tutorials' / 'dashboard-local-start.md', 'kind': 'Tutorial'},
+            ],
+        },
+        'workflow': {
+            'title': 'Workflow & Bedienung',
+            'subtitle': 'Wie man mit Pipeline und Dashboard arbeitet.',
+            'items': [
+                {'slug': 'pipeline', 'title': 'Pipeline Guide', 'path': DOCS_ROOT / 'guides' / 'PIPELINE.md', 'kind': 'Guide'},
+                {'slug': 'automation', 'title': 'Automation', 'path': DOCS_ROOT / 'guides' / 'AUTOMATION.md', 'kind': 'Guide'},
+                {'slug': 'song-to-output', 'title': 'Vom Song zum Output-Artefakt', 'path': DOCS_ROOT / 'tutorials' / 'song-to-output.md', 'kind': 'Tutorial'},
+            ],
+        },
+        'reference': {
+            'title': 'Reference',
+            'subtitle': 'Technische Fakten, Struktur und Diagramme.',
+            'items': [
+                {'slug': 'repo-structure', 'title': 'Repo-Struktur', 'path': DOCS_ROOT / 'technical' / 'repo-structure.md', 'kind': 'Reference'},
+                {'slug': 'metadata', 'title': 'Metadata', 'path': DOCS_ROOT / 'technical' / 'metadata.md', 'kind': 'Reference'},
+                {'slug': 'validation', 'title': 'Validation', 'path': DOCS_ROOT / 'technical' / 'validation.md', 'kind': 'Reference'},
+                {'slug': 'preflight', 'title': 'Preflight', 'path': DOCS_ROOT / 'technical' / 'preflight.md', 'kind': 'Reference'},
+                {'slug': 'upload-completeness', 'title': 'Upload Completeness', 'path': DOCS_ROOT / 'technical' / 'upload-completeness.md', 'kind': 'Reference'},
+                {'slug': 'architecture-diagram', 'title': 'Architecture Diagram', 'path': DOCS_ROOT / 'reference' / 'architecture-diagram.md', 'kind': 'Reference'},
+            ],
+        },
+        'explanation': {
+            'title': 'Explanation',
+            'subtitle': 'Warum das System so gebaut ist.',
+            'items': [
+                {'slug': 'architecture-overview', 'title': 'Architecture Overview', 'path': DOCS_ROOT / 'explanation' / 'architecture-overview.md', 'kind': 'Explanation'},
+                {'slug': 'audio-strategy', 'title': 'Audio Strategy', 'path': DOCS_ROOT / 'explanation' / 'audio-strategy.md', 'kind': 'Explanation'},
+            ],
+        },
+    }
+
+
+def _docs_by_slug() -> dict[str, dict[str, Any]]:
+    nav = _build_docs_nav()
+    return {item['slug']: {**item, 'section': section_key, 'section_title': section['title']} for section_key, section in nav.items() for item in section['items']}
+
+
+def _render_inline_md(text: str) -> str:
+    text = html.escape(text)
+    text = re.sub(r'`([^`]+)`', r'<code>\1</code>', text)
+    text = re.sub(r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', text)
+    text = re.sub(r'\*([^*]+)\*', r'<em>\1</em>', text)
+    text = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2">\1</a>', text)
+    return text
+
+
+def _markdown_to_html(md: str) -> str:
+    lines = md.splitlines()
+    out: list[str] = []
+    in_ul = False
+    in_ol = False
+    in_code = False
+
+    def close_lists():
+        nonlocal in_ul, in_ol
+        if in_ul:
+            out.append('</ul>')
+            in_ul = False
+        if in_ol:
+            out.append('</ol>')
+            in_ol = False
+
+    for raw in lines:
+        stripped = raw.strip()
+        if stripped.startswith('```'):
+            close_lists()
+            if not in_code:
+                out.append('<pre class="doc-code"><code>')
+                in_code = True
+            else:
+                out.append('</code></pre>')
+                in_code = False
+            continue
+        if in_code:
+            out.append(html.escape(raw))
+            continue
+        if not stripped:
+            close_lists()
+            continue
+        if stripped.startswith('# '):
+            close_lists()
+            out.append(f'<h1>{_render_inline_md(stripped[2:])}</h1>')
+        elif stripped.startswith('## '):
+            close_lists()
+            out.append(f'<h2>{_render_inline_md(stripped[3:])}</h2>')
+        elif stripped.startswith('### '):
+            close_lists()
+            out.append(f'<h3>{_render_inline_md(stripped[4:])}</h3>')
+        elif re.match(r'^[-*]\s+', stripped):
+            if in_ol:
+                out.append('</ol>')
+                in_ol = False
+            if not in_ul:
+                out.append('<ul>')
+                in_ul = True
+            out.append(f'<li>{_render_inline_md(re.sub(r"^[-*]\s+", "", stripped))}</li>')
+        elif re.match(r'^\d+\.\s+', stripped):
+            if in_ul:
+                out.append('</ul>')
+                in_ul = False
+            if not in_ol:
+                out.append('<ol>')
+                in_ol = True
+            out.append(f'<li>{_render_inline_md(re.sub(r"^\d+\.\s+", "", stripped))}</li>')
+        elif stripped.startswith('> '):
+            close_lists()
+            out.append(f'<blockquote>{_render_inline_md(stripped[2:])}</blockquote>')
+        elif stripped.startswith('---'):
+            close_lists()
+            out.append('<hr />')
+        else:
+            close_lists()
+            out.append(f'<p>{_render_inline_md(stripped)}</p>')
+    close_lists()
+    if in_code:
+        out.append('</code></pre>')
+    return '\n'.join(out)
 
 def _get_house_template(name: str) -> dict[str, Any] | None:
     tpl = _load_house_templates()
@@ -549,6 +683,41 @@ def admin_server_stats():
 
 
 # ── audio generator ──
+
+
+
+@app.get('/admin/docs', response_class=HTMLResponse)
+def admin_docs(request: Request):
+    nav = _build_docs_nav()
+    sections = []
+    for key, section in nav.items():
+        items = []
+        for item in section['items']:
+            summary = ''
+            try:
+                content = item['path'].read_text(encoding='utf-8')
+                for line in content.splitlines():
+                    s = line.strip()
+                    if s and not s.startswith('#') and not s.startswith('```'):
+                        summary = s[:180]
+                        break
+            except Exception:
+                pass
+            items.append({**item, 'summary': summary})
+        sections.append({'key': key, 'title': section['title'], 'subtitle': section['subtitle'], 'items': items})
+    return templates.TemplateResponse('docs.html', {'request': request, 'page': 'docs', 'sections': sections})
+
+
+@app.get('/admin/docs/{slug}', response_class=HTMLResponse)
+def admin_doc_detail(request: Request, slug: str):
+    doc = _docs_by_slug().get(slug)
+    if not doc:
+        raise HTTPException(status_code=404, detail='Doc not found')
+    try:
+        markdown = doc['path'].read_text(encoding='utf-8')
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail='Doc file missing')
+    return templates.TemplateResponse('doc_detail.html', {'request': request, 'page': 'docs', 'doc': doc, 'doc_html': _markdown_to_html(markdown)})
 
 @app.get('/admin/audio', response_class=HTMLResponse)
 def admin_audio(request: Request):
