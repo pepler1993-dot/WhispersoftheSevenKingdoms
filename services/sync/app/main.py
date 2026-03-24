@@ -1059,6 +1059,7 @@ def admin_audio(request: Request):
         'health': health,
         'presets': presets,
         'jobs': jobs,
+        'house_templates': _load_house_templates(),
     })
 
 
@@ -1849,4 +1850,5 @@ async def github_webhook(
         'task_state_updated': task_state_updated,
         'seq': assigned_seq or None,
     }
+
 
