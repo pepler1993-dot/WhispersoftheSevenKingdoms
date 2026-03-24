@@ -1,35 +1,41 @@
 # Documentation Index
 
-This repository is moving toward a Diátaxis-style documentation structure so people can find the right kind of information quickly instead of digging through archaeology layers.
+Die Doku wird auf das **Diátaxis-Framework** umgebaut, damit man nicht erst Archäologie studieren muss, um etwas zu finden.
 
-## Start here
+## Start hier
 
-- **Project status / current truth**: [`../PROJECT_STATUS.md`](../PROJECT_STATUS.md)
-- **Roadmap / what comes next**: [`../ROADMAP.md`](../ROADMAP.md)
-- **Repository overview**: [`../README.md`](../README.md)
+- **Projektstatus / operative Wahrheit**: [`../PROJECT_STATUS.md`](../PROJECT_STATUS.md)
+- **Roadmap / nächste Prioritäten**: [`../ROADMAP.md`](../ROADMAP.md)
+- **Repository-Überblick**: [`../README.md`](../README.md)
+- **Doku-Audit / Migrationsstand**: [`DOCS_AUDIT.md`](DOCS_AUDIT.md)
 
-## Diátaxis map
+---
+
+## Diátaxis-Navigation
 
 ### Tutorials
-Learning-oriented, step-by-step material for getting something working end to end.
+Lernpfade von null bis zu einem funktionierenden Ergebnis.
 
-- _Planned_: first-run tutorial for local setup
-- _Planned_: first successful end-to-end song generation + publish walkthrough
+- [`tutorials/README.md`](tutorials/README.md)
+- _geplant_: Erstes Video lokal erzeugen
+- _geplant_: Dashboard lokal starten und benutzen
+- _geplant_: Vom Song zum Publish-Artefakt
 
-### How-to guides
-Goal-oriented instructions for a concrete task.
+### How-to Guides
+Aufgabenorientierte Anleitungen für ein konkretes Ziel.
 
-- [`guides/QUICKSTART.md`](guides/QUICKSTART.md)
-- [`guides/PIPELINE.md`](guides/PIPELINE.md)
+- [`guides/QUICKSTART.md`](guides/QUICKSTART.md) ⚠️ aktuell noch veraltet
+- [`guides/PIPELINE.md`](guides/PIPELINE.md) ⚠️ aktuell noch veraltet / gemischt
 - [`guides/AUTOMATION.md`](guides/AUTOMATION.md)
 - [`guides/AGENT_SYNC.md`](guides/AGENT_SYNC.md)
 - [`guides/BRANCHING.md`](guides/BRANCHING.md)
 - [`guides/CONTRIBUTING.md`](guides/CONTRIBUTING.md)
 
 ### Reference
-Lookup material: structures, schemas, templates, technical facts.
+Lookup-Material: technische Fakten, Formate, Konventionen, Templates.
 
-- [`technical/repo-structure.md`](technical/repo-structure.md)
+- [`reference/README.md`](reference/README.md)
+- [`technical/repo-structure.md`](technical/repo-structure.md) ⚠️ veraltet
 - [`technical/metadata.md`](technical/metadata.md)
 - [`technical/validation.md`](technical/validation.md)
 - [`technical/preflight.md`](technical/preflight.md)
@@ -38,27 +44,48 @@ Lookup material: structures, schemas, templates, technical facts.
 - [`publishing/`](publishing/)
 
 ### Explanation
-Why things are the way they are, tradeoffs, strategy, architecture.
+Warum Dinge so gebaut sind, welche Tradeoffs gelten, welche Strategie verfolgt wird.
 
+- [`explanation-index.md`](explanation-index.md)
 - [`architecture/TECH_DECISIONS.md`](architecture/TECH_DECISIONS.md)
 - [`architecture/EXPANSION_PLAN_FINAL.md`](architecture/EXPANSION_PLAN_FINAL.md)
 - [`AUDIO_GENERATION_ALTERNATIVES_EVALUATION.md`](AUDIO_GENERATION_ALTERNATIVES_EVALUATION.md)
-- [`AUDIO_GENERATION_ALTERNATIVES_FEEDBACK.md`](AUDIO_GENERATION_ALTERNATIVES_FEEDBACK.md)
-- [`AUDIO_GENERATION_ALTERNATIVES_SMITH_FEEDBACK.md`](AUDIO_GENERATION_ALTERNATIVES_SMITH_FEEDBACK.md)
-- [`AUDIO_GENERATION_FEEDBACK_SMITH.md`](AUDIO_GENERATION_FEEDBACK_SMITH.md)
 
-## Current documentation problems
+---
 
-These are the main issues still being cleaned up:
+## Aktuelle Probleme
 
-1. **Outdated paths** – some docs still refer to pre-monorepo paths like `scripts/` or `publishing/musicgen/`.
-2. **Mixed doc types** – tutorials, reference, and rationale are currently mixed together.
-3. **Duplicate feedback docs** – there are overlapping audio-generation feedback files that should be merged or clearly differentiated.
-4. **Missing true tutorials** – there are several guides, but almost no beginner-friendly learning docs yet.
+Die größten Baustellen gerade:
 
-## Next cleanup steps
+1. **fehlende echte Tutorials**
+2. **veraltete Pfade in QUICKSTART / PIPELINE / repo-structure**
+3. **gemischte Doku-Typen**
+4. **Audio-Dubletten im Explanation-Bereich**
 
-- Create a proper `tutorials/` section
-- Rewrite `README.md` to reflect current monorepo paths
-- Merge or clarify duplicate audio-generation feedback documents
-- Add a "local GPU worker setup" how-to once the VM path is stable
+---
+
+## Nächste konkrete Schritte
+
+1. `QUICKSTART.md` modernisieren
+2. `PIPELINE.md` neu schreiben
+3. erstes Tutorial anlegen
+4. `repo-structure.md` auf reale Monorepo-Struktur ziehen
+5. Audio-Entscheidungsdocs zusammenführen
+
+---
+
+## Arbeitsaufteilung
+
+### Pako
+- technische Guides mit echtem Implementierungsbezug
+- Pipeline-, Dashboard- und Struktur-Doku
+- Tutorials, die reale Workflows zeigen
+
+### Jarvis
+- Doku-Mapping
+- Navigation / Crosslinks
+- Dublettenanalyse
+- Strukturhygiene und Linkpflege
+
+### Smith
+- Infra-, DB-, Deployment- und Backend-nahe Explanation/Reference
