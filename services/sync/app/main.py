@@ -338,8 +338,8 @@ def _phase_label(phase: str | None) -> str:
     return {
         'working': 'In Arbeit',
         'blocked': 'Blockiert',
-        'released': 'Freigegeben',
-        'done': 'Erledigt',
+        'released': 'Freigegeben (offen)',
+        'done': 'Abgeschlossen',
         'stale': 'Abgelaufen',
         'archived': 'Archiviert',
     }.get(phase or '', phase or '—')
