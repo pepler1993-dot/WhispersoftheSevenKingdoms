@@ -39,7 +39,7 @@
             <a href="/admin/tasks/{{ task.task_id | urlencode }}">{{ task.display_title }}</a>
             <div class="metric-help" style="margin-top:4px">{{ task.task_id }}</div>
           </td>
-          <td><span class="badge {{ task.phase }}">{{ task.phase }}</span></td>
+          <td><span class="badge {{ task.phase_label }}">{{ task.phase_label }}</span></td>
           <td>{{ task.last_agent }}</td>
           <td style="white-space:normal; min-width:260px">{{ task.summary }}</td>
           <td>{{ task.updated_at_display }}</td>

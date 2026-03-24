@@ -295,6 +295,18 @@ def _format_berlin(value: str | None, with_seconds: bool = False) -> str:
     return dt.strftime('%d.%m.%Y %H:%M:%S' if with_seconds else '%d.%m.%Y %H:%M')
 
 
+
+
+def _phase_label(phase: str | None) -> str:
+    return {
+        'working': 'In Arbeit',
+        'blocked': 'Blockiert',
+        'released': 'Freigegeben',
+        'done': 'Erledigt',
+        'stale': 'Abgelaufen',
+        'archived': 'Archiviert',
+    }.get(phase or '', phase or '—')
+
 def _humanize_task_for_manager(task: dict[str, Any], detail: dict[str, Any] | None = None) -> dict[str, Any]:
     snapshot = task.get('snapshot') or {}
     task_id = task.get('task_id', '')
@@ -355,6 +367,8 @@ def _humanize_task_for_manager(task: dict[str, Any], detail: dict[str, Any] | No
     return {
         **task,
         'display_title': title,
+        'phase_label': _phase_label(task.get('phase')),
+        'issue_url': f"https://github.com/{task_id.split('#')[0]}/issues/{issue_number}" if issue_number and '#' in task_id else None,
         'last_agent': last_agent or '—',
         'summary': summary,
         'updated_at_display': _format_berlin(task.get('updated_at')),

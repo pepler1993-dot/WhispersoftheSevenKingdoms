@@ -8,6 +8,7 @@
   </div>
   <div class="header-actions">
     <a href="/admin/ops?tab=tasks" class="btn btn-secondary btn-sm">← Zur Übersicht</a>
+    {% if detail.human.issue_url %}<a href="{{ detail.human.issue_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">Auf GitHub öffnen</a>{% endif %}
   </div>
 </div>
 
@@ -15,7 +16,7 @@
   <section class="panel panel-accent-gold">
     <h2>Aktueller Stand</h2>
     <div class="config-grid">
-      <div class="config-item"><div class="label">Status</div><div class="value"><span class="badge {{ detail.state.phase }}">{{ detail.state.phase }}</span></div></div>
+      <div class="config-item"><div class="label">Status</div><div class="value"><span class="badge {{ detail.human.phase_label }}">{{ detail.human.phase_label }}</span></div></div>
       <div class="config-item"><div class="label">Zuletzt von</div><div class="value">{{ detail.human.last_agent }}</div></div>
       <div class="config-item"><div class="label">Aktualisiert</div><div class="value">{{ detail.updated_at_display }}</div></div>
       <div class="config-item"><div class="label">Lease bis</div><div class="value">{{ detail.lease_until_display }}</div></div>
