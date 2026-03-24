@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}{{ doc.title }}{% endblock %}
+{% block content %}
+<div class="page-header page-header-flex">
+  <div>
+    <h1>{{ doc.title }}</h1>
+    <div class="page-subtitle">{{ doc.kind }} · {{ doc.section_title }}</div>
+  </div>
+  <div class="header-actions">
+    <a href="/admin/docs" class="btn btn-secondary btn-sm">← Zur Doku</a>
+  </div>
+</div>
+
+<section class="panel panel-accent-gold">
+  <article class="doc-prose">
+    {{ doc_html | safe }}
+  </article>
+</section>
+{% endblock %}

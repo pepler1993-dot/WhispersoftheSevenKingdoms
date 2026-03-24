@@ -1337,3 +1337,71 @@ pre {
 
 /* Version badge */
 .sidebar-version { position: absolute; bottom: 12px; left: 16px; font-size: 0.7rem; color: rgba(255,255,255,0.25); font-family: monospace; letter-spacing: 0.5px; }
+
+
+/* docs */
+.docs-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+.docs-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+  color: var(--text);
+  box-shadow: var(--shadow);
+  transition: transform .18s var(--ease), border-color .18s var(--ease), box-shadow .18s var(--ease);
+}
+.docs-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--gold);
+  box-shadow: var(--shadow-lg);
+  color: var(--text);
+}
+.docs-card h3 { margin: 0; font-size: 1rem; }
+.docs-card p { color: var(--text-secondary); font-size: .84rem; line-height: 1.6; }
+.docs-kind { background: rgba(143,180,255,0.14); color: #a9c7ff; }
+.docs-kind::before { background: #8fb4ff; }
+.docs-card-link { margin-top: auto; color: var(--gold); font-weight: 700; font-size: .82rem; }
+.doc-prose { max-width: 920px; }
+.doc-prose h1, .doc-prose h2, .doc-prose h3 { margin-top: 1.2em; margin-bottom: .6em; }
+.doc-prose h1:first-child { margin-top: 0; }
+.doc-prose p, .doc-prose ul, .doc-prose ol, .doc-prose blockquote { margin: 0 0 1em; }
+.doc-prose ul, .doc-prose ol { padding-left: 1.25rem; }
+.doc-prose li { margin-bottom: .45em; color: var(--text-secondary); }
+.doc-prose p { color: var(--text-secondary); }
+.doc-prose strong { color: var(--text); }
+.doc-prose code {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 0.15rem 0.35rem;
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .82em;
+}
+.doc-code {
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: #050910;
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  overflow: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .78rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin: 0 0 1em;
+}
+.doc-prose blockquote {
+  border-left: 3px solid var(--gold);
+  padding-left: 12px;
+  color: var(--text-secondary);
+  opacity: .95;
+}
+.doc-prose hr { border: 0; border-top: 1px solid var(--line); margin: 1.2em 0; }

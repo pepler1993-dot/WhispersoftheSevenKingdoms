@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Doku{% endblock %}
+{% block content %}
+<div class="page-header page-header-flex">
+  <div>
+    <h1>Doku</h1>
+    <div class="page-subtitle">Die Anwender-Sicht im Dashboard: sauber gegliedert, direkt klickbar, ohne Markdown-Wüste.</div>
+  </div>
+  <div class="header-actions">
+    <a href="/admin/pipeline" class="btn btn-primary btn-sm">Zur Pipeline</a>
+    <a href="/admin" class="btn btn-secondary btn-sm">Overview</a>
+  </div>
+</div>
+
+{% for section in sections %}
+<section class="panel panel-accent-blue docs-section">
+  <div class="section-header-inline">
+    <div>
+      <h2>{{ section.title }}</h2>
+      <div class="page-subtitle">{{ section.subtitle }}</div>
+    </div>
+  </div>
+  <div class="docs-card-grid">
+    {% for item in section.items %}
+    <a href="/admin/docs/{{ item.slug }}" class="docs-card">
+      <div class="docs-card-top">
+        <span class="badge docs-kind">{{ item.kind }}</span>
+      </div>
+      <h3>{{ item.title }}</h3>
+      <p>{{ item.summary or 'Öffnen, lesen, loslegen.' }}</p>
+      <span class="docs-card-link">Öffnen →</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endfor %}
+{% endblock %}
