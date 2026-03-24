@@ -6,6 +6,15 @@
 
 ---
 
+## ⚠️ PFLICHT: Agent Sync Service nutzen!
+- **Jede Aufgabe** muss als GitHub Issue angelegt werden, damit sie als Task im Sync Service erscheint
+- **Regelmäßig** den Stand vom Sync Service pullen (Tasks, Events, Status)
+- **Kein stilles Arbeiten** – alles läuft über den Sync Service nach Protokoll
+- **Dashboard URL:** über ngrok (aktuelle URL im Service prüfen)
+- **Webhook:** GitHub → Sync Service läuft ✅
+
+---
+
 ## 🎯 Projektziel
 Vollautomatisierte YouTube-Pipeline für GoT-themed Sleep Music.
 Haus wählen → Audio generieren (Kaggle) → Thumbnail → Video → Metadaten → YouTube Upload.
