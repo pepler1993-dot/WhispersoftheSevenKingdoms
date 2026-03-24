@@ -100,11 +100,31 @@
       </div>
       {% endif %}
       <div class="form-group">
-        <label for="prompt_text">Prompt(s)</label>
-        <textarea name="prompt_text" id="prompt_text" class="form-input" rows="8" placeholder="Eine Zeile pro Prompt. Mehrere Prompts werden auf die Clips verteilt. z.B.:
-ambienter Wald, Vogelgezwitscher, sanfter Wind
-dunkle Höhle, tropfendes Wasser, Echo"></textarea>
+        <label for="house_preset">Prompt-Vorlage (House)</label>
+        <select name="house_preset" id="house_preset" class="form-select" onchange="fillPresetPrompts()">
+          <option value="">— eigener Prompt —</option>
+          {% for key, house in house_templates.items() %}
+          <option value="{{ key }}" data-prompts="{{ house.prompts | join('
+') | e }}">{{ house.sigil }} {{ house.display_name }} ({{ house.prompts | length }} Prompts)</option>
+          {% endfor %}
+        </select>
+        <div class="metric-help">Wähle ein House um vorgefertigte Prompts zu laden, oder schreibe eigene.</div>
       </div>
+      <div class="form-group">
+        <label for="prompt_text">Prompt(s)</label>
+        <textarea name="prompt_text" id="prompt_text" class="form-input" rows="8" placeholder="Eine Zeile pro Prompt. Mehrere Prompts werden auf die Clips verteilt."></textarea>
+      </div>
+      <script>
+      function fillPresetPrompts() {
+        const select = document.getElementById("house_preset");
+        const textarea = document.getElementById("prompt_text");
+        const option = select.options[select.selectedIndex];
+        const prompts = option.dataset.prompts || "";
+        if (prompts) {
+          textarea.value = prompts;
+        }
+      }
+      </script>
       <button type="submit" class="btn btn-primary" style="width:100%"><i data-lucide="sparkles" style="width:16px;height:16px"></i> Audio-Job anlegen</button>
     </form>
   </section>
@@ -142,6 +162,7 @@ dunkle Höhle, tropfendes Wasser, Echo"></textarea>
   </table>
 </section>
 {% endblock %}
+
 
 
 
