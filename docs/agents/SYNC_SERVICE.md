@@ -42,15 +42,30 @@ Das darf ein Agent nicht verwechseln.
 
 ## Minimaler Arbeitsablauf für Agenten
 
-1. Task lesen
-2. claimen
-3. daran arbeiten
-4. Heartbeats senden, wenn die Arbeit länger läuft
-5. bei Abschluss `complete`
-6. wenn nur pausiert/abgegeben wird: `release`
+1. zu einer echten Aufgabe zuerst ein GitHub-Issue anlegen
+2. Task im Sync-Service lesen
+3. claimen
+4. daran arbeiten
+5. regelmäßig Heartbeats senden und Events/Status nachziehen
+6. vor jedem GitHub-Write nochmal resyncen
+7. bei Abschluss `complete`
+8. wenn nur pausiert/abgegeben wird: `release`
 
 ---
 
+
+## Issue als Startpunkt
+
+In diesem Projekt soll für jede echte Aufgabe ein **GitHub-Issue** existieren.
+
+Warum:
+- das Issue erzeugt den fachlichen Bezugspunkt
+- der Sync-Service kann daraus den Task ableiten
+- alle Agenten arbeiten über dieselbe Aufgaben-ID statt über Chat-Gefühl
+
+Kurz: **Issue first, dann Sync-Service, dann Arbeit.**
+
+---
 ## Relevante Endpunkte
 
 ### Lesen

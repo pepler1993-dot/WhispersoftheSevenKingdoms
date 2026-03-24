@@ -69,13 +69,15 @@ Danach:
 ## Playbook 3 – Task über Sync-Service übernehmen und sauber abschließen
 
 ### Ablauf
-1. Task lesen
-2. claimen
-3. arbeiten
-4. Heartbeats senden, wenn die Arbeit länger dauert
-5. vor jedem GitHub-Write resyncen
-6. commit/push/PR nur mit gültigem Claim
-7. am Ende `complete` oder `release`
+1. zuerst GitHub-Issue für die Aufgabe anlegen
+2. Task im Sync-Service lesen
+3. claimen
+4. arbeiten
+5. Heartbeats senden, wenn die Arbeit länger dauert
+6. regelmäßig Events/Status nachziehen
+7. vor jedem GitHub-Write resyncen
+8. commit/push/PR nur mit gültigem Claim
+9. am Ende `complete` oder `release`
 
 ### Entscheidungshilfe
 - **complete** → Aufgabe fachlich erledigt

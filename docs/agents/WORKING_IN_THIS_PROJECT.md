@@ -43,6 +43,19 @@ Checkliste:
 
 ---
 
+## Issue-first und Sync-first
+
+Für echte Aufgaben gilt in diesem Projekt ab jetzt:
+
+1. **erst GitHub-Issue anlegen**
+2. dadurch erscheint die Aufgabe als Task im Sync-Service
+3. **erst dann** Task lesen, claimen und bearbeiten
+4. während der Arbeit regelmäßig den Stand aus dem Sync-Service nachziehen
+
+Ohne Issue kein sauberer Task. Ohne Task keine saubere Koordination.
+
+---
+
 ## Branching-Regeln
 
 ### Direkt auf `main`
