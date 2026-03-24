@@ -506,7 +506,10 @@ def _humanize_task_for_manager(task: dict[str, Any], detail: dict[str, Any] | No
                         summary = f"Issue-Beschreibung: {issue['body'][:100]}..." if len(issue['body']) > 100 else issue['body']
                         break
                     elif event.get('event_type') == 'issues' and event.get('action') == 'opened':
-                        summary = f"Neues Issue von {event.get('sender', 'GitHub')}"
+                        summary = f"Neues Issue: {issue.get('title', 'Ohne Titel')}"
+                        break
+                    elif event.get('event_type') == 'pull_request' and event.get('action') == 'opened':
+                        summary = f"Neuer Pull Request von {event.get('sender', 'einem Contributor')}"
                         break
 
     return {
@@ -642,12 +645,12 @@ def list_github_events(
     return {'events': events, 'count': len(events)}
 
 
-@app.get('/debug/events')
-def debug_events(
-    limit: int = Query(default=20, ge=1, le=200),
-    task_id: str | None = Query(default=None),
-) -> dict[str, Any]:
-    return list_github_events(limit=limit, task_id=task_id)
+@app.get('/api/filters')
+def get_filter_options():
+    """Bereitstellung aller verfügbaren Filterwerte."""
+    agents = db.get_unique_agents()
+    phases = db.get_unique_phases()
+    return {'agents': agents, 'phases': phases}
 
 
 @app.get('/github/events/{delivery_id}')

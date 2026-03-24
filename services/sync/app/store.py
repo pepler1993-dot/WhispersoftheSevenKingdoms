@@ -512,6 +512,8 @@ class AgentSyncDB:
         owner: str | None = None,
         query: str | None = None,
         include_done: bool = False,
+        limit: int = 50,
+        offset: int = 0,
     ) -> list[dict[str, Any]]:
         clauses = []
         params: list[Any] = []
@@ -529,7 +531,8 @@ class AgentSyncDB:
         sql = 'SELECT * FROM task_states'
         if clauses:
             sql += ' WHERE ' + ' AND '.join(clauses)
-        sql += ' ORDER BY updated_at DESC'
+        sql += ' ORDER BY updated_at DESC LIMIT ? OFFSET ?'
+        params.extend([limit, offset])
         with self._connect() as conn:
             rows = conn.execute(sql, params).fetchall()
         return [self._row_to_task_state(row) for row in rows]
@@ -549,24 +552,21 @@ class AgentSyncDB:
             'latest_seq': latest_seq,
         }
 
-    def get_system_summary(self) -> dict[str, Any]:
+    def get_unique_agents(self) -> list[str]:
+        """Hole alle eindeutigen Agenten aus der Datenbank."""
         with self._connect() as conn:
-            counts = {}
-            for table in ('github_events', 'task_snapshots', 'task_events', 'task_states'):
-                row = conn.execute(f'SELECT COUNT(*) AS c FROM {table}').fetchone()
-                counts[table] = row['c'] if row else 0
-            latest_github = conn.execute(
-                'SELECT received_at FROM github_events ORDER BY received_at DESC LIMIT 1'
-            ).fetchone()
-            latest_task = conn.execute(
-                'SELECT updated_at FROM task_states ORDER BY updated_at DESC LIMIT 1'
-            ).fetchone()
-        return {
-            'db_path': str(self.db_path),
-            'counts': counts,
-            'latest_github_event_at': latest_github['received_at'] if latest_github else None,
-            'latest_task_update_at': latest_task['updated_at'] if latest_task else None,
-        }
+            rows = conn.execute(
+                "SELECT DISTINCT owner_agent FROM task_states WHERE owner_agent IS NOT NULL"
+            ).fetchall()
+        return [row['owner_agent'] for row in rows]
+
+    def get_unique_phases(self) -> list[str]:
+        """Hole alle eindeutigen Phasen aus der Datenbank."""
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT DISTINCT phase FROM task_states"
+            ).fetchall()
+        return [row['phase'] for row in rows]
 
     def _row_to_github_event(self, row: sqlite3.Row) -> dict[str, Any]:
         return {
