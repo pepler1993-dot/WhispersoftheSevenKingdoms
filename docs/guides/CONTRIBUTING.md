@@ -1,73 +1,126 @@
 # Contributing
 
+## Zweck
+Diese Seite beschreibt, wie Beiträge im Projekt sauber eingebracht werden.
+
+Sie gilt für Menschen und Agenten — bei Agenten kommen zusätzlich die speziellen Agent-Operations-Dokumente dazu.
+
+---
+
 ## Grundregeln
-1. Änderungen im eigenen Branch machen
-2. Vor neuer Arbeit `git pull` auf aktuellen Stand
-3. Kleine, klar abgegrenzte Commits
-4. Erst nach kurzem Review nach `main`
-5. Keine Secrets ins Repo
 
-## Zusammenarbeit
-- **Jarvis**: Workflow, Doku, Review, Aufgabenkoordination
-- **Pako**: Struktur, technische Pipeline, Schema, QA-Basis
-- **Smith**: Publishing, Plattformlogik, Upload-Metadaten, YouTube-Flow
-- Gemeinsame Dateien nur mit Absprache bearbeiten
+1. Erst verstehen, dann ändern
+2. Scope klein halten
+3. Kleine, verständliche Commits
+4. Keine Secrets ins Repo
+5. Neue Änderungen dürfen nicht versehentlich neuere Arbeit zurückdrehen
 
-## Sync-Service ist Pflicht
+---
 
-Für aktive Task-Arbeit gilt nicht mehr „Chat lesen und loslegen".
+## Bevor du etwas änderst
 
-### Verbindlicher Ablauf
+Mindestens prüfen:
+- `README.md`
+- `PROJECT_STATUS.md`
+- relevante Doku im betroffenen Bereich
+- `git status`
+- `git fetch --all --prune`
 
-1. **Task lesen**
-   - `GET /tasks` und `GET /tasks/{task_id}` nutzen
-   - Aktuellen Snapshot, Owner, Lease, Phase prüfen
+---
 
-2. **Claim versuchen**
-   - `POST /tasks/{task_id}/claim` mit `{ "agent_id": "<deine_agent_id>" }`
-   - Nur bei Erfolg (status 200) weiterarbeiten
+## Branch oder `main`?
 
-3. **Während der Arbeit**
-   - Regelmäßig Heartbeats senden: `POST /tasks/{task_id}/heartbeat`
-   - Lease aktiv halten
-   - Inkrementell neue Events holen: `GET /tasks/{task_id}/events?after_seq=<letzter_seq>`
+### Direkt auf `main`
+Nur für:
+- kleine, saubere, konfliktarme Änderungen
+- isolierte Doku-Fixes
+- sehr überschaubare Korrekturen
 
-4. **Vor jedem schreibenden GitHub-Schritt**
-   - Resync: aktuellen Task-State lesen und Events nachziehen
-   - Lease gültig? Kein fremder Lease?
-   - Erst danach committen/pushen/PR erstellen
+### Eigener Branch
+Empfohlen für:
+- größere Features
+- Refactors
+- konfliktträchtige Dateien
+- experimentelle Änderungen
+- alles, was erst reviewed werden sollte
 
-5. **Bei Claim-Fehler**
-   - Nicht parallel arbeiten
-   - Task neu lesen, abwarten oder anderen Task wählen
+---
 
-6. **Fertigstellen**
-   - Finalen Stand prüfen
-   - `POST /tasks/{task_id}/release` mit `{ "agent_id": "...", "phase": "released" }`
+## Commit-Stil
 
-### Wichtige Regeln
-- Kein Commit/Push/PR/Kommentar/Review ohne gültigen Claim
-- Kein paralleles Arbeiten an demselben Task bei gültigem fremdem Lease
-- Vor jedem GitHub-Write immer resyncen
-- Bei abgelaufenem/unklarem Lease: sofort stoppen, neu claimen
-- Telegram ist nur Steuerung/Kontext, nicht Wahrheitsquelle
+Bevorzugte Präfixe:
+- `docs: ...`
+- `fix: ...`
+- `feat: ...`
+- `chore: ...`
 
-### Quellen der Wahrheit
-- **GitHub**: Code, Commits, PRs, Reviews, Kommentare
-- **agent-sync-service**: Ownership, Lease, Aktivitätszustand, inkrementeller Änderungsabgleich
+Beispiele:
+- `docs: refresh quickstart for monorepo`
+- `fix(dashboard): make server load indicator less misleading`
+- `docs: add agent operations manual`
 
-## Regeln für GitHub-Arbeit
-- Kein Commit, Push, PR, Review oder Kommentar ohne gültigen Claim
-- Kein paralleles Arbeiten an demselben Task gegen einen gültigen fremden Lease
-- Vor jedem schreibenden GitHub-Schritt immer aktuellen Task-State und neue Events prüfen
-- Bei abgelaufenem oder unklarem Lease: sofort stoppen, neu lesen, neu claimen oder warten
-- Telegram ist für Steuerung und Kontext nützlich, aber nicht die primäre Wahrheitsquelle
+---
+
+## Regeln für Zusammenarbeit
+
+- gemeinsame zentrale Dateien nicht blind parallel umschreiben
+- bei Konfliktpotenzial lieber Branch statt Heldentod auf `main`
+- Reviews prüfen auch auf versehentliche Rollbacks
+- operative Wahrheit steht nicht nur im Chat
+
+---
+
+## Sync-Service in der Zusammenarbeit
+
+Bei echter paralleler Task-Arbeit gilt:
+1. Task lesen
+2. claimen
+3. arbeiten
+4. Heartbeats senden
+5. vor GitHub-Write resyncen
+6. `release` oder `complete`
+
+Mehr Details:
+- [`AGENT_SYNC.md`](AGENT_SYNC.md)
+- [`../agents/SYNC_SERVICE.md`](../agents/SYNC_SERVICE.md)
+- [`../agents/PLAYBOOKS.md`](../agents/PLAYBOOKS.md)
+
+---
 
 ## Quellen der Wahrheit
-- **GitHub** → Code, Commits, PRs, Reviews, Kommentare
-- **agent-sync-service** → Ownership, Lease, Aktivitätszustand, inkrementeller Änderungsabgleich
 
-## Wichtige gemeinsame Konventionen
-- gleicher Slug für Song, Thumbnail und Metadaten
-- keine halbfertigen Dateien in die Upload-Ordner
-- Übergaberegeln stehen in `PARALLEL_WORK_PLAN.md`
+### Git / GitHub
+- Code
+- Branches
+- Commits
+- Reviews
+
+### Sync-Service
+- Ownership
+- Lease-Zustand
+- Aktivitätslage
+
+### `PROJECT_STATUS.md`
+- aktueller Projektstand
+- Prioritäten
+- operative Lage
+
+---
+
+## Nicht tun
+
+- kein Push mit Secrets im Diff
+- keine alten Branch-Stände blind über neuere Arbeit schieben
+- keine Doku schreiben, die instabile Technik als fertig verkauft
+- kein großflächiger Umbau ohne klares Ziel
+
+---
+
+## Für Agenten zusätzlich relevant
+
+Agenten sollten außerdem lesen:
+- [`../agents/README.md`](../agents/README.md)
+- [`../agents/WORKING_IN_THIS_PROJECT.md`](../agents/WORKING_IN_THIS_PROJECT.md)
+- [`../agents/GITHUB_AND_PAT.md`](../agents/GITHUB_AND_PAT.md)
+- [`../agents/SYNC_SERVICE.md`](../agents/SYNC_SERVICE.md)
+- [`../agents/PLAYBOOKS.md`](../agents/PLAYBOOKS.md)
