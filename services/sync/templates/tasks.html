@@ -3,19 +3,19 @@
 {% block content %}
 <div class="page-header">
   <h1>Tasks</h1>
-  <div class="page-subtitle">Alle Tasks und deren aktueller Status</div>
+  <div class="page-subtitle">Menschenlesbare Übersicht aller Aufgaben im Sync-Service.</div>
 </div>
 
 <form method="get" class="filters panel inline-form">
-  <input type="text" name="q" value="{{ filters.q or '' }}" placeholder="task_id suchen" />
-  <input type="text" name="owner" value="{{ filters.owner or '' }}" placeholder="owner" />
-  <input type="text" name="phase" value="{{ filters.phase or '' }}" placeholder="phase" />
+  <input type="text" name="q" value="{{ filters.q or '' }}" placeholder="Issue- oder Task-ID suchen" />
+  <input type="text" name="owner" value="{{ filters.owner or '' }}" placeholder="Agent / Bearbeiter" />
+  <input type="text" name="phase" value="{{ filters.phase or '' }}" placeholder="Status" />
   <label class="form-check" style="margin:0">
     <input type="checkbox" name="include_done" value="true" {% if filters.include_done %}checked{% endif %} />
-    include done
+    erledigte zeigen
   </label>
   <button type="submit" class="btn btn-primary btn-sm">
-    <i data-lucide="search" style="width:14px;height:14px"></i> Filter
+    <i data-lucide="search" style="width:14px;height:14px"></i> Filtern
   </button>
 </form>
 
@@ -24,23 +24,26 @@
     <table>
       <thead>
         <tr>
-          <th>task_id</th>
-          <th>phase</th>
-          <th>owner</th>
-          <th>lease_until</th>
-          <th>updated_at</th>
-          <th>seq</th>
+          <th>Aufgabe</th>
+          <th>Status</th>
+          <th>Zuletzt von</th>
+          <th>Zusammenfassung</th>
+          <th>Aktualisiert</th>
+          <th>Lease bis</th>
         </tr>
       </thead>
       <tbody>
         {% for task in tasks %}
         <tr>
-          <td><a href="/admin/tasks/{{ task.task_id }}">{{ task.task_id }}</a></td>
-          <td><span class="badge {{ task.phase }}">{{ task.phase }}</span></td>
-          <td>{{ task.owner_agent or '&mdash;' }}</td>
-          <td>{{ task.lease_until or '&mdash;' }}</td>
-          <td>{{ task.updated_at }}</td>
-          <td>{{ task.latest_seq }}</td>
+          <td>
+            <a href="/admin/tasks/{{ task.task_id | urlencode }}">{{ task.display_title }}</a>
+            <div class="metric-help" style="margin-top:4px">{{ task.task_id }}</div>
+          </td>
+          <td><span class="badge {{ task.phase_label }}">{{ task.phase_label }}</span></td>
+          <td>{{ task.last_agent }}</td>
+          <td style="white-space:normal; min-width:260px">{{ task.summary }}</td>
+          <td>{{ task.updated_at_display }}</td>
+          <td>{{ task.lease_until_display }}</td>
         </tr>
         {% else %}
         <tr><td colspan="6" class="empty-state">Keine Tasks gefunden</td></tr>

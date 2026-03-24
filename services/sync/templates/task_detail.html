@@ -1,45 +1,69 @@
 {% extends 'base.html' %}
-{% block title %}Task {{ task_id }}{% endblock %}
+{% block title %}Task {{ detail.task_id }}{% endblock %}
 {% block content %}
-<div class="status-header">
-  <h1>Task Detail</h1>
-  <a href="/admin/tasks" class="btn btn-secondary btn-sm">
-    <i data-lucide="arrow-left" style="width:14px;height:14px"></i> Alle Tasks
-  </a>
-</div>
-
-<div class="panel panel-accent-gold" style="margin-bottom:16px">
-  <div class="label" style="margin-bottom:4px">Task ID</div>
-  <div class="mono" style="font-size:0.9rem;color:var(--gold);font-weight:600">{{ task_id }}</div>
+<div class="page-header page-header-flex">
+  <div>
+    <h1>{{ detail.human.display_title }}</h1>
+    <div class="page-subtitle">{{ detail.task_id }}</div>
+  </div>
+  <div class="header-actions">
+    <a href="/admin/ops?tab=tasks" class="btn btn-secondary btn-sm">← Zur Übersicht</a>
+    {% if detail.human.issue_url %}<a href="{{ detail.human.issue_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">Auf GitHub öffnen</a>{% endif %}
+  </div>
 </div>
 
 <div class="grid two">
-  <section class="panel panel-accent-blue">
-    <h2>State</h2>
-    <pre>{{ detail.state | tojson(indent=2) }}</pre>
+  <section class="panel panel-accent-gold">
+    <h2>Aktueller Stand</h2>
+    <div class="config-grid">
+      <div class="config-item"><div class="label">Status</div><div class="value"><span class="badge {{ detail.state.phase }}">{{ detail.human.phase_label }}</span></div></div>
+      <div class="config-item"><div class="label">Zuletzt von</div><div class="value">{{ detail.human.last_agent }}</div></div>
+      <div class="config-item"><div class="label">Aktualisiert</div><div class="value">{{ detail.updated_at_display }}</div></div>
+      <div class="config-item"><div class="label">Lease bis</div><div class="value">{{ detail.lease_until_display }}</div></div>
+      <div class="config-item"><div class="label">Heartbeat</div><div class="value">{{ detail.heartbeat_at_display }}</div></div>
+      <div class="config-item"><div class="label">Issue</div><div class="value">#{{ detail.issue_number or '—' }}</div></div>
+    </div>
+    <div class="output-files" style="margin-top:14px">
+      <strong>Zusammenfassung:</strong><br />
+      {{ detail.human.summary }}
+    </div>
   </section>
-  <section class="panel panel-accent-purple">
+
+  <section class="panel panel-accent-blue">
     <h2>Snapshot</h2>
-    <pre>{{ detail.snapshot | tojson(indent=2) }}</pre>
+    <div class="config-grid">
+      <div class="config-item"><div class="label">Issue-Status</div><div class="value">{{ detail.snapshot.status or '—' }}</div></div>
+      <div class="config-item"><div class="label">Branch</div><div class="value">{{ detail.snapshot.branch or '—' }}</div></div>
+      <div class="config-item"><div class="label">PR</div><div class="value">{{ detail.snapshot.pr_number or '—' }}</div></div>
+      <div class="config-item"><div class="label">Review</div><div class="value">{{ detail.snapshot.review_state or '—' }}</div></div>
+      <div class="config-item"><div class="label">Commit</div><div class="value mono">{{ detail.snapshot.last_commit_sha or '—' }}</div></div>
+      <div class="config-item"><div class="label">Letzte Summary</div><div class="value">{{ detail.snapshot.last_summary or '—' }}</div></div>
+    </div>
   </section>
 </div>
 
 <div class="grid two">
   <section class="panel panel-accent-teal">
-    <h2>Task Events</h2>
-    <ul class="list mono">
+    <h2>Task-Verlauf</h2>
+    <ul class="list">
       {% for event in detail.task_events %}
-      <li>#{{ event.seq }} {{ event.event_type }} / {{ event.action }}</li>
+      <li>
+        <strong>{{ event.summary }}</strong><br />
+        <span class="metric-help">{{ event.actor }} · {{ event.display_time }}</span>
+      </li>
       {% else %}
       <li class="empty-state">Keine Task-Events</li>
       {% endfor %}
     </ul>
   </section>
   <section class="panel panel-accent-crimson">
-    <h2>GitHub Events</h2>
-    <ul class="list mono">
+    <h2>GitHub-Verlauf</h2>
+    <ul class="list">
       {% for event in detail.github_events %}
-      <li>{{ event.delivery_id }} &mdash; {{ event.event_type }} / {{ event.action }}</li>
+      <li>
+        <strong>{{ event.summary }}</strong><br />
+        <span class="metric-help">{{ event.sender or '—' }} · {{ event.display_time }}</span>
+      </li>
       {% else %}
       <li class="empty-state">Keine GitHub Events</li>
       {% endfor %}

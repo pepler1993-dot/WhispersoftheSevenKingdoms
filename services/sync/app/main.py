@@ -8,6 +8,7 @@ import json
 import shutil
 import uuid
 from datetime import datetime, timezone, timedelta
+from zoneinfo import ZoneInfo
 from typing import Any
 
 CET = timezone(timedelta(hours=1))
@@ -282,6 +283,176 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 templates = Jinja2Templates(directory=str(BASE_DIR / 'templates'))
 
 app = FastAPI(title='agent-sync-service')
+
+BERLIN_TZ = ZoneInfo('Europe/Berlin')
+
+
+def _parse_iso(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value.replace('Z', '+00:00'))
+    except Exception:
+        return None
+
+
+def _format_berlin(value: str | None, with_seconds: bool = False) -> str:
+    dt = _parse_iso(value)
+    if not dt:
+        return '—'
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    dt = dt.astimezone(BERLIN_TZ)
+    return dt.strftime('%d.%m.%Y %H:%M:%S' if with_seconds else '%d.%m.%Y %H:%M')
+
+
+
+
+
+
+def _event_manager_summary(event: dict[str, Any]) -> str:
+    et = event.get('event_type')
+    action = event.get('action')
+    sender = event.get('sender') or 'jemand'
+    if et == 'issues' and action == 'opened':
+        return f'Issue wurde von {sender} eröffnet.'
+    if et == 'task.claimed':
+        return f'{sender} hat die Aufgabe übernommen.'
+    if et == 'task.heartbeat':
+        return f'{sender} arbeitet weiter an der Aufgabe.'
+    if et == 'task.released':
+        return f'{sender} hat die Aufgabe wieder freigegeben.'
+    if et == 'task.completed':
+        return f'{sender} hat die Aufgabe als erledigt markiert.'
+    if et == 'task.stale':
+        return 'Ein Claim ist abgelaufen.'
+    if et == 'pull_request' and action == 'opened':
+        return f'{sender} hat einen Pull Request eröffnet.'
+    if et == 'pull_request' and action == 'closed':
+        return 'Ein Pull Request wurde geschlossen.'
+    if et == 'pull_request_review':
+        return f'Ein Review von {sender} ist eingegangen.'
+    return f'{et or "event"}{(" / " + action) if action else ""}'
+
+def _phase_label(phase: str | None) -> str:
+    return {
+        'working': 'In Arbeit',
+        'blocked': 'Blockiert',
+        'released': 'Freigegeben',
+        'done': 'Erledigt',
+        'stale': 'Abgelaufen',
+        'archived': 'Archiviert',
+    }.get(phase or '', phase or '—')
+
+def _humanize_task_for_manager(task: dict[str, Any], detail: dict[str, Any] | None = None) -> dict[str, Any]:
+    snapshot = task.get('snapshot') or {}
+    task_id = task.get('task_id', '')
+    issue_number = snapshot.get('issue_number')
+    title = f'Issue #{issue_number}' if issue_number else task_id
+
+    last_agent = task.get('owner_agent')
+    last_action = None
+    last_action_at = task.get('updated_at')
+    summary = 'Noch keine verständliche Zusammenfassung vorhanden.'
+
+    if detail:
+        events = detail.get('task_events') or []
+        for event in reversed(events):
+            agent = event.get('sender') or (event.get('task_state') or {}).get('owner_agent')
+            if agent and not last_agent:
+                last_agent = agent
+            et = event.get('event_type')
+            action = event.get('action')
+            occurred_at = event.get('occurred_at') or last_action_at
+            if et == 'task.claimed':
+                last_action = f'Von {event.get("sender") or agent or "einem Agenten"} übernommen'
+                last_action_at = occurred_at
+            elif et == 'task.released':
+                who = event.get('sender') or agent or last_agent or 'ein Agent'
+                last_action = f'Von {who} freigegeben'
+                last_action_at = occurred_at
+            elif et == 'task.completed':
+                who = event.get('sender') or agent or last_agent or 'ein Agent'
+                last_action = f'Von {who} als erledigt markiert'
+                last_action_at = occurred_at
+            elif et == 'task.heartbeat' and not last_action:
+                who = event.get('sender') or agent or last_agent or 'ein Agent'
+                last_action = f'{who} arbeitet daran'
+                last_action_at = occurred_at
+            elif et == 'issues' and action == 'opened' and not last_action:
+                who = event.get('sender') or 'GitHub'
+                last_action = f'Issue von {who} geöffnet'
+                last_action_at = occurred_at
+        if not last_agent:
+            for event in reversed(detail.get('github_events') or []):
+                if event.get('sender'):
+                    last_agent = event['sender']
+                    break
+
+    phase = task.get('phase') or 'released'
+    if phase == 'working':
+        summary = f'{last_agent or "Ein Agent"} arbeitet aktuell daran.'
+    elif phase == 'blocked':
+        summary = f'Blockiert{": " + task.get("blocked_reason") if task.get("blocked_reason") else "."}'
+    elif phase == 'released':
+        summary = last_action or f'Zuletzt bearbeitet von {last_agent}.' if last_agent else 'Freigegeben und aktuell bei niemandem aktiv.'
+    elif phase == 'done':
+        summary = last_action or f'Erledigt{(" von " + last_agent) if last_agent else ""}.'
+    elif phase == 'stale':
+        summary = f'Claim abgelaufen{(" – zuletzt bei " + last_agent) if last_agent else ""}.'
+
+    return {
+        **task,
+        'display_title': title,
+        'phase_label': _phase_label(task.get('phase')),
+        'issue_url': f"https://github.com/{task_id.split('#')[0]}/issues/{issue_number}" if issue_number and '#' in task_id else None,
+        'last_agent': last_agent or '—',
+        'summary': summary,
+        'updated_at_display': _format_berlin(task.get('updated_at')),
+        'lease_until_display': _format_berlin(task.get('lease_until')),
+        'heartbeat_at_display': _format_berlin(task.get('heartbeat_at')),
+        'last_action': last_action or '—',
+        'last_action_at_display': _format_berlin(last_action_at),
+    }
+
+
+def _humanize_task_detail_for_manager(task_id: str, detail: dict[str, Any]) -> dict[str, Any]:
+    state = detail.get('state') or {}
+    snapshot = detail.get('snapshot') or {}
+    human = _humanize_task_for_manager(state, detail)
+    task_events = []
+    for event in detail.get('task_events') or []:
+        actor = event.get('sender') or (event.get('task_state') or {}).get('owner_agent') or 'System'
+        label = event.get('event_type') or 'event'
+        action = event.get('action') or ''
+        task_events.append({
+            **event,
+            'actor': actor,
+            'display_time': _format_berlin(event.get('occurred_at'), with_seconds=True),
+            'display_label': f'{label} / {action}'.strip(' /'),
+            'summary': _event_manager_summary(event),
+        })
+    github_events = []
+    for event in detail.get('github_events') or []:
+        github_events.append({
+            **event,
+            'display_time': _format_berlin(event.get('received_at'), with_seconds=True),
+            'summary': _event_manager_summary(event),
+        })
+    return {
+        **detail,
+        'human': human,
+        'task_id': task_id,
+        'state': state,
+        'snapshot': snapshot,
+        'task_events': task_events,
+        'github_events': github_events,
+        'updated_at_display': _format_berlin(state.get('updated_at'), with_seconds=True),
+        'lease_until_display': _format_berlin(state.get('lease_until'), with_seconds=True),
+        'heartbeat_at_display': _format_berlin(state.get('heartbeat_at'), with_seconds=True),
+        'issue_number': snapshot.get('issue_number'),
+    }
+
 app.mount('/static', StaticFiles(directory=str(BASE_DIR / 'static')), name='static')
 
 
@@ -583,7 +754,7 @@ def admin_tasks(
     q: str | None = Query(default=None),
     include_done: bool = Query(default=False),
 ):
-    tasks = db.list_tasks_for_admin(phase=phase, owner=owner, query=q, include_done=include_done)
+    tasks = [_humanize_task_for_manager(task, db.get_task_detail(task['task_id'])) for task in db.list_tasks_for_admin(phase=phase, owner=owner, query=q, include_done=include_done)]
     return templates.TemplateResponse('tasks.html', {
         'request': request,
         'page': 'ops',
@@ -597,6 +768,7 @@ def admin_task_detail(request: Request, task_id: str):
     detail = db.get_task_detail(task_id)
     if not detail:
         raise HTTPException(status_code=404, detail='Task not found')
+    detail = _humanize_task_detail_for_manager(task_id, detail)
     return templates.TemplateResponse('task_detail.html', {
         'request': request,
         'page': 'ops',
@@ -619,6 +791,8 @@ def admin_events(request: Request, limit: int = Query(default=100, ge=1, le=500)
 @app.get('/admin/system', response_class=HTMLResponse)
 def admin_system(request: Request):
     system = db.get_system_summary()
+    system['latest_github_event_at_display'] = _format_berlin(system.get('latest_github_event_at'), with_seconds=True)
+    system['latest_task_update_at_display'] = _format_berlin(system.get('latest_task_update_at'), with_seconds=True)
     return templates.TemplateResponse('system.html', {
         'request': request,
         'page': 'ops',
@@ -648,9 +822,12 @@ def admin_ops(
 ):
     allowed_tabs = {'tasks', 'events', 'system'}
     current_tab = tab if tab in allowed_tabs else 'tasks'
-    tasks = db.list_tasks_for_admin(phase=phase, owner=owner, query=q, include_done=include_done)
-    events = db.list_github_events(limit=limit)
+    raw_tasks = db.list_tasks_for_admin(phase=phase, owner=owner, query=q, include_done=include_done)
+    tasks = [_humanize_task_for_manager(task, db.get_task_detail(task['task_id'])) for task in raw_tasks]
+    events = [{**event, 'received_at_display': _format_berlin(event.get('received_at'), with_seconds=True), 'summary': _event_manager_summary(event)} for event in db.list_github_events(limit=limit)]
     system = db.get_system_summary()
+    system['latest_github_event_at_display'] = _format_berlin(system.get('latest_github_event_at'), with_seconds=True)
+    system['latest_task_update_at_display'] = _format_berlin(system.get('latest_task_update_at'), with_seconds=True)
     summary = db.get_dashboard_summary()
     return templates.TemplateResponse('ops.html', {
         'request': request,
