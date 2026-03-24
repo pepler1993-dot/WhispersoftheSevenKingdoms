@@ -35,15 +35,15 @@
       <tbody>
         {% for task in tasks %}
         <tr>
-          <td>
+          <td data-label="Aufgabe">
             <a href="/admin/tasks/{{ task.task_id | urlencode }}">{{ task.assignment_title }}</a>
             <div class="metric-help" style="margin-top:4px">{{ task.task_id }}</div>
           </td>
-          <td><span class="badge {{ task.phase_label }}">{{ task.phase_label }}</span></td>
-          <td>{{ task.last_agent }}</td>
-          <td style="white-space:normal; min-width:260px">{{ task.summary }}</td>
-          <td>{{ task.updated_at_display }}</td>
-          <td>{{ task.lease_until_display }}</td>
+          <td data-label="Status"><span class="badge {{ task.phase_label }}">{{ task.phase_label }}</span></td>
+          <td data-label="Zuletzt von">{{ task.last_agent }}</td>
+          <td data-label="Zusammenfassung" style="white-space:normal; min-width:260px">{{ task.summary }}</td>
+          <td data-label="Aktualisiert">{{ task.updated_at_display }}</td>
+          <td data-label="Lease bis">{{ task.lease_until_display }}</td>
         </tr>
         {% else %}
         <tr><td colspan="6" class="empty-state">Keine Tasks gefunden</td></tr>

@@ -41,9 +41,9 @@
         <tbody>
           {% for item in songs %}
           <tr>
-            <td>{{ item.name }}</td>
-            <td>{{ item.size }}</td>
-            <td>{{ item.modified }}</td>
+            <td data-label="Datei">{{ item.name }}</td>
+            <td data-label="Größe">{{ item.size }}</td>
+            <td data-label="Geändert">{{ item.modified }}</td>
           </tr>
           {% else %}
           <tr><td colspan="3" class="empty-state">Keine Songs vorhanden</td></tr>

@@ -126,10 +126,10 @@
       <tbody>
         {% for event in events %}
         <tr>
-          <td>{{ event.task_id or '—' }}</td>
-          <td style="white-space:normal; min-width:280px">{{ event.summary }}</td>
-          <td>{{ event.sender or '—' }}</td>
-          <td>{{ event.received_at_display }}</td>
+          <td data-label="Task">{{ event.task_id or '—' }}</td>
+          <td data-label="Zusammenfassung" style="white-space:normal; min-width:280px">{{ event.summary }}</td>
+          <td data-label="Von">{{ event.sender or '—' }}</td>
+          <td data-label="Zeit (Berlin)">{{ event.received_at_display }}</td>
         </tr>
         {% else %}
         <tr><td colspan="4" class="empty-state">Keine Events</td></tr>
@@ -173,6 +173,11 @@
       </div>
       {% endfor %}
     </div>
+  </section>
+</div>
+{% endif %}
+{% endblock %}
+   </div>
   </section>
 </div>
 {% endif %}

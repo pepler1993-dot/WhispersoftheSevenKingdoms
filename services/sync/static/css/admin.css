@@ -1212,7 +1212,8 @@ pre {
   }
 
   .page-header-flex,
-  .section-header-inline {
+  .section-header-inline,
+  .step-card-header {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -1256,11 +1257,66 @@ pre {
   .ops-summary-grid { grid-template-columns: 1fr; gap: 10px; }
   .overview-strip { grid-template-columns: 1fr; gap: 10px; }
 
-  .action-bar { gap: 8px; }
+  .action-bar,
+  .header-actions,
+  .ops-tabs,
+  .docs-search {
+    gap: 8px;
+    width: 100%;
+  }
+
+  .header-actions > *,
+  .action-bar > *,
+  .docs-search > * {
+    width: 100%;
+  }
 
   .btn { padding: 9px 16px; font-size: 0.8rem; }
 
   th, td { padding: 10px; font-size: 0.8rem; }
+
+  .table-wrap {
+    overflow: visible;
+  }
+
+  .table-wrap table,
+  .table-wrap thead,
+  .table-wrap tbody,
+  .table-wrap th,
+  .table-wrap td,
+  .table-wrap tr {
+    display: block;
+    width: 100%;
+  }
+
+  .table-wrap thead {
+    display: none;
+  }
+
+  .table-wrap tbody tr {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    margin-bottom: 10px;
+  }
+
+  .table-wrap tbody td {
+    border: 0;
+    padding: 6px 0;
+    white-space: normal;
+  }
+
+  .table-wrap tbody td::before {
+    content: attr(data-label);
+    display: block;
+    color: var(--muted);
+    font-size: 0.64rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 2px;
+  }
 
   .log-viewer {
     max-height: 45vh;
@@ -1282,21 +1338,35 @@ pre {
     align-items: stretch;
   }
 
-  .inline-form input, .inline-form button, .inline-form .form-check { width: 100%; }
+  .inline-form input, .inline-form button, .inline-form .form-check, .inline-form .form-select { width: 100%; }
   .ops-filter-bar .form-check.compact {
     justify-content: flex-start;
     padding: 6px 2px;
   }
 
-  .status-header {
+  .status-header,
+  .timeline-item,
+  .timeline-meta {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
 
+  .timeline-item a {
+    width: 100%;
+    white-space: normal;
+  }
+
   .page-header { margin-bottom: 16px; }
 
   .list li { padding: 8px 8px; margin: 0 -8px; font-size: 0.8rem; }
+
+  .docs-card-grid,
+  .docs-quicklinks-grid,
+  .thumb-grid,
+  .video-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 400px) {
