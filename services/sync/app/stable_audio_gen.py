@@ -1,12 +1,17 @@
-"""Stable Audio Open generator – daemon-based GPU worker implementation.
+"""Stable Audio Open generator – daemon-based GPU worker implementation v2.
 
 Submits jobs as JSON files to the worker daemon on the GPU VM.
-The daemon keeps the model loaded in memory, eliminating ~2-5min load time per clip.
+The daemon keeps the model loaded in VRAM, eliminating ~2-5min load time per clip.
 Falls back to single-shot mode if daemon is not running.
+
+Fixes in v2:
+- Shell-safe job submission (base64-encoded JSON, no shell injection)
+- Proper error handling for daemon readiness
 """
 
 from __future__ import annotations
 
+import base64
 import json
 import os
 import subprocess
@@ -115,25 +120,30 @@ class StableAudioGenerator(AudioGenerator):
         db.update_audio_job(job_id, status='cancelled', finished_at=now_iso(),
                             error_message='Cancelled by user')
         db.append_audio_job_log(job_id, 'system', 'Job cancelled.', now_iso())
-        # Remove pending job files and kill any running generation
         try:
-            self._ssh_run(f'rm -f {GPU_WORKER_JOB_DIR}/{job_id}_*.json {GPU_WORKER_JOB_DIR}/{job_id}_*.running', timeout=5)
+            self._ssh_run(
+                f'rm -f {GPU_WORKER_JOB_DIR}/{job_id}_*.json '
+                f'{GPU_WORKER_JOB_DIR}/{job_id}_*.running '
+                f'{GPU_WORKER_JOB_DIR}/{job_id}_*.tmp',
+                timeout=5,
+            )
         except Exception:
             pass
         return True
 
     def _submit_daemon_job(self, clip_slug: str, prompt: str, duration: float, steps: int) -> bool:
-        """Submit a job to the daemon via JSON file."""
+        """Submit a job to the daemon via JSON file (shell-safe with base64)."""
         job_data = json.dumps({
             'prompt': prompt,
             'duration': duration,
             'steps': steps,
             'slug': clip_slug,
         })
+        # Base64-encode to avoid any shell escaping issues with special chars
+        b64 = base64.b64encode(job_data.encode()).decode()
         try:
-            # Write job file atomically: write to .tmp then rename to .json
             result = self._ssh_run(
-                f"echo '{job_data}' > {GPU_WORKER_JOB_DIR}/{clip_slug}.tmp && "
+                f"echo {b64} | base64 -d > {GPU_WORKER_JOB_DIR}/{clip_slug}.tmp && "
                 f"mv {GPU_WORKER_JOB_DIR}/{clip_slug}.tmp {GPU_WORKER_JOB_DIR}/{clip_slug}.json",
                 timeout=10,
             )
@@ -146,7 +156,6 @@ class StableAudioGenerator(AudioGenerator):
         start = time.time()
         while time.time() - start < timeout:
             try:
-                # Check for .done file
                 result = self._ssh_run(
                     f'test -f {GPU_WORKER_JOB_DIR}/{clip_slug}.done && echo DONE || '
                     f'test -f {GPU_WORKER_JOB_DIR}/{clip_slug}.error && echo ERROR || '
@@ -155,7 +164,6 @@ class StableAudioGenerator(AudioGenerator):
                 )
                 status = result.stdout.strip()
                 if status == 'DONE':
-                    # Read worker status for timing info
                     try:
                         sr = self._ssh_run(f'cat {GPU_WORKER_STATUS_FILE}', timeout=5)
                         return json.loads(sr.stdout)
@@ -219,13 +227,12 @@ class StableAudioGenerator(AudioGenerator):
 
             db.append_audio_job_log(
                 job_id, 'system',
-                f"Generating clip {i + 1}/{num_clips}: \"{prompt[:60]}\"",
+                f"Generating clip {i + 1}/{num_clips}: \"{prompt[:120]}\"",
                 now_iso(),
             )
 
             try:
                 if use_daemon:
-                    # ── Daemon mode: submit JSON job, poll for completion ──
                     if not self._submit_daemon_job(clip_slug, prompt, clip_seconds, steps):
                         raise RuntimeError('Failed to submit job to daemon')
 
@@ -244,7 +251,6 @@ class StableAudioGenerator(AudioGenerator):
                     self._ssh_run(f'rm -f {GPU_WORKER_JOB_DIR}/{clip_slug}.*', timeout=5)
 
                 else:
-                    # ── Fallback: single-shot mode (old behavior) ──
                     cmd = (
                         f'/opt/musicgen-worker/.venv/bin/python3 '
                         f'/opt/musicgen-worker/worker_daemon.py '
