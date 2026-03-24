@@ -57,11 +57,30 @@
           <label for="minutes">Ziel-Dauer (Minuten)</label>
           <input type="number" name="minutes" id="minutes" class="form-input" value="42" min="1" max="180" />
         </div>
+        {% if health.provider != 'stable-audio-local' %}
         <div class="form-group">
           <label for="clip_seconds">Clip-Länge</label>
           <input type="number" name="clip_seconds" id="clip_seconds" class="form-input" value="30" min="10" max="60" />
         </div>
+        {% endif %}
       </div>
+      {% if health.provider == 'stable-audio-local' %}
+      <div class="grid two">
+        <div class="form-group">
+          <label for="steps">Inference Steps</label>
+          <select name="steps" id="steps" class="form-select">
+            <option value="30">30 (schnell, ~2 min/clip)</option>
+            <option value="50" selected>50 (standard, ~3.5 min/clip)</option>
+            <option value="100">100 (beste Qualität, ~7 min/clip)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="clip_seconds">Max. Clip-Länge (Sek.)</label>
+          <input type="number" name="clip_seconds" id="clip_seconds" class="form-input" value="47" min="10" max="47" />
+          <div class="metric-help">Stable Audio Open max: 47s pro Clip</div>
+        </div>
+      </div>
+      {% else %}
       <div class="form-group">
         <label for="model">Model</label>
         <select name="model" id="model" class="form-select">
@@ -79,6 +98,7 @@
           {% endfor %}
         </select>
       </div>
+      {% endif %}
       <div class="form-group">
         <label for="prompt_text">Prompt(s)</label>
         <textarea name="prompt_text" id="prompt_text" class="form-input" rows="8" placeholder="Eine Zeile pro Prompt. Wenn leer, wird das gewählte Preset verwendet."></textarea>
@@ -120,4 +140,5 @@
   </table>
 </section>
 {% endblock %}
+
 
