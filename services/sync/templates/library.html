@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}Library{% endblock %}
+{% block content %}
+<div class="page-header page-header-flex">
+  <div>
+    <h1>Library</h1>
+    <div class="page-subtitle">Zentrale Verwaltung für Assets, die im Create-Tab als Pipeline-Eingaben benutzt werden.</div>
+  </div>
+</div>
+
+{% if success_message %}
+<div class="panel panel-accent-teal" style="margin-bottom:18px;">
+  <div class="success-banner">✅ {{ success_message }}</div>
+</div>
+{% endif %}
+{% if error_message %}
+<div class="panel error-panel" style="margin-bottom:18px;">
+  <strong>Fehler:</strong> {{ error_message }}
+</div>
+{% endif %}
+
+<div class="grid two">
+  <section class="panel panel-accent-blue">
+    <h2>Songs</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Datei</th><th>Größe</th><th>Geändert</th></tr></thead>
+        <tbody>
+          {% for item in songs %}
+          <tr>
+            <td>{{ item.name }}</td>
+            <td>{{ item.size }}</td>
+            <td>{{ item.modified }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="3" class="empty-state">Keine Songs vorhanden</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <form method="post" action="/admin/library/upload" enctype="multipart/form-data" style="margin-top:16px;">
+      <input type="hidden" name="asset_type" value="songs" />
+      <div class="form-group">
+        <label for="song_file">Song hochladen</label>
+        <input id="song_file" name="file" type="file" class="form-input" accept=".mp3,.wav,.ogg" required />
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">Song hochladen</button>
+    </form>
+  </section>
+
+  <section class="panel panel-accent-purple">
+    <h2>Thumbnails</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Datei</th><th>Größe</th><th>Geändert</th></tr></thead>
+        <tbody>
+          {% for item in thumbnails %}
+          <tr>
+            <td>{{ item.name }}</td>
+            <td>{{ item.size }}</td>
+            <td>{{ item.modified }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="3" class="empty-state">Keine Thumbnails vorhanden</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <form method="post" action="/admin/library/upload" enctype="multipart/form-data" style="margin-top:16px;">
+      <input type="hidden" name="asset_type" value="thumbnails" />
+      <div class="form-group">
+        <label for="thumb_file">Thumbnail hochladen</label>
+        <input id="thumb_file" name="file" type="file" class="form-input" accept=".jpg,.jpeg,.png,.webp" required />
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">Thumbnail hochladen</button>
+    </form>
+  </section>
+</div>
+
+<section class="panel panel-accent-gold">
+  <h2>Metadata</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Datei</th><th>Größe</th><th>Geändert</th></tr></thead>
+      <tbody>
+        {% for item in metadata %}
+        <tr>
+          <td>{{ item.name }}</td>
+          <td>{{ item.size }}</td>
+          <td>{{ item.modified }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3" class="empty-state">Keine Metadata-Dateien vorhanden</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <form method="post" action="/admin/library/upload" enctype="multipart/form-data" style="margin-top:16px; max-width: 460px;">
+    <input type="hidden" name="asset_type" value="metadata" />
+    <div class="form-group">
+      <label for="meta_file">Metadata JSON hochladen</label>
+      <input id="meta_file" name="file" type="file" class="form-input" accept=".json,.md" required />
+    </div>
+    <button type="submit" class="btn btn-primary btn-sm">Metadata hochladen</button>
+  </form>
+</section>
+{% endblock %}

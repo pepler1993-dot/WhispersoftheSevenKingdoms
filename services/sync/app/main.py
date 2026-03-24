@@ -68,6 +68,38 @@ def slugify(text: str) -> str:
 DOCS_ROOT = Path(__file__).resolve().parents[3] / 'docs'
 
 
+def _human_size(size: int) -> str:
+    units = ['B', 'KB', 'MB', 'GB']
+    value = float(size)
+    for unit in units:
+        if value < 1024 or unit == units[-1]:
+            return f'{value:.1f} {unit}' if unit != 'B' else f'{int(value)} B'
+        value /= 1024
+    return f'{value:.1f} GB'
+
+
+def _format_local_ts(ts: float) -> str:
+    return datetime.fromtimestamp(ts, CET).strftime('%Y-%m-%d %H:%M')
+
+
+def _list_library_dir(dir_path: Path, allowed_suffixes: set[str]) -> list[dict[str, str]]:
+    if not dir_path.exists():
+        return []
+    items = []
+    for f in sorted(dir_path.iterdir(), key=lambda p: p.stat().st_mtime, reverse=True):
+        if not f.is_file() or f.name.startswith('.'):
+            continue
+        if allowed_suffixes and f.suffix.lower() not in allowed_suffixes:
+            continue
+        stat = f.stat()
+        items.append({
+            'name': f.name,
+            'size': _human_size(stat.st_size),
+            'modified': _format_local_ts(stat.st_mtime),
+        })
+    return items
+
+
 def _load_house_templates() -> dict[str, Any]:
     if not HOUSE_TEMPLATES_PATH.exists():
         return {}
@@ -949,6 +981,43 @@ def admin_audio(request: Request):
         'presets': presets,
         'jobs': jobs,
     })
+
+
+@app.get('/admin/library', response_class=HTMLResponse)
+def admin_library(request: Request, success: str | None = Query(default=None), error: str | None = Query(default=None)):
+    songs = _list_library_dir(PIPELINE_DIR / 'data' / 'upload' / 'songs', {'.mp3', '.wav', '.ogg'})
+    thumbnails = _list_library_dir(PIPELINE_DIR / 'data' / 'upload' / 'thumbnails', {'.jpg', '.jpeg', '.png', '.webp'})
+    metadata = _list_library_dir(PIPELINE_DIR / 'data' / 'upload' / 'metadata', {'.json', '.md'})
+    return templates.TemplateResponse('library.html', {
+        'request': request,
+        'page': 'library',
+        'songs': songs,
+        'thumbnails': thumbnails,
+        'metadata': metadata,
+        'success_message': success or '',
+        'error_message': error or '',
+    })
+
+
+@app.post('/admin/library/upload')
+async def admin_library_upload(asset_type: str = Form(...), file: UploadFile = File(...)):
+    mapping = {
+        'songs': (PIPELINE_DIR / 'data' / 'upload' / 'songs', {'.mp3', '.wav', '.ogg'}),
+        'thumbnails': (PIPELINE_DIR / 'data' / 'upload' / 'thumbnails', {'.jpg', '.jpeg', '.png', '.webp'}),
+        'metadata': (PIPELINE_DIR / 'data' / 'upload' / 'metadata', {'.json', '.md'}),
+    }
+    if asset_type not in mapping:
+        return RedirectResponse('/admin/library?error=Ung%C3%BCltiger+Asset-Typ', status_code=303)
+    target_dir, allowed = mapping[asset_type]
+    filename = Path(file.filename or '').name
+    if not filename:
+        return RedirectResponse('/admin/library?error=Dateiname+fehlt', status_code=303)
+    if Path(filename).suffix.lower() not in allowed:
+        return RedirectResponse('/admin/library?error=Dateityp+nicht+erlaubt', status_code=303)
+    target_dir.mkdir(parents=True, exist_ok=True)
+    content = await file.read()
+    (target_dir / filename).write_bytes(content)
+    return RedirectResponse(f'/admin/library?success={asset_type}+Datei+{filename}+hochgeladen', status_code=303)
 
 
 @app.get('/admin/shorts', response_class=HTMLResponse)
