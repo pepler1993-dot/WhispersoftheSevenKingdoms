@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Release Notes{% endblock %}
+{% block content %}
+<div class="page-header page-header-flex">
+  <div>
+    <h1>Release Notes</h1>
+    <div class="page-subtitle">Versionshistorie und Änderungsprotokoll</div>
+  </div>
+</div>
+
+{% for release in releases %}
+<div class="panel" style="margin-bottom: 18px;">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+    <h2 style="margin:0; font-size:1.3rem;">{{ release.tag }}</h2>
+    <span class="badge" style="font-size:0.8rem;">{{ release.date }}</span>
+  </div>
+  <div style="line-height:1.7;">
+    {{ release.body | safe }}
+  </div>
+</div>
+{% endfor %}
+
+{% if not releases %}
+<div class="panel">
+  <p>Keine Release Notes verfügbar.</p>
+</div>
+{% endif %}
+{% endblock %}
