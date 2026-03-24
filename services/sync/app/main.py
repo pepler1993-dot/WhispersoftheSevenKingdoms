@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import hashlib
 import html
+import markdown as _md_lib
 import re
+import subprocess as _sp
 import hmac
 import json
 import shutil
@@ -313,6 +315,28 @@ settings = get_settings()
 db = AgentSyncDB(settings.data_dir)
 BASE_DIR = Path(__file__).resolve().parent.parent
 templates = Jinja2Templates(directory=str(BASE_DIR / 'templates'))
+
+
+# ── Version detection ─────────────────────────────────────────────────────
+
+def _detect_version() -> str:
+    """Read current version from latest git tag."""
+    try:
+        result = _sp.run(
+            ['git', 'describe', '--tags', '--abbrev=0'],
+            capture_output=True, text=True, timeout=5,
+            cwd=str(BASE_DIR),
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            return result.stdout.strip()
+    except Exception:
+        pass
+    return 'dev'
+
+
+APP_VERSION = _detect_version()
+templates.env.globals['app_version'] = APP_VERSION
+
 
 app = FastAPI(title='agent-sync-service')
 
@@ -923,6 +947,61 @@ def admin_server_stats():
 
 # ── audio generator ──
 
+
+
+# ── Release Notes ─────────────────────────────────────────────────────────
+
+def _get_release_notes() -> list[dict[str, str]]:
+    """Parse git tags into release notes."""
+    releases = []
+    try:
+        result = _sp.run(
+            ['git', 'tag', '-l', 'v*', '--sort=-creatordate', '--format=%(refname:short)|%(creatordate:short)|%(contents)'],
+            capture_output=True, text=True, timeout=10,
+            cwd=str(BASE_DIR),
+        )
+        if result.returncode != 0:
+            return releases
+
+        current: dict[str, str] | None = None
+        for line in result.stdout.strip().split('\n'):
+            if not line:
+                if current:
+                    current['body'] += '<br>'
+                continue
+            if '|' in line and line.startswith('v'):
+                parts = line.split('|', 2)
+                if len(parts) >= 2:
+                    if current:
+                        releases.append(current)
+                    body_raw = parts[2] if len(parts) > 2 else ''
+                    try:
+                        body_html = _md_lib.markdown(body_raw)
+                    except Exception:
+                        body_html = body_raw.replace('\n', '<br>')
+                    current = {
+                        'tag': parts[0],
+                        'date': parts[1],
+                        'body': body_html,
+                    }
+            elif current:
+                try:
+                    current['body'] += _md_lib.markdown(line)
+                except Exception:
+                    current['body'] += '<br>' + line
+        if current:
+            releases.append(current)
+    except Exception:
+        pass
+    return releases
+
+
+@app.get('/admin/releases', response_class=HTMLResponse)
+def admin_releases(request: Request):
+    releases = _get_release_notes()
+    return templates.TemplateResponse('releases.html', {
+        'request': request, 'page': 'releases', 'releases': releases,
+    })
 
 
 @app.get('/admin/docs', response_class=HTMLResponse)
@@ -1770,3 +1849,4 @@ async def github_webhook(
         'task_state_updated': task_state_updated,
         'seq': assigned_seq or None,
     }
+
