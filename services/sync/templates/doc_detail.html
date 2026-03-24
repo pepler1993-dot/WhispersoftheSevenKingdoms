@@ -5,7 +5,7 @@
   <div>
     <div class="docs-kicker">{{ doc.section_title }}</div>
     <h1>{{ doc.title }}</h1>
-    <div class="page-subtitle">{{ doc.kind }} · Anwender-/Teamsicht im Dashboard</div>
+    <div class="page-subtitle">{{ doc.kind }} · {{ doc.section_title }}</div>
   </div>
   <div class="header-actions">
     <a href="/admin/docs" class="btn btn-secondary btn-sm">← Zur Doku</a>
@@ -18,3 +18,4 @@
     {{ doc_html | safe }}
   </article>
 </section>
+{% endblock %}
