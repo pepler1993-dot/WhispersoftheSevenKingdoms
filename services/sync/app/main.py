@@ -1020,6 +1020,21 @@ async def admin_library_upload(asset_type: str = Form(...), file: UploadFile = F
     return RedirectResponse(f'/admin/library?success={asset_type}+Datei+{filename}+hochgeladen', status_code=303)
 
 
+@app.get('/admin/library/preview/{asset_type}/{filename}')
+def admin_library_preview(asset_type: str, filename: str):
+    mapping = {
+        'songs': PIPELINE_DIR / 'data' / 'upload' / 'songs',
+        'thumbnails': PIPELINE_DIR / 'data' / 'upload' / 'thumbnails',
+        'metadata': PIPELINE_DIR / 'data' / 'upload' / 'metadata',
+    }
+    if asset_type not in mapping:
+        raise HTTPException(status_code=404, detail='Asset type not found')
+    path = mapping[asset_type] / Path(filename).name
+    if not path.exists() or not path.is_file():
+        raise HTTPException(status_code=404, detail='File not found')
+    return FileResponse(path)
+
+
 @app.get('/admin/shorts', response_class=HTMLResponse)
 def admin_shorts(request: Request, success: str | None = Query(default=None), error: str | None = Query(default=None)):
     library_tracks = list_library_tracks_for_pipeline(db)

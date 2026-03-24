@@ -19,9 +19,22 @@
 </div>
 {% endif %}
 
+<section class="panel panel-accent-gold" style="margin-bottom:18px;">
+  <h2>Wofür die Library da ist</h2>
+  <div class="page-subtitle" style="max-width: 78ch; margin-top: 10px;">
+    Die Library ist der zentrale Ort für Pipeline-Eingaben. Im <strong>Create</strong>-Tab wählt ihr nur noch aus,
+    welche Assets benutzt werden sollen. Hochladen und Überblick passieren hier.
+  </div>
+  <ul class="list" style="margin-top: 12px;">
+    <li><strong>Songs</strong> → erscheinen im Create-Tab als Audio-Bibliothek</li>
+    <li><strong>Thumbnails</strong> → stehen im Create-Tab als vorhandene Thumbnail-Auswahl bereit</li>
+    <li><strong>Metadata</strong> → liegen zentral für Referenz, Wiederverwendung und QA</li>
+  </ul>
+</section>
+
 <div class="grid two">
   <section class="panel panel-accent-blue">
-    <h2>Songs</h2>
+    <div class="section-header-inline"><h2>Songs</h2><span class="section-note">für Audio-Auswahl im Create-Tab</span></div>
     <div class="table-wrap">
       <table>
         <thead><tr><th>Datei</th><th>Größe</th><th>Geändert</th></tr></thead>
@@ -49,22 +62,19 @@
   </section>
 
   <section class="panel panel-accent-purple">
-    <h2>Thumbnails</h2>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Datei</th><th>Größe</th><th>Geändert</th></tr></thead>
-        <tbody>
-          {% for item in thumbnails %}
-          <tr>
-            <td>{{ item.name }}</td>
-            <td>{{ item.size }}</td>
-            <td>{{ item.modified }}</td>
-          </tr>
-          {% else %}
-          <tr><td colspan="3" class="empty-state">Keine Thumbnails vorhanden</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="section-header-inline"><h2>Thumbnails</h2><span class="section-note">für vorhandene Thumbnail-Auswahl</span></div>
+    <div class="thumb-grid">
+      {% for item in thumbnails %}
+      <div class="thumb-card">
+        <img src="/admin/library/preview/thumbnails/{{ item.name }}" alt="{{ item.name }}" class="thumb-preview" />
+        <div class="thumb-meta">
+          <div class="thumb-name">{{ item.name }}</div>
+          <div class="thumb-sub">{{ item.size }} · {{ item.modified }}</div>
+        </div>
+      </div>
+      {% else %}
+      <div class="empty-state">Keine Thumbnails vorhanden</div>
+      {% endfor %}
     </div>
     <form method="post" action="/admin/library/upload" enctype="multipart/form-data" style="margin-top:16px;">
       <input type="hidden" name="asset_type" value="thumbnails" />
@@ -78,7 +88,7 @@
 </div>
 
 <section class="panel panel-accent-gold">
-  <h2>Metadata</h2>
+  <div class="section-header-inline"><h2>Metadata</h2><span class="section-note">für Referenz und Wiederverwendung</span></div>
   <div class="table-wrap">
     <table>
       <thead><tr><th>Datei</th><th>Größe</th><th>Geändert</th></tr></thead>
@@ -104,4 +114,37 @@
     <button type="submit" class="btn btn-primary btn-sm">Metadata hochladen</button>
   </form>
 </section>
+
+<style>
+.thumb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+}
+.thumb-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface);
+}
+.thumb-preview {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+}
+.thumb-meta {
+  padding: 10px 12px;
+}
+.thumb-name {
+  font-size: 0.84rem;
+  font-weight: 700;
+  word-break: break-word;
+}
+.thumb-sub {
+  font-size: 0.74rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+</style>
 {% endblock %}
