@@ -65,6 +65,14 @@ docs/
 Hinweis: Bestehende Unterordner wie `technical/`, `publishing/`, `templates/`, `architecture/` bleiben zunächst bestehen,
 bis ihre Inhalte sauber migriert oder neu indexiert wurden.
 
+## Neue konsolidierte Explanation-Einstiege
+
+- `docs/explanation/README.md`
+- `docs/explanation/architecture-overview.md`
+- `docs/explanation/audio-strategy.md`
+
+Diese Dateien dienen als primäre Einstiegspunkte. Ältere Review-Dokumente bleiben vorerst als Appendix erhalten.
+
 ## Priorisierte Arbeitspakete
 
 ### P0 – Jetzt

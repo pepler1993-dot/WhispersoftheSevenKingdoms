@@ -55,7 +55,9 @@ Lookup-Material: technische Fakten, Formate, Konventionen, Templates.
 ### Explanation
 Warum Dinge so gebaut sind, welche Tradeoffs gelten, welche Strategie verfolgt wird.
 
-- [`explanation-index.md`](explanation-index.md)
+- [`explanation/README.md`](explanation/README.md)
+- [`explanation/architecture-overview.md`](explanation/architecture-overview.md)
+- [`explanation/audio-strategy.md`](explanation/audio-strategy.md)
 - [`architecture/TECH_DECISIONS.md`](architecture/TECH_DECISIONS.md)
 - [`architecture/EXPANSION_PLAN_FINAL.md`](architecture/EXPANSION_PLAN_FINAL.md)
 - [`AUDIO_GENERATION_ALTERNATIVES_EVALUATION.md`](AUDIO_GENERATION_ALTERNATIVES_EVALUATION.md)
