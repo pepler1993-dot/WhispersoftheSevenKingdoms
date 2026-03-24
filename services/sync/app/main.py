@@ -297,6 +297,32 @@ def _format_berlin(value: str | None, with_seconds: bool = False) -> str:
 
 
 
+
+
+def _event_manager_summary(event: dict[str, Any]) -> str:
+    et = event.get('event_type')
+    action = event.get('action')
+    sender = event.get('sender') or 'jemand'
+    if et == 'issues' and action == 'opened':
+        return f'Issue wurde von {sender} eröffnet.'
+    if et == 'task.claimed':
+        return f'{sender} hat die Aufgabe übernommen.'
+    if et == 'task.heartbeat':
+        return f'{sender} arbeitet weiter an der Aufgabe.'
+    if et == 'task.released':
+        return f'{sender} hat die Aufgabe wieder freigegeben.'
+    if et == 'task.completed':
+        return f'{sender} hat die Aufgabe als erledigt markiert.'
+    if et == 'task.stale':
+        return 'Ein Claim ist abgelaufen.'
+    if et == 'pull_request' and action == 'opened':
+        return f'{sender} hat einen Pull Request eröffnet.'
+    if et == 'pull_request' and action == 'closed':
+        return 'Ein Pull Request wurde geschlossen.'
+    if et == 'pull_request_review':
+        return f'Ein Review von {sender} ist eingegangen.'
+    return f'{et or "event"}{(" / " + action) if action else ""}'
+
 def _phase_label(phase: str | None) -> str:
     return {
         'working': 'In Arbeit',
@@ -393,12 +419,14 @@ def _humanize_task_detail_for_manager(task_id: str, detail: dict[str, Any]) -> d
             'actor': actor,
             'display_time': _format_berlin(event.get('occurred_at'), with_seconds=True),
             'display_label': f'{label} / {action}'.strip(' /'),
+            'summary': _event_manager_summary(event),
         })
     github_events = []
     for event in detail.get('github_events') or []:
         github_events.append({
             **event,
             'display_time': _format_berlin(event.get('received_at'), with_seconds=True),
+            'summary': _event_manager_summary(event),
         })
     return {
         **detail,
@@ -785,7 +813,7 @@ def admin_ops(
     current_tab = tab if tab in allowed_tabs else 'tasks'
     raw_tasks = db.list_tasks_for_admin(phase=phase, owner=owner, query=q, include_done=include_done)
     tasks = [_humanize_task_for_manager(task, db.get_task_detail(task['task_id'])) for task in raw_tasks]
-    events = [{**event, 'received_at_display': _format_berlin(event.get('received_at'), with_seconds=True)} for event in db.list_github_events(limit=limit)]
+    events = [{**event, 'received_at_display': _format_berlin(event.get('received_at'), with_seconds=True), 'summary': _event_manager_summary(event)} for event in db.list_github_events(limit=limit)]
     system = db.get_system_summary()
     system['latest_github_event_at_display'] = _format_berlin(system.get('latest_github_event_at'), with_seconds=True)
     system['latest_task_update_at_display'] = _format_berlin(system.get('latest_task_update_at'), with_seconds=True)

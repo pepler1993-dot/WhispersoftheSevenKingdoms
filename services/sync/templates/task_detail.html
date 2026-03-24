@@ -16,7 +16,7 @@
   <section class="panel panel-accent-gold">
     <h2>Aktueller Stand</h2>
     <div class="config-grid">
-      <div class="config-item"><div class="label">Status</div><div class="value"><span class="badge {{ detail.human.phase_label }}">{{ detail.human.phase_label }}</span></div></div>
+      <div class="config-item"><div class="label">Status</div><div class="value"><span class="badge {{ detail.state.phase }}">{{ detail.human.phase_label }}</span></div></div>
       <div class="config-item"><div class="label">Zuletzt von</div><div class="value">{{ detail.human.last_agent }}</div></div>
       <div class="config-item"><div class="label">Aktualisiert</div><div class="value">{{ detail.updated_at_display }}</div></div>
       <div class="config-item"><div class="label">Lease bis</div><div class="value">{{ detail.lease_until_display }}</div></div>
@@ -48,7 +48,7 @@
     <ul class="list">
       {% for event in detail.task_events %}
       <li>
-        <strong>{{ event.display_label }}</strong><br />
+        <strong>{{ event.summary }}</strong><br />
         <span class="metric-help">{{ event.actor }} · {{ event.display_time }}</span>
       </li>
       {% else %}
@@ -61,7 +61,7 @@
     <ul class="list">
       {% for event in detail.github_events %}
       <li>
-        <strong>{{ event.event_type }}{% if event.action %} / {{ event.action }}{% endif %}</strong><br />
+        <strong>{{ event.summary }}</strong><br />
         <span class="metric-help">{{ event.sender or '—' }} · {{ event.display_time }}</span>
       </li>
       {% else %}
