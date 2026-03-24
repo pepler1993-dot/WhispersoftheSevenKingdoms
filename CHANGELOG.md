@@ -3,6 +3,20 @@
 Alle relevanten Änderungen am Projekt werden hier dokumentiert.
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [v2.1.0] – 2026-03-24
+
+### Added
+- Release Notes Page mit dynamischem Version-Badge (#59)
+- Task-Lifecycle Dokumentation in WORKING_IN_THIS_PROJECT.md
+- CHANGELOG.md
+
+### Changed
+- Mobile-responsive UI für gesamtes Dashboard (#60)
+  - Tabellen werden auf Mobile zu Card-Layout
+  - Buttons full-width auf kleinen Screens
+  - Pipeline Create, Ops, Tasks, Library, Releases optimiert
+- Version-Badge in Sidebar zeigt aktuelle Git-Tag Version
+
 ## [v2.0.0] – 2026-03-24
 
 ### Added
@@ -29,3 +43,4 @@ Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0
 - Operations Dashboard mit Task-Tracking
 - GitHub Webhook Integration
 - Docs Landing Page unter Operations
+
