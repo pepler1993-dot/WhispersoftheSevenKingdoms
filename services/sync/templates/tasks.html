@@ -36,7 +36,7 @@
         {% for task in tasks %}
         <tr>
           <td>
-            <a href="/admin/tasks/{{ task.task_id | urlencode }}">{{ task.display_title }}</a>
+            <a href="/admin/tasks/{{ task.task_id | urlencode }}">{{ task.assignment_title }}</a>
             <div class="metric-help" style="margin-top:4px">{{ task.task_id }}</div>
           </td>
           <td><span class="badge {{ task.phase_label }}">{{ task.phase_label }}</span></td>

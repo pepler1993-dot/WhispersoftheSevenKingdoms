@@ -344,11 +344,27 @@ def _phase_label(phase: str | None) -> str:
         'archived': 'Archiviert',
     }.get(phase or '', phase or '—')
 
+
+
+def _extract_issue_title(detail: dict[str, Any] | None, snapshot: dict[str, Any], fallback_task_id: str) -> str | None:
+    if detail:
+        for event in detail.get('github_events') or []:
+            payload = event.get('payload_json') or {}
+            issue = payload.get('issue') or {}
+            title = issue.get('title')
+            if title:
+                return title.strip()
+    title = snapshot.get('last_summary')
+    if isinstance(title, str) and title.strip():
+        return title.strip()
+    return None
+
 def _humanize_task_for_manager(task: dict[str, Any], detail: dict[str, Any] | None = None) -> dict[str, Any]:
     snapshot = task.get('snapshot') or {}
     task_id = task.get('task_id', '')
     issue_number = snapshot.get('issue_number')
-    title = f'Issue #{issue_number}' if issue_number else task_id
+    assignment_title = _extract_issue_title(detail, snapshot, task_id)
+    title = assignment_title or (f'Issue #{issue_number}' if issue_number else task_id)
 
     last_agent = task.get('owner_agent')
     last_action = None
@@ -404,6 +420,7 @@ def _humanize_task_for_manager(task: dict[str, Any], detail: dict[str, Any] | No
     return {
         **task,
         'display_title': title,
+        'assignment_title': assignment_title or title,
         'phase_label': _phase_label(task.get('phase')),
         'issue_url': f"https://github.com/{task_id.split('#')[0]}/issues/{issue_number}" if issue_number and '#' in task_id else None,
         'last_agent': last_agent or '—',
