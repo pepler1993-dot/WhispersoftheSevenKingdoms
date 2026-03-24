@@ -20,10 +20,17 @@
     </div>
     <div class="config-grid">
       <div class="config-item"><div class="label">Provider</div><div class="value">{{ health.provider }}</div></div>
+      {% if health.provider == 'stable-audio-local' %}
+      <div class="config-item"><div class="label">GPU</div><div class="value">{{ health.gpu or 'nicht erreichbar' }}</div></div>
+      <div class="config-item"><div class="label">Host</div><div class="value">{{ health.host or '—' }}</div></div>
+      <div class="config-item"><div class="label">Modell</div><div class="value">{{ health.model or '—' }}</div></div>
+      <div class="config-item"><div class="label">Status</div><div class="value">{{ '✅ Online' if health.available else '❌ Offline' }}</div></div>
+      {% else %}
       <div class="config-item"><div class="label">CLI</div><div class="value">{{ 'ok' if health.kaggle_bin else 'fehlt' }}</div></div>
       <div class="config-item"><div class="label">Token</div><div class="value">{{ 'ok' if health.token_present else 'fehlt' }}</div></div>
       <div class="config-item"><div class="label">Template</div><div class="value">{{ 'ok' if health.template_present else 'fehlt' }}</div></div>
       <div class="config-item"><div class="label">Upload Dir</div><div class="value">{{ 'ok' if health.upload_dir_present else 'fehlt' }}</div></div>
+      {% endif %}
     </div>
     <div style="margin-top:12px;color:var(--text-secondary);font-size:14px">
       {% if health.available %}
@@ -113,3 +120,4 @@
   </table>
 </section>
 {% endblock %}
+
