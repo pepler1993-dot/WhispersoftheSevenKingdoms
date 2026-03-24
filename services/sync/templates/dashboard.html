@@ -56,10 +56,11 @@
     <div class="gauge-label">💾 Disk</div>
     <div class="gauge-detail" id="detail-disk">– / – GB</div>
   </div>
-  <div class="gauge-card load-card">
+  <div class="gauge-card load-card" title="Server-Last basiert auf dem 1-Minuten-Load pro CPU-Kern. Das ist nicht dasselbe wie CPU-Prozent und reagiert auch auf blockierte Prozesse oder I/O-Wartezeit.">
     <div class="load-emoji" id="load-emoji">😴</div>
     <div class="load-status" id="load-status">Lädt...</div>
     <div class="gauge-label">⚡ Server-Last</div>
+    <div class="gauge-detail" id="detail-load">Load: – / Kern</div>
     <div class="gauge-detail" id="detail-uptime">Uptime: –</div>
   </div>
 </div>
@@ -119,17 +120,18 @@ async function refreshStats() {
     document.getElementById('detail-cpu').textContent = d.cpu.cores + ' Cores';
     document.getElementById('detail-ram').textContent = d.memory.used_gb.toFixed(1) + ' / ' + d.memory.total_gb.toFixed(1) + ' GB';
     document.getElementById('detail-disk').textContent = d.disk.used_gb.toFixed(1) + ' / ' + d.disk.total_gb.toFixed(1) + ' GB';
-    // Load als einfache Ampel
-    const cores = d.cpu.cores || 1;
+    // Load pro Kern: entspanntere, verständlichere Einordnung als zuvor
+    const cores = Math.max(1, d.cpu.cores || 1);
     const ratio = d.cpu.load_1m / cores;
     let emoji, status;
-    if (ratio < 0.3) { emoji = '😴'; status = 'Entspannt'; }
-    else if (ratio < 0.6) { emoji = '😊'; status = 'Läuft gut'; }
-    else if (ratio < 0.85) { emoji = '😤'; status = 'Beschäftigt'; }
-    else if (ratio < 1.0) { emoji = '🔥'; status = 'Voll ausgelastet'; }
-    else { emoji = '💀'; status = 'Überlastet!'; }
+    if (ratio < 0.5) { emoji = '😌'; status = 'Leicht'; }
+    else if (ratio < 1.0) { emoji = '🙂'; status = 'Normal'; }
+    else if (ratio < 1.5) { emoji = '😅'; status = 'Erhöht'; }
+    else if (ratio < 2.0) { emoji = '😓'; status = 'Hoch'; }
+    else { emoji = '🚨'; status = 'Sehr hoch'; }
     document.getElementById('load-emoji').textContent = emoji;
     document.getElementById('load-status').textContent = status;
+    document.getElementById('detail-load').textContent = 'Load: ' + d.cpu.load_1m.toFixed(2) + ' (' + ratio.toFixed(2) + ' / Kern)';
     document.getElementById('detail-uptime').textContent = 'Uptime: ' + timeSince(d.boot_time);
   } catch(e) { console.error('Stats fetch failed', e); }
 }
