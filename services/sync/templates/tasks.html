@@ -6,15 +6,28 @@
   <div class="page-subtitle">Menschenlesbare Übersicht aller Aufgaben im Sync-Service.</div>
 </div>
 
-<form method="get" class="filters panel inline-form">
-  <input type="text" name="q" value="{{ filters.q or '' }}" placeholder="Issue- oder Task-ID suchen" />
-  <input type="text" name="owner" value="{{ filters.owner or '' }}" placeholder="Agent / Bearbeiter" />
-  <input type="text" name="phase" value="{{ filters.phase or '' }}" placeholder="Status" />
+<form method="get" class="filters panel inline-form" id="task-filter-form">
+  <input type="text" name="q" id="search-input" value="{{ filters.q or '' }}" placeholder="Issue- oder Task-ID suchen" />
+  <select name="owner" id="owner-select">
+    <option value="">Alle Bearbeiter</option>
+    <!-- Optionen werden dynamisch gefüllt -->
+    <option value="Pako" {% if filters.owner == "Pako" %}selected{% endif %}>Pako</option>
+    <option value="Smith" {% if filters.owner == "Smith" %}selected{% endif %}>Smith</option>
+    <option value="Jarvis" {% if filters.owner == "Jarvis" %}selected{% endif %}>Jarvis</option>
+  </select>
+  <select name="phase" id="phase-select">
+    <option value="">Alle Status</option>
+    <option value="working" {% if filters.phase == "working" %}selected{% endif %}>In Arbeit</option>
+    <option value="blocked" {% if filters.phase == "blocked" %}selected{% endif %}>Blockiert</option>
+    <option value="released" {% if filters.phase == "released" %}selected{% endif %}>Freigegeben (offen)</option>
+    <option value="done" {% if filters.phase == "done" %}selected{% endif %}>Abgeschlossen</option>
+    <option value="stale" {% if filters.phase == "stale" %}selected{% endif %}>Abgelaufen</option>
+  </select>
   <label class="form-check" style="margin:0">
-    <input type="checkbox" name="include_done" value="true" {% if filters.include_done %}checked{% endif %} />
+    <input type="checkbox" name="include_done" value="true" id="include-done-checkbox" {% if filters.include_done %}checked{% endif %} />
     erledigte zeigen
   </label>
-  <button type="submit" class="btn btn-primary btn-sm">
+  <button type="submit" class="btn btn-primary btn-sm" id="filter-button" style="display:none;">
     <i data-lucide="search" style="width:14px;height:14px"></i> Filtern
   </button>
 </form>
@@ -32,7 +45,7 @@
           <th>Lease bis</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="tasks-table-body">
         {% for task in tasks %}
         <tr>
           <td data-label="Aufgabe">
@@ -52,4 +65,54 @@
     </table>
   </div>
 </section>
+
+<script>
+  // Live-Filterung ohne extra Button
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('task-filter-form');
+    const searchInput = document.getElementById('search-input');
+    const ownerSelect = document.getElementById('owner-select');
+    const phaseSelect = document.getElementById('phase-select');
+    const includeDoneCheckbox = document.getElementById('include-done-checkbox');
+    
+    // Funktion zum Sammeln der Filterwerte
+    function getFilterValues() {
+      return {
+        q: searchInput.value,
+        owner: ownerSelect.value,
+        phase: phaseSelect.value,
+        include_done: includeDoneCheckbox.checked
+      };
+    }
+    
+    // Funktion zum Aktualisieren der URL ohne Neuladen
+    function updateURL(filters) {
+      const url = new URL(window.location);
+      url.search = '';
+      
+      for (const [key, value] of Object.entries(filters)) {
+        if (value !== '' && value !== false) {
+          url.searchParams.set(key, value);
+        }
+      }
+      
+      window.history.replaceState({}, '', url);
+    }
+    
+    // Funktion zum Filtern der Tabelle (könnte mit echter API verbunden werden)
+    function filterTable() {
+      const filters = getFilterValues();
+      updateURL(filters);
+      
+      // Hier könnte echtes clientseitiges Filtern stattfinden
+      // Für Server-seitiges Filtern müsste ein API-Endpunkt aufgerufen werden
+    }
+    
+    // Event-Listener für Live-Filterung
+    searchInput.addEventListener('input', filterTable);
+    ownerSelect.addEventListener('change', filterTable);
+    phaseSelect.addEventListener('change', filterTable);
+    includeDoneCheckbox.addEventListener('change', filterTable);
+  });
+</script>
 {% endblock %}

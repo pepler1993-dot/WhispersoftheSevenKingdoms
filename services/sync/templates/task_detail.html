@@ -24,8 +24,8 @@
       <div class="config-item"><div class="label">Issue</div><div class="value">#{{ detail.issue_number or '—' }}</div></div>
     </div>
     <div class="output-files" style="margin-top:14px">
-      <strong>Zusammenfassung:</strong><br />
-      {{ detail.human.summary }}
+      <strong>Aufgabenbeschreibung:</strong><br />
+      {{ detail.detailed_description | default(detail.human.summary) }}
     </div>
   </section>
 

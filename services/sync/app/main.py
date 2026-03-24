@@ -415,6 +415,23 @@ def _extract_issue_title(detail: dict[str, Any] | None, snapshot: dict[str, Any]
         return title.strip()
     return None
 
+
+def _extract_issue_body(detail: dict[str, Any] | None) -> str | None:
+    """Extrahiere den Issue-Body für detailliertere Beschreibungen."""
+    if not detail:
+        return None
+    
+    # Suche nach dem neuesten Issue-Event mit Body
+    for event in detail.get('github_events') or []:
+        payload = event.get('payload_json') or {}
+        issue = payload.get('issue') or {}
+        body = issue.get('body')
+        if body and isinstance(body, str) and body.strip():
+            # Kürze den Body auf eine sinnvolle Länge
+            return body.strip()[:500] + "..." if len(body.strip()) > 500 else body.strip()
+    
+    return None
+
 def _humanize_task_for_manager(task: dict[str, Any], detail: dict[str, Any] | None = None) -> dict[str, Any]:
     snapshot = task.get('snapshot') or {}
     task_id = task.get('task_id', '')
@@ -472,6 +489,25 @@ def _humanize_task_for_manager(task: dict[str, Any], detail: dict[str, Any] | No
         summary = last_action or f'Erledigt{(" von " + last_agent) if last_agent else ""}.'
     elif phase == 'stale':
         summary = f'Claim abgelaufen{(" – zuletzt bei " + last_agent) if last_agent else ""}.'
+    
+    # Verbesserte Fallback-Beschreibung
+    if summary == 'Noch keine verständliche Zusammenfassung vorhanden.':
+        if detail:
+            issue_body = _extract_issue_body(detail)
+            if issue_body:
+                summary = issue_body
+            else:
+                # Suche nach sinnvollen Events für bessere Beschreibung
+                github_events = detail.get('github_events') or []
+                for event in github_events:
+                    payload = event.get('payload_json') or {}
+                    issue = payload.get('issue') or {}
+                    if issue.get('body'):
+                        summary = f"Issue-Beschreibung: {issue['body'][:100]}..." if len(issue['body']) > 100 else issue['body']
+                        break
+                    elif event.get('event_type') == 'issues' and event.get('action') == 'opened':
+                        summary = f"Neues Issue von {event.get('sender', 'GitHub')}"
+                        break
 
     return {
         **task,
@@ -512,6 +548,14 @@ def _humanize_task_detail_for_manager(task_id: str, detail: dict[str, Any]) -> d
             'display_time': _format_berlin(event.get('received_at'), with_seconds=True),
             'summary': _event_manager_summary(event),
         })
+    
+    # Verbesserte detaillierte Beschreibung
+    detailed_description = human.get('summary', '')
+    if detail:
+        issue_body = _extract_issue_body(detail)
+        if issue_body and issue_body != detailed_description:
+            detailed_description = issue_body
+    
     return {
         **detail,
         'human': human,
@@ -524,6 +568,7 @@ def _humanize_task_detail_for_manager(task_id: str, detail: dict[str, Any]) -> d
         'lease_until_display': _format_berlin(state.get('lease_until'), with_seconds=True),
         'heartbeat_at_display': _format_berlin(state.get('heartbeat_at'), with_seconds=True),
         'issue_number': snapshot.get('issue_number'),
+        'detailed_description': detailed_description,  # Neue detaillierte Beschreibung
     }
 
 app.mount('/static', StaticFiles(directory=str(BASE_DIR / 'static')), name='static')
