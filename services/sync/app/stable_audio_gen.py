@@ -194,8 +194,9 @@ class StableAudioGenerator(AudioGenerator):
                                 error_message='No prompts provided')
             return
 
-        db.update_audio_job(job_id, status='running')
-        db.append_audio_job_log(job_id, 'system', 'Checking GPU worker health...', now_iso())
+        start_ts = now_iso()
+        db.update_audio_job(job_id, status='running', started_at=start_ts, provider='stable-audio-local')
+        db.append_audio_job_log(job_id, 'system', 'Checking GPU worker health...', start_ts)
 
         health = self.health()
         if not health['available']:
@@ -317,7 +318,10 @@ class StableAudioGenerator(AudioGenerator):
                                 error_message=f'Download failed: {e}')
             return
 
+        db.append_audio_job_log(job_id, 'system', f'Final track downloaded: {local_path.name}', now_iso())
+
         # Cleanup remote files
+        db.append_audio_job_log(job_id, 'system', 'Cleaning up remote worker files...', now_iso())
         try:
             self._ssh_run(
                 f'rm -f {GPU_WORKER_OUTPUT_DIR}/{job_id}_clip_*.wav {final_remote}',
@@ -328,12 +332,13 @@ class StableAudioGenerator(AudioGenerator):
 
         # Done!
         file_size_mb = local_path.stat().st_size / 1024 / 1024
-        db.update_audio_job(job_id, status='complete', finished_at=now_iso(),
-                            output_path=str(local_path))
+        finish_ts = now_iso()
+        db.update_audio_job(job_id, status='complete', finished_at=finish_ts,
+                            output_path=str(local_path), provider='stable-audio-local')
         db.append_audio_job_log(
             job_id, 'system',
             f'✅ Track complete: {local_path.name} ({file_size_mb:.1f} MB)',
-            now_iso(),
+            finish_ts,
         )
 
     def _stitch_clips(self, clips: list[str], output: str, crossfade: int) -> None:

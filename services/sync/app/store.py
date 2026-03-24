@@ -721,7 +721,7 @@ class AgentSyncDB:
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ''',
                     (
-                        job['job_id'], job['slug'], job.get('title'), job.get('provider', 'kaggle'),
+                        job['job_id'], job['slug'], job.get('title'), job.get('provider', 'stable-audio-local'),
                         job.get('preset_name'), job.get('prompt_text'), json.dumps(job.get('prompts', []), ensure_ascii=False),
                         job.get('minutes'), job.get('model'), job.get('clip_seconds'), job.get('status', 'queued'),
                         job.get('kernel_ref'), job.get('output_path'), job.get('started_at'), job.get('finished_at'),
