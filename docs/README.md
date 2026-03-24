@@ -1,38 +1,35 @@
 # Documentation Index
 
-Die Doku wird auf das **Diátaxis-Framework** umgebaut, damit man nicht erst Archäologie studieren muss, um etwas zu finden.
+Diese Dokumentation ist nach dem **Diátaxis-Framework** organisiert, damit unterschiedliche Zielgruppen schnell die richtige Art von Information finden.
 
 ## Start hier
 
-- **Projektstatus / operative Wahrheit**: [`../PROJECT_STATUS.md`](../PROJECT_STATUS.md)
-- **Roadmap / nächste Prioritäten**: [`../ROADMAP.md`](../ROADMAP.md)
 - **Repository-Überblick**: [`../README.md`](../README.md)
+- **Projektstatus**: [`../PROJECT_STATUS.md`](../PROJECT_STATUS.md)
+- **Roadmap**: [`../ROADMAP.md`](../ROADMAP.md)
 - **Changelog**: [`../CHANGELOG.md`](../CHANGELOG.md)
-- **Doku-Audit / Migrationsstand**: [`DOCS_AUDIT.md`](DOCS_AUDIT.md)
 
 ---
 
-## Diátaxis-Navigation
-
-### Tutorials
+## Tutorials
 Lernpfade von null bis zu einem funktionierenden Ergebnis.
 
 - [`tutorials/README.md`](tutorials/README.md)
-- _geplant_: Erstes Video lokal erzeugen
-- _geplant_: Dashboard lokal starten und benutzen
-- _geplant_: Vom Song zum Publish-Artefakt
+- [`tutorials/first-local-pipeline-run.md`](tutorials/first-local-pipeline-run.md)
+- [`tutorials/dashboard-local-start.md`](tutorials/dashboard-local-start.md)
+- [`tutorials/song-to-output.md`](tutorials/song-to-output.md)
 
-### How-to Guides
-Aufgabenorientierte Anleitungen für ein konkretes Ziel.
+## How-to Guides
+Aufgabenorientierte Anleitungen für konkrete Ziele.
 
-- [`guides/QUICKSTART.md`](guides/QUICKSTART.md) ⚠️ aktuell noch veraltet
-- [`guides/PIPELINE.md`](guides/PIPELINE.md) ⚠️ aktuell noch veraltet / gemischt
+- [`guides/QUICKSTART.md`](guides/QUICKSTART.md)
+- [`guides/PIPELINE.md`](guides/PIPELINE.md)
 - [`guides/AUTOMATION.md`](guides/AUTOMATION.md)
 - [`guides/AGENT_SYNC.md`](guides/AGENT_SYNC.md)
 - [`guides/BRANCHING.md`](guides/BRANCHING.md)
 - [`guides/CONTRIBUTING.md`](guides/CONTRIBUTING.md)
 
-### Agent Operations
+## Agent Operations
 Arbeitsregeln und Betriebswissen für Agenten, die im Projekt aktiv Änderungen machen.
 
 - [`agents/README.md`](agents/README.md)
@@ -41,12 +38,12 @@ Arbeitsregeln und Betriebswissen für Agenten, die im Projekt aktiv Änderungen 
 - [`agents/SYNC_SERVICE.md`](agents/SYNC_SERVICE.md)
 - [`agents/PLAYBOOKS.md`](agents/PLAYBOOKS.md)
 
-### Reference
-Lookup-Material: technische Fakten, Formate, Konventionen, Templates.
+## Reference
+Lookup-Material: technische Fakten, Formate, Konventionen und Diagramme.
 
 - [`reference/README.md`](reference/README.md)
 - [`reference/architecture-diagram.md`](reference/architecture-diagram.md)
-- [`technical/repo-structure.md`](technical/repo-structure.md) ⚠️ veraltet
+- [`technical/repo-structure.md`](technical/repo-structure.md)
 - [`technical/metadata.md`](technical/metadata.md)
 - [`technical/validation.md`](technical/validation.md)
 - [`technical/preflight.md`](technical/preflight.md)
@@ -54,8 +51,8 @@ Lookup-Material: technische Fakten, Formate, Konventionen, Templates.
 - [`templates/`](templates/)
 - [`publishing/`](publishing/)
 
-### Explanation
-Warum Dinge so gebaut sind, welche Tradeoffs gelten, welche Strategie verfolgt wird.
+## Explanation
+Warum Dinge so gebaut sind, welche Tradeoffs gelten und welche Strategie verfolgt wird.
 
 - [`explanation/README.md`](explanation/README.md)
 - [`explanation/architecture-overview.md`](explanation/architecture-overview.md)
@@ -66,39 +63,7 @@ Warum Dinge so gebaut sind, welche Tradeoffs gelten, welche Strategie verfolgt w
 
 ---
 
-## Aktuelle Probleme
+## Hinweis zu älteren Dokumenten
 
-Die größten Baustellen gerade:
-
-1. **fehlende echte Tutorials**
-2. **veraltete Pfade in QUICKSTART / PIPELINE / repo-structure**
-3. **gemischte Doku-Typen**
-4. **Audio-Dubletten im Explanation-Bereich**
-
----
-
-## Nächste konkrete Schritte
-
-1. `QUICKSTART.md` modernisieren
-2. `PIPELINE.md` neu schreiben
-3. erstes Tutorial anlegen
-4. `repo-structure.md` auf reale Monorepo-Struktur ziehen
-5. Audio-Entscheidungsdocs zusammenführen
-
----
-
-## Arbeitsaufteilung
-
-### Pako
-- technische Guides mit echtem Implementierungsbezug
-- Pipeline-, Dashboard- und Struktur-Doku
-- Tutorials, die reale Workflows zeigen
-
-### Jarvis
-- Doku-Mapping
-- Navigation / Crosslinks
-- Dublettenanalyse
-- Strukturhygiene und Linkpflege
-
-### Smith
-- Infra-, DB-, Deployment- und Backend-nahe Explanation/Reference
+Ältere Review-, Strategie- und Kontextdokumente bleiben bewusst im Repository erhalten, wenn sie für Nachvollziehbarkeit und historische Entscheidungen noch relevant sind.
+Die primären Einstiege liegen aber in den oben verlinkten Bereichen.
