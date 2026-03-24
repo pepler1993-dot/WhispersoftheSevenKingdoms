@@ -1,5 +1,5 @@
 # PROJECT STATUS – Whispers of the Seven Kingdoms
-> Letzte Aktualisierung: 2026-03-24T13:00:01Z
+> Letzte Aktualisierung: 2026-03-24T19:00:01Z
 > Aktualisiert von: Smith
 
 **Agents: Lest diese Datei zuerst. Sie enthält alles was ihr wissen müsst.**
@@ -161,8 +161,14 @@ data/output/youtube/                ← Fertige Videos + Metadaten
 
 
 
-## 🕐 Letzte Commits (auto-generated 2026-03-24T13:00:01Z)
+
+## 🕐 Letzte Commits (auto-generated 2026-03-24T19:00:01Z)
 ```
+124ff02 fix(audio-worker): shell logic in _wait_for_clip caused infinite poll
+04954be fix(audio-worker): v2 - shell-safe job submission, proper numpy handling
+e62a7d8 feat(audio-worker): daemon mode - submit jobs via JSON, model stays loaded
+94cfba1 perf(audio-worker): reduce defaults to 30s clips, 30 steps for 4GB RAM
+5fdc814 auto: update PROJECT_STATUS.md (2026-03-24T13:00:01Z)
 cc1dc9a feat(audio-lab): pass house_templates to audio page (#63)
 3df77ef feat(audio-lab): house prompt presets dropdown (#63)
 8ac26b9 fix(audio-lab): update prompt placeholder for GPU worker (#62)
@@ -185,43 +191,5 @@ badaa5e feat(gpu-worker): update StableAudioGenerator for diffusers + correct IP
 a1e5807 feat(library): add previews and create-tab guidance
 534656a Merge pako: Status-Labels verbessert (Freigegeben→offen, Erledigt→Abgeschlossen)
 bdf3b20 feat(library): add asset library management page
-8530918 fix(ops): clarify released vs completed task status labels
-00a846f feat(ops): show issue title as actual task assignment
-9adcf02 fix(docs): move docs under Operations + fix Jinja crash (Pako)
-9ce4bd6 fix(docs): resolve landing page crash from Jinja dict.items clash
-3e0eddf fix(docs): harden docs landing page and move nav under operations
-a25c4a4 feat(ops): merge Pako ops improvements for project managers
-68116ce feat(ops): simplify event language for project managers
-fe54e54 feat(shorts): merge Jarvis shorts feature with fixes
-091bf34 feat(ops): add human phase labels and issue links
-414b466 fix(ops): url-encode task links in manager views
-1384a2f feat(ops): make task views manager-friendly and berlin-time aware
-f20cdc4 fix: f-string backslash compat for Python 3.11 (server)
-1395991 chore: bump version to v1.3.0 (docs integration, webhook fix, timezone)
-f8f5207 docs: cherry-pick Jarvis SHORTS_EXPANSION_PLAN + SYSTEM_ARCHITECTURE from jarvis/rebase branch
-9575098 docs: update ROADMAP.md to current status (24.03.2026)
-24b844d fix(dashboard): repair docs detail template
-a3a5449 feat(dashboard): add search and richer user docs landing page
-277add9 docs: add mandatory Sync Service protocol for all agents
-6d94625 docs(agents): require issue-first sync-service workflow
-ce31860 chore: webhook test 2
-af10d18 fix(dashboard): repair docs markdown renderer
-411a93f feat(dashboard): add user-facing docs section to navbar
-b1a154c docs: clean up docs index for professional public navigation
-a2967b1 docs: add changelog architecture diagram and more tutorials
-50d4625 chore: webhook test
-3ef22f2 docs: consolidate explanation layer with architecture and audio strategy
-6f86a43 docs: modernize collaboration and automation guides
-7a0b6f7 docs: expand agent playbooks and refresh reference pages
-b101ba8 docs: add agent operations manual for project workflows
-1ade6fc docs: refresh quickstart pipeline and repo structure for monorepo
-8fd95d5 docs: establish diataxis audit and navigation structure
-d60cdcf fix(dashboard): make server load indicator less misleading
-4d27e24 docs: merge safe parts from Jarvis review branch
-1a319c1 docs: Correct Jarvis feedback on audio generation alternatives
-f84bcd2 docs: Add Smith's feedback on audio generation alternatives
-6faad2d docs: Add Jarvis feedback on audio generation alternatives
-8cc000b docs: refresh root README for current monorepo state
-b82b35c auto: update PROJECT_STATUS.md (2026-03-24T07:04:45Z)
 ```
 ---
