@@ -1,10 +1,7 @@
 """Stable Audio Open generator – local GPU worker implementation.
 
-This module implements the AudioGenerator ABC using Stable Audio Open
-running on a local GPU (e.g. GTX 1070 via Proxmox passthrough).
-
-The worker connects to the GPU VM via SSH, runs generation there,
-and copies the result back to the pipeline upload directory.
+Uses diffusers (not stable_audio_tools) for Python 3.13 compatibility.
+Connects to GPU VM via SSH, runs worker.py, copies WAV back.
 """
 
 from __future__ import annotations
@@ -23,87 +20,19 @@ from app.store import AgentSyncDB
 
 # ── Configuration ─────────────────────────────────────────────────────────
 
-GPU_WORKER_HOST = os.environ.get('GPU_WORKER_HOST', '192.168.178.131')
+GPU_WORKER_HOST = os.environ.get('GPU_WORKER_HOST', '192.168.178.152')
 GPU_WORKER_USER = os.environ.get('GPU_WORKER_USER', 'root')
 GPU_WORKER_SSH_KEY = os.environ.get('GPU_WORKER_SSH_KEY', '')
 GPU_WORKER_VENV = os.environ.get('GPU_WORKER_VENV', '/opt/musicgen-worker/.venv')
-GPU_WORKER_OUTPUT_DIR = os.environ.get('GPU_WORKER_OUTPUT_DIR', '/opt/musicgen-worker/output')
+GPU_WORKER_SCRIPT = os.environ.get('GPU_WORKER_SCRIPT', '/opt/musicgen-worker/worker.py')
+GPU_WORKER_OUTPUT_DIR = os.environ.get('GPU_WORKER_OUTPUT_DIR', '/mnt/data/output')
+GPU_WORKER_STATUS_FILE = '/mnt/data/worker_status.json'
 
 MODEL_NAME = 'stabilityai/stable-audio-open-1.0'
 MAX_CLIP_DURATION = 47  # Stable Audio Open max output length in seconds
 SAMPLE_RATE = 44100
 
 CET = timezone(timedelta(hours=1))
-
-# ── Generation script that runs ON the GPU worker ─────────────────────────
-
-GENERATE_SCRIPT = r'''#!/usr/bin/env python3
-"""Generate audio clip using Stable Audio Open. Runs on GPU worker."""
-
-import argparse
-import json
-import sys
-import torch
-import torchaudio
-from stable_audio_tools import get_pretrained_model
-from stable_audio_tools.inference.generation import generate_diffusion_cond
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--prompt', required=True)
-    parser.add_argument('--duration', type=float, default=47.0)
-    parser.add_argument('--output', required=True)
-    parser.add_argument('--seed', type=int, default=-1)
-    args = parser.parse_args()
-
-    print(json.dumps({"phase": "loading", "message": "Loading Stable Audio Open model..."}), flush=True)
-
-    model, model_config = get_pretrained_model(
-        "stabilityai/stable-audio-open-1.0"
-    )
-    sample_rate = model_config["sample_rate"]
-    sample_size = model_config["sample_size"]
-
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = model.to(device)
-
-    print(json.dumps({"phase": "generating", "message": f"Generating {args.duration}s on {device}..."}), flush=True)
-
-    seed = args.seed if args.seed >= 0 else torch.randint(0, 2**32 - 1, (1,)).item()
-
-    conditioning = [{
-        "prompt": args.prompt,
-        "seconds_start": 0,
-        "seconds_total": args.duration,
-    }]
-
-    with torch.no_grad():
-        output = generate_diffusion_cond(
-            model,
-            steps=100,
-            cfg_scale=7,
-            conditioning=conditioning,
-            sample_size=sample_size,
-            sigma_min=0.3,
-            sigma_max=500,
-            sampler_type="dpmpp-3m-sde",
-            device=device,
-            seed=seed,
-        )
-
-    output = output.squeeze(0).cpu()
-
-    # Trim to requested duration
-    max_samples = int(args.duration * sample_rate)
-    output = output[:, :max_samples]
-
-    torchaudio.save(args.output, output, sample_rate)
-
-    print(json.dumps({"phase": "done", "message": f"Saved to {args.output}", "seed": seed}), flush=True)
-
-if __name__ == "__main__":
-    main()
-'''
 
 
 class StableAudioGenerator(AudioGenerator):
@@ -113,7 +42,6 @@ class StableAudioGenerator(AudioGenerator):
         self._ssh_base = self._build_ssh_cmd()
 
     def _build_ssh_cmd(self) -> list[str]:
-        """Build base SSH command with options."""
         cmd = [
             'ssh',
             '-o', 'StrictHostKeyChecking=no',
@@ -126,28 +54,31 @@ class StableAudioGenerator(AudioGenerator):
         return cmd
 
     def _ssh_run(self, command: str, timeout: int = 30) -> subprocess.CompletedProcess:
-        """Run a command on the GPU worker via SSH."""
         return subprocess.run(
             self._ssh_base + [command],
             capture_output=True, text=True, timeout=timeout,
         )
 
+    def _scp_from(self, remote: str, local: str, timeout: int = 300) -> subprocess.CompletedProcess:
+        cmd = ['scp', '-o', 'StrictHostKeyChecking=no', '-o', 'BatchMode=yes']
+        if GPU_WORKER_SSH_KEY:
+            cmd.extend(['-i', GPU_WORKER_SSH_KEY])
+        cmd.extend([f'{GPU_WORKER_USER}@{GPU_WORKER_HOST}:{remote}', local])
+        return subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+
     def health(self) -> dict[str, Any]:
-        """Check if the GPU worker is reachable and has NVIDIA GPU."""
         try:
             result = self._ssh_run('nvidia-smi --query-gpu=name,memory.total --format=csv,noheader', timeout=15)
             if result.returncode == 0 and result.stdout.strip():
-                gpu_info = result.stdout.strip()
                 return {
                     'provider': 'stable-audio-local',
                     'available': True,
-                    'gpu': gpu_info,
+                    'gpu': result.stdout.strip(),
                     'host': GPU_WORKER_HOST,
                     'model': MODEL_NAME,
                 }
         except (subprocess.TimeoutExpired, FileNotFoundError):
             pass
-
         return {
             'provider': 'stable-audio-local',
             'available': False,
@@ -158,30 +89,27 @@ class StableAudioGenerator(AudioGenerator):
         }
 
     def start(self, job: dict[str, Any], db: AgentSyncDB) -> None:
-        """Start audio generation in a background thread."""
         thread = threading.Thread(target=self._run_job, args=(job, db), daemon=True)
         thread.start()
 
     def cancel(self, job: dict[str, Any], db: AgentSyncDB) -> bool:
-        """Cancel a running job."""
         job_id = job['job_id']
         db.update_audio_job(job_id, status='cancelled', finished_at=now_iso(),
                             error_message='Cancelled by user')
         db.append_audio_job_log(job_id, 'system', 'Job cancelled.', now_iso())
-        # Try to kill remote process
         try:
-            self._ssh_run(f'pkill -f "generate_clip.*{job_id}"', timeout=5)
+            self._ssh_run(f'pkill -f "worker.py.*{job_id}"', timeout=5)
         except Exception:
             pass
         return True
 
     def _run_job(self, job: dict[str, Any], db: AgentSyncDB) -> None:
-        """Main job execution: generate clips, stitch, download."""
         job_id = job['job_id']
         slug = job['slug']
         prompts = job.get('prompts', []) or []
         minutes = int(job.get('minutes') or 3)
         clip_seconds = min(int(job.get('clip_seconds') or MAX_CLIP_DURATION), MAX_CLIP_DURATION)
+        steps = int(job.get('steps') or 50)
         crossfade = 4
 
         if not prompts:
@@ -189,7 +117,6 @@ class StableAudioGenerator(AudioGenerator):
                                 error_message='No prompts provided')
             return
 
-        # Check worker health
         db.update_audio_job(job_id, status='running')
         db.append_audio_job_log(job_id, 'system', 'Checking GPU worker health...', now_iso())
 
@@ -197,7 +124,6 @@ class StableAudioGenerator(AudioGenerator):
         if not health['available']:
             db.update_audio_job(job_id, status='error', finished_at=now_iso(),
                                 error_message=f"GPU worker not available: {health.get('error', 'unknown')}")
-            db.append_audio_job_log(job_id, 'system', f"GPU worker check failed: {health}", now_iso())
             return
 
         db.append_audio_job_log(job_id, 'system', f"GPU: {health['gpu']}", now_iso())
@@ -209,92 +135,86 @@ class StableAudioGenerator(AudioGenerator):
 
         db.append_audio_job_log(
             job_id, 'system',
-            f"Plan: {num_clips} clips × {clip_seconds}s = ~{total_duration:.1f} min",
+            f"Plan: {num_clips} clips × {clip_seconds}s ({steps} steps) ≈ {total_duration:.1f} min",
             now_iso(),
         )
 
-        # Upload generate script to worker
-        try:
-            self._setup_worker(job_id, db)
-        except Exception as e:
-            db.update_audio_job(job_id, status='error', finished_at=now_iso(),
-                                error_message=f'Worker setup failed: {e}')
-            return
-
-        # Generate each clip
+        # Generate each clip using worker.py (diffusers-based)
         remote_clips = []
         for i in range(num_clips):
             prompt = prompts[i % len(prompts)]
-            clip_name = f'{job_id}_clip_{i:03d}.wav'
-            remote_path = f'{GPU_WORKER_OUTPUT_DIR}/{clip_name}'
+            clip_slug = f'{job_id}_clip_{i:03d}'
+            remote_path = f'{GPU_WORKER_OUTPUT_DIR}/{clip_slug}.wav'
 
             db.append_audio_job_log(
                 job_id, 'system',
-                f"Generating clip {i + 1}/{num_clips}: \"{prompt[:60]}...\"",
+                f"Generating clip {i + 1}/{num_clips}: \"{prompt[:60]}\"",
                 now_iso(),
             )
 
             try:
-                result = self._ssh_run(
-                    f'{GPU_WORKER_VENV}/bin/python /opt/musicgen-worker/generate_clip.py '
+                cmd = (
+                    f'{GPU_WORKER_VENV}/bin/python3 {GPU_WORKER_SCRIPT} '
                     f'--prompt {json.dumps(prompt)} '
                     f'--duration {clip_seconds} '
-                    f'--output {remote_path}',
-                    timeout=600,  # 10 min per clip max
+                    f'--slug {clip_slug} '
+                    f'--steps {steps}'
                 )
+                result = self._ssh_run(cmd, timeout=900)  # 15 min per clip max
 
                 if result.returncode != 0:
-                    db.append_audio_job_log(job_id, 'error', f"Clip {i + 1} failed: {result.stderr[:200]}", now_iso())
+                    error_msg = result.stderr[:300] if result.stderr else result.stdout[-300:]
+                    db.append_audio_job_log(job_id, 'error', f"Clip {i+1} failed: {error_msg}", now_iso())
                     db.update_audio_job(job_id, status='error', finished_at=now_iso(),
-                                        error_message=f'Clip generation failed: {result.stderr[:200]}')
+                                        error_message=f'Clip generation failed: {error_msg}')
                     return
 
-                # Parse progress from stdout
-                for line in result.stdout.strip().split('\n'):
-                    try:
-                        msg = json.loads(line)
-                        db.append_audio_job_log(job_id, 'worker', msg.get('message', line), now_iso())
-                    except json.JSONDecodeError:
-                        if line.strip():
-                            db.append_audio_job_log(job_id, 'worker', line.strip(), now_iso())
+                # Parse worker status
+                try:
+                    status = json.loads(
+                        self._ssh_run(f'cat {GPU_WORKER_STATUS_FILE}', timeout=5).stdout
+                    )
+                    db.append_audio_job_log(
+                        job_id, 'worker',
+                        f"Clip {i+1} done in {status.get('elapsed_seconds', '?')}s",
+                        now_iso(),
+                    )
+                except Exception:
+                    db.append_audio_job_log(job_id, 'worker', f"Clip {i+1} generated", now_iso())
 
                 remote_clips.append(remote_path)
 
             except subprocess.TimeoutExpired:
                 db.update_audio_job(job_id, status='error', finished_at=now_iso(),
-                                    error_message=f'Clip {i + 1} timed out (>10 min)')
+                                    error_message=f'Clip {i+1} timed out (>15 min)')
                 return
             except Exception as e:
                 db.update_audio_job(job_id, status='error', finished_at=now_iso(),
-                                    error_message=f'Clip {i + 1} error: {e}')
+                                    error_message=f'Clip {i+1} error: {e}')
                 return
 
-        # Stitch clips with crossfade on the worker
-        db.append_audio_job_log(job_id, 'system', f'Stitching {len(remote_clips)} clips with {crossfade}s crossfade...', now_iso())
-        final_remote = f'{GPU_WORKER_OUTPUT_DIR}/{slug}.wav'
+        # Stitch clips with crossfade
+        if len(remote_clips) > 1:
+            db.append_audio_job_log(job_id, 'system',
+                                    f'Stitching {len(remote_clips)} clips with {crossfade}s crossfade...', now_iso())
+            final_remote = f'{GPU_WORKER_OUTPUT_DIR}/{slug}.wav'
+            try:
+                self._stitch_clips(remote_clips, final_remote, crossfade)
+            except Exception as e:
+                db.update_audio_job(job_id, status='error', finished_at=now_iso(),
+                                    error_message=f'Stitching failed: {e}')
+                return
+        else:
+            final_remote = remote_clips[0]
 
-        try:
-            self._stitch_clips(job_id, remote_clips, final_remote, crossfade, db)
-        except Exception as e:
-            db.update_audio_job(job_id, status='error', finished_at=now_iso(),
-                                error_message=f'Stitching failed: {e}')
-            return
-
-        # Download result
+        # Download result via SCP
         db.append_audio_job_log(job_id, 'system', 'Downloading final track...', now_iso())
         upload_dir = get_pipeline_upload_dir()
         upload_dir.mkdir(parents=True, exist_ok=True)
         local_path = upload_dir / f'{slug}.wav'
 
         try:
-            scp_cmd = ['scp', '-o', 'StrictHostKeyChecking=no']
-            if GPU_WORKER_SSH_KEY:
-                scp_cmd.extend(['-i', GPU_WORKER_SSH_KEY])
-            scp_cmd.extend([
-                f'{GPU_WORKER_USER}@{GPU_WORKER_HOST}:{final_remote}',
-                str(local_path),
-            ])
-            result = subprocess.run(scp_cmd, capture_output=True, text=True, timeout=300)
+            result = self._scp_from(final_remote, str(local_path))
             if result.returncode != 0:
                 raise RuntimeError(f'SCP failed: {result.stderr}')
         except Exception as e:
@@ -304,45 +224,31 @@ class StableAudioGenerator(AudioGenerator):
 
         # Cleanup remote files
         try:
-            cleanup_cmd = f'rm -f {GPU_WORKER_OUTPUT_DIR}/{job_id}_clip_*.wav {final_remote}'
-            self._ssh_run(cleanup_cmd, timeout=10)
+            self._ssh_run(
+                f'rm -f {GPU_WORKER_OUTPUT_DIR}/{job_id}_clip_*.wav {final_remote}',
+                timeout=10,
+            )
         except Exception:
-            pass  # non-critical
+            pass
 
         # Done!
+        file_size_mb = local_path.stat().st_size / 1024 / 1024
         db.update_audio_job(job_id, status='complete', finished_at=now_iso(),
                             output_path=str(local_path))
         db.append_audio_job_log(
             job_id, 'system',
-            f'✅ Track complete: {local_path.name} ({local_path.stat().st_size / 1024 / 1024:.1f} MB)',
+            f'✅ Track complete: {local_path.name} ({file_size_mb:.1f} MB)',
             now_iso(),
         )
 
-    def _setup_worker(self, job_id: str, db: AgentSyncDB) -> None:
-        """Ensure the generate script and output dir exist on the worker."""
-        # Create directories
-        self._ssh_run(f'mkdir -p /opt/musicgen-worker {GPU_WORKER_OUTPUT_DIR}', timeout=10)
-
-        # Upload generate script via stdin
-        subprocess.run(
-            self._ssh_base + ['cat > /opt/musicgen-worker/generate_clip.py'],
-            input=GENERATE_SCRIPT,
-            capture_output=True, text=True, timeout=15,
-        )
-
-        db.append_audio_job_log(job_id, 'system', 'Generate script uploaded to worker.', now_iso())
-
-    def _stitch_clips(self, job_id: str, clips: list[str], output: str, crossfade: int, db: AgentSyncDB) -> None:
-        """Stitch multiple clips with crossfade using ffmpeg on the worker."""
+    def _stitch_clips(self, clips: list[str], output: str, crossfade: int) -> None:
+        """Stitch clips with crossfade using ffmpeg on the worker."""
         if len(clips) == 1:
             self._ssh_run(f'cp {clips[0]} {output}', timeout=30)
             return
 
-        # Build ffmpeg filter for crossfade stitching
-        filter_parts = []
         inputs = ' '.join(f'-i {c}' for c in clips)
 
-        # Chain crossfades: [0][1]acrossfade=d=4:c1=tri:c2=tri[a01]; [a01][2]acrossfade=...
         if len(clips) == 2:
             filter_str = f'[0][1]acrossfade=d={crossfade}:c1=tri:c2=tri'
         else:
@@ -351,15 +257,12 @@ class StableAudioGenerator(AudioGenerator):
                 if i == 1:
                     parts.append(f'[0][1]acrossfade=d={crossfade}:c1=tri:c2=tri[a{i:02d}]')
                 elif i == len(clips) - 1:
-                    parts.append(f'[a{i - 1:02d}][{i}]acrossfade=d={crossfade}:c1=tri:c2=tri')
+                    parts.append(f'[a{i-1:02d}][{i}]acrossfade=d={crossfade}:c1=tri:c2=tri')
                 else:
-                    parts.append(f'[a{i - 1:02d}][{i}]acrossfade=d={crossfade}:c1=tri:c2=tri[a{i:02d}]')
+                    parts.append(f'[a{i-1:02d}][{i}]acrossfade=d={crossfade}:c1=tri:c2=tri[a{i:02d}]')
             filter_str = '; '.join(parts)
 
         cmd = f'ffmpeg -y {inputs} -filter_complex "{filter_str}" {output}'
         result = self._ssh_run(cmd, timeout=120)
-
         if result.returncode != 0:
             raise RuntimeError(f'ffmpeg stitch failed: {result.stderr[:300]}')
-
-        db.append_audio_job_log(job_id, 'system', f'Stitched {len(clips)} clips → {output}', now_iso())
