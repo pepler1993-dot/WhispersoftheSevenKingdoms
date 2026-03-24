@@ -157,9 +157,9 @@ class StableAudioGenerator(AudioGenerator):
         while time.time() - start < timeout:
             try:
                 result = self._ssh_run(
-                    f'test -f {GPU_WORKER_JOB_DIR}/{clip_slug}.done && echo DONE || '
-                    f'test -f {GPU_WORKER_JOB_DIR}/{clip_slug}.error && echo ERROR || '
-                    f'echo PENDING',
+                    f'if test -f {GPU_WORKER_JOB_DIR}/{clip_slug}.done; then echo DONE; '
+                    f'elif test -f {GPU_WORKER_JOB_DIR}/{clip_slug}.error; then echo ERROR; '
+                    f'else echo PENDING; fi',
                     timeout=10,
                 )
                 status = result.stdout.strip()
