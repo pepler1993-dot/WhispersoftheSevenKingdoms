@@ -31,6 +31,14 @@ Aufgabenorientierte Anleitungen für ein konkretes Ziel.
 - [`guides/BRANCHING.md`](guides/BRANCHING.md)
 - [`guides/CONTRIBUTING.md`](guides/CONTRIBUTING.md)
 
+### Agent Operations
+Arbeitsregeln und Betriebswissen für Agenten, die im Projekt aktiv Änderungen machen.
+
+- [`agents/README.md`](agents/README.md)
+- [`agents/WORKING_IN_THIS_PROJECT.md`](agents/WORKING_IN_THIS_PROJECT.md)
+- [`agents/GITHUB_AND_PAT.md`](agents/GITHUB_AND_PAT.md)
+- [`agents/SYNC_SERVICE.md`](agents/SYNC_SERVICE.md)
+
 ### Reference
 Lookup-Material: technische Fakten, Formate, Konventionen, Templates.
 
