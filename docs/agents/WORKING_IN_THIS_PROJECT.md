@@ -165,3 +165,44 @@ Besonders bei diesem Projekt gilt:
 - zurückdrehen neuerer Änderungen durch alte Branch-Stände
 - Committen von `.claw/`-internen Notizen, Tokens oder lokalen Betriebsartefakten
 - Dokumentation, die so tut als sei eine Baustelle bereits gelöst
+
+
+---
+
+## Task-Lifecycle im Sync Service
+
+Jeder Agent **muss** den korrekten Task-Lifecycle einhalten:
+
+### Phasen
+
+| Phase | Bedeutung | API-Endpoint |
+|-------|-----------|--------------|
+| `released` | Offen, verfügbar zur Bearbeitung | Standard bei neuem Task |
+| `working` | Agent arbeitet aktiv daran | `POST /api/tasks/{id}/claim` |
+| `blocked` | Wartend auf externe Abhängigkeit | `POST /api/tasks/{id}/update` mit phase=blocked |
+| `done` | **Abgeschlossen** | `POST /api/tasks/{id}/complete` |
+| `archived` | Archiviert (nach Abschluss) | Manuell |
+| `stale` | Lease abgelaufen, nicht mehr aktiv | Automatisch |
+
+### Workflow
+
+1. Task claimen → Phase wird `working`
+2. Arbeit erledigen, regelmäßig Heartbeat senden
+3. **Task abschließen → `/complete` aufrufen** → Phase wird `done`
+
+### ⚠️ Häufiger Fehler
+
+**FALSCH:** Task nach Abschluss auf `released` setzen (= Task erscheint wieder als offen!)
+**RICHTIG:** Task über `/complete` Endpoint abschließen → Phase wird `done` (= "Abgeschlossen")
+
+`released` bedeutet "offen und verfügbar" – **nicht** "fertig und freigegeben".
+
+### Version & Release Workflow (Smith)
+
+Vor jedem Merge/Deploy:
+1. Code reviewen
+2. Merge nach main
+3. `CHANGELOG.md` aktualisieren
+4. Git Tag mit Semantic Versioning erstellen
+5. Deploy auf LXC 103 (git pull + restart)
+
