@@ -163,11 +163,13 @@ It is written as a practical backlog for implementation planning, not as a raw t
 
 ### Tasks
 - Define a new library asset class for visual and animation inputs.
-- Decide how backgrounds, overlays, motion layers, or image sequences should be stored.
+- Decide how backgrounds, overlays, motion layers, still images for animated output, or image sequences should be stored.
 - Define how these assets are selected and referenced in the pipeline.
+- Clarify whether the first version needs simple animated still-image videos or a richer asset animation workflow.
 
 ### Acceptance criteria
 - There is a clear asset model for visuals used by animated video generation.
+- The first implementation target for animated visual support is explicitly defined.
 
 ## Priority D — monitoring and system visibility
 
@@ -279,3 +281,40 @@ It is written as a practical backlog for implementation planning, not as a raw t
 12. Redesign the System tab.
 13. Add admin login.
 14. Design thumbnail editor and animated visual asset handling.
+.
+2. Enforce `done` vs `released` semantics in workflow and UI.
+3. Add protocol-health visibility in Operations.
+
+### Slice 2 — task management usability
+4. Improve task summaries.
+5. Add detailed task descriptions on the task detail page.
+6. Improve task filters with live filtering and reset behavior.
+
+### Slice 3 — audio workflow cleanup
+7. Remove old Kaggle assumptions from Audio Lab and Pipeline.
+8. Improve Audio Lab load performance.
+9. Make presets/prompts and GPU-worker flow consistent in the UI.
+
+### Slice 4 — library productivity
+10. Extend Library with metadata form.
+11. Add song preview/playback and tighter Audio Lab linking.
+12. Define the visual/animation asset model.
+
+### Slice 5 — content tooling and docs
+13. Clean up user-facing documentation.
+14. Redesign the docs homepage for clarity.
+15. Design thumbnail editor / template workflow.
+
+### Slice 6 — monitoring and system structure
+16. Add GPU worker metrics.
+17. Add PVE temperature.
+18. Move version and server metrics into the System tab.
+
+### Slice 7 — user/admin quality of life
+19. Auto-generate slugs from title.
+20. Add admin login with persistent sessions.
+21. Fix remaining mobile navigation polish issues.
+
+### Slice 8 — future process / testing roles
+22. Add the dashboard ticket system.
+23. Formalize Pako as UI/UX tester with a repeatable workflow.
