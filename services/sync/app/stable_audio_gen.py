@@ -29,7 +29,7 @@ GPU_WORKER_OUTPUT_DIR = os.environ.get('GPU_WORKER_OUTPUT_DIR', '/mnt/data/outpu
 GPU_WORKER_STATUS_FILE = '/mnt/data/worker_status.json'
 
 MODEL_NAME = 'stabilityai/stable-audio-open-1.0'
-MAX_CLIP_DURATION = 47  # Stable Audio Open max output length in seconds
+MAX_CLIP_DURATION = 30  # Stable Audio Open max output length in seconds
 SAMPLE_RATE = 44100
 
 CET = timezone(timedelta(hours=1))
@@ -109,7 +109,7 @@ class StableAudioGenerator(AudioGenerator):
         prompts = job.get('prompts', []) or []
         minutes = int(job.get('minutes') or 3)
         clip_seconds = min(int(job.get('clip_seconds') or MAX_CLIP_DURATION), MAX_CLIP_DURATION)
-        steps = int(job.get('steps') or 50)
+        steps = int(job.get('steps') or 30)
         crossfade = 4
 
         if not prompts:
