@@ -1,5 +1,5 @@
 # PROJECT STATUS – Whispers of the Seven Kingdoms
-> Letzte Aktualisierung: 2026-03-24T07:04:45Z
+> Letzte Aktualisierung: 2026-03-24T13:00:01Z
 > Aktualisiert von: Smith
 
 **Agents: Lest diese Datei zuerst. Sie enthält alles was ihr wissen müsst.**
@@ -160,34 +160,68 @@ data/output/youtube/                ← Fertige Videos + Metadaten
 *Automatisches Backup alle 6h per Cron.*
 
 
-## 🕐 Letzte Commits (auto-generated 2026-03-23T20:00:01Z)
+
+## 🕐 Letzte Commits (auto-generated 2026-03-24T13:00:01Z)
 ```
-0f15590 feat(kaggle): pass model parameter through to notebook (small/medium)
-6bb4ca1 docs: add pako feedback to smith review
-e85dc10 docs: Smith's review and feedback on audio generation alternatives
-fbb21f8 docs: evaluate alternatives to kaggle audio generation
-70204c2 chore: bump version to v1.1.0 (Kaggle integration, server stats, activity timeline)
-d511da8 fix(musicgen): full device-agnostic notebook, clean CPU fallback for P100
-996e68a fix(musicgen): downgrade to torch 2.2.2+cu118 for P100, fix DEVICE reference
-52c1d04 fix(kaggle): force T4 GPU type, revert CPU fallback (caused device mismatch)
-b7a0f4a fix(musicgen): use Kaggle preinstalled PyTorch, auto CPU fallback for P100
-430d8ab feat(ui): add version badge v1.0.0 in sidebar + versioning rules in PROJECT_STATUS
-608e21b fix(musicgen): use torch 2.4.1+cu118 (available on Kaggle, supports P100)
-f528f91 fix(musicgen): install P100-compatible PyTorch (CUDA 11.8) in notebook
-8159648 fix(pipeline): fix undefined status display, add clearer phase descriptions
-6cb7756 fix: use CET (UTC+1) timestamps instead of UTC
-74e668c fix(kaggle): parse real kernel slug from push output, fix 403 on status poll
-aa5e498 feat(pipeline): live progress tracker for Kaggle audio generation
-1a458cd fix(pipeline): friendly error when audio missing, redirect back with message
-e894e42 feat(pipeline): integrate Kaggle audio generation directly into house selection
-6d446e2 feat(pipeline): remove uploads, use library-only for audio + thumbnails
-eab6b03 auto: update PROJECT_STATUS.md (2026-03-23T14:00:01Z)
-4b1efe8 feat(dashboard): activity timeline (recent pipeline runs + audio jobs)
-9410eb9 feat(dashboard): simplify load average to emoji status (😴→😊→😤→🔥→💀)
-ab1f8f1 fix(dashboard): fix gauge text rotation - rotate only rings, not text
-b4e823e feat(dashboard): fancy gauge rings for server stats (CPU/RAM/Disk/Load)
-9003a4e feat(dashboard): live server stats widget (CPU, RAM, Disk, Load)
-8b8f1f3 feat(pipeline): vorhandene Audio-Tracks aus Bibliothek waehlen
-34e1076 fix(requirements): include sync service runtime deps
+cc1dc9a feat(audio-lab): pass house_templates to audio page (#63)
+3df77ef feat(audio-lab): house prompt presets dropdown (#63)
+8ac26b9 fix(audio-lab): update prompt placeholder for GPU worker (#62)
+cd10c2a feat(audio-lab): adapt job form for GPU worker (steps, clip length)
+b4acd9a fix(audio-lab): show GPU worker health instead of Kaggle fields
+d98eb0d fix(ops): remove duplicate endblock causing Jinja crash
+815e253 docs: update CHANGELOG for v2.1.0
+6a9daed Merge jarvis: Mobile-responsive UI polish (#60)
+2e237f8 fix(ui): finish mobile polish for dashboard views
+610d79a docs(agents): add Task-Lifecycle + Version/Release workflow
+c31b415 fix(ui): polish mobile layout for create and detail views
+b95c113 fix(ui): improve mobile responsiveness across dashboard
+f7795b9 docs: add CHANGELOG.md
+5897127 feat(releases): version detection + /admin/releases endpoint (#59)
+9fcf90a feat(releases): add release notes template (#59)
+f041d64 feat(releases): dynamic version badge + releases link in navbar (#59)
+6e6606d Merge jarvis: Library Management page + asset browser
+b8036f0 fix(pipeline): remove broken template fragment
+badaa5e feat(gpu-worker): update StableAudioGenerator for diffusers + correct IP
+a1e5807 feat(library): add previews and create-tab guidance
+534656a Merge pako: Status-Labels verbessert (Freigegeben→offen, Erledigt→Abgeschlossen)
+bdf3b20 feat(library): add asset library management page
+8530918 fix(ops): clarify released vs completed task status labels
+00a846f feat(ops): show issue title as actual task assignment
+9adcf02 fix(docs): move docs under Operations + fix Jinja crash (Pako)
+9ce4bd6 fix(docs): resolve landing page crash from Jinja dict.items clash
+3e0eddf fix(docs): harden docs landing page and move nav under operations
+a25c4a4 feat(ops): merge Pako ops improvements for project managers
+68116ce feat(ops): simplify event language for project managers
+fe54e54 feat(shorts): merge Jarvis shorts feature with fixes
+091bf34 feat(ops): add human phase labels and issue links
+414b466 fix(ops): url-encode task links in manager views
+1384a2f feat(ops): make task views manager-friendly and berlin-time aware
+f20cdc4 fix: f-string backslash compat for Python 3.11 (server)
+1395991 chore: bump version to v1.3.0 (docs integration, webhook fix, timezone)
+f8f5207 docs: cherry-pick Jarvis SHORTS_EXPANSION_PLAN + SYSTEM_ARCHITECTURE from jarvis/rebase branch
+9575098 docs: update ROADMAP.md to current status (24.03.2026)
+24b844d fix(dashboard): repair docs detail template
+a3a5449 feat(dashboard): add search and richer user docs landing page
+277add9 docs: add mandatory Sync Service protocol for all agents
+6d94625 docs(agents): require issue-first sync-service workflow
+ce31860 chore: webhook test 2
+af10d18 fix(dashboard): repair docs markdown renderer
+411a93f feat(dashboard): add user-facing docs section to navbar
+b1a154c docs: clean up docs index for professional public navigation
+a2967b1 docs: add changelog architecture diagram and more tutorials
+50d4625 chore: webhook test
+3ef22f2 docs: consolidate explanation layer with architecture and audio strategy
+6f86a43 docs: modernize collaboration and automation guides
+7a0b6f7 docs: expand agent playbooks and refresh reference pages
+b101ba8 docs: add agent operations manual for project workflows
+1ade6fc docs: refresh quickstart pipeline and repo structure for monorepo
+8fd95d5 docs: establish diataxis audit and navigation structure
+d60cdcf fix(dashboard): make server load indicator less misleading
+4d27e24 docs: merge safe parts from Jarvis review branch
+1a319c1 docs: Correct Jarvis feedback on audio generation alternatives
+f84bcd2 docs: Add Smith's feedback on audio generation alternatives
+6faad2d docs: Add Jarvis feedback on audio generation alternatives
+8cc000b docs: refresh root README for current monorepo state
+b82b35c auto: update PROJECT_STATUS.md (2026-03-24T07:04:45Z)
 ```
 ---
