@@ -1,70 +1,31 @@
 # Changelog
 
-Alle wichtigen, für Menschen relevanten Projektänderungen sollen hier in knapper Form landen.
+Alle relevanten Änderungen am Projekt werden hier dokumentiert.
+Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
-Format orientiert sich an **Keep a Changelog**.
-Versionierung orientiert sich dort, wo sinnvoll, an den sichtbaren Dashboard-/Service-Versionen und an relevanten Meilensteinen.
-
----
-
-## [Unreleased]
+## [v2.0.0] – 2026-03-24
 
 ### Added
-- Diátaxis-Grundstruktur unter `docs/` aufgebaut
-- Agenten-Doku unter `docs/agents/` ergänzt
-- erstes Tutorial unter `docs/tutorials/` ergänzt
-- Explanation-Layer mit Architektur- und Audio-Strategie konsolidiert
-- Docs-Audit und Migrationsdokumente ergänzt
-- Agent-Playbooks / Standardabläufe ergänzt
+- **GPU Audio Worker**: Lokale Audio-Generierung mit Stable Audio Open 1.0 auf GTX 1070
+- **SSH-Bridge Pipeline**: Dashboard → GPU-VM Integration via SSH + SCP
+- **Library Management**: Neue `/admin/library` Seite für Songs, Thumbnails, Metadata
+- **Release Notes Page**: `/admin/releases` mit automatischer Tag-Erkennung
+- **Dynamischer Version Badge**: Sidebar zeigt aktuelle Version aus Git Tags
+- **Task-Beschreibung**: Issue-Titel wird als Aufgabenbeschreibung in Ops angezeigt
 
 ### Changed
-- `README.md` auf aktuellen Monorepo-Stand gebracht
-- `docs/guides/QUICKSTART.md` modernisiert
-- `docs/guides/PIPELINE.md` modernisiert
-- `docs/technical/repo-structure.md` modernisiert
-- `docs/guides/AUTOMATION.md` modernisiert
-- `docs/guides/AGENT_SYNC.md` modernisiert
-- `docs/guides/CONTRIBUTING.md` modernisiert
-- `docs/technical/validation.md`, `preflight.md`, `upload-completeness.md` auf aktuellen Stand gebracht
-- Dashboard-Load-Anzeige verständlicher gemacht
+- `stable_audio_gen.py`: Von `stable_audio_tools` auf `diffusers` umgestellt (Python 3.13 kompatibel)
+- GPU Worker IP korrigiert (192.168.178.152)
+- Status-Labels: "Freigegeben" → "Freigegeben (offen)", "Erledigt" → "Abgeschlossen"
+- Create-Tab verlinkt jetzt auf Library-Verwaltung
 
-### Notes
-- Ältere Strategie-/Feedback-Dokumente bleiben bewusst als Appendix/Legacy-Kontext erhalten und wurden **nicht** gelöscht.
+### Removed
+- Kaggle als Audio-Provider (ersetzt durch lokalen GPU-Worker)
 
----
-
-## [v1.2.0] - 2026-03-24
+## [v1.5.0] – 2026-03-23
 
 ### Added
-- aktualisierte Root-README mit realem Monorepo-Stand
-- zusätzliche Audio-Feedback-/Review-Dokumente aus Jarvis-Branch selektiv übernommen
-- Diátaxis-Doku-Aufbau begonnen
-
-### Fixed
-- missverständliche Server-Load-Anzeige im Dashboard überarbeitet
-
----
-
-## [v1.1.0] - 2026-03-23
-
-### Added
-- Kaggle-Integration im Dashboard
-- Server-Stats / Activity Timeline im Dashboard
-- One-Click House-Karten UI
-- Audio Generator Tab
-- Fortschrittsanzeige für Audio-Jobs
-
-### Changed
-- Dashboard/UI weiter in Richtung produktiver Control-Plane entwickelt
-- Audio-Strategie neu priorisiert: lokaler GPU-Worker statt Kaggle als Fundament
-
----
-
-## Historischer Hinweis
-
-Frühere Änderungen vor dieser Datei sind primär über:
-- Git-Historie
-- `PROJECT_STATUS.md`
-- ältere Planungs- und Review-Dokumente
-
-nachvollziehbar.
+- Shorts Dashboard (Create, Detail, Render, Upload)
+- Operations Dashboard mit Task-Tracking
+- GitHub Webhook Integration
+- Docs Landing Page unter Operations
