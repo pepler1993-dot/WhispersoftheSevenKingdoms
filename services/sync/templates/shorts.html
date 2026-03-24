@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% block title %}Shorts{% endblock %}
+{% block content %}
+<div class="page-header page-header-flex">
+  <div>
+    <h1>Shorts</h1>
+    <div class="page-subtitle">Vertikale Kurzform für YouTube Shorts — sauber getrennt von der Longform-Pipeline.</div>
+  </div>
+  <div class="header-actions">
+    <a href="/admin/pipeline" class="btn btn-secondary btn-sm">Zur Longform-Pipeline</a>
+    <a href="/admin/audio" class="btn btn-secondary btn-sm">Audio prüfen</a>
+  </div>
+</div>
+
+{% if success_message %}
+<div class="panel panel-accent-teal" style="margin-bottom:18px;">
+  <div class="success-banner">✅ {{ success_message }}</div>
+</div>
+{% endif %}
+{% if error_message %}
+<div class="panel error-panel" style="margin-bottom:18px;">
+  <strong>Fehler:</strong> {{ error_message }}
+</div>
+{% endif %}
+
+<section class="docs-hero" style="margin-bottom: 18px;">
+  <div class="panel panel-accent-crimson">
+    <div class="docs-kicker">Phase 1 · MVP</div>
+    <h2>Shorts aus bestehendem Audio anlegen</h2>
+    <p class="page-subtitle" style="max-width: 70ch; margin-top: 10px;">
+      Der erste nutzbare Flow nimmt einen vorhandenen Track aus der Bibliothek, definiert einen kurzen Ausschnitt
+      und legt daraus einen renderbaren Short-Entwurf an. Rendering und Upload folgen als nächste Schicht.
+    </p>
+  </div>
+  <div class="docs-hero-side">
+    <div class="docs-stat-card">
+      <div class="label">MVP-Regeln</div>
+      <div class="value">15–60s</div>
+      <div class="metric-help">9:16, bestehendes Audio, Short-spezifischer Draft im System</div>
+      <div style="margin-top: 16px; display: grid; gap: 10px;">
+        <div>
+          <div class="label">Quelle</div>
+          <div class="system-value">Bibliothek</div>
+        </div>
+        <div>
+          <div class="label">Status</div>
+          <div class="system-value">Draft → Render → Upload</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="grid two">
+  <section class="panel panel-accent-purple">
+    <div class="section-header-inline">
+      <h2>Short erstellen</h2>
+      <span class="section-note">Schritt 2 im Plan</span>
+    </div>
+
+    <form method="post" action="/admin/shorts/create" id="shorts-form">
+      <div class="form-group">
+        <label for="source_audio">Quelle: Audio-Track</label>
+        <select id="source_audio" name="source_audio" class="form-select" required>
+          <option value="">— Audio aus Bibliothek wählen —</option>
+          {% for t in library_tracks %}
+          <option value="{{ t.filename }}" data-stem="{{ t.stem }}">{{ t.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="grid two">
+        <div class="form-group">
+          <label for="title">Short-Titel</label>
+          <input id="title" name="title" class="form-input" placeholder="z. B. Winterfell at Night | Ambient Short" required />
+        </div>
+        <div class="form-group">
+          <label for="slug">Slug</label>
+          <input id="slug" name="slug" class="form-input" placeholder="auto-aus-Titel-oder-Track" />
+        </div>
+      </div>
+
+      <div class="grid two">
+        <div class="form-group">
+          <label for="clip_start_seconds">Clip-Start (Sekunden)</label>
+          <input id="clip_start_seconds" name="clip_start_seconds" type="number" min="0" value="0" class="form-input" required />
+        </div>
+        <div class="form-group">
+          <label for="clip_duration_seconds">Clip-Länge (15–60s)</label>
+          <input id="clip_duration_seconds" name="clip_duration_seconds" type="number" min="15" max="60" value="30" class="form-input" required />
+        </div>
+      </div>
+
+      <div class="grid two">
+        <div class="form-group">
+          <label for="visual_mode">Visual Mode</label>
+          <select id="visual_mode" name="visual_mode" class="form-select">
+            <option value="static-artwork">Static Artwork</option>
+            <option value="blurred-background">Blurred Background</option>
+            <option value="cinematic-gradient">Cinematic Gradient</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="visibility">Visibility</label>
+          <select id="visibility" name="visibility" class="form-select">
+            <option value="private">Private</option>
+            <option value="unlisted">Unlisted</option>
+            <option value="public">Public</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="preview-meta" style="margin: 8px 0 18px;">
+        <strong>Was beim Speichern passiert:</strong><br/>
+        Es wird ein Short-Draft angelegt, Metadaten unter <code>data/upload/shorts/metadata/</code> gespeichert
+        und ein eigener Run mit <code>content_type=short</code> in der DB registriert.
+      </div>
+
+      <button type="submit" class="btn btn-primary">Short-Entwurf anlegen</button>
+    </form>
+  </section>
+
+  <section class="panel panel-accent-blue">
+    <div class="section-header-inline">
+      <h2>Letzte Short-Drafts</h2>
+      <span class="section-note">aus den Pipeline-Runs gefiltert</span>
+    </div>
+    <ul class="list">
+      {% for run in short_runs %}
+      <li class="timeline-item">
+        <div>
+          <strong>{{ run.title or run.slug }}</strong><br/>
+          <span class="timeline-time">{{ run.slug }}</span>
+        </div>
+        <div class="timeline-meta">
+          <a href="/admin/shorts/{{ run.run_id }}" class="btn btn-secondary btn-sm">Details</a>
+          <span class="badge badge-{{ run.status }}">{{ run.status }}</span>
+          <span class="timeline-time">{{ run.created_at[:16] if run.created_at else '–' }}</span>
+        </div>
+      </li>
+      {% else %}
+      <li class="empty-state">Noch keine Short-Drafts vorhanden</li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+
+<script>
+(function() {
+  const source = document.getElementById('source_audio');
+  const title = document.getElementById('title');
+  const slug = document.getElementById('slug');
+
+  function slugify(text) {
+    return (text || '')
+      .toLowerCase()
+      .replace(/['’]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+  }
+
+  source.addEventListener('change', () => {
+    const opt = source.options[source.selectedIndex];
+    const stem = opt?.dataset?.stem || '';
+    if (!title.value && stem) {
+      title.value = stem.replace(/-/g, ' ').replace(/\b\w/g, m => m.toUpperCase()) + ' | Ambient Short';
+    }
+    if (!slug.value && stem) {
+      slug.value = stem + '-short';
+    }
+  });
+
+  title.addEventListener('input', () => {
+    if (!slug.dataset.touched) slug.value = slugify(title.value);
+  });
+  slug.addEventListener('input', () => {
+    slug.dataset.touched = '1';
+  });
+})();
+</script>
+{% endblock %}

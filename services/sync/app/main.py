@@ -55,6 +55,15 @@ from app.kaggle_gen import (
 
 
 HOUSE_TEMPLATES_PATH = Path(__file__).resolve().parent.parent / 'data' / 'house_templates.json'
+
+
+def slugify(text: str) -> str:
+    """Convert text to a URL-safe slug."""
+    text = text.lower().strip()
+    text = re.sub(r'[^\w\s-]', '', text)
+    text = re.sub(r'[\s_]+', '-', text)
+    text = re.sub(r'-+', '-', text)
+    return text.strip('-')
 DOCS_ROOT = Path(__file__).resolve().parents[3] / 'docs'
 
 
@@ -177,8 +186,8 @@ def _markdown_to_html(md: str) -> str:
             if not in_ul:
                 out.append('<ul>')
                 in_ul = True
-            li_text = re.sub(r"^[-*]\s+", "", stripped)
-            out.append(f'<li>{_render_inline_md(li_text)}</li>')
+            list_text = re.sub(r'^[-*]\s+', '', stripped)
+            out.append(f'<li>{_render_inline_md(list_text)}</li>')
         elif re.match(r'^\d+\.\s+', stripped):
             if in_ul:
                 out.append('</ul>')
@@ -186,8 +195,8 @@ def _markdown_to_html(md: str) -> str:
             if not in_ol:
                 out.append('<ol>')
                 in_ol = True
-            li_text = re.sub(r"^\d+\.\s+", "", stripped)
-            out.append(f'<li>{_render_inline_md(li_text)}</li>')
+            list_text = re.sub(r'^\d+\.\s+', '', stripped)
+            out.append(f'<li>{_render_inline_md(list_text)}</li>')
         elif stripped.startswith('> '):
             close_lists()
             out.append(f'<blockquote>{_render_inline_md(stripped[2:])}</blockquote>')
@@ -748,6 +757,214 @@ def admin_audio(request: Request):
     })
 
 
+@app.get('/admin/shorts', response_class=HTMLResponse)
+def admin_shorts(request: Request, success: str | None = Query(default=None), error: str | None = Query(default=None)):
+    library_tracks = list_library_tracks_for_pipeline(db)
+    short_runs = [run for run in db.list_runs(limit=100) if (run.get('config') or {}).get('content_type') == 'short']
+    return templates.TemplateResponse('shorts.html', {
+        'request': request,
+        'page': 'shorts',
+        'library_tracks': library_tracks,
+        'short_runs': short_runs[:20],
+        'success_message': success or '',
+        'error_message': error or '',
+    })
+
+
+@app.post('/admin/shorts/create')
+def admin_shorts_create(
+    source_audio: str = Form(...),
+    title: str = Form(...),
+    slug: str = Form(''),
+    clip_start_seconds: int = Form(0),
+    clip_duration_seconds: int = Form(30),
+    visual_mode: str = Form('static-artwork'),
+    visibility: str = Form('private'),
+):
+    source_audio = source_audio.strip()
+    title = title.strip()
+    slug = slugify(slug.strip() or title)
+
+    if not source_audio:
+        raise HTTPException(status_code=400, detail='Quelle für Audio ist erforderlich')
+    if not title:
+        raise HTTPException(status_code=400, detail='Titel ist erforderlich')
+    if not slug:
+        raise HTTPException(status_code=400, detail='Slug ist erforderlich')
+    if clip_start_seconds < 0:
+        raise HTTPException(status_code=400, detail='Clip-Start darf nicht negativ sein')
+    if clip_duration_seconds < 15 or clip_duration_seconds > 60:
+        raise HTTPException(status_code=400, detail='Clip-Länge muss zwischen 15 und 60 Sekunden liegen')
+    if visual_mode not in {'static-artwork', 'blurred-background', 'cinematic-gradient'}:
+        raise HTTPException(status_code=400, detail='Ungültiger Visual Mode')
+    if visibility not in {'private', 'unlisted', 'public'}:
+        raise HTTPException(status_code=400, detail='Ungültige Sichtbarkeit')
+
+    source_path = PIPELINE_DIR / 'data' / 'upload' / 'songs' / source_audio
+    if not source_path.exists():
+        raise HTTPException(status_code=400, detail='Gewählte Audio-Datei existiert nicht')
+
+    now = datetime.now(CET).isoformat()
+    run_id = uuid.uuid4().hex[:12]
+    metadata = {
+        'slug': slug,
+        'title': title,
+        'platform': 'youtube',
+        'content_type': 'short',
+        'source_audio': source_audio,
+        'clip_start_seconds': clip_start_seconds,
+        'clip_duration_seconds': clip_duration_seconds,
+        'visual_mode': visual_mode,
+        'visibility': visibility,
+        'hashtags': ['shorts'],
+    }
+
+    metadata_dir = PIPELINE_DIR / 'data' / 'upload' / 'shorts' / 'metadata'
+    metadata_dir.mkdir(parents=True, exist_ok=True)
+    metadata_path = metadata_dir / f'{slug}.json'
+    metadata_path.write_text(json.dumps(metadata, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+
+    config = {
+        'content_type': 'short',
+        'format': 'youtube_short',
+        'aspect_ratio': '9:16',
+        'source_audio': source_audio,
+        'source_audio_path': str(source_path),
+        'clip_start_seconds': clip_start_seconds,
+        'clip_duration_seconds': clip_duration_seconds,
+        'visual_mode': visual_mode,
+        'visibility': visibility,
+        'metadata_path': str(metadata_path),
+    }
+
+    db.create_run({
+        'run_id': run_id,
+        'slug': slug,
+        'title': title,
+        'status': 'created',
+        'config': config,
+        'created_at': now,
+    })
+    db.append_run_log(run_id, 'system', f'Short draft created from {source_audio}', now)
+    db.append_run_log(run_id, 'system', f'Clip window: start={clip_start_seconds}s duration={clip_duration_seconds}s', now)
+    db.append_run_log(run_id, 'system', f'Visual mode: {visual_mode} · visibility: {visibility}', now)
+
+    return RedirectResponse(url=f'/admin/shorts/{run_id}?success=Short-Entwurf+{slug}+wurde+angelegt', status_code=303)
+
+
+@app.get('/admin/shorts/{run_id}', response_class=HTMLResponse)
+def admin_shorts_detail(request: Request, run_id: str, success: str | None = Query(default=None), error: str | None = Query(default=None)):
+    run = db.get_run(run_id)
+    if not run or (run.get('config') or {}).get('content_type') != 'short':
+        raise HTTPException(status_code=404, detail='Short run not found')
+    logs = db.get_run_logs(run_id, limit=1000)
+    output_files: list[dict[str, str]] = []
+    output_dir = PIPELINE_DIR / 'data' / 'output' / 'shorts' / run['slug']
+    if output_dir.exists():
+        for f in sorted(output_dir.iterdir()):
+            if f.is_file():
+                output_files.append({'name': f.name, 'size': f'{f.stat().st_size / 1024 / 1024:.1f} MB'})
+    return templates.TemplateResponse('short_detail.html', {
+        'request': request,
+        'page': 'shorts',
+        'run': run,
+        'logs': logs,
+        'output_files': output_files,
+        'success_message': success or '',
+        'error_message': error or '',
+    })
+
+
+@app.post('/admin/shorts/{run_id}/render')
+def admin_shorts_render(run_id: str):
+    run = db.get_run(run_id)
+    if not run or (run.get('config') or {}).get('content_type') != 'short':
+        raise HTTPException(status_code=404, detail='Short run not found')
+    if run['status'] not in {'created', 'failed'}:
+        raise HTTPException(status_code=409, detail=f'Cannot render short from status {run["status"]}')
+
+    now = datetime.now(CET).isoformat()
+    config = run.get('config', {})
+    db.update_run(run_id, status='running', started_at=now, error_message=None)
+    db.append_run_log(run_id, 'system', 'Short render requested from dashboard', now)
+    db.append_run_log(run_id, 'system', f"Source audio: {config.get('source_audio')}", now)
+    db.append_run_log(run_id, 'system', f"Clip window: {config.get('clip_start_seconds', 0)}s → +{config.get('clip_duration_seconds', 30)}s", now)
+    db.append_run_log(run_id, 'system', f"Visual mode: {config.get('visual_mode', 'static-artwork')}", now)
+    db.append_run_log(run_id, 'system', 'Render backend for Shorts is not wired yet — this draft is now queued for implementation.', now)
+    db.update_run(run_id, status='queued')
+
+    return RedirectResponse(url=f'/admin/shorts/{run_id}?success=Short-Render+wurde+angestoßen', status_code=303)
+
+
+@app.get('/admin/shorts/{run_id}/logs')
+def admin_shorts_logs(run_id: str, after_id: int = Query(default=0, ge=0)):
+    run = db.get_run(run_id)
+    if not run or (run.get('config') or {}).get('content_type') != 'short':
+        raise HTTPException(status_code=404, detail='Short run not found')
+    logs = db.get_run_logs(run_id, after_id=after_id)
+    return JSONResponse({'logs': logs, 'status': run['status'], 'error_message': run.get('error_message')})
+
+
+@app.post('/admin/shorts/{run_id}/upload')
+def admin_shorts_upload(run_id: str):
+    run = db.get_run(run_id)
+    if not run or (run.get('config') or {}).get('content_type') != 'short':
+        raise HTTPException(status_code=404, detail='Short run not found')
+    if run['status'] != 'rendered':
+        raise HTTPException(status_code=409, detail=f'Cannot upload short from status {run["status"]}')
+
+    slug = run['slug']
+    output_dir = PIPELINE_DIR / 'data' / 'output' / 'shorts' / slug
+    video_path = output_dir / 'video.mp4'
+    metadata_path = output_dir / 'metadata.json'
+    if not video_path.exists() or not metadata_path.exists():
+        raise HTTPException(status_code=400, detail='Rendered short output is incomplete')
+
+    run_cfg = run.get('config', {})
+    cmd = [
+        sys.executable,
+        str(PIPELINE_DIR / 'pipeline' / 'scripts' / 'publish' / 'youtube_upload.py'),
+        '--video', str(video_path),
+        '--metadata', str(metadata_path),
+    ]
+    if run_cfg.get('visibility') == 'public':
+        cmd.append('--public')
+
+    db.update_run(run_id, status='uploading', error_message=None)
+    cmd_str = ' '.join(cmd)
+    db.append_run_log(run_id, 'system', f'Starting Shorts upload: {cmd_str}', datetime.now(CET).isoformat())
+
+    def worker():
+        try:
+            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=str(PIPELINE_DIR))
+        except Exception as exc:
+            db.update_run(run_id, status='rendered', error_message=f'Upload start failed: {exc}')
+            db.append_run_log(run_id, 'system', f'Upload start failed: {exc}', datetime.now(CET).isoformat())
+            return
+        t_out, t_err = _append_process_logs(run_id, proc)
+        code = proc.wait()
+        t_out.join(timeout=5)
+        t_err.join(timeout=5)
+        now = datetime.now(CET).isoformat()
+        if code == 0:
+            db.update_run(run_id, status='uploaded', finished_at=now, error_message=None)
+            db.append_run_log(run_id, 'system', 'Short uploaded successfully', now)
+        else:
+            db.update_run(run_id, status='rendered', error_message=f'Shorts upload failed (exit {code})')
+            db.append_run_log(run_id, 'system', f'Shorts upload failed with exit code {code}', now)
+
+    threading.Thread(target=worker, daemon=True).start()
+    return RedirectResponse(url=f'/admin/shorts/{run_id}?success=Short-Upload+wurde+gestartet', status_code=303)
+
+
+@app.get('/admin/shorts/preview/{slug}/{filename}')
+def admin_shorts_preview_file(slug: str, filename: str):
+    path = PIPELINE_DIR / 'data' / 'output' / 'shorts' / slug / filename
+    if not path.exists() or not path.is_file():
+        raise HTTPException(status_code=404, detail='File not found')
+    return FileResponse(path)
+
+
 @app.post('/admin/audio/generate')
 def admin_audio_generate(
     slug: str = Form(...),
@@ -1111,6 +1328,88 @@ def admin_pipeline_run_upload(run_id: str):
 
     trigger_upload(run_id, run['slug'], run.get('config', {}), db)
     return RedirectResponse(url=f'/admin/pipeline/run/{run_id}', status_code=303)
+
+
+@app.post('/admin/pipeline/run/{run_id}/cancel')
+def admin_pipeline_run_cancel(run_id: str):
+    run = db.get_run(run_id)
+    if not run:
+        raise HTTPException(status_code=404, detail='Run not found')
+    if run['status'] != 'running':
+        raise HTTPException(status_code=409, detail='Can only cancel running pipelines')
+    cancel_run(run_id, db)
+    return RedirectResponse(url=f'/admin/pipeline/run/{run_id}', status_code=303)
+
+
+@app.get('/admin/pipeline/preview/{slug}/{filename}')
+def admin_pipeline_preview_file(slug: str, filename: str):
+    path = get_output_path(slug, filename)
+    if not path:
+        raise HTTPException(status_code=404, detail='File not found')
+    return FileResponse(path)
+
+
+@app.post('/github/webhook')
+async def github_webhook(
+    request: Request,
+    x_github_delivery: str | None = Header(default=None),
+    x_github_event: str | None = Header(default=None),
+    x_hub_signature_256: str | None = Header(default=None),
+) -> dict[str, Any]:
+    if not x_github_delivery:
+        raise HTTPException(status_code=400, detail='Missing X-GitHub-Delivery header')
+    if not x_github_event:
+        raise HTTPException(status_code=400, detail='Missing X-GitHub-Event header')
+
+    raw_body = await request.body()
+    verify_signature(raw_body, x_hub_signature_256)
+
+    try:
+        payload = json.loads(raw_body.decode('utf-8'))
+    except json.JSONDecodeError as exc:
+        raise HTTPException(status_code=400, detail='Invalid JSON payload') from exc
+
+    event_record = build_event_record(x_github_delivery, x_github_event, payload)
+    was_inserted = db.insert_github_event(event_record)
+
+    snapshot_updated = False
+    updated_snapshot: dict[str, Any] | None = None
+    task_id = event_record.get('task_id')
+    if task_id:
+        existing_snapshot = db.get_snapshot(task_id)
+        updated_snapshot = update_snapshot_from_event(existing_snapshot, event_record)
+        if updated_snapshot:
+            db.upsert_snapshot(updated_snapshot)
+            snapshot_updated = True
+
+    normalized_event = normalize_task_event(event_record, updated_snapshot)
+    task_event_inserted, assigned_seq = _append_task_event(normalized_event)
+
+    task_state_updated = False
+    if normalized_event and updated_snapshot and assigned_seq:
+        existing = db.get_task_state(normalized_event['task_id'])
+        if existing:
+            task_state = existing.copy()
+            task_state['snapshot'] = updated_snapshot
+            task_state['latest_seq'] = assigned_seq
+            task_state['updated_at'] = updated_snapshot.get('updated_at', utc_now_iso())
+        else:
+            task_state = create_task_state(normalized_event['task_id'], updated_snapshot, assigned_seq)
+        db.upsert_task_state(normalized_event['task_id'], task_state)
+        task_state_updated = True
+
+    return {
+        'ok': True,
+        'delivery_id': x_github_delivery,
+        'event_type': x_github_event,
+        'action': event_record.get('action'),
+        'task_id': event_record.get('task_id'),
+        'event_inserted': was_inserted,
+        'snapshot_updated': snapshot_updated,
+        'task_event_inserted': task_event_inserted,
+        'task_state_updated': task_state_updated,
+        'seq': assigned_seq or None,
+    }
 
 
 @app.post('/admin/pipeline/run/{run_id}/cancel')

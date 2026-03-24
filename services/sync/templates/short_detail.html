@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% block title %}Short {{ run.run_id }}{% endblock %}
+{% block content %}
+<div class="status-header">
+  <h1>{{ run.title or run.slug }}</h1>
+  <span class="badge {{ run.status }}">{{ run.status }}</span>
+</div>
+
+{% if success_message %}
+<div class="panel panel-accent-teal" style="margin-bottom:18px;">
+  <div class="success-banner">✅ {{ success_message }}</div>
+</div>
+{% endif %}
+{% if error_message or run.error_message %}
+<div class="panel error-panel" style="margin-bottom:18px;">
+  <strong>Fehler:</strong> {{ error_message or run.error_message }}
+</div>
+{% endif %}
+
+<div class="action-bar">
+  <a href="/admin/shorts" class="btn btn-secondary btn-sm">
+    <i data-lucide="arrow-left" style="width:14px;height:14px"></i> Alle Shorts
+  </a>
+  {% if run.status in ('created', 'failed') %}
+  <form method="post" action="/admin/shorts/{{ run.run_id }}/render" style="margin:0">
+    <button type="submit" class="btn btn-primary">
+      <i data-lucide="clapperboard" style="width:16px;height:16px"></i> Render starten
+    </button>
+  </form>
+  {% endif %}
+  {% if run.status == 'rendered' %}
+  <form method="post" action="/admin/shorts/{{ run.run_id }}/upload" style="margin:0">
+    <button type="submit" class="btn btn-success">
+      <i data-lucide="upload" style="width:16px;height:16px"></i> Zu YouTube hochladen
+    </button>
+  </form>
+  {% endif %}
+  {% if run.status == 'uploaded' %}
+  <span class="success-banner">
+    <i data-lucide="check-circle" style="width:18px;height:18px"></i> Upload abgeschlossen
+  </span>
+  {% endif %}
+</div>
+
+<div class="grid two">
+  <div class="panel panel-accent-purple">
+    <h2>Short-Konfiguration</h2>
+    <div class="config-grid">
+      <div class="config-item"><div class="label">Slug</div><div class="value">{{ run.slug }}</div></div>
+      <div class="config-item"><div class="label">Format</div><div class="value">{{ run.config.get('format', 'youtube_short') }}</div></div>
+      <div class="config-item"><div class="label">Aspect Ratio</div><div class="value">{{ run.config.get('aspect_ratio', '9:16') }}</div></div>
+      <div class="config-item"><div class="label">Source Audio</div><div class="value" style="font-size:0.8rem">{{ run.config.get('source_audio', '—') }}</div></div>
+      <div class="config-item"><div class="label">Clip Start</div><div class="value">{{ run.config.get('clip_start_seconds', 0) }}s</div></div>
+      <div class="config-item"><div class="label">Clip Dauer</div><div class="value">{{ run.config.get('clip_duration_seconds', 30) }}s</div></div>
+      <div class="config-item"><div class="label">Visual</div><div class="value">{{ run.config.get('visual_mode', 'static-artwork') }}</div></div>
+      <div class="config-item"><div class="label">Visibility</div><div class="value">{{ run.config.get('visibility', 'private') }}</div></div>
+      <div class="config-item"><div class="label">Erstellt</div><div class="value" style="font-size:0.75rem">{{ run.created_at[:19] if run.created_at else '—' }}</div></div>
+      <div class="config-item"><div class="label">Gestartet</div><div class="value" style="font-size:0.75rem">{{ run.started_at[:19] if run.started_at else '—' }}</div></div>
+    </div>
+  </div>
+
+  <div class="panel panel-accent-blue">
+    <h2>Status</h2>
+    <div class="preview-meta">
+      <strong>Aktueller Stand:</strong><br/>
+      {% if run.status == 'created' %}
+      Der Short-Draft ist angelegt. Als Nächstes kann der Render gestartet werden.
+      {% elif run.status == 'queued' %}
+      Der Render wurde angefordert. Das Backend für echte Shorts-Render-Jobs wird als nächster Schritt verdrahtet.
+      {% elif run.status == 'running' %}
+      Der Short-Render läuft gerade.
+      {% elif run.status == 'failed' %}
+      Der Short ist fehlgeschlagen und kann erneut angestoßen werden.
+      {% else %}
+      Status: {{ run.status }}
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% if run.status in ('rendered', 'uploaded') and output_files %}
+<div class="panel panel-accent-gold">
+  <h2>Preview</h2>
+  {% for f in output_files %}
+    {% if f.name == 'video.mp4' %}
+    <div style="margin-bottom:18px; max-width: 420px;">
+      <video class="preview-video" controls preload="metadata" style="max-width:420px; aspect-ratio: 9 / 16; object-fit: cover;">
+        <source src="/admin/shorts/preview/{{ run.slug }}/video.mp4" type="video/mp4" />
+      </video>
+    </div>
+    {% endif %}
+  {% endfor %}
+
+  <div class="output-files">
+    <strong>Output-Dateien:</strong>
+    {% for f in output_files %}
+      {{ f.name }} ({{ f.size }}){% if not loop.last %}, {% endif %}
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<div class="panel">
+  <h2>Logs</h2>
+  <div class="log-viewer" id="log-viewer">
+    {% for log in logs %}
+    <div class="log-line {{ log.stream }}">{{ log.message }}</div>
+    {% else %}
+    <div class="log-line system">Warte auf Logs…</div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+(function() {
+  var status = '{{ run.status }}';
+  var runId = '{{ run.run_id }}';
+  var viewer = document.getElementById('log-viewer');
+  var lastId = {{ logs[-1].id if logs else 0 }};
+  var polling = (status === 'running' || status === 'queued' || status === 'created');
+
+  function pollLogs() {
+    if (!polling) return;
+    fetch('/admin/shorts/' + runId + '/logs?after_id=' + lastId)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.logs && data.logs.length > 0) {
+          data.logs.forEach(function(log) {
+            var div = document.createElement('div');
+            div.className = 'log-line ' + log.stream;
+            div.textContent = log.message;
+            viewer.appendChild(div);
+            lastId = log.id;
+          });
+          viewer.scrollTop = viewer.scrollHeight;
+        }
+        if (data.status !== 'running' && data.status !== 'queued' && data.status !== 'created') {
+          polling = false;
+        }
+        if (polling) setTimeout(pollLogs, 3000);
+      })
+      .catch(function() { if (polling) setTimeout(pollLogs, 5000); });
+  }
+
+  if (polling) setTimeout(pollLogs, 3000);
+})();
+</script>
+{% endblock %}
