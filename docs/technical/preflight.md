@@ -1,27 +1,78 @@
-# Preflight – erster QA-Schritt
+# Preflight
 
 ## Zweck
-Der erste Preflight-Schritt schreibt einen verwertbaren Report für die Metadaten-Prüfung.
+Preflight ist die QA-Stufe vor dem eigentlichen Publish-Schritt.
 
-## Skript
-- `scripts/qa/preflight-metadata-report.js`
+Aktuell ist das noch kein allwissendes Kontrollzentrum, sondern ein pragmatischer Prüfpunkt im Pipeline-Prozess.
 
-## Ablauf
-Das Skript ruft die Metadaten-Validierung auf und schreibt das Ergebnis als JSON-Report nach:
-- `work/publish/reports/metadata-preflight.latest.json`
-- zusätzlich eine Zeitstempel-Datei für spätere Nachvollziehbarkeit
+---
 
-## Beispiel
+## Relevante Dateien
+
+- `pipeline/scripts/qa/preflight_metadata_report.py`
+- `pipeline/scripts/qa/preflight-metadata-report.js`
+- `data/work/publish/reports/`
+
+---
+
+## Was Preflight aktuell prüft
+
+Der aktuelle Schwerpunkt liegt auf Metadaten-Prüfung und Report-Erzeugung.
+
+Ziel:
+- verwertbaren Report schreiben
+- Fehler/Warnungen sichtbar machen
+- Pipeline nicht völlig blind weiterlaufen lassen
+
+---
+
+## Typische Ausführung
+
+### Python
+
 ```bash
-node scripts/qa/preflight-metadata-report.js
-node scripts/qa/preflight-metadata-report.js upload/metadata
+python pipeline/scripts/qa/preflight_metadata_report.py
 ```
 
-## Zielbild
-Preflight soll später mehrere Prüfschritte bündeln:
-- Metadaten
-- Dateivollständigkeit
-- Audio-Technik
-- Render-/Output-Vollständigkeit
+### JavaScript
 
-Aktuell ist das noch die erste QA-Stufe, nicht die ganze Maschine.
+```bash
+node pipeline/scripts/qa/preflight-metadata-report.js
+```
+
+---
+
+## Output
+
+Reports liegen typischerweise unter:
+
+```text
+data/work/publish/reports/
+```
+
+Je nach Skript und Stand z. B. als:
+- latest-Report
+- Zeitstempel-Report
+
+---
+
+## Rolle im Gesamtfluss
+
+Preflight sitzt zwischen:
+- Metadaten-/Asset-Vorbereitung
+- und Render/Publish- bzw. Freigabeentscheidungen
+
+Es ist eine Sicherungsschicht, kein Ersatz für echte Sichtprüfung.
+
+---
+
+## Ausbaupfad
+
+Später kann Preflight zusätzlich bündeln:
+- Upload-Vollständigkeit
+- Audio-Technik
+- Render-Vollständigkeit
+- Asset-Präsenz
+- Plattform-spezifische Checks
+
+Aktuell gilt: lieber ein kleiner ehrlicher Preflight als ein großer imaginärer.

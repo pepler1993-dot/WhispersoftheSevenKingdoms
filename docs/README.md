@@ -38,6 +38,7 @@ Arbeitsregeln und Betriebswissen für Agenten, die im Projekt aktiv Änderungen 
 - [`agents/WORKING_IN_THIS_PROJECT.md`](agents/WORKING_IN_THIS_PROJECT.md)
 - [`agents/GITHUB_AND_PAT.md`](agents/GITHUB_AND_PAT.md)
 - [`agents/SYNC_SERVICE.md`](agents/SYNC_SERVICE.md)
+- [`agents/PLAYBOOKS.md`](agents/PLAYBOOKS.md)
 
 ### Reference
 Lookup-Material: technische Fakten, Formate, Konventionen, Templates.

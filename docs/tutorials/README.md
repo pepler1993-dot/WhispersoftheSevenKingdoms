@@ -7,6 +7,7 @@ Ziel: Jemand mit wenig Projektkontext soll Schritt für Schritt zu einem funktio
 ## Geplante Tutorials
 
 1. **Erstes Video lokal erzeugen**
+   - [`first-local-pipeline-run.md`](first-local-pipeline-run.md)
    - Setup
    - Testdaten
    - Pipeline-Run ohne Upload

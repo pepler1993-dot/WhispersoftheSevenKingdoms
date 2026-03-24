@@ -18,6 +18,7 @@ Ein Agent soll hier schnell Antworten finden auf:
 - [`WORKING_IN_THIS_PROJECT.md`](WORKING_IN_THIS_PROJECT.md) — Regeln, Arbeitsweise, Branching, Push-Verhalten
 - [`GITHUB_AND_PAT.md`](GITHUB_AND_PAT.md) — GitHub-Push mit PAT, Sicherheitsregeln, typische Git-Kommandos
 - [`SYNC_SERVICE.md`](SYNC_SERVICE.md) — Nutzung des Agent-Sync-Service im Projektkontext
+- [`PLAYBOOKS.md`](PLAYBOOKS.md) — Standardabläufe für wiederkehrende Agentenarbeit
 
 ## Wichtige Abgrenzung
 

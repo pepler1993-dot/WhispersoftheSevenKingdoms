@@ -1,35 +1,61 @@
-# Upload-Vollständigkeitscheck
+# Upload Completeness
 
 ## Zweck
-Dieser Check prüft im einfachen `upload/`-Workflow, ob zu einem Slug alle drei Kernbestandteile vorhanden sind:
-- Song
-- Thumbnail
-- Metadaten
+Dieser Check prüft, ob für einen Slug die nötigen Grundbausteine im Upload-Workflow vorhanden sind.
 
-## Skript
-- `scripts/qa/check-upload-completeness.js`
+Aktuell relevant für den pragmatischen Datei-Workflow unter `data/upload/`.
 
-## Geprüfte Ordner
-- `upload/songs/`
-- `upload/thumbnails/`
-- `upload/metadata/`
+---
 
-## Regeln
-Ein Slug gilt als vollständig, wenn vorhanden sind:
-- mindestens 1 Songdatei (`.mp3`, `.wav`, `.ogg`)
-- mindestens 1 Thumbnail (`.jpg`, `.png`, `.webp`)
-- mindestens 1 Metadatei (`.json`)
+## Relevante Datei
 
-Mehrere Dateien pro Typ werden aktuell als Warnung markiert.
+- `pipeline/scripts/qa/check-upload-completeness.js`
 
-## Report
-Das Skript schreibt einen Report nach:
-- `work/publish/reports/upload-completeness.latest.json`
+---
 
-## Beispiel
-```bash
-node scripts/qa/check-upload-completeness.js
+## Geprüfte Verzeichnisse
+
+```text
+data/upload/songs/
+data/upload/thumbnails/
+data/upload/metadata/
 ```
 
-## Zweck im PoC
-Damit wird vor Render- oder Upload-Logik zuerst geprüft, ob die Grundbausteine überhaupt vollständig vorliegen.
+---
+
+## Vollständig bedeutet aktuell
+
+Für einen Slug vorhanden:
+- mindestens eine Songdatei (`.mp3`, `.wav`, `.ogg`)
+- mindestens ein Thumbnail (`.jpg`, `.png`, `.webp`, ggf. weitere Bildformate je nach Skriptstand)
+- genau genommen mindestens eine Metadaten-Datei (`.json`)
+
+Mehrere Dateien pro Typ sind kein automatischer Weltuntergang, können aber als Warnsignal auftauchen.
+
+---
+
+## Typische Ausführung
+
+```bash
+node pipeline/scripts/qa/check-upload-completeness.js
+```
+
+---
+
+## Report
+
+Typischer Zielort:
+
+```text
+data/work/publish/reports/upload-completeness.latest.json
+```
+
+---
+
+## Nutzen im Workflow
+
+Der Check beantwortet früh die einfache, aber wichtige Frage:
+
+**Liegt für einen Slug überhaupt genug Material vor, um sinnvoll weiterzumachen?**
+
+Er verhindert damit, dass Render- oder Publish-Schritte an fehlenden Grundlagen scheitern.

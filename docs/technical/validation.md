@@ -1,31 +1,82 @@
-# Metadaten-Validierung
+# Validation
 
 ## Zweck
-Dieses Projekt hat ein erstes, leichtgewichtiges Validierungsskript für Song-Metadaten.
+Diese Seite beschreibt die aktuelle Validierung rund um Song-Metadaten im Projekt.
 
-## Skript
-- `scripts/metadata/validate-song-metadata.js`
+Sie ist Lookup-Doku: knapp, technisch, ohne Strategiepredigt.
 
-## Was es aktuell prüft
+---
+
+## Relevante Dateien
+
+- `schemas/song.schema.json`
+- `pipeline/scripts/metadata/validate_song_metadata.py`
+- `pipeline/scripts/metadata/validate-song-metadata.js`
+- `data/upload/metadata/`
+
+---
+
+## Was validiert wird
+
+Der Kernfokus liegt aktuell auf Metadaten-Dateien pro Slug.
+
+Typische Prüfungen:
 - Pflichtfelder vorhanden
 - erlaubte Top-Level-Felder
 - Slug-Format
-- String-/Array-Typen für die wichtigsten Felder
-- einfache Struktur von `music_brief` und `thumbnail_brief`
+- Typen für Strings / Arrays
+- grobe Struktur von Briefing-Feldern
 
-## Standardziel
-Ohne Argument prüft das Skript alle JSON-Dateien in:
-- `upload/metadata/`
+---
 
-## Beispiele
-```bash
-node scripts/metadata/validate-song-metadata.js
-node scripts/metadata/validate-song-metadata.js upload/metadata
-node scripts/metadata/validate-song-metadata.js templates/metadata/example.song.json
+## Erwartete Eingaben
+
+Typischerweise:
+
+```text
+data/upload/metadata/<slug>.json
 ```
 
-## Hinweis
-Das Skript ist bewusst dependency-frei gehalten, damit es sofort lokal läuft.
-Es ist ein pragmatischer Start, kein Endzustand.
+Schema:
+- `schemas/song.schema.json`
 
-Später kann das auf TypeScript + echtes JSON-Schema-Tooling (z. B. AJV) umgestellt werden.
+---
+
+## CLI / Skripte
+
+### Python-Variante
+
+```bash
+python pipeline/scripts/metadata/validate_song_metadata.py
+```
+
+### JS-Variante
+
+```bash
+node pipeline/scripts/metadata/validate-song-metadata.js
+```
+
+Je nach Skriptversion kann auch ein Pfad übergeben werden, z. B. für Einzeldateien oder Verzeichnisse.
+
+---
+
+## Zweck im Workflow
+
+Validation ist die erste technische Hürde vor:
+- Metadaten-Generierung
+- QA / Preflight
+- Render / Publish-Schritten
+
+Sie soll früh verhindern, dass kaputte oder unvollständige JSON-Dateien weiter durch die Pipeline fallen.
+
+---
+
+## Grenzen
+
+Validation garantiert nicht:
+- inhaltlich gute Titel
+- gute Tags
+- gutes Audio
+- funktionierenden Upload
+
+Sie prüft primär Struktur und Grundkonsistenz.
