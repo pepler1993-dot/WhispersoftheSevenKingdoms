@@ -101,7 +101,9 @@
       {% endif %}
       <div class="form-group">
         <label for="prompt_text">Prompt(s)</label>
-        <textarea name="prompt_text" id="prompt_text" class="form-input" rows="8" placeholder="Eine Zeile pro Prompt. Wenn leer, wird das gewählte Preset verwendet."></textarea>
+        <textarea name="prompt_text" id="prompt_text" class="form-input" rows="8" placeholder="Eine Zeile pro Prompt. Mehrere Prompts werden auf die Clips verteilt. z.B.:
+ambienter Wald, Vogelgezwitscher, sanfter Wind
+dunkle Höhle, tropfendes Wasser, Echo"></textarea>
       </div>
       <button type="submit" class="btn btn-primary" style="width:100%"><i data-lucide="sparkles" style="width:16px;height:16px"></i> Audio-Job anlegen</button>
     </form>
@@ -140,5 +142,6 @@
   </table>
 </section>
 {% endblock %}
+
 
 
