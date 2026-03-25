@@ -3,6 +3,18 @@
 Alle relevanten Änderungen am Projekt werden hier dokumentiert.
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [v2.8.0] – 2026-03-25
+
+### Added
+- **Auto-Timestamps**: Clip-Grenzen → thematische Timestamps pro House (10 Labels je Haus)
+- **Cross-Pollination Playlists**: min. 3, max. 6 Playlists pro Video automatisch zugewiesen
+- **Endscreen-Empfehlung**: Passende Playlist-Empfehlung basierend auf Mood/House
+- **Auto-Description**: YouTube-Beschreibung aus Template + Lore generiert (inkl. Timestamps)
+- **Auto-Hashtags/Tags**: 23 Tags pro Video (Core + House + Mood)
+- **Titel-Varianten**: 2-3 A/B-Test-Varianten pro Video
+- **Metadata Preview API**: `/api/pipeline/preview-metadata` für Dashboard-Vorschau
+- **Duration Fix**: Pipeline nutzt loop_hours für Titel (z.B. "3 Hours" statt "42 Minutes")
+
 ## [v2.7.1] – 2026-03-25
 
 ### Fixed
