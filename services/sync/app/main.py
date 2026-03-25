@@ -1593,7 +1593,7 @@ def admin_pipeline_assets():
 
 @app.post('/admin/pipeline/start')
 def admin_pipeline_start(
-    slug: str = Form(''),
+    slug: str = Form(''),  # ignored – always generated from title
     title: str = Form(...),
     theme: str = Form(...),
     minutes: int = Form(42),
@@ -1619,11 +1619,11 @@ def admin_pipeline_start(
     thumbnail_avoid: str = Form(''),
     house: str = Form(''),
 ):
-    slug = slug.strip().lower() if slug else slugify(title)
     title = title.strip()
+    slug = slugify(title)  # always auto-generated from title
     theme = theme.strip()
     if not slug:
-        raise HTTPException(status_code=400, detail='Slug is required')
+        raise HTTPException(status_code=400, detail='Title must produce a valid slug')
     if not title:
         raise HTTPException(status_code=400, detail='Title is required')
     if not theme:
