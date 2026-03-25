@@ -37,6 +37,21 @@
 </div>
 {% endif %}
 
+<div class="panel panel-accent-blue" style="margin-bottom:16px;">
+  <div class="section-header-inline">
+    <div>
+      <h2>Gesamtstatus</h2>
+      <div class="page-subtitle">Du hast hier bereits einen kompletten Workflow gestartet — nicht nur einen isolierten Audio-Job.</div>
+    </div>
+    <span class="badge {{ wf.status }}">{{ wf.status }}</span>
+  </div>
+  <div class="list" style="margin-top: 12px;">
+    <div><strong>1.</strong> Audio wird generiert{% if wf.audio_job_id %} · <a href="/admin/audio/jobs/{{ wf.audio_job_id }}">Audio-Job öffnen</a>{% endif %}</div>
+    <div><strong>2.</strong> Pipeline-Render startet danach automatisch{% if wf.pipeline_run_id %} · <a href="/admin/pipeline/run/{{ wf.pipeline_run_id }}">Pipeline-Run öffnen</a>{% endif %}</div>
+    <div><strong>3.</strong> {% if wf.auto_upload %}YouTube-Upload folgt automatisch{% else %}Upload ist aktuell nicht automatisch aktiviert{% endif %}</div>
+  </div>
+</div>
+
 <div class="ticket-detail-grid">
   <!-- Audio Job -->
   <section class="panel">
@@ -49,6 +64,7 @@
       <div class="meta-row"><span class="label">Gestartet</span><span>{{ audio_job.started_at[:16] if audio_job.started_at else '—' }}</span></div>
       <div class="meta-row"><span class="label">Beendet</span><span>{{ audio_job.finished_at[:16] if audio_job.finished_at else '—' }}</span></div>
     </div>
+    <div class="page-subtitle" style="margin-top:10px;">Dieser Schritt läuft bereits als Teil des gesamten Pipeline-Workflows.</div>
     {% else %}
     <div class="empty-state">Audio Job wird erstellt...</div>
     {% endif %}
@@ -64,8 +80,9 @@
       <div class="meta-row"><span class="label">Gestartet</span><span>{{ pipeline_run.started_at[:16] if pipeline_run.started_at else '—' }}</span></div>
       <div class="meta-row"><span class="label">Beendet</span><span>{{ pipeline_run.finished_at[:16] if pipeline_run.finished_at else '—' }}</span></div>
     </div>
+    <div class="page-subtitle" style="margin-top:10px;">Der Render-Lauf wurde aus diesem Workflow heraus erzeugt und bleibt hier verlinkt.</div>
     {% else %}
-    <div class="empty-state">Startet nach Audio-Generierung</div>
+    <div class="empty-state">Pipeline ist bereits eingeplant und startet automatisch nach erfolgreicher Audio-Generierung.</div>
     {% endif %}
   </section>
 </div>
