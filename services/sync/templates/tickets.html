@@ -60,6 +60,7 @@
           <th>Typ</th>
           <th>Priorität</th>
           <th>Status</th>
+          <th>Bearbeiter</th>
           <th>Erstellt von</th>
           <th>Erstellt</th>
         </tr>
@@ -76,7 +77,7 @@
             {% else %}📋 {{ t.type|capitalize }}{% endif %}
           </td>
           <td data-label="Priorität">
-            <span class="badge {% if t.priority == 'critical' %}stale{% elif t.priority == 'high' %}running{% elif t.priority == 'medium' %}waiting{% else %}completed{% endif %}">
+            <span class="badge {% if t.priority == 'critical' %}stale{% elif t.priority == 'high' %}running{% elif t.priority == 'medium' %}waiting{% else %}waiting{% endif %}">
               {{ t.priority|capitalize }}
             </span>
           </td>
@@ -85,11 +86,12 @@
               {{ t.status|replace('_', ' ')|capitalize }}
             </span>
           </td>
+          <td data-label="Bearbeiter">{{ t.assigned_to or '—' }}</td>
           <td data-label="Erstellt von">{{ t.created_by or '—' }}</td>
           <td data-label="Erstellt">{{ t.created_at[:10] }}</td>
         </tr>
         {% else %}
-        <tr><td colspan="7" class="empty-state">Keine Tickets vorhanden — <a href="/admin/tickets/new">Erstes Ticket erstellen</a></td></tr>
+        <tr><td colspan="8" class="empty-state">Keine Tickets vorhanden — <a href="/admin/tickets/new">Erstes Ticket erstellen</a></td></tr>
         {% endfor %}
       </tbody>
     </table>

@@ -87,7 +87,7 @@ def admin_ticket_create(request: Request):
         'updated_at': now,
     }
     create_ticket(shared.db, ticket)
-    return RedirectResponse(url=f'/admin/tickets/{ticket_id}', status_code=303)
+    return RedirectResponse(url='/admin/tickets', status_code=303)
 
 
 @router.post('/admin/tickets/{ticket_id}/update')

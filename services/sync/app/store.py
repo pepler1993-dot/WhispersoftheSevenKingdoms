@@ -199,6 +199,11 @@ class AgentSyncDB:
                 CREATE INDEX IF NOT EXISTS idx_tickets_type ON tickets(type);
                 '''
             )
+            # Migrations for tickets
+            try:
+                conn.execute('ALTER TABLE tickets ADD COLUMN assigned_to TEXT')
+            except Exception:
+                pass  # Column already exists
             conn.commit()
 
     def _table_empty(self, conn: sqlite3.Connection, table: str) -> bool:

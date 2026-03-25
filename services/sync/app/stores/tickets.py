@@ -62,7 +62,8 @@ def create_ticket(db, ticket: dict[str, Any]) -> dict[str, Any]:
 def update_ticket(db, ticket_id: str, updates: dict[str, Any]) -> bool:
     """Update ticket fields."""
     allowed = {'title', 'type', 'priority', 'description', 'status',
-               'github_issue_number', 'github_issue_url', 'task_id', 'updated_at'}
+               'github_issue_number', 'github_issue_url', 'task_id', 'updated_at',
+               'assigned_to'}
     fields = {k: v for k, v in updates.items() if k in allowed}
     if not fields:
         return False
