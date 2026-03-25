@@ -1,6 +1,7 @@
 """Library routes: upload, preview, listing."""
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from fastapi import APIRouter, File, Form, HTTPException, Query, Request, UploadFile
@@ -13,11 +14,28 @@ from app.pipeline_runner import PIPELINE_DIR
 router = APIRouter()
 
 
+def _enrich_metadata_items(items: list[dict[str, str]]) -> list[dict[str, str]]:
+    enriched: list[dict[str, str]] = []
+    meta_dir = PIPELINE_DIR / 'data' / 'upload' / 'metadata'
+    for item in items:
+        extra = {'title': '—', 'slug': Path(item['name']).stem}
+        if item['name'].endswith('.json'):
+            path = meta_dir / item['name']
+            try:
+                data = json.loads(path.read_text(encoding='utf-8'))
+                extra['title'] = (data.get('title') or '—').strip() or '—'
+                extra['slug'] = (data.get('slug') or extra['slug']).strip() or extra['slug']
+            except Exception:
+                pass
+        enriched.append({**item, **extra})
+    return enriched
+
+
 @router.get('/admin/library', response_class=HTMLResponse)
 def admin_library(request: Request, success: str | None = Query(default=None), error: str | None = Query(default=None)):
     songs = _list_library_dir(PIPELINE_DIR / 'data' / 'upload' / 'songs', {'.mp3', '.wav', '.ogg'})
     thumbnails = _list_library_dir(PIPELINE_DIR / 'data' / 'upload' / 'thumbnails', {'.jpg', '.jpeg', '.png', '.webp'})
-    metadata = _list_library_dir(PIPELINE_DIR / 'data' / 'upload' / 'metadata', {'.json', '.md'})
+    metadata = _enrich_metadata_items(_list_library_dir(PIPELINE_DIR / 'data' / 'upload' / 'metadata', {'.json', '.md'}))
     return shared.templates.TemplateResponse(request, 'library.html', {
         'request': request,
         'page': 'library',
@@ -48,6 +66,7 @@ def admin_library_create_metadata(
     thumbnail_text: str = Form(''),
     thumbnail_style: str = Form(''),
     thumbnail_avoid: str = Form(''),
+    overwrite: str = Form(''),
 ):
     clean_title = title.strip()
     clean_slug = slugify(slug or clean_title)
@@ -82,8 +101,12 @@ def admin_library_create_metadata(
 
     target = PIPELINE_DIR / 'data' / 'upload' / 'metadata' / f'{clean_slug}.json'
     target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(__import__('json').dumps(metadata, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
-    return RedirectResponse(f'/admin/library?success=Metadata+{clean_slug}.json+erstellt', status_code=303)
+    existed_before = target.exists()
+    if existed_before and overwrite != 'true':
+        return RedirectResponse(f'/admin/library?error=Metadata+{clean_slug}.json+existiert+bereits.+Aktiviere+Overwrite+wenn+du+sie+ersetzen+willst', status_code=303)
+    target.write_text(json.dumps(metadata, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+    action = 'aktualisiert' if existed_before and overwrite == 'true' else 'erstellt'
+    return RedirectResponse(f'/admin/library?success=Metadata+{clean_slug}.json+{action}', status_code=303)
 
 
 @router.post('/admin/library/upload')
