@@ -21,7 +21,38 @@
       "the_crypts": "Deep below Winterfell, echoing stone, ancestors",
       "beyond_winterfell": "The Wolfswood, cold streams, northern wilderness",
       "the_long_night": "Deep winter, howling wind, endless darkness"
-    }
+    },
+    "defaults": {
+      "minutes": 20,
+      "loop_hours": 3,
+      "crossfade": 8,
+      "audio_preset": "ambient",
+      "music_tempo": "slow",
+      "music_energy": "low"
+    },
+    "music_brief": {
+      "style": "Cold ambient, soft piano, winter textures",
+      "influences": [
+        "Sigur Rós",
+        "Brian Eno",
+        "Nordic folk"
+      ],
+      "avoid": [
+        "drums",
+        "vocals",
+        "percussion"
+      ]
+    },
+    "thumbnail_brief": {
+      "scene": "Frozen castle at night, snow falling",
+      "elements": [
+        "direwolf",
+        "weirwood",
+        "northern lights"
+      ],
+      "style": "cold blue tones, minimal"
+    },
+    "title_template": "Peaceful Winterfell – Gentle Sleep Music, {duration}"
   },
   "lannister": {
     "display_name": "Casterly Rock",
@@ -45,7 +76,38 @@
       "castamere": "Ruins in the rain, melancholic cello, faded glory",
       "the_sept": "Sept of Baelor, candlelight, choir echoes",
       "lannister_feast": "Grand banquet, soft harp, wine and warmth"
-    }
+    },
+    "defaults": {
+      "minutes": 20,
+      "loop_hours": 3,
+      "crossfade": 8,
+      "audio_preset": "ambient",
+      "music_tempo": "slow",
+      "music_energy": "low"
+    },
+    "music_brief": {
+      "style": "Warm baroque ambient, harp, strings",
+      "influences": [
+        "Ramin Djawadi",
+        "Vivaldi",
+        "medieval court music"
+      ],
+      "avoid": [
+        "drums",
+        "vocals",
+        "harsh sounds"
+      ]
+    },
+    "thumbnail_brief": {
+      "scene": "Golden throne room, candlelight",
+      "elements": [
+        "lion",
+        "crown",
+        "red banners"
+      ],
+      "style": "warm gold tones, regal"
+    },
+    "title_template": "King's Landing – Royal Sleep Music, {duration}"
   },
   "targaryen": {
     "display_name": "Dragonstone",
@@ -69,7 +131,38 @@
       "dragons_lair": "Dragon breath, embers, deep cave echoes",
       "the_painted_table": "War council, flickering candles, strategy",
       "fire_and_blood": "Ritual fire, chanting, primal power"
-    }
+    },
+    "defaults": {
+      "minutes": 20,
+      "loop_hours": 3,
+      "crossfade": 8,
+      "audio_preset": "dark",
+      "music_tempo": "slow",
+      "music_energy": "low"
+    },
+    "music_brief": {
+      "style": "Ethereal dark ambient, ancient mystical",
+      "influences": [
+        "Dead Can Dance",
+        "Wardruna",
+        "Ramin Djawadi"
+      ],
+      "avoid": [
+        "drums",
+        "vocals",
+        "modern sounds"
+      ]
+    },
+    "thumbnail_brief": {
+      "scene": "Dragonstone at sunset, volcanic shores",
+      "elements": [
+        "dragon",
+        "fire",
+        "ancient runes"
+      ],
+      "style": "dark red and black, mystical"
+    },
+    "title_template": "Dragonstone – Dark Ambient Sleep Music, {duration}"
   },
   "baratheon": {
     "display_name": "Storm's End",
@@ -93,7 +186,37 @@
       "roberts_rebellion": "War drums fading to peace, aftermath, memories",
       "the_great_hall": "Feast and fire, warmth inside the storm",
       "shipbreaker_bay": "Violent sea, lighthouse, sailors' lullaby"
-    }
+    },
+    "defaults": {
+      "minutes": 20,
+      "loop_hours": 3,
+      "crossfade": 8,
+      "audio_preset": "dark",
+      "music_tempo": "slow",
+      "music_energy": "low"
+    },
+    "music_brief": {
+      "style": "Stormy ambient, deep brass, thunder textures",
+      "influences": [
+        "Godspeed You! Black Emperor",
+        "Lustmord",
+        "Hans Zimmer"
+      ],
+      "avoid": [
+        "vocals",
+        "fast rhythms"
+      ]
+    },
+    "thumbnail_brief": {
+      "scene": "Storm's End fortress in thunderstorm",
+      "elements": [
+        "stag",
+        "lightning",
+        "crashing waves"
+      ],
+      "style": "dramatic dark tones, stormy"
+    },
+    "title_template": "Storm's End – Deep Sleep Music, {duration}"
   },
   "arryn": {
     "display_name": "The Eyrie",
@@ -117,7 +240,38 @@
       "the_moon_door": "Vertigo, vast emptiness below, cold wind",
       "the_bloody_gate": "Mountain pass, echoing stone, guardian silence",
       "sky_cells": "Open air prison, stars at night, freedom in captivity"
-    }
+    },
+    "defaults": {
+      "minutes": 20,
+      "loop_hours": 3,
+      "crossfade": 8,
+      "audio_preset": "gentle",
+      "music_tempo": "slow",
+      "music_energy": "low"
+    },
+    "music_brief": {
+      "style": "High altitude ambient, crystal clear, flute",
+      "influences": [
+        "Enya",
+        "Kitaro",
+        "Tibetan bowl meditation"
+      ],
+      "avoid": [
+        "drums",
+        "vocals",
+        "bass"
+      ]
+    },
+    "thumbnail_brief": {
+      "scene": "Mountain fortress above the clouds",
+      "elements": [
+        "eagle",
+        "moon",
+        "snow peaks"
+      ],
+      "style": "pale blue and white, ethereal"
+    },
+    "title_template": "The Eyrie – Peaceful Mountain Sleep Music, {duration}"
   },
   "tully": {
     "display_name": "Riverrun",
@@ -141,7 +295,38 @@
       "the_riverlands": "Fertile plains, gentle rain, farming villages",
       "harrenhal": "Massive ruins, haunted halls, dark history",
       "the_twins": "Bridge fortress, crossing waters, passage"
-    }
+    },
+    "defaults": {
+      "minutes": 20,
+      "loop_hours": 3,
+      "crossfade": 8,
+      "audio_preset": "gentle",
+      "music_tempo": "slow",
+      "music_energy": "low"
+    },
+    "music_brief": {
+      "style": "River ambient, gentle acoustic, water sounds",
+      "influences": [
+        "Ólafur Arnalds",
+        "Nils Frahm",
+        "folk guitar"
+      ],
+      "avoid": [
+        "drums",
+        "vocals",
+        "electronic"
+      ]
+    },
+    "thumbnail_brief": {
+      "scene": "Castle between two rivers at dusk",
+      "elements": [
+        "fish",
+        "flowing water",
+        "green hills"
+      ],
+      "style": "warm river blue and green"
+    },
+    "title_template": "Riverrun – Gentle River Sleep Music, {duration}"
   },
   "tyrell": {
     "display_name": "Highgarden",
@@ -165,7 +350,38 @@
       "oldtown": "The Citadel, ancient library, scholar's candle",
       "the_arbor": "Vineyard, wine, Mediterranean evening",
       "rose_garden": "Midnight garden, moonflowers, gentle fountain"
-    }
+    },
+    "defaults": {
+      "minutes": 20,
+      "loop_hours": 3,
+      "crossfade": 8,
+      "audio_preset": "gentle",
+      "music_tempo": "slow",
+      "music_energy": "low"
+    },
+    "music_brief": {
+      "style": "Pastoral ambient, flute, harp, garden sounds",
+      "influences": [
+        "Debussy",
+        "Joe Hisaishi",
+        "pastoral classical"
+      ],
+      "avoid": [
+        "drums",
+        "vocals",
+        "dark tones"
+      ]
+    },
+    "thumbnail_brief": {
+      "scene": "Sunlit rose garden, warm afternoon",
+      "elements": [
+        "roses",
+        "butterflies",
+        "fountain"
+      ],
+      "style": "warm golden green, peaceful"
+    },
+    "title_template": "Highgarden – Gentle Garden Sleep Music, {duration}"
   },
   "greyjoy": {
     "display_name": "Pyke",
@@ -189,7 +405,38 @@
       "the_drowned_god": "Underwater temple, deep sea, ritual drowning",
       "the_silence": "Ghost ship, foggy sea, eerie calm",
       "old_wyk": "Ancient island, standing stones, old magic"
-    }
+    },
+    "defaults": {
+      "minutes": 20,
+      "loop_hours": 3,
+      "crossfade": 8,
+      "audio_preset": "dark",
+      "music_tempo": "slow",
+      "music_energy": "low"
+    },
+    "music_brief": {
+      "style": "Ocean dark ambient, deep underwater drones",
+      "influences": [
+        "Atrium Carceri",
+        "Sunn O)))",
+        "sea shanty melancholy"
+      ],
+      "avoid": [
+        "vocals",
+        "fast rhythms",
+        "bright tones"
+      ]
+    },
+    "thumbnail_brief": {
+      "scene": "Iron fortress on sea cliffs in fog",
+      "elements": [
+        "kraken",
+        "ship",
+        "iron chains"
+      ],
+      "style": "dark teal and iron grey"
+    },
+    "title_template": "The Iron Islands – Dark Ocean Sleep Music, {duration}"
   },
   "martell": {
     "display_name": "Sunspear",
@@ -213,7 +460,38 @@
       "the_desert": "Endless sand dunes, starry night, campfire",
       "the_shadow_city": "Market at night, spices, lanterns",
       "the_sandship": "Ancient fortress, desert wind, unbowed spirit"
-    }
+    },
+    "defaults": {
+      "minutes": 20,
+      "loop_hours": 3,
+      "crossfade": 8,
+      "audio_preset": "ambient",
+      "music_tempo": "slow",
+      "music_energy": "low"
+    },
+    "music_brief": {
+      "style": "Desert ambient, oud, exotic strings",
+      "influences": [
+        "Anouar Brahem",
+        "Ravi Shankar",
+        "Moroccan night music"
+      ],
+      "avoid": [
+        "drums",
+        "vocals",
+        "western instruments"
+      ]
+    },
+    "thumbnail_brief": {
+      "scene": "Desert palace under starry sky",
+      "elements": [
+        "sun",
+        "spear",
+        "palm trees"
+      ],
+      "style": "warm orange and deep blue night"
+    },
+    "title_template": "Dorne – Exotic Desert Sleep Music, {duration}"
   },
   "the_wall": {
     "display_name": "The Wall",
@@ -237,6 +515,37 @@
       "beyond_the_wall": "Frozen wasteland, white walkers, desolation",
       "the_haunted_forest": "Dark trees, cracking ice, unseen danger",
       "hardhome": "Abandoned wildling village, eerie silence, snow"
-    }
+    },
+    "defaults": {
+      "minutes": 20,
+      "loop_hours": 3,
+      "crossfade": 8,
+      "audio_preset": "dark",
+      "music_tempo": "slow",
+      "music_energy": "low"
+    },
+    "music_brief": {
+      "style": "Frozen dark ambient, deep bass drones, wind",
+      "influences": [
+        "Lustmord",
+        "Northaunt",
+        "Arctic field recordings"
+      ],
+      "avoid": [
+        "vocals",
+        "melody",
+        "warmth"
+      ]
+    },
+    "thumbnail_brief": {
+      "scene": "700 feet of ice stretching into darkness",
+      "elements": [
+        "wall of ice",
+        "torch",
+        "night's watch"
+      ],
+      "style": "cold grey and black, vast"
+    },
+    "title_template": "The Wall – Dark Frozen Ambient, {duration}"
   }
 }
