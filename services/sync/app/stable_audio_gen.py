@@ -230,14 +230,15 @@ class StableAudioGenerator(AudioGenerator):
         num_clips = max(1, int((minutes * 60) / effective_clip) + 1)
         total_duration = (num_clips * effective_clip + crossfade) / 60
 
-        # Estimate render time: ~4s per step on GTX 1070
+        # Estimate render time: measured ~4s per step on GTX 1070 as initial guess
         est_seconds_per_clip = steps * 4
         est_total_minutes = (num_clips * est_seconds_per_clip) / 60
+        actual_clip_duration = None  # will be set after first clip for accurate estimates
 
         db.append_audio_job_log(
             job_id, 'system',
             f"Plan: {num_clips} clips × {clip_seconds}s ({steps} steps) "
-            f"≈ {est_seconds_per_clip}s/clip ≈ {est_total_minutes:.0f} min Renderzeit",
+            f"≈ {est_seconds_per_clip}s/clip ≈ {est_total_minutes:.0f} min Renderzeit (Schätzung, wird nach Clip 1 korrigiert)",
             now_iso(),
         )
 
@@ -278,6 +279,20 @@ class StableAudioGenerator(AudioGenerator):
 
                     elapsed = result.get('elapsed_seconds', '?')
                     db.append_audio_job_log(job_id, 'worker', f"Clip {i+1} done in {elapsed}s", now_iso())
+
+                    # Update estimate based on actual render time
+                    if isinstance(elapsed, (int, float)) and elapsed > 0:
+                        if actual_clip_duration is None:
+                            actual_clip_duration = elapsed
+                            est_seconds_per_clip = int(actual_clip_duration)
+                            new_est_total = (num_clips - (i + 1)) * est_seconds_per_clip / 60
+                            db.append_audio_job_log(job_id, 'system',
+                                f"Schätzung korrigiert: {est_seconds_per_clip}s/clip (gemessen) → ≈{new_est_total:.0f} min verbleibend",
+                                now_iso())
+                        else:
+                            # Running average
+                            actual_clip_duration = (actual_clip_duration + elapsed) / 2
+                            est_seconds_per_clip = int(actual_clip_duration)
 
                     # Cleanup job files
                     self._ssh_run(f'rm -f {GPU_WORKER_JOB_DIR}/{clip_slug}.*', timeout=5)
