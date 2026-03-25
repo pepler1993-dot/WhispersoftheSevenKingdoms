@@ -17,10 +17,13 @@
 </section>
 
 <!-- House Selection -->
+<div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+  <a href="/admin/pipeline/logs" class="btn btn-secondary btn-sm">📋 Pipeline Logs</a>
+</div>
+
 <section class="panel panel-accent-blue">
   <div class="section-header-inline">
     <h2>Wähle ein Haus</h2>
-    <span class="section-note" data-tooltip="Das Haus steuert Presets für Titel, Stimmung, Musikbrief und Thumbnail-Richtung.">Was passiert hier?</span>
   </div>
   <div class="house-grid">
     {% for key, house in houses.items() %}
@@ -102,8 +105,8 @@
     <input type="hidden" name="duration_hint" id="duration_hint" value="long-form sleep track" />
     <input type="hidden" name="house" id="house" />
 
-    <!-- Assets Info -->
-    <div class="assets-mini" id="assets-info">
+    <!-- Assets Info (hidden) -->
+    <div class="assets-mini" id="assets-info" style="display:none">
       <div class="assets-mini-label">Assets für <span id="assets-slug">—</span>:</div>
       <div id="assets-status">—</div>
     </div>
@@ -120,12 +123,12 @@
     <div class="form-group library-audio-row">
       <label>🎵 Audio Track <span class="inline-help" data-tooltip="Nimm vorhandenes Audio aus der Bibliothek oder starte einen neuen Generator-Job. Für zuverlässige Bedienung sollte am Ende genau eine Quelle klar ausgewählt sein.">ⓘ</span></label>
       <div class="audio-source-toggle">
-        <button type="button" class="toggle-btn active" id="btn-library" onclick="showAudioSource('library')">📚 Aus Bibliothek</button>
-        <button type="button" class="toggle-btn" id="btn-generate" onclick="showAudioSource('generate')">🚀 Neu generieren</button>
+        <button type="button" class="toggle-btn" id="btn-library" onclick="showAudioSource('library')">📚 Aus Bibliothek</button>
+        <button type="button" class="toggle-btn active" id="btn-generate" onclick="showAudioSource('generate')">🚀 Neu generieren</button>
       </div>
 
       <!-- Option A: Existing track -->
-      <div id="audio-library" class="audio-source">
+      <div id="audio-library" class="audio-source" style="display:none">
         <select id="library-audio" class="form-select" autocomplete="off">
           <option value="">— Audio aus Bibliothek wählen —</option>
           {% for t in library_tracks %}
@@ -136,7 +139,7 @@
       </div>
 
       <!-- Option B: Generate new audio track -->
-      <div id="audio-generate" class="audio-source" style="display:none">
+      <div id="audio-generate" class="audio-source">
         <div class="generate-card">
           <div class="generate-info">
             <span id="gen-house-icon">🏰</span>
@@ -163,7 +166,7 @@
         </div>
       </div>
       <input type="hidden" name="audio_job_id" id="audio_job_id" />
-      <input type="hidden" name="audio_source" id="audio_source" value="library" />
+      <input type="hidden" name="audio_source" id="audio_source" value="generate" />
       <input type="hidden" name="gen_minutes" id="gen_minutes_hidden" value="42" />
       <input type="hidden" name="gen_model" id="gen_model_hidden" value="medium" />
       <input type="hidden" name="gen_prompt" id="gen_prompt_hidden" value="" />

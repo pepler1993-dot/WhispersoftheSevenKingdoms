@@ -115,8 +115,8 @@ def _detect_background_source(selected_background: str | None, theme: str) -> di
     }
 
 
-@router.get('/admin/pipeline', response_class=HTMLResponse)
-def admin_pipeline(request: Request):
+@router.get('/admin/pipeline/logs', response_class=HTMLResponse)
+def admin_pipeline_logs(request: Request):
     runs = shared.db.list_runs(limit=100)
     houses = _load_house_templates()
     queue = get_queue_status(shared.db)
@@ -129,6 +129,7 @@ def admin_pipeline(request: Request):
     })
 
 
+@router.get('/admin/pipeline', response_class=HTMLResponse)
 @router.get('/admin/pipeline/new', response_class=HTMLResponse)
 def admin_pipeline_new(request: Request, slug: str | None = Query(default=None), error: str | None = Query(default=None)):
     assets = list_available_assets()
