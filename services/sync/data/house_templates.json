@@ -31,28 +31,32 @@
       "music_energy": "low"
     },
     "music_brief": {
-      "style": "Cold ambient, soft piano, winter textures",
+      "style": "Frozen ambient, soft piano, winter wind, Nordic atmosphere",
       "influences": [
         "Sigur Rós",
-        "Brian Eno",
-        "Nordic folk"
+        "Ólafur Arnalds",
+        "Ramin Djawadi Stark themes",
+        "Nordic folk lullabies"
       ],
       "avoid": [
         "drums",
         "vocals",
-        "percussion"
+        "percussion",
+        "fast tempo",
+        "major keys"
       ]
     },
     "thumbnail_brief": {
-      "scene": "Frozen castle at night, snow falling",
+      "scene": "Winterfell castle in heavy snowfall at night, blue moonlight, warm window glow",
       "elements": [
-        "direwolf",
-        "weirwood",
-        "northern lights"
+        "direwolf silhouette",
+        "snow",
+        "northern lights",
+        "Stark banner"
       ],
-      "style": "cold blue tones, minimal"
+      "style": "dark blue and ice white, cinematic, atmospheric"
     },
-    "title_template": "Peaceful Winterfell – Gentle Sleep Music, {duration}",
+    "title_template": "Winterfell Sleep Music – Peaceful Ambient for Deep Sleep, {duration} | Game of Thrones",
     "variant_prompts": {
       "winterfell": [
         "Gentle ambient sleep music inspired by a frozen northern castle at night. Soft piano melody with reverb over sustained string pads and cold wind textures. Slow tempo at 60 BPM, very quiet dynamics. No vocals, no drums.",
@@ -145,28 +149,32 @@
       "music_energy": "low"
     },
     "music_brief": {
-      "style": "Warm baroque ambient, harp, strings",
+      "style": "Royal warm ambient, classical harp, baroque strings, candlelight atmosphere",
       "influences": [
-        "Ramin Djawadi",
-        "Vivaldi",
-        "medieval court music"
+        "Ramin Djawadi Lannister themes",
+        "Vivaldi slow movements",
+        "medieval court music",
+        "Renaissance lute"
       ],
       "avoid": [
         "drums",
         "vocals",
-        "harsh sounds"
+        "harsh sounds",
+        "minor keys",
+        "dark tones"
       ]
     },
     "thumbnail_brief": {
-      "scene": "Golden throne room, candlelight",
+      "scene": "Red Keep throne room at night, golden candlelight, Lannister banners",
       "elements": [
-        "lion",
-        "crown",
-        "red banners"
+        "lion sigil",
+        "golden crown",
+        "warm torchlight",
+        "Iron Throne silhouette"
       ],
-      "style": "warm gold tones, regal"
+      "style": "warm gold and crimson, opulent, regal"
     },
-    "title_template": "King's Landing – Royal Sleep Music, {duration}",
+    "title_template": "King's Landing Sleep Music – Royal Ambient for Deep Sleep, {duration} | Game of Thrones",
     "variant_prompts": {
       "casterly_rock": [
         "Warm golden ambient with soft harp arpeggios echoing in vast stone halls. Torchlight atmosphere, wealth and ancient power. 60 BPM, mezzo-piano. No drums, no vocals.",
@@ -259,28 +267,31 @@
       "music_energy": "low"
     },
     "music_brief": {
-      "style": "Ethereal dark ambient, ancient mystical",
+      "style": "Ethereal dark ambient, ancient Valyrian mystery, dragon-fire warmth, otherworldly",
       "influences": [
+        "Ramin Djawadi Targaryen themes",
         "Dead Can Dance",
         "Wardruna",
-        "Ramin Djawadi"
+        "Lisa Gerrard"
       ],
       "avoid": [
         "drums",
         "vocals",
-        "modern sounds"
+        "modern electronic",
+        "cheerful tones"
       ]
     },
     "thumbnail_brief": {
-      "scene": "Dragonstone at sunset, volcanic shores",
+      "scene": "Dragonstone island at dusk, volcanic shores, dragon silhouette in red sky",
       "elements": [
-        "dragon",
+        "dragon wings",
         "fire",
-        "ancient runes"
+        "Targaryen banner",
+        "volcanic rock"
       ],
-      "style": "dark red and black, mystical"
+      "style": "dark red and black, mystical, powerful"
     },
-    "title_template": "Dragonstone – Dark Ambient Sleep Music, {duration}",
+    "title_template": "Dragonstone Sleep Music – Mystical Dragon Ambient, {duration} | Game of Thrones",
     "variant_prompts": {
       "dragonstone": [
         "Ethereal ambient with volcanic shore wave textures. Deep reverb on everything, ancient fortress atmosphere. 55 BPM, pianissimo. No vocals, no drums.",
@@ -349,7 +360,7 @@
     "sigil": "🦌",
     "color": "#e8c840",
     "bg_color": "#1a1a0a",
-    "mood": "dark",
+    "mood": "stormy",
     "prompts": [
       "Dark ambient music with distant thunder and heavy rain on stone walls. Deep brass drones, storm energy, fortress atmosphere. 55 BPM, mezzo-piano dynamics. Powerful yet calming. No vocals, no drums.",
       "Stormy coastal ambient with crashing waves and howling wind. Deep cello sustain, occasional lightning flash textures. Raw, untamed, majestic. No rhythm, no percussion.",
@@ -373,27 +384,31 @@
       "music_energy": "low"
     },
     "music_brief": {
-      "style": "Stormy ambient, deep brass, thunder textures",
+      "style": "Storm ambient, deep brass warmth, thunder and rain, coastal fortress",
       "influences": [
+        "Hans Zimmer",
+        "Ramin Djawadi battle aftermath",
         "Godspeed You! Black Emperor",
-        "Lustmord",
-        "Hans Zimmer"
+        "Max Richter"
       ],
       "avoid": [
         "vocals",
-        "fast rhythms"
+        "fast rhythms",
+        "cheerful tones",
+        "high-pitched sounds"
       ]
     },
     "thumbnail_brief": {
-      "scene": "Storm's End fortress in thunderstorm",
+      "scene": "Storm's End fortress in dramatic thunderstorm, waves crashing, lightning",
       "elements": [
-        "stag",
-        "lightning",
-        "crashing waves"
+        "stag crown",
+        "lightning bolts",
+        "crashing waves",
+        "dark clouds"
       ],
-      "style": "dramatic dark tones, stormy"
+      "style": "dramatic dark with yellow lightning accents"
     },
-    "title_template": "Storm's End – Deep Sleep Music, {duration}",
+    "title_template": "Storm's End Sleep Music – Thunderstorm Ambient, {duration} | Game of Thrones",
     "variant_prompts": {
       "storms_end": [
         "Dark ambient music with distant thunder and heavy rain on stone walls. Deep brass drones, storm energy, fortress atmosphere. 55 BPM, mezzo-piano dynamics. Powerful yet calming. No vocals, no drums.",
@@ -462,7 +477,7 @@
     "sigil": "🦅",
     "color": "#a8c8e8",
     "bg_color": "#0a1a2d",
-    "mood": "calm",
+    "mood": "ethereal",
     "prompts": [
       "High altitude ambient with thin mountain air textures and distant eagle calls. Soft flute melody with extreme reverb, clouds passing below. 55 BPM, pianissimo. Serene, elevated, pure. No drums, no vocals.",
       "Crystal clear bell tones echoing across mountain peaks. Soft string pad, cold pure air atmosphere. Majestic height, spiritual clarity. Extremely slow evolution. No rhythm.",
@@ -486,28 +501,31 @@
       "music_energy": "low"
     },
     "music_brief": {
-      "style": "High altitude ambient, crystal clear, flute",
+      "style": "High altitude crystal ambient, pure flute, mountain echo, thin air tranquility",
       "influences": [
         "Enya",
         "Kitaro",
-        "Tibetan bowl meditation"
+        "Tibetan singing bowls",
+        "Ramin Djawadi Vale themes"
       ],
       "avoid": [
         "drums",
         "vocals",
-        "bass"
+        "bass-heavy sounds",
+        "dark tones"
       ]
     },
     "thumbnail_brief": {
-      "scene": "Mountain fortress above the clouds",
+      "scene": "The Eyrie castle above clouds, eagle soaring, pristine mountain sky",
       "elements": [
-        "eagle",
+        "falcon",
         "moon",
-        "snow peaks"
+        "snow peaks",
+        "clouds below"
       ],
-      "style": "pale blue and white, ethereal"
+      "style": "pale sky blue and white, ethereal, breathtaking height"
     },
-    "title_template": "The Eyrie – Peaceful Mountain Sleep Music, {duration}",
+    "title_template": "The Eyrie Sleep Music – Mountain Ambient for Deep Sleep, {duration} | Game of Thrones",
     "variant_prompts": {
       "the_eyrie": [
         "High altitude ambient with thin mountain air textures and distant eagle calls. Soft flute melody with extreme reverb, clouds passing below. 55 BPM, pianissimo. Serene, elevated, pure. No drums, no vocals.",
@@ -576,7 +594,7 @@
     "sigil": "🪼",
     "color": "#4a8ab5",
     "bg_color": "#0a1520",
-    "mood": "calm",
+    "mood": "peaceful",
     "prompts": [
       "Gentle river ambient with soft water flowing over stones. Warm acoustic guitar fingerpicking with reverb, peaceful riverside atmosphere. 58 BPM, piano dynamics. Calming, familial, grounded. No drums, no vocals.",
       "Layered water sounds — gentle stream, distant waterfall, rain on river surface. Soft flute melody weaving through. Lush, green, alive. No percussion, very quiet.",
@@ -600,28 +618,31 @@
       "music_energy": "low"
     },
     "music_brief": {
-      "style": "River ambient, gentle acoustic, water sounds",
+      "style": "River ambient, gentle acoustic guitar, flowing water, pastoral warmth",
       "influences": [
         "Ólafur Arnalds",
         "Nils Frahm",
-        "folk guitar"
+        "acoustic folk guitar",
+        "Ramin Djawadi gentle themes"
       ],
       "avoid": [
         "drums",
         "vocals",
-        "electronic"
+        "electronic sounds",
+        "dark tones"
       ]
     },
     "thumbnail_brief": {
-      "scene": "Castle between two rivers at dusk",
+      "scene": "Riverrun castle between two rivers at golden hour, flowing water, stone bridge",
       "elements": [
-        "fish",
-        "flowing water",
-        "green hills"
+        "trout fish",
+        "flowing river",
+        "green hills",
+        "golden sunset"
       ],
-      "style": "warm river blue and green"
+      "style": "warm river blue and sunset gold, peaceful, pastoral"
     },
-    "title_template": "Riverrun – Gentle River Sleep Music, {duration}",
+    "title_template": "Riverrun Sleep Music – Gentle River Ambient, {duration} | Game of Thrones",
     "variant_prompts": {
       "riverrun": [
         "Gentle river ambient with soft water flowing over stones. Warm acoustic guitar fingerpicking with reverb, peaceful riverside atmosphere. 58 BPM, piano dynamics. Calming, familial, grounded. No drums, no vocals.",
@@ -690,7 +711,7 @@
     "sigil": "🌹",
     "color": "#5cb85c",
     "bg_color": "#0a200a",
-    "mood": "warm",
+    "mood": "pastoral",
     "prompts": [
       "Gentle pastoral ambient music with soft baroque flute melody and warm harp arpeggios. Blooming garden atmosphere, birdsong textures in the distance. 65 BPM, piano dynamics. No drums, no vocals.",
       "Warm acoustic guitar fingerpicking with heavy spring reverb. Soft string pad accompaniment, gentle breeze and leaf rustle textures. Sunny, peaceful, idyllic. 60 BPM, very quiet.",
@@ -714,28 +735,32 @@
       "music_energy": "low"
     },
     "music_brief": {
-      "style": "Pastoral ambient, flute, harp, garden sounds",
+      "style": "Pastoral garden ambient, baroque flute, warm harp, birdsong, sunlight",
       "influences": [
         "Debussy",
         "Joe Hisaishi",
-        "pastoral classical"
+        "pastoral classical",
+        "Ramin Djawadi gentle themes"
       ],
       "avoid": [
         "drums",
         "vocals",
-        "dark tones"
+        "dark tones",
+        "minor keys",
+        "electronic"
       ]
     },
     "thumbnail_brief": {
-      "scene": "Sunlit rose garden, warm afternoon",
+      "scene": "Highgarden rose garden in golden sunlight, butterflies, castle towers",
       "elements": [
-        "roses",
+        "golden rose",
         "butterflies",
-        "fountain"
+        "fountain",
+        "warm sunlight"
       ],
-      "style": "warm golden green, peaceful"
+      "style": "warm green and gold, lush, inviting, paradise"
     },
-    "title_template": "Highgarden – Gentle Garden Sleep Music, {duration}",
+    "title_template": "Highgarden Sleep Music – Garden Ambient for Relaxation, {duration} | Game of Thrones",
     "variant_prompts": {
       "highgarden": [
         "Gentle pastoral ambient music with soft baroque flute melody and warm harp arpeggios. Blooming garden atmosphere, birdsong textures in the distance. 65 BPM, piano dynamics. No drums, no vocals.",
@@ -804,7 +829,7 @@
     "sigil": "🐙",
     "color": "#2a6a6a",
     "bg_color": "#0a1515",
-    "mood": "dark",
+    "mood": "oceanic",
     "prompts": [
       "Dark ocean ambient with deep underwater drones and distant ship creaking. Salt wind textures, crashing waves against iron cliffs. 45 BPM, low dynamics. Harsh, untamed, free. No vocals, no drums.",
       "Heavy rain on wooden ship deck with deep sea ambient underneath. Soft shanty-inspired melody on concertina, very slow and mournful. Lonely, vast ocean. No percussion.",
@@ -828,28 +853,31 @@
       "music_energy": "low"
     },
     "music_brief": {
-      "style": "Ocean dark ambient, deep underwater drones",
+      "style": "Deep ocean dark ambient, underwater drones, salt wind, iron and sea",
       "influences": [
         "Atrium Carceri",
-        "Sunn O)))",
-        "sea shanty melancholy"
+        "ocean field recordings",
+        "Nordic sea shanty melancholy",
+        "Lustmord"
       ],
       "avoid": [
         "vocals",
         "fast rhythms",
-        "bright tones"
+        "bright tones",
+        "cheerful sounds"
       ]
     },
     "thumbnail_brief": {
-      "scene": "Iron fortress on sea cliffs in fog",
+      "scene": "Pyke fortress on sea cliffs in fog, massive waves below",
       "elements": [
         "kraken",
-        "ship",
-        "iron chains"
+        "iron ship",
+        "fog",
+        "crashing waves"
       ],
-      "style": "dark teal and iron grey"
+      "style": "dark teal and iron grey, harsh, maritime"
     },
-    "title_template": "The Iron Islands – Dark Ocean Sleep Music, {duration}",
+    "title_template": "Iron Islands Sleep Music – Deep Ocean Ambient, {duration} | Game of Thrones",
     "variant_prompts": {
       "pyke": [
         "Dark ocean ambient with deep underwater drones and distant ship creaking. Salt wind textures, crashing waves against iron cliffs. 45 BPM, low dynamics. Harsh, untamed, free. No vocals, no drums.",
@@ -942,28 +970,31 @@
       "music_energy": "low"
     },
     "music_brief": {
-      "style": "Desert ambient, oud, exotic strings",
+      "style": "Warm desert night ambient, oud, exotic strings, oasis tranquility",
       "influences": [
         "Anouar Brahem",
-        "Ravi Shankar",
-        "Moroccan night music"
+        "Moroccan Gnawa",
+        "Arabic maqam",
+        "Ramin Djawadi Dorne themes"
       ],
       "avoid": [
         "drums",
         "vocals",
-        "western instruments"
+        "western instruments",
+        "cold sounds"
       ]
     },
     "thumbnail_brief": {
-      "scene": "Desert palace under starry sky",
+      "scene": "Sunspear palace under starry desert sky, warm sandstone, orange groves",
       "elements": [
-        "sun",
-        "spear",
-        "palm trees"
+        "sun and spear",
+        "palm trees",
+        "desert stars",
+        "warm lanterns"
       ],
-      "style": "warm orange and deep blue night"
+      "style": "warm orange and deep night blue, exotic, luxurious"
     },
-    "title_template": "Dorne – Exotic Desert Sleep Music, {duration}",
+    "title_template": "Dorne Sleep Music – Exotic Desert Ambient, {duration} | Game of Thrones",
     "variant_prompts": {
       "sunspear": [
         "Warm desert ambient with soft oud melody and gentle nylon string guitar. Starry night oasis atmosphere, distant sand wind textures. 58 BPM, mezzo-piano. No drums, no vocals.",
@@ -1032,7 +1063,7 @@
     "sigil": "🧊",
     "color": "#8899aa",
     "bg_color": "#050810",
-    "mood": "dark",
+    "mood": "frozen",
     "prompts": [
       "Dark ambient music with frozen wasteland atmosphere. Deep bass drones at 30Hz, howling arctic wind field recordings. Vast, desolate, endless. Extremely slow evolution. No melody, no rhythm, no vocals.",
       "Ice cave ambience with resonant dripping textures and deep sub-bass rumble. Distant horn call echoing across tundra. 40 BPM at most, barely perceptible pulse. Isolating, cold, immense.",
@@ -1056,28 +1087,32 @@
       "music_energy": "low"
     },
     "music_brief": {
-      "style": "Frozen dark ambient, deep bass drones, wind",
+      "style": "Extreme frozen dark ambient, deep bass drones, arctic wind, ice textures, desolation",
       "influences": [
         "Lustmord",
         "Northaunt",
-        "Arctic field recordings"
+        "Arctic field recordings",
+        "Ramin Djawadi Night King themes"
       ],
       "avoid": [
         "vocals",
         "melody",
-        "warmth"
+        "warmth",
+        "rhythm",
+        "hope"
       ]
     },
     "thumbnail_brief": {
-      "scene": "700 feet of ice stretching into darkness",
+      "scene": "700-foot ice wall at night, aurora borealis, endless frozen north",
       "elements": [
-        "wall of ice",
-        "torch",
-        "night's watch"
+        "ice wall",
+        "Night's Watch torch",
+        "northern lights",
+        "frozen wasteland"
       ],
-      "style": "cold grey and black, vast"
+      "style": "cold grey-blue and black, vast, terrifying, beautiful"
     },
-    "title_template": "The Wall – Dark Frozen Ambient, {duration}",
+    "title_template": "The Wall Sleep Music – Frozen Dark Ambient, {duration} | Game of Thrones",
     "variant_prompts": {
       "castle_black": [
         "Dark ambient music with frozen wasteland atmosphere. Deep bass drones at 30Hz, howling arctic wind field recordings. Vast, desolate, endless. Extremely slow evolution. No melody, no rhythm, no vocals.",
