@@ -91,16 +91,18 @@
   <div class="section-header-inline"><h2>Metadata</h2><span class="section-note">für Referenz und Wiederverwendung</span></div>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Datei</th><th>Größe</th><th>Geändert</th></tr></thead>
+      <thead><tr><th>Datei</th><th>Titel</th><th>Slug</th><th>Größe</th><th>Geändert</th></tr></thead>
       <tbody>
         {% for item in metadata %}
         <tr>
-          <td>{{ item.name }}</td>
+          <td><a href="/admin/library/preview/metadata/{{ item.name }}" target="_blank">{{ item.name }}</a></td>
+          <td>{{ item.title }}</td>
+          <td><code>{{ item.slug }}</code></td>
           <td>{{ item.size }}</td>
           <td>{{ item.modified }}</td>
         </tr>
         {% else %}
-        <tr><td colspan="3" class="empty-state">Keine Metadata-Dateien vorhanden</td></tr>
+        <tr><td colspan="5" class="empty-state">Keine Metadata-Dateien vorhanden</td></tr>
         {% endfor %}
       </tbody>
     </table>
@@ -117,9 +119,10 @@
 
     <form method="post" action="/admin/library/create-metadata" class="metadata-form">
       <div class="section-header-inline" style="margin-bottom:10px;"><h3>Metadata direkt erstellen</h3><span class="section-note">ohne JSON-Datei von Hand</span></div>
+      <p class="page-subtitle" style="margin:0 0 14px 0; max-width:70ch;">Erzeugt eine sofort nutzbare Metadata-Datei im bestehenden Pipeline-Format. Ideal für neue Songs, QA und spätere Wiederverwendung im Create-Flow.</p>
       <div class="form-group">
         <label for="meta_title">Titel</label>
-        <input id="meta_title" name="title" type="text" class="form-input" required oninput="document.getElementById('meta_slug').value=this.value.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')" />
+        <input id="meta_title" name="title" type="text" class="form-input" required placeholder="Dreams Beyond the Wall" oninput="document.getElementById('meta_slug').value=this.value.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')" />
       </div>
       <div class="grid two">
         <div class="form-group">
@@ -135,10 +138,12 @@
         <div class="form-group">
           <label for="meta_mood">Mood</label>
           <input id="meta_mood" name="mood" type="text" class="form-input" placeholder="calm, mystical" />
+          <div class="metric-help">Mehrere Werte per Komma trennen.</div>
         </div>
         <div class="form-group">
           <label for="meta_tags">Tags</label>
           <input id="meta_tags" name="tags" type="text" class="form-input" placeholder="sleep, ambient, fantasy" />
+          <div class="metric-help">Tags werden automatisch in eine Liste umgewandelt.</div>
         </div>
       </div>
       <div class="form-group">
@@ -199,7 +204,13 @@
           <input id="meta_thumb_avoid" name="thumbnail_avoid" type="text" class="form-input" />
         </div>
       </div>
-      <button type="submit" class="btn btn-primary btn-sm">Metadata erstellen</button>
+      <div class="form-check" style="margin: 8px 0 14px 0;">
+        <input type="checkbox" id="meta_overwrite" name="overwrite" value="true" />
+        <label for="meta_overwrite">Bestehende Metadata mit gleichem Slug überschreiben</label>
+      </div>
+      <div class="form-actions-inline">
+        <button type="submit" class="btn btn-primary btn-sm">Metadata erstellen</button>
+      </div>
     </form>
   </div>
 </section>
@@ -240,6 +251,11 @@
 }
 .metadata-form .form-input {
   width: 100%;
+}
+.form-actions-inline {
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 </style>
 {% endblock %}
