@@ -170,11 +170,11 @@
       ]
     },
     "prompts": [
-      "Ethereal ambient music, mysterious and ancient, soft choir pads, dark but peaceful, deep sleep music, no vocals.",
-      "Haunting ambient, dragon inspired, deep drones, mystical atmosphere, calm and vast, no vocals.",
-      "Ethereal strings, ancient power, slow and meditative, dark ambient sleep music, no vocals.",
-      "Deep mystical pads, ancient temple atmosphere, vast and ethereal, peaceful darkness, no vocals.",
-      "Soft choir ambient, dragon flight, majestic and calm, deep sleep drone, no vocals."
+      "Ethereal ambient music with mysterious dark choir pads and ancient temple atmosphere. Deep reverb on everything, subtle dragon-breath wind textures. 55 BPM, pianissimo dynamics. No vocals, no drums, no percussion.",
+      "Dark ambient drone with layered low brass sustain and shimmering high-frequency textures like distant fire. Slow evolving pad, mystical and otherworldly. Extremely minimal movement. No rhythm, no melody.",
+      "Soft duduk-like woodwind melody with heavy reverb over warm analog synth pad. Volcanic heat atmosphere, embers floating. 50 BPM, very quiet. Ancient, powerful yet peaceful. No drums.",
+      "Deep cello sustained notes with granular fire crackle textures blended underneath. Distant ethereal female voice pad (not lyrics, just texture). Dark, meditative, timeless. No beats.",
+      "Warm string ensemble playing extremely slowly, each note lasting 8 seconds. Subtle metallic shimmer textures, heat haze atmosphere. Royal and ancient, deeply hypnotic. No percussion."
     ]
   },
   "the_wall": {
@@ -230,11 +230,11 @@
       ]
     },
     "prompts": [
-      "Dark ambient music, frozen wasteland, deep bass drones, howling wind, vast and desolate, sleep music, no vocals.",
-      "Icy ambient soundscape, distant horns, cold and mysterious, ancient frozen wall, deep sleep, no vocals.",
-      "Deep drones and wind textures, frozen night, vast emptiness, dark meditative ambient, no vocals.",
-      "Cold ambient pads, ice cracking, distant wolves, northern lights atmosphere, sleep music, no vocals.",
-      "Haunting wind ambient, frozen silence, deep bass, ancient ice, calm and desolate, no vocals."
+      "Dark ambient music with frozen wasteland atmosphere. Deep bass drones at 30Hz, howling arctic wind field recordings. Vast, desolate, endless. Extremely slow evolution. No melody, no rhythm, no vocals.",
+      "Ice cave ambience with resonant dripping textures and deep sub-bass rumble. Distant horn call echoing across tundra. 40 BPM at most, barely perceptible pulse. Isolating, cold, immense.",
+      "Low cello drone with heavy distortion and reverb. Blizzard wind noise layered with granular ice crystal textures. Dark, foreboding, hypnotic. No percussion, no vocals.",
+      "Massive reverb space with occasional deep brass stabs fading into silence. Wind howl textures, frozen ground creaking sounds. Sparse, monumental, lonely. Each sound event 20+ seconds apart.",
+      "Soft filtered white noise resembling arctic wind over deep warm pad. Subtle pitch bending, glacial movement. Meditative and vast, like standing at the edge of the world. No drums, no melody."
     ]
   },
   "highgarden": {
@@ -290,11 +290,11 @@
       ]
     },
     "prompts": [
-      "Gentle pastoral music, soft flute and harp, blooming garden, warm sunlight, peaceful and serene, sleep music, no vocals.",
-      "Light ambient with birdsong, flowing water, gentle breeze through flowers, calm and relaxing, no vocals.",
-      "Soft strings and woodwinds, garden atmosphere, warm and peaceful, gentle lullaby, no vocals.",
-      "Peaceful flute melody, roses and sunlight, calm garden ambience, soothing and light, no vocals.",
-      "Gentle harp arpeggios, warm breeze, nature sounds, tranquil garden, deep relaxation, no vocals."
+      "Gentle pastoral ambient music with soft baroque flute melody and warm harp arpeggios. Blooming garden atmosphere, birdsong textures in the distance. 65 BPM, piano dynamics. No drums, no vocals.",
+      "Warm acoustic guitar fingerpicking with heavy spring reverb. Soft string pad accompaniment, gentle breeze and leaf rustle textures. Sunny, peaceful, idyllic. 60 BPM, very quiet.",
+      "Lush string quartet playing legato at pianissimo. Gentle woodwind ornaments, flower garden ambience. Rich harmonic movement, warm and inviting. No percussion, no vocals.",
+      "Soft celesta melody with music box quality over warm analog pad. Butterfly wing textures, warm sunshine atmosphere. Delicate, dreamy, innocent. 55 BPM, extremely gentle.",
+      "Ambient harp glissandos with long reverb tails over soft choir aahs. Garden fountain water textures blended underneath. Heavenly, serene, timeless. No rhythm section."
     ]
   },
   "dorne": {
@@ -350,11 +350,11 @@
       ]
     },
     "prompts": [
-      "Warm desert ambient, soft oud and gentle strings, starry night, peaceful oasis, exotic sleep music, no vocals.",
-      "Desert night soundscape, warm sand, distant melody, calm and exotic, deep relaxation, no vocals.",
-      "Soft exotic strings, warm breeze, ancient desert palace, peaceful and mystical, no vocals.",
-      "Gentle percussion shimmer and strings, warm night, desert tranquility, sleep ambient, no vocals.",
-      "Warm ambient pads, desert wind, soft melodic touches, exotic calm, deep sleep, no vocals."
+      "Warm desert ambient with soft oud melody and gentle nylon string guitar. Starry night oasis atmosphere, distant sand wind textures. 58 BPM, mezzo-piano. No drums, no vocals.",
+      "Middle-eastern inspired ambient with soft qanun plucking and warm pad. Spice market at night, warm breeze, palm trees rustling. Exotic, peaceful, sensual. No percussion.",
+      "Deep warm synth pad with subtle arabic scale ornaments on soft flute. Desert night sky, cooling sand, distant campfire crackle. Meditative, ancient, vast. 50 BPM.",
+      "Soft frame drum pattern at 55 BPM (very quiet, barely audible pulse) with oud harmonics and warm reverb. Moonlit palace courtyard, fountain water. Intimate, luxurious, sleepy.",
+      "Layered ambient drones in warm golden tones with subtle sand grain textures. Occasional soft bell chime, desert wind. Timeless, expansive, deeply relaxing. No melody, no rhythm."
     ]
   },
   "godswood": {
@@ -410,11 +410,11 @@
       ]
     },
     "prompts": [
-      "Ancient forest ambient, deep meditation drones, rustling leaves, spiritual and calm, sacred tree, sleep music, no vocals.",
-      "Mystical forest soundscape, ancient wooden textures, deep and meditative, peaceful nature, no vocals.",
-      "Spiritual ambient, old gods atmosphere, gentle wind through ancient trees, deep relaxation, no vocals.",
-      "Deep meditation drones, forest night, ancient and sacred, calm and timeless, no vocals.",
-      "Gentle nature ambient, ancient grove, spiritual peace, soft wind, deep sleep meditation, no vocals."
+      "Ancient forest ambient with deep meditation drones and rustling leaf textures. Soft wooden flute melody, spiritual and calm. 50 BPM, pianissimo throughout. No drums, no vocals.",
+      "Granular wood creaking and forest atmosphere over deep warm pad. Distant bird call, gentle stream water sound. Sacred, primordial, grounding. Extremely slow movement. No rhythm.",
+      "Soft bowed psaltery or dulcimer with extreme reverb in forest space. Layered leaf rustle and gentle wind textures. Ancient, mystical, connected to earth. 45 BPM, barely there.",
+      "Deep throat singing inspired drone with forest ambience overlay. Heartbeat-like sub-bass pulse at 60 BPM (very subtle). Roots, earth, ancient wisdom. No percussion, no vocals.",
+      "Ambient pad evolving through natural minor scale very slowly. Owl call in distance, night forest atmosphere, soft moss textures. Sacred grove at midnight, deeply peaceful. No drums."
     ]
   },
   "castamere": {
@@ -470,11 +470,11 @@
       ]
     },
     "prompts": [
-      "Melancholic ambient, distant cello, rain sounds, ruined castle, haunting and beautiful, sleep music, no vocals.",
-      "Dark somber ambient, echoing stone halls, tragic beauty, gentle rain, deep sleep, no vocals.",
-      "Haunting strings, ancient ruins, melancholic and peaceful, soft rain textures, no vocals.",
-      "Slow cello melody, rain on stone, abandoned castle, tragic calm, deep relaxation, no vocals.",
-      "Dark ambient with gentle piano, rainy ruins, melancholic beauty, soothing sadness, no vocals."
+      "Melancholic ambient with distant solo cello playing slow sustained notes. Rain on stone textures, ruined castle atmosphere. Haunting, beautiful, sorrowful. 48 BPM, pianissimo. No drums, no vocals.",
+      "Dark piano chords with extreme reverb, each chord ringing for 10 seconds. Dripping water in empty halls, cold stone echo. Lonely, ghostly, elegant. No rhythm, no percussion.",
+      "Soft viola melody in minor key over warm pad drone. Gentle rain field recording, abandoned corridors atmosphere. Bittersweet, nostalgic, fading glory. 52 BPM, very quiet.",
+      "Deep organ-like pad with subtle choir texture. Distant thunder rumble, rain against windows. Grand but empty, majestic in ruin. Extremely slow harmonic movement. No beats.",
+      "Solo acoustic guitar in minor key with heavy room reverb. Rain textures, stone dripping, cold wind through broken windows. Beautiful desolation, peaceful mourning. 50 BPM, no other instruments."
     ]
   }
 }
