@@ -75,9 +75,13 @@ Siehe `docs/roadmaps/DASHBOARD_TASK_BACKLOG.md` für Details.
 **Priorität A – Workflow & UX:**
 - Task-Zusammenfassungen aussagekräftiger machen
 - Task-Filter: Dropdowns statt Textfelder, Live-Filtering
-- Slug auto-generieren aus Titel
+- Slug auto-generieren aus Titel (**Pako arbeitet gerade daran**)
 - Audio Lab Ladezeit verbessern
 - `done` vs `released` Semantik durchsetzen
+
+**Status-Check Claim/Heartbeat:**
+- Claim-/Heartbeat-Bausteine sind im Sync-Service bereits vorhanden (`lease_until`, `heartbeat_at`, Heartbeat-Endpoint, Task-Phasenlogik)
+- Das Thema ist aber **noch nicht fertig abgeschlossen**: Investigation, stale-claim visibility, protocol-health warnings und saubere `done` vs `released`-Abnahme bleiben offen
 
 **Priorität B – Features:**
 - Ticket-System im Dashboard (Bugs, Features, Änderungen)

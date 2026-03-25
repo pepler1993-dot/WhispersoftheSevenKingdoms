@@ -7,6 +7,8 @@ It is written as a practical backlog for implementation planning, not as a raw t
 ## Priority A — critical / blocking
 
 ## 1. Claims expire unexpectedly
+**Status:** In progress / partially implemented. Heartbeat + lease fields and related task-phase handling exist in the sync service, but the full investigation + dashboard visibility + acceptance criteria are not yet fully closed.
+
 **Goal:** Sync-service claims should not expire unexpectedly while an agent is actively working.
 
 ### Tasks
@@ -281,6 +283,8 @@ It is written as a practical backlog for implementation planning, not as a raw t
 - Long-running checks no longer block page rendering.
 
 ## 17. Slug should be generated automatically from title
+**Status:** In progress — Pako is currently working on this task.
+
 **Goal:** Users should not have to manually manage slugs.
 
 ### Tasks
