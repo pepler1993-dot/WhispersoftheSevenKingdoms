@@ -47,6 +47,9 @@ def _build_command(slug: str, config: dict[str, Any]) -> list[str]:
         cmd += ['--mood', config['mood']]
     if config.get('house'):
         cmd += ['--house', config['house']]
+    background = (config.get('background_source') or {}).get('path') if isinstance(config.get('background_source'), dict) else None
+    if background:
+        cmd += ['--bg-image', str(PIPELINE_DIR / background)]
     return cmd
 
 

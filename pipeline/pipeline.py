@@ -136,6 +136,7 @@ def parse_args():
     p.add_argument('--skip-post-process', action='store_true', help='Skip audio post-processing (EQ/Reverb/Normalize)')
     p.add_argument('--prepare-colab', action='store_true', help='Prepare job + status files for manual Colab run')
     p.add_argument('--resume', action='store_true', help='Resume pipeline after Colab has produced audio')
+    p.add_argument('--bg-image', help='Explicit background image for video rendering')
     return p.parse_args()
 
 
@@ -338,7 +339,7 @@ def main():
     update_status(slug, 'metadata_ready', metadata=str(metadata_out.relative_to(REPO_ROOT)))
 
     # Video render
-    bg_image = REPO_ROOT / 'data' / 'assets' / 'backgrounds' / f'{theme}.jpg'
+    bg_image = Path(args.bg_image) if args.bg_image else (REPO_ROOT / 'data' / 'assets' / 'backgrounds' / f'{theme}.jpg')
     if args.animated and bg_image.exists():
         render_cmd = [
             sys.executable, 'pipeline/scripts/video/render_animated.py',

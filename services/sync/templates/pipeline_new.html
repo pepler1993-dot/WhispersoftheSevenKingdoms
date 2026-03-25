@@ -165,22 +165,37 @@
         </div>
       </div>
 
-    <!-- Thumbnail aus Bibliothek -->
-    <div class="form-group library-audio-row">
-      <label for="library-thumbnail">🖼️ Thumbnail <span class="inline-help" data-tooltip="Wenn du hier nichts auswählst, wird das Thumbnail automatisch aus dem Briefing generiert. Vorhandene Thumbnails aus der Bibliothek beschleunigen den Flow.">ⓘ</span></label>
-      <select id="library-thumbnail" name="thumbnail_file" class="form-select" autocomplete="off">
-        <option value="">— Auto-generieren —</option>
-        {% for t in library_thumbnails %}
-        <option value="{{ t }}">{{ t }}</option>
-        {% endfor %}
-      </select>
-      <p class="step-desc">Vorhandene Thumbnails aus der Bibliothek · Verwaltung in der <a href="/admin/library">Library</a></p>
-      <div id="thumbnail-source-preview" class="step-desc" style="margin-top:8px; padding:10px 12px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; background:rgba(255,255,255,0.03);">
-        {% if prefill_thumbnail_source %}
-        Voraussichtliche Quelle: <strong>{{ prefill_thumbnail_source.label }}</strong>{% if prefill_thumbnail_source.filename %} · {{ prefill_thumbnail_source.filename }}{% endif %}
-        {% else %}
-        Voraussichtliche Quelle: <strong>Wird automatisch bestimmt</strong>
-        {% endif %}
+    <div class="grid two">
+      <div class="form-group library-audio-row">
+        <label for="library-thumbnail">🖼️ Thumbnail <span class="inline-help" data-tooltip="Nur für das YouTube-/Preview-Thumbnail. Wenn du hier nichts auswählst, wird das Thumbnail aus dem Briefing oder per Fallback bestimmt.">ⓘ</span></label>
+        <select id="library-thumbnail" name="thumbnail_file" class="form-select" autocomplete="off">
+          <option value="">— Auto-generieren / Fallback —</option>
+          {% for t in library_thumbnails %}
+          <option value="{{ t }}">{{ t }}</option>
+          {% endfor %}
+        </select>
+        <p class="step-desc">Wird nur für das Thumbnail benutzt · Verwaltung in der <a href="/admin/library">Library</a></p>
+        <div id="thumbnail-source-preview" class="step-desc" style="margin-top:8px; padding:10px 12px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; background:rgba(255,255,255,0.03);">
+          {% if prefill_thumbnail_source %}
+          Voraussichtliche Quelle: <strong>{{ prefill_thumbnail_source.label }}</strong>{% if prefill_thumbnail_source.filename %} · {{ prefill_thumbnail_source.filename }}{% endif %}
+          {% else %}
+          Voraussichtliche Quelle: <strong>Wird automatisch bestimmt</strong>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="form-group library-audio-row">
+        <label for="library-background">🎞️ Video-Hintergrund <span class="inline-help" data-tooltip="Dieses Bild wird als visuelle Basis für das eigentliche Video benutzt. Es ist unabhängig vom Thumbnail.">ⓘ</span></label>
+        <select id="library-background" name="background_file" class="form-select" autocomplete="off">
+          <option value="">— Theme-Standard / Fallback —</option>
+          {% for bg in library_backgrounds %}
+          <option value="{{ bg }}">{{ bg }}</option>
+          {% endfor %}
+        </select>
+        <p class="step-desc">Wird nur fürs Video benutzt · Standard kommt sonst aus <code>data/assets/backgrounds/</code></p>
+        <div id="background-source-preview" class="step-desc" style="margin-top:8px; padding:10px 12px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; background:rgba(255,255,255,0.03);">
+          Voraussichtlicher Video-Hintergrund: <strong>Theme-Standard / automatisch</strong>
+        </div>
       </div>
     </div>
 
@@ -640,6 +655,7 @@
       }
       refreshAudioForCurrentSlug();
       updateGenerateCard(house);
+      updateBackgroundSourcePreview();
     });
   });
 
@@ -677,6 +693,7 @@
   document.getElementById('adv-influences').addEventListener('input', function() { document.getElementById('music_influences').value = this.value; });
   document.getElementById('adv-thumb-scene').addEventListener('input', function() { document.getElementById('thumbnail_scene').value = this.value; updateThumbnailSourcePreview(); });
   document.getElementById('library-thumbnail').addEventListener('change', updateThumbnailSourcePreview);
+  document.getElementById('library-background').addEventListener('change', updateBackgroundSourcePreview);
 
   // title → slug (always auto-generated) + thumbnail text sync
   titleInput.addEventListener('input', function() {
@@ -697,17 +714,32 @@
     const text = document.getElementById('thumbnail_text').value;
 
     if (selected) {
-      preview.innerHTML = 'Voraussichtliche Quelle: <strong>Aus Thumbnail-Library gewählt</strong> · ' + selected;
+      preview.innerHTML = 'Voraussichtliche Thumbnail-Quelle: <strong>Aus Thumbnail-Library gewählt</strong> · ' + selected;
       return;
     }
     if (slug) {
       if (scene || text) {
-        preview.innerHTML = 'Voraussichtliche Quelle: <strong>Wird aus dem Thumbnail-Briefing generiert</strong>';
+        preview.innerHTML = 'Voraussichtliche Thumbnail-Quelle: <strong>Wird aus dem Thumbnail-Briefing generiert</strong>';
       } else {
-        preview.innerHTML = 'Voraussichtliche Quelle: <strong>Fallback / noch unklar</strong>';
+        preview.innerHTML = 'Voraussichtliche Thumbnail-Quelle: <strong>Fallback / noch unklar</strong>';
       }
     } else {
-      preview.innerHTML = 'Voraussichtliche Quelle: <strong>Wird automatisch bestimmt</strong>';
+      preview.innerHTML = 'Voraussichtliche Thumbnail-Quelle: <strong>Wird automatisch bestimmt</strong>';
+    }
+  }
+
+  function updateBackgroundSourcePreview() {
+    const preview = document.getElementById('background-source-preview');
+    const selected = document.getElementById('library-background').value;
+    const house = document.getElementById('house').value || document.getElementById('theme').value;
+    if (selected) {
+      preview.innerHTML = 'Voraussichtlicher Video-Hintergrund: <strong>Explizit gewählt</strong> · ' + selected;
+      return;
+    }
+    if (house) {
+      preview.innerHTML = 'Voraussichtlicher Video-Hintergrund: <strong>Theme-Standard</strong> · ' + house + '.jpg';
+    } else {
+      preview.innerHTML = 'Voraussichtlicher Video-Hintergrund: <strong>Theme-Standard / automatisch</strong>';
     }
   }
 
@@ -892,6 +924,7 @@
   }
 
   updateThumbnailSourcePreview();
+  updateBackgroundSourcePreview();
 
   {% if prefill_slug %}
   // auto-select house from prefill slug

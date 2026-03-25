@@ -52,10 +52,15 @@
     <div class="config-item"><div class="label">House / Theme</div><div class="value">{{ run.config.house }}</div></div>
     {% endif %}
     {% set thumb = run.config.get('thumbnail_source', {}) %}
+    {% set bg = run.config.get('background_source', {}) %}
     <div class="config-item"><div class="label">Thumbnail-Quelle</div><div class="value">{{ thumb.get('label', '—') }}</div></div>
     <div class="config-item"><div class="label">Thumbnail-Datei</div><div class="value">{{ thumb.get('filename') or '—' }}</div></div>
     <div class="config-item"><div class="label">Thumbnail-Pfad</div><div class="value" style="font-size:0.7rem;word-break:break-all;white-space:normal">{{ thumb.get('path') or '—' }}</div></div>
-    <div class="config-item"><div class="label">Fallback</div><div class="value">{{ thumb.get('fallback_reason') or '—' }}</div></div>
+    <div class="config-item"><div class="label">Thumbnail-Fallback</div><div class="value">{{ thumb.get('fallback_reason') or '—' }}</div></div>
+    <div class="config-item"><div class="label">Video-Hintergrund</div><div class="value">{{ bg.get('label', '—') }}</div></div>
+    <div class="config-item"><div class="label">Hintergrund-Datei</div><div class="value">{{ bg.get('filename') or '—' }}</div></div>
+    <div class="config-item"><div class="label">Hintergrund-Pfad</div><div class="value" style="font-size:0.7rem;word-break:break-all;white-space:normal">{{ bg.get('path') or '—' }}</div></div>
+    <div class="config-item"><div class="label">Hintergrund-Fallback</div><div class="value">{{ bg.get('fallback_reason') or '—' }}</div></div>
     {% endif %}
     <div class="config-item"><div class="label">Gestartet</div><div class="value" style="font-size:0.75rem">{{ run.started_at[:19] if run.started_at else '&mdash;' }}</div></div>
     <div class="config-item"><div class="label">Beendet</div><div class="value" style="font-size:0.75rem">{{ run.finished_at[:19] if run.finished_at else '&mdash;' }}</div></div>

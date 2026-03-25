@@ -82,6 +82,39 @@ def _detect_thumbnail_source(slug: str, selected_thumbnail: str | None, metadata
     }
 
 
+def _detect_background_source(selected_background: str | None, theme: str) -> dict[str, Any]:
+    selected_background = (selected_background or '').strip()
+    bg_dir = PIPELINE_DIR / 'data' / 'assets' / 'backgrounds'
+
+    if selected_background:
+        bg_path = bg_dir / selected_background
+        return {
+            'type': 'library',
+            'label': 'Explizit als Video-Hintergrund gewählt',
+            'path': str(bg_path.relative_to(PIPELINE_DIR)) if bg_path.exists() else f'data/assets/backgrounds/{selected_background}',
+            'filename': selected_background,
+            'fallback_reason': None,
+        }
+
+    theme_path = bg_dir / f'{theme}.jpg'
+    if theme_path.exists():
+        return {
+            'type': 'theme-default',
+            'label': 'Theme-Standardhintergrund fürs Video',
+            'path': str(theme_path.relative_to(PIPELINE_DIR)),
+            'filename': theme_path.name,
+            'fallback_reason': None,
+        }
+
+    return {
+        'type': 'fallback',
+        'label': 'Fallback / kein Video-Hintergrund gefunden',
+        'path': None,
+        'filename': None,
+        'fallback_reason': f'Kein expliziter Hintergrund gewählt und kein Theme-Background für {theme} gefunden.',
+    }
+
+
 @router.get('/admin/pipeline', response_class=HTMLResponse)
 def admin_pipeline(request: Request):
     runs = shared.db.list_runs(limit=100)
@@ -104,6 +137,8 @@ def admin_pipeline_new(request: Request, slug: str | None = Query(default=None),
     library_tracks = list_library_tracks_for_pipeline(shared.db)
     thumb_dir = Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'output' / 'thumbnails'
     library_thumbnails = sorted(f.name for f in thumb_dir.iterdir() if f.is_file() and f.suffix in {'.jpg', '.jpeg', '.png', '.webp'}) if thumb_dir.exists() else []
+    bg_dir = PIPELINE_DIR / 'data' / 'assets' / 'backgrounds'
+    library_backgrounds = sorted(f.name for f in bg_dir.iterdir() if f.is_file() and f.suffix.lower() in {'.jpg', '.jpeg', '.png', '.webp'}) if bg_dir.exists() else []
     prefill_slug = (slug or '').strip().lower()
     prefill_thumbnail_source = _detect_thumbnail_source(prefill_slug, None, {}) if prefill_slug else None
     return shared.templates.TemplateResponse(request, 'pipeline_new.html', {
@@ -114,6 +149,7 @@ def admin_pipeline_new(request: Request, slug: str | None = Query(default=None),
         'houses': houses,
         'library_tracks': library_tracks,
         'library_thumbnails': library_thumbnails,
+        'library_backgrounds': library_backgrounds,
         'prefill_slug': prefill_slug,
         'prefill_thumbnail_source': prefill_thumbnail_source,
         'error_message': error or '',
@@ -195,6 +231,7 @@ def admin_pipeline_start(
     thumbnail_avoid: str = Form(''),
     house: str = Form(''),
     thumbnail_file: str = Form(''),
+    background_file: str = Form(''),
     audio_source: str = Form('library'),
     gen_minutes: int = Form(42),
     gen_model: str = Form('medium'),
@@ -250,6 +287,9 @@ def admin_pipeline_start(
         metadata_path.parent.mkdir(parents=True, exist_ok=True)
         metadata_path.write_text(json.dumps(metadata, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
 
+        thumbnail_source = _detect_thumbnail_source(slug, thumbnail_file, metadata)
+        background_source = _detect_background_source(background_file, theme)
+
         pipeline_config = {
             'minutes': minutes,
             'loop_hours': loop_hours,
@@ -261,6 +301,8 @@ def admin_pipeline_start(
             'mood': mood or None,
             'house': house or theme or None,
             'metadata': metadata,
+            'thumbnail_source': thumbnail_source,
+            'background_source': background_source,
         }
 
         now = datetime.now(shared.CET).isoformat()
@@ -313,6 +355,7 @@ def admin_pipeline_start(
     metadata_path.write_text(json.dumps(metadata, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
 
     thumbnail_source = _detect_thumbnail_source(slug, thumbnail_file, metadata)
+    background_source = _detect_background_source(background_file, theme)
 
     config = {
         'minutes': minutes,
@@ -326,6 +369,7 @@ def admin_pipeline_start(
         'house': house or theme or None,
         'metadata': metadata,
         'thumbnail_source': thumbnail_source,
+        'background_source': background_source,
     }
 
     run_id = uuid.uuid4().hex[:12]
