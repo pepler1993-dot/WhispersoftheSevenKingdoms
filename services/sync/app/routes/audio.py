@@ -10,8 +10,11 @@ from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from app import shared
 from app.helpers import _load_house_templates
 from app.kaggle_gen import (
+    CANCELLABLE_AUDIO_JOB_STATUSES,
+    FINAL_AUDIO_JOB_STATUSES,
     create_audio_job,
     find_prompt_preset,
+    get_audio_generator,
     get_audio_generator_health,
     list_prompt_presets,
 )
@@ -109,6 +112,21 @@ def admin_audio_job_cancel(job_id: str):
     job = shared.db.get_audio_job(job_id)
     if not job:
         raise HTTPException(status_code=404, detail='Audio job not found')
-    shared.db.update_audio_job(job_id, status='cancelled', finished_at=datetime.now(shared.CET).isoformat(), error_message='Cancelled by user')
-    shared.db.append_audio_job_log(job_id, 'system', 'Cancellation requested by user', datetime.now(shared.CET).isoformat())
+
+    status = job.get('status')
+    now = datetime.now(shared.CET).isoformat()
+
+    if status in FINAL_AUDIO_JOB_STATUSES:
+        shared.db.append_audio_job_log(job_id, 'system', f'Cancel ignored: job is already in final state ({status}).', now)
+        return RedirectResponse(url=f'/admin/audio/jobs/{job_id}', status_code=303)
+
+    if status not in CANCELLABLE_AUDIO_JOB_STATUSES:
+        shared.db.append_audio_job_log(job_id, 'system', f'Cancel ignored: status {status} cannot be cancelled.', now)
+        return RedirectResponse(url=f'/admin/audio/jobs/{job_id}', status_code=303)
+
+    generator = get_audio_generator(job.get('provider'))
+    cancelled = generator.cancel(job, shared.db)
+    if not cancelled:
+        shared.db.append_audio_job_log(job_id, 'system', 'Cancellation request failed or is not supported for this provider/state.', now)
+
     return RedirectResponse(url=f'/admin/audio/jobs/{job_id}', status_code=303)

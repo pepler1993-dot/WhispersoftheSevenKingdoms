@@ -21,7 +21,13 @@ from datetime import timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-from app.kaggle_gen import AudioGenerator, get_pipeline_upload_dir, now_iso
+from app.kaggle_gen import (
+    AudioGenerator,
+    get_pipeline_upload_dir,
+    is_audio_job_cancelled,
+    mark_audio_job_cancelled,
+    now_iso,
+)
 from app.store import AgentSyncDB
 
 # ── Configuration ─────────────────────────────────────────────────────────
@@ -49,6 +55,12 @@ class StableAudioGenerator(AudioGenerator):
 
     def __init__(self) -> None:
         self._ssh_base = self._build_ssh_cmd()
+
+    def _job_cancelled(self, job_id: str, db: AgentSyncDB, *, log: bool = False) -> bool:
+        cancelled = is_audio_job_cancelled(job_id, db)
+        if cancelled and log:
+            db.append_audio_job_log(job_id, 'system', 'Job execution stopped because cancellation was requested.', now_iso())
+        return cancelled
 
     def _build_ssh_cmd(self) -> list[str]:
         cmd = [
@@ -117,14 +129,15 @@ class StableAudioGenerator(AudioGenerator):
 
     def cancel(self, job: dict[str, Any], db: AgentSyncDB) -> bool:
         job_id = job['job_id']
-        db.update_audio_job(job_id, status='cancelled', finished_at=now_iso(),
-                            error_message='Cancelled by user')
-        db.append_audio_job_log(job_id, 'system', 'Job cancelled.', now_iso())
+        mark_audio_job_cancelled(job_id, db, message='Job cancelled by user.')
         try:
             self._ssh_run(
                 f'rm -f {GPU_WORKER_JOB_DIR}/{job_id}_*.json '
                 f'{GPU_WORKER_JOB_DIR}/{job_id}_*.running '
-                f'{GPU_WORKER_JOB_DIR}/{job_id}_*.tmp',
+                f'{GPU_WORKER_JOB_DIR}/{job_id}_*.tmp '
+                f'{GPU_WORKER_JOB_DIR}/{job_id}_*.done '
+                f'{GPU_WORKER_JOB_DIR}/{job_id}_*.error '
+                f'{GPU_WORKER_JOB_DIR}/{job_id}_*.error.log',
                 timeout=5,
             )
         except Exception:
@@ -182,6 +195,8 @@ class StableAudioGenerator(AudioGenerator):
 
     def _run_job(self, job: dict[str, Any], db: AgentSyncDB) -> None:
         job_id = job['job_id']
+        if self._job_cancelled(job_id, db):
+            return
         slug = job['slug']
         prompts = job.get('prompts', []) or []
         minutes = int(job.get('minutes') or 3)
@@ -199,6 +214,8 @@ class StableAudioGenerator(AudioGenerator):
         db.append_audio_job_log(job_id, 'system', 'Checking GPU worker health...', start_ts)
 
         health = self.health()
+        if self._job_cancelled(job_id, db, log=True):
+            return
         if not health['available']:
             db.update_audio_job(job_id, status='error', finished_at=now_iso(),
                                 error_message=f"GPU worker not available: {health.get('error', 'unknown')}")
@@ -219,9 +236,14 @@ class StableAudioGenerator(AudioGenerator):
             now_iso(),
         )
 
+        if self._job_cancelled(job_id, db, log=True):
+            return
+
         # Generate each clip
         remote_clips = []
         for i in range(num_clips):
+            if self._job_cancelled(job_id, db, log=True):
+                return
             prompt = prompts[i % len(prompts)]
             clip_slug = f'{job_id}_clip_{i:03d}'
             remote_path = f'{GPU_WORKER_OUTPUT_DIR}/{clip_slug}.wav'
@@ -238,6 +260,8 @@ class StableAudioGenerator(AudioGenerator):
                         raise RuntimeError('Failed to submit job to daemon')
 
                     result = self._wait_for_clip(clip_slug, timeout=JOB_TIMEOUT)
+                    if self._job_cancelled(job_id, db, log=True):
+                        return
                     if result is None:
                         db.update_audio_job(job_id, status='error', finished_at=now_iso(),
                                             error_message=f'Clip {i+1} timed out (>{JOB_TIMEOUT}s)')
@@ -261,6 +285,8 @@ class StableAudioGenerator(AudioGenerator):
                         f'--steps {steps}'
                     )
                     ssh_result = self._ssh_run(cmd, timeout=900)
+                    if self._job_cancelled(job_id, db, log=True):
+                        return
 
                     if ssh_result.returncode != 0:
                         error_msg = ssh_result.stderr[:300] if ssh_result.stderr else ssh_result.stdout[-300:]
@@ -289,6 +315,9 @@ class StableAudioGenerator(AudioGenerator):
                                     error_message=f'Clip {i+1} error: {e}')
                 return
 
+        if self._job_cancelled(job_id, db, log=True):
+            return
+
         # Stitch clips with crossfade
         if len(remote_clips) > 1:
             db.append_audio_job_log(job_id, 'system',
@@ -310,6 +339,8 @@ class StableAudioGenerator(AudioGenerator):
         local_path = upload_dir / f'{slug}.wav'
 
         try:
+            if self._job_cancelled(job_id, db, log=True):
+                return
             result = self._scp_from(final_remote, str(local_path))
             if result.returncode != 0:
                 raise RuntimeError(f'SCP failed: {result.stderr}')
@@ -329,6 +360,9 @@ class StableAudioGenerator(AudioGenerator):
             )
         except Exception:
             pass
+
+        if self._job_cancelled(job_id, db, log=True):
+            return
 
         # Done!
         file_size_mb = local_path.stat().st_size / 1024 / 1024

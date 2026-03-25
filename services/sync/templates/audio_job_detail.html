@@ -9,14 +9,18 @@
 <div class="action-bar detail-actions-stack">
   <a href="/admin/audio" class="btn btn-secondary btn-sm">Alle Audio-Jobs</a>
   <a href="/admin/pipeline/new?slug={{ job.slug }}" class="btn btn-primary btn-sm">Zur Pipeline</a>
-  {% if job.status in ('queued', 'pushing', 'running') %}
+  {% if job.status in ('queued', 'pushing', 'running', 'downloading') %}
     <form method="post" action="/admin/audio/jobs/{{ job.job_id }}/cancel" style="margin:0">
       <button type="submit" class="btn btn-danger btn-sm">Abbrechen</button>
     </form>
   {% endif %}
 </div>
 
-{% if job.error_message %}
+{% if job.status == 'cancelled' %}
+<div class="panel" style="border-color:var(--warning, #d97706)">
+  <strong style="color:var(--warning, #d97706)">Abgebrochen:</strong> {{ job.error_message or 'Der Job wurde abgebrochen.' }}
+</div>
+{% elif job.error_message %}
 <div class="panel" style="border-color:var(--bad)">
   <strong style="color:var(--bad)">Fehler:</strong> {{ job.error_message }}
 </div>

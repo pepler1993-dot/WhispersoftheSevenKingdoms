@@ -179,6 +179,10 @@ def _run_subprocess(cmd: list[str], log_prefix: str, job_id: str, db: AgentSyncD
     return result
 
 
+CANCELLABLE_AUDIO_JOB_STATUSES = {'queued', 'pushing', 'running', 'downloading'}
+FINAL_AUDIO_JOB_STATUSES = {'complete', 'cancelled', 'error'}
+
+
 class AudioGenerator(ABC):
     @abstractmethod
     def health(self) -> dict[str, Any]:
@@ -215,11 +219,18 @@ class KaggleGenerator(AudioGenerator):
         thread.start()
 
     def cancel(self, job: dict[str, Any], db: AgentSyncDB) -> bool:
-        db.update_audio_job(job['job_id'], status='cancelled', finished_at=now_iso(), error_message='Cancelled by user')
-        db.append_audio_job_log(job['job_id'], 'system', 'Cancellation requested. Manual Kaggle stop may still be required.', now_iso())
+        mark_audio_job_cancelled(
+            job['job_id'],
+            db,
+            message='Cancellation requested. Manual Kaggle stop may still be required.',
+        )
         return True
 
     def _run_job(self, job: dict[str, Any], db: AgentSyncDB) -> None:
+        job_id = job['job_id']
+        if is_audio_job_cancelled(job_id, db):
+            return
+
         health = self.health()
         if not health['available']:
             reason = (
@@ -298,6 +309,9 @@ class KaggleGenerator(AudioGenerator):
         )
         db.append_audio_job_log(job_id, 'system', f'kernel-metadata.json written: {kernel_ref}', now_iso())
 
+        if is_audio_job_cancelled(job_id, db):
+            return
+
         db.update_audio_job(job_id, status='pushing', kernel_ref=kernel_ref, started_at=now_iso())
 
         # ── 4. kaggle kernels push ────────────────────────────────────────────
@@ -325,12 +339,18 @@ class KaggleGenerator(AudioGenerator):
                 db.append_audio_job_log(job_id, 'system', f'Kaggle assigned slug: {real_kernel_ref} (was {kernel_ref})', now_iso())
                 db.update_audio_job(job_id, kernel_ref=real_kernel_ref)
 
+        if is_audio_job_cancelled(job_id, db):
+            return
+
         db.update_audio_job(job_id, status='running')
         db.append_audio_job_log(job_id, 'system', f'Kernel pushed. Polling status for {real_kernel_ref} …', now_iso())
 
         # ── 5. Poll kaggle kernels status ─────────────────────────────────────
         final_status: str | None = None
         for attempt in range(1, MAX_POLL_ATTEMPTS + 1):
+            if is_audio_job_cancelled(job_id, db):
+                db.append_audio_job_log(job_id, 'system', 'Polling stopped because the job was cancelled.', now_iso())
+                return
             time.sleep(POLL_INTERVAL)
 
             status_result = _run_subprocess(
@@ -357,6 +377,9 @@ class KaggleGenerator(AudioGenerator):
                 db.append_audio_job_log(job_id, 'system', f'Poll #{attempt}: still running …', now_iso())
 
         if final_status != 'complete':
+            if final_status == 'cancelled' or is_audio_job_cancelled(job_id, db):
+                mark_audio_job_cancelled(job_id, db, message='Job cancelled during Kaggle execution.')
+                return
             reason = f'Kernel did not complete successfully: status={final_status}'
             db.update_audio_job(job_id, status='error', finished_at=now_iso(), error_message=reason)
             db.append_audio_job_log(job_id, 'system', reason, now_iso())
@@ -365,6 +388,8 @@ class KaggleGenerator(AudioGenerator):
         # ── 6. Download kernel output ──────────────────────────────────────────
         output_dir = job_dir / 'output'
         output_dir.mkdir(parents=True, exist_ok=True)
+        if is_audio_job_cancelled(job_id, db):
+            return
         db.update_audio_job(job_id, status='downloading')
 
         dl_result = _run_subprocess(
@@ -396,10 +421,14 @@ class KaggleGenerator(AudioGenerator):
 
         PIPELINE_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
         dest = PIPELINE_UPLOAD_DIR / f'{slug}.wav'
+        if is_audio_job_cancelled(job_id, db):
+            return
         shutil.copy2(str(audio_file), str(dest))
         db.append_audio_job_log(job_id, 'system', f'Audio copied: {audio_file.name} → {dest}', now_iso())
 
         # ── 8. Mark complete ───────────────────────────────────────────────────
+        if is_audio_job_cancelled(job_id, db):
+            return
         db.update_audio_job(
             job_id,
             status='complete',
@@ -424,6 +453,19 @@ def get_audio_generator(provider: str | None = None) -> AudioGenerator:
 
 def get_audio_generator_health() -> dict[str, Any]:
     return get_audio_generator().health()
+
+
+def is_audio_job_cancelled(job_id: str, db: AgentSyncDB) -> bool:
+    job = db.get_audio_job(job_id)
+    return bool(job and job.get('status') == 'cancelled')
+
+
+def mark_audio_job_cancelled(job_id: str, db: AgentSyncDB, message: str = 'Cancelled by user') -> None:
+    job = db.get_audio_job(job_id)
+    if not job or job.get('status') == 'cancelled':
+        return
+    db.update_audio_job(job_id, status='cancelled', finished_at=now_iso(), error_message=message)
+    db.append_audio_job_log(job_id, 'system', message, now_iso())
 
 
 def create_audio_job(
