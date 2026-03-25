@@ -73,6 +73,7 @@ from app.routes.library import router as library_router        # noqa: E402
 from app.routes.docs import router as docs_router              # noqa: E402
 from app.routes.shorts import router as shorts_router          # noqa: E402
 from app.routes.tickets import router as tickets_router        # noqa: E402
+from app.routes.workflows import router as workflows_router    # noqa: E402
 
 app.include_router(health_router)
 app.include_router(tasks_router)
@@ -85,8 +86,14 @@ app.include_router(library_router)
 app.include_router(docs_router)
 app.include_router(shorts_router)
 app.include_router(tickets_router)
+app.include_router(workflows_router)
 
-# ── Startup: recover queued pipeline jobs ─────────────────────────────────
+# ── Startup ──────────────────────────────────────────────────────────────
 
 from app.pipeline_queue import _ensure_worker  # noqa: E402
+from app.stores.workflows import ensure_table as _ensure_workflows_table  # noqa: E402
+from app.pipeline_workflow import _ensure_poll_thread  # noqa: E402
+
+_ensure_workflows_table(db)
 _ensure_worker(db)
+_ensure_poll_thread(db)

@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block title %}Neuer Workflow{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>⚡ One-Click Workflow</h1>
+  <div class="page-subtitle">Audio generieren + Video rendern in einem Schritt. Optional direkt hochladen.</div>
+</div>
+
+<section class="panel" style="max-width: 700px;">
+  <form method="post" action="/admin/workflow/start" class="ticket-form">
+    <div class="form-group">
+      <label for="title">Titel *</label>
+      <input type="text" id="title" name="title" required placeholder="z.B. Whispers of Winterfell" class="form-input" />
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="theme">Theme / Haus *</label>
+        <select id="theme" name="theme" class="form-input" required>
+          <option value="">Wählen...</option>
+          {% for name, tpl in houses.items() %}
+          <option value="{{ name }}">{{ tpl.get('display_name', name) }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="house">House Override</label>
+        <input type="text" id="house" name="house" placeholder="Optional" class="form-input" />
+      </div>
+    </div>
+
+    <h3 style="margin-top:24px; margin-bottom:12px; color:var(--text-secondary); font-size:13px;">🎵 Audio-Einstellungen</h3>
+
+    <div class="form-group">
+      <label for="preset_name">Prompt Preset</label>
+      <select id="preset_name" name="preset_name" class="form-input">
+        <option value="">Kein Preset (eigener Prompt)</option>
+        {% for preset in presets %}
+        <option value="{{ preset.name }}">{{ preset.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="prompt_text">Eigener Prompt</label>
+      <textarea id="prompt_text" name="prompt_text" rows="3" placeholder="Beschreibung des gewünschten Sounds..." class="form-input"></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="minutes">Minuten</label>
+        <input type="number" id="minutes" name="minutes" value="42" min="1" max="180" class="form-input" />
+      </div>
+      <div class="form-group">
+        <label for="clip_seconds">Clip-Länge (s)</label>
+        <input type="number" id="clip_seconds" name="clip_seconds" value="30" min="10" max="120" class="form-input" />
+      </div>
+      <div class="form-group">
+        <label for="model">Model</label>
+        <select id="model" name="model" class="form-input">
+          <option value="medium" selected>Medium</option>
+          <option value="large">Large</option>
+        </select>
+      </div>
+    </div>
+
+    <h3 style="margin-top:24px; margin-bottom:12px; color:var(--text-secondary); font-size:13px;">🎬 Pipeline-Einstellungen</h3>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="loop_hours">Loop Stunden</label>
+        <input type="number" id="loop_hours" name="loop_hours" value="0" min="0" max="12" step="0.5" class="form-input" />
+      </div>
+      <div class="form-group">
+        <label for="crossfade">Crossfade (s)</label>
+        <input type="number" id="crossfade" name="crossfade" value="8" min="0" max="30" class="form-input" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="mood">Mood</label>
+      <input type="text" id="mood" name="mood" placeholder="z.B. peaceful, dark, epic" class="form-input" />
+    </div>
+
+    <h3 style="margin-top:24px; margin-bottom:12px; color:var(--text-secondary); font-size:13px;">🖼️ Thumbnail (optional)</h3>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="thumbnail_scene">Szene</label>
+        <input type="text" id="thumbnail_scene" name="thumbnail_scene" placeholder="z.B. Winterfell at night" class="form-input" />
+      </div>
+      <div class="form-group">
+        <label for="thumbnail_text">Text</label>
+        <input type="text" id="thumbnail_text" name="thumbnail_text" placeholder="Wird auto-befüllt vom Titel" class="form-input" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="thumbnail_style">Style</label>
+      <input type="text" id="thumbnail_style" name="thumbnail_style" placeholder="z.B. cinematic, dark, atmospheric" class="form-input" />
+    </div>
+
+    <h3 style="margin-top:24px; margin-bottom:12px; color:var(--text-secondary); font-size:13px;">📤 Upload</h3>
+
+    <div class="form-group">
+      <label class="form-check" style="margin:0; display:flex; align-items:center; gap:8px;">
+        <input type="checkbox" name="auto_upload" value="true" />
+        <span>Automatisch auf YouTube hochladen wenn fertig</span>
+      </label>
+    </div>
+
+    <div class="form-actions" style="margin-top:24px;">
+      <button type="submit" class="btn btn-primary">⚡ Workflow starten</button>
+      <a href="/admin/workflow" class="btn btn-secondary">Abbrechen</a>
+    </div>
+  </form>
+</section>
+
+<style>
+  .ticket-form .form-group { margin-bottom: 16px; }
+  .ticket-form label { display: block; margin-bottom: 6px; font-weight: 500; color: var(--text-secondary); font-size: 13px; }
+  .ticket-form .form-input { width: 100%; padding: 10px 12px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-size: 14px; }
+  .ticket-form .form-input:focus { border-color: var(--accent); outline: none; }
+  .ticket-form textarea.form-input { resize: vertical; font-family: inherit; }
+  .ticket-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .ticket-form .form-actions { display: flex; gap: 10px; }
+  @media (max-width: 600px) { .ticket-form .form-row { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+  document.getElementById('title').addEventListener('input', function() {
+    document.getElementById('thumbnail_text').value = this.value;
+  });
+</script>
+{% endblock %}

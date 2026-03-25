@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block title %}Workflow {{ wf.workflow_id }}{% endblock %}
+{% block content %}
+<div class="page-header page-header-flex">
+  <div>
+    <h1>{{ wf.title }}</h1>
+    <div class="page-subtitle">
+      <code>{{ wf.workflow_id }}</code> &middot; {{ wf.slug }}
+    </div>
+  </div>
+  <div class="header-actions">
+    <a href="/admin/workflow" class="btn btn-secondary btn-sm">← Alle Workflows</a>
+  </div>
+</div>
+
+<!-- Phase Progress -->
+<div class="workflow-phases panel">
+  <div class="phase-track">
+    {% set phases = ['audio', 'render', 'upload', 'done'] %}
+    {% set phase_icons = {'audio': '🎵', 'render': '🎬', 'upload': '📤', 'done': '✅'} %}
+    {% set phase_labels = {'audio': 'Audio', 'render': 'Render', 'upload': 'Upload', 'done': 'Fertig'} %}
+    {% for p in phases %}
+    <div class="phase-step {% if p == wf.phase %}active{% elif phases.index(p) < phases.index(wf.phase) %}completed{% endif %} {% if wf.status == 'error' and p == wf.phase %}error{% endif %}">
+      <div class="phase-icon">{{ phase_icons[p] }}</div>
+      <div class="phase-label">{{ phase_labels[p] }}</div>
+    </div>
+    {% if not loop.last %}
+    <div class="phase-connector {% if phases.index(p) < phases.index(wf.phase) %}completed{% endif %}"></div>
+    {% endif %}
+    {% endfor %}
+  </div>
+</div>
+
+{% if wf.status == 'error' %}
+<div class="panel" style="border-color:var(--bad); margin-bottom:16px;">
+  <strong style="color:var(--bad)">Fehler:</strong> {{ wf.error_message or 'Unbekannter Fehler' }}
+</div>
+{% endif %}
+
+<div class="ticket-detail-grid">
+  <!-- Audio Job -->
+  <section class="panel">
+    <h2>🎵 Audio Job</h2>
+    {% if audio_job %}
+    <div class="ticket-meta">
+      <div class="meta-row"><span class="label">Job ID</span><a href="/admin/audio/jobs/{{ audio_job.job_id }}"><code>{{ audio_job.job_id[:12] }}</code></a></div>
+      <div class="meta-row"><span class="label">Status</span><span class="badge {{ audio_job.status }}">{{ audio_job.status }}</span></div>
+      <div class="meta-row"><span class="label">Provider</span><span>{{ audio_job.provider or '—' }}</span></div>
+      <div class="meta-row"><span class="label">Gestartet</span><span>{{ audio_job.started_at[:16] if audio_job.started_at else '—' }}</span></div>
+      <div class="meta-row"><span class="label">Beendet</span><span>{{ audio_job.finished_at[:16] if audio_job.finished_at else '—' }}</span></div>
+    </div>
+    {% else %}
+    <div class="empty-state">Audio Job wird erstellt...</div>
+    {% endif %}
+  </section>
+
+  <!-- Pipeline Run -->
+  <section class="panel">
+    <h2>🎬 Pipeline Run</h2>
+    {% if pipeline_run %}
+    <div class="ticket-meta">
+      <div class="meta-row"><span class="label">Run ID</span><a href="/admin/pipeline/run/{{ pipeline_run.run_id }}"><code>{{ pipeline_run.run_id[:12] }}</code></a></div>
+      <div class="meta-row"><span class="label">Status</span><span class="badge {{ pipeline_run.status }}">{{ pipeline_run.status }}</span></div>
+      <div class="meta-row"><span class="label">Gestartet</span><span>{{ pipeline_run.started_at[:16] if pipeline_run.started_at else '—' }}</span></div>
+      <div class="meta-row"><span class="label">Beendet</span><span>{{ pipeline_run.finished_at[:16] if pipeline_run.finished_at else '—' }}</span></div>
+    </div>
+    {% else %}
+    <div class="empty-state">Startet nach Audio-Generierung</div>
+    {% endif %}
+  </section>
+</div>
+
+<section class="panel" style="margin-top:16px;">
+  <h2>Konfiguration</h2>
+  <div class="ticket-meta">
+    <div class="meta-row"><span class="label">Auto-Upload</span><span>{{ '✅ Ja' if wf.auto_upload else '❌ Nein' }}</span></div>
+    <div class="meta-row"><span class="label">Erstellt</span><span>{{ wf.created_at[:16] }}</span></div>
+    <div class="meta-row"><span class="label">Aktualisiert</span><span>{{ wf.updated_at[:16] }}</span></div>
+  </div>
+</section>
+
+<style>
+.workflow-phases { padding: 24px; }
+.phase-track { display: flex; align-items: center; justify-content: center; gap: 0; }
+.phase-step { text-align: center; min-width: 80px; opacity: 0.4; }
+.phase-step.active { opacity: 1; }
+.phase-step.completed { opacity: 0.8; }
+.phase-step.error .phase-icon { filter: grayscale(1); }
+.phase-icon { font-size: 2rem; margin-bottom: 6px; }
+.phase-label { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); }
+.phase-step.active .phase-label { color: var(--accent); }
+.phase-connector { width: 60px; height: 3px; background: var(--border); margin: 0 8px; margin-bottom: 20px; border-radius: 2px; }
+.phase-connector.completed { background: var(--good); }
+@media (max-width: 600px) {
+  .phase-connector { width: 20px; }
+  .phase-step { min-width: 60px; }
+}
+</style>
+
+{% if wf.status == 'running' %}
+<script>
+  setTimeout(function() { location.reload(); }, 15000);
+</script>
+{% endif %}
+{% endblock %}
