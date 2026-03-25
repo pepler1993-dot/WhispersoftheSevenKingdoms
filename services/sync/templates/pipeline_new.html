@@ -86,7 +86,7 @@
     <!-- Hidden defaults (filled by JS from house template) -->
     <input type="hidden" name="slug" id="slug" />
     <input type="hidden" name="theme" id="theme" />
-    <input type="hidden" name="minutes" id="minutes" value="42" />
+    <input type="hidden" name="minutes" id="minutes" value="20" />
     <input type="hidden" name="loop_hours" id="loop_hours" value="3" />
     <input type="hidden" name="crossfade" id="crossfade" value="8" />
     <input type="hidden" name="audio_preset" id="audio_preset" value="ambient" />
@@ -149,25 +149,18 @@
             </div>
           </div>
           <div class="generate-settings">
-            <div class="grid two">
-              <div class="form-group">
-                <label for="gen-minutes">Dauer (Min)</label>
-                <input type="number" id="gen-minutes" class="form-input" value="42" min="1" max="120" />
-              </div>
-              <div class="form-group">
-                <label for="gen-model">Modell</label>
-                <select id="gen-model" class="form-select">
-                  <option value="stable-audio" selected>Stable Audio Open</option>
-                </select>
-              </div>
+            <div class="form-group">
+              <label for="gen-minutes">Dauer (Min)</label>
+              <input type="number" id="gen-minutes" class="form-input" value="20" min="1" max="120" />
             </div>
+            <input type="hidden" id="gen-model" value="stable-audio" />
           </div>
 
         </div>
       </div>
       <input type="hidden" name="audio_job_id" id="audio_job_id" />
       <input type="hidden" name="audio_source" id="audio_source" value="generate" />
-      <input type="hidden" name="gen_minutes" id="gen_minutes_hidden" value="42" />
+      <input type="hidden" name="gen_minutes" id="gen_minutes_hidden" value="20" />
       <input type="hidden" name="gen_model" id="gen_model_hidden" value="medium" />
       <input type="hidden" name="gen_prompt" id="gen_prompt_hidden" value="" />
     </div>
@@ -180,39 +173,19 @@
         </div>
       </div>
 
-    <div class="grid two">
-      <div class="form-group library-audio-row">
-        <label for="library-thumbnail">🖼️ Thumbnail <span class="inline-help" data-tooltip="Nur für das YouTube-/Preview-Thumbnail. Wenn du hier nichts auswählst, wird das Thumbnail aus dem Briefing oder per Fallback bestimmt.">ⓘ</span></label>
-        <select id="library-thumbnail" name="thumbnail_file" class="form-select" autocomplete="off">
-          <option value="">— Auto-generieren / Fallback —</option>
-          {% for t in library_thumbnails %}
-          <option value="{{ t }}">{{ t }}</option>
-          {% endfor %}
-        </select>
-
-        <div id="thumbnail-source-preview" class="step-desc" style="margin-top:8px; padding:10px 12px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; background:rgba(255,255,255,0.03);">
-          {% if prefill_thumbnail_source %}
-          Voraussichtliche Quelle: <strong>{{ prefill_thumbnail_source.label }}</strong>{% if prefill_thumbnail_source.filename %} · {{ prefill_thumbnail_source.filename }}{% endif %}
-          {% else %}
-          Voraussichtliche Quelle: <strong>Wird automatisch bestimmt</strong>
-          {% endif %}
-        </div>
-      </div>
-
-      <div class="form-group library-audio-row">
-        <label for="library-background">🎞️ Video-Hintergrund <span class="inline-help" data-tooltip="Dieses Bild wird als visuelle Basis für das eigentliche Video benutzt. Es ist unabhängig vom Thumbnail.">ⓘ</span></label>
-        <select id="library-background" name="background_file" class="form-select" autocomplete="off">
-          <option value="">— Theme-Standard / Fallback —</option>
-          {% for bg in library_backgrounds %}
-          <option value="{{ bg }}">{{ bg }}</option>
-          {% endfor %}
-        </select>
-
-        <div id="background-source-preview" class="step-desc" style="margin-top:8px; padding:10px 12px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; background:rgba(255,255,255,0.03);">
-          Voraussichtlicher Video-Hintergrund: <strong>Theme-Standard / automatisch</strong>
-        </div>
-      </div>
+    <!-- Thumbnail + Background: automatisch aus Preset, manuell hidden -->
+    <input type="hidden" name="thumbnail_file" id="library-thumbnail" value="" />
+    <div class="form-group library-audio-row">
+      <label for="library-background">🎞️ Video-Hintergrund</label>
+      <select id="library-background" name="background_file" class="form-select" autocomplete="off">
+        <option value="">— Automatisch aus Preset —</option>
+        {% for bg in library_backgrounds %}
+        <option value="{{ bg }}">{{ bg }}</option>
+        {% endfor %}
+      </select>
     </div>
+    <div id="thumbnail-source-preview" style="display:none"></div>
+    <div id="background-source-preview" style="display:none"></div>
 
     <!-- Video & Publish Options (visible) -->
     <div style="display:flex; gap:24px; flex-wrap:wrap; margin-bottom:16px;">
@@ -701,7 +674,7 @@
 
       // defaults
       const d = house.defaults || {};
-      document.getElementById('minutes').value = d.minutes || 42;
+      document.getElementById('minutes').value = d.minutes || 20;
       document.getElementById('loop_hours').value = d.loop_hours || 3;
       document.getElementById('crossfade').value = d.crossfade || 8;
       document.getElementById('audio_preset').value = d.audio_preset || 'ambient';
@@ -709,7 +682,7 @@
       document.getElementById('music_energy').value = d.music_energy || 'low';
 
       // advanced fields
-      document.getElementById('adv-minutes').value = d.minutes || 42;
+      document.getElementById('adv-minutes').value = d.minutes || 20;
       document.getElementById('adv-loop').value = d.loop_hours || 3;
       document.getElementById('adv-crossfade').value = d.crossfade || 8;
       document.getElementById('adv-preset').value = d.audio_preset || 'ambient';
@@ -734,8 +707,9 @@
       titleInput.value = (house.title_template || '').replace('{duration}', duration) || house.display_name;
       document.getElementById('thumbnail_text').value = titleInput.value;
 
-      // moods
-      buildMoodTags(house.moods || [], house.default_mood || []);
+      // moods — set from house preset mood
+      const houseMood = house.mood || 'calm';
+      buildMoodTags(['calm', 'cold', 'dark', 'warm', 'mystical', 'melancholic', 'exotic', 'meditative'], [houseMood]);
 
       // config header
       document.getElementById('config-title-label').innerHTML = house.sigil + ' ' + house.display_name;
@@ -905,7 +879,7 @@
     icon.textContent = house.sigil || '🏰';
     name.textContent = house.display_name + ' – Audio Track';
     const pc = (house.prompts || []).length;
-    info.textContent = pc + ' Prompts · ' + (house.defaults?.minutes || 42) + ' Min · MusicGen Medium';
+    info.textContent = pc + ' Prompts · ' + (house.defaults?.minutes || 20) + ' Min · MusicGen Medium';
     // Sync prompt to hidden field for form submission
     document.getElementById('gen_prompt_hidden').value = (house.prompts || []).join('\n');
     btn.disabled = false;
