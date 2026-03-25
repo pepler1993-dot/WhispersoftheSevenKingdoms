@@ -372,7 +372,8 @@ def _humanize_task_for_manager(task: dict[str, Any], detail: dict[str, Any] | No
     elif phase == 'done':
         summary = last_action or f'Erledigt{(" von " + last_agent) if last_agent else ""}.'
     elif phase == 'stale':
-        summary = f'Claim abgelaufen{(" \u2013 zuletzt bei " + last_agent) if last_agent else ""}.'
+        agent_suffix = " \u2013 zuletzt bei " + last_agent if last_agent else ""
+        summary = f'Claim abgelaufen{agent_suffix}.'
 
     # Verbesserte Fallback-Beschreibung
     if summary == 'Noch keine verst\u00e4ndliche Zusammenfassung vorhanden.':
