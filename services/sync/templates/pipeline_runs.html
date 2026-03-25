@@ -51,6 +51,9 @@
       {% if run.config and run.config.get('loop_hours') %}
       <span>{{ run.config.loop_hours }}h</span>
       {% endif %}
+      {% if run.config and run.config.get('thumbnail_source') %}
+      <span title="Thumbnail: {{ run.config.thumbnail_source.get('label', '?') }}">🖼️ {{ run.config.thumbnail_source.get('label', '?') }}</span>
+      {% endif %}
     </div>
   </a>
   {% endfor %}
