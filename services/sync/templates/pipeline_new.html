@@ -296,12 +296,14 @@
   transition: all 0.2s;
 }
 .variant-card:hover {
-  border-color: var(--gold);
+  border-color: var(--house-color, var(--gold));
   background: rgba(255,255,255,0.06);
+  transform: translateY(-2px);
 }
 .variant-card.selected {
-  border-color: var(--gold);
-  background: rgba(201,165,58,0.12);
+  border-color: var(--house-color, var(--gold));
+  background: color-mix(in srgb, var(--house-color, var(--gold)) 15%, transparent);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--house-color, var(--gold)) 20%, transparent);
 }
 .variant-name {
   font-weight: 600;
@@ -737,22 +739,31 @@
       const variantGrid = document.getElementById('variant-grid');
       document.getElementById('variant-house-name').innerHTML = house.sigil + ' ' + house.display_name + ' — Variante';
       variantGrid.innerHTML = '';
-      const variants = house.variants || [];
-      if (variants.length > 0) {
-        variants.forEach((v, i) => {
+      const variantsObj = house.variants || {};
+      const variantKeys = Object.keys(variantsObj);
+      if (variantKeys.length > 0) {
+        variantKeys.forEach(vKey => {
+          const vDesc = variantsObj[vKey];
+          const vName = vKey.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
           const btn = document.createElement('div');
           btn.className = 'variant-card';
-          btn.innerHTML = '<div class="variant-name">' + v.name + '</div><div class="variant-style">' + (v.style || '') + '</div>';
+          btn.style.setProperty('--house-color', house.color || 'var(--gold)');
+          btn.innerHTML = '<div class="variant-name">' + vName + '</div><div class="variant-style">' + vDesc + '</div>';
           btn.addEventListener('click', () => {
             variantGrid.querySelectorAll('.variant-card').forEach(c => c.classList.remove('selected'));
             btn.classList.add('selected');
-            document.getElementById('notes').value = v.name + ' — ' + (v.style || '');
-            if (v.mood) document.getElementById('mood-input').value = v.mood;
+            // Store selected variant key for prompt selection
+            document.getElementById('notes').value = vKey;
+            document.getElementById('slug').value = slugify(vName);
+            document.getElementById('theme').value = vName;
+            document.getElementById('assets-slug').textContent = slugify(vName);
             // Update title with variant
             const duration = (document.getElementById('loop_hours').value || 3) + ' Hours';
-            titleInput.value = v.name + ' – ' + duration + ' Sleep Music | Whispers of the Seven Kingdoms';
+            titleInput.value = vName + ' – ' + duration + ' Sleep Music | Whispers of the Seven Kingdoms';
             document.getElementById('thumbnail_text').value = titleInput.value;
+            // Show duration selection
             document.getElementById('duration-panel').style.display = 'block';
+            setTimeout(() => document.getElementById('duration-panel').scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
           });
           variantGrid.appendChild(btn);
         });
