@@ -13,7 +13,17 @@
 - **Kein stilles Arbeiten** – alles läuft über Tickets nach Protokoll
 - **Dashboard URL:** `https://unsuitable-amina-tyrannizingly.ngrok-free.dev` (wird bald `dashboard.ka189.de` via Cloudflare Tunnel)
 - **Workflow:** Ticket holen → claimen → Branch erstellen → arbeiten → im Chat melden → Review + Merge → Ticket auf done
+- **Wenn ein Ticket fertig ist → immer auf `done` setzen!**
 - GitHub Issues und Tasks sind **veraltet** — Tickets im Dashboard sind die Single Source of Truth
+
+## 🚀 Deploy-Regeln
+- **Smith deployed auf den Server.** Im Notfall auch Jarvis.
+- **Derjenige der deployed ist verantwortlich für:**
+  1. Release Notes in `CHANGELOG.md`
+  2. Version-Tag (SemVer: `vMAJOR.MINOR.PATCH`)
+  3. `git push --tags`
+  4. Server pull + restart + verify
+- **SemVer:** MAJOR = Breaking Changes, MINOR = neue Features, PATCH = Bugfixes
 
 ---
 

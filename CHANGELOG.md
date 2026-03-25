@@ -3,6 +3,16 @@
 Alle relevanten Änderungen am Projekt werden hier dokumentiert.
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [v2.7.1] – 2026-03-25
+
+### Fixed
+- **Audio Steps Bug**: Steps-Auswahl im UI wurde nicht an den Generator weitergereicht (war immer hardcoded)
+- **Zeitschätzung**: Adaptive Messung nach Clip 1 statt statischer Schätzung (steps × 4s)
+
+### Changed
+- 40-Steps-Option entfernt, nur noch 30/50/100 (Default: 50)
+- PROJECT_STATUS.md: Ticket-System ist jetzt Single Source of Truth, Deploy-Regeln dokumentiert
+
 ## [v2.7.0] – 2026-03-25
 
 ### Added
