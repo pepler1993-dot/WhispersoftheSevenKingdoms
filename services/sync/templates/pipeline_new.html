@@ -122,7 +122,7 @@
         <p class="step-desc">Tracks aus <code>data/upload/songs/</code></p>
       </div>
 
-      <!-- Option B: Generate new track via Kaggle -->
+      <!-- Option B: Generate new audio track -->
       <div id="audio-generate" class="audio-source" style="display:none">
         <div class="generate-card">
           <div class="generate-info">
@@ -141,13 +141,12 @@
               <div class="form-group">
                 <label for="gen-model">Modell</label>
                 <select id="gen-model" class="form-select">
-                  <option value="medium" selected>MusicGen Medium</option>
-                  <option value="small">MusicGen Small (schneller)</option>
+                  <option value="stable-audio" selected>Stable Audio Open</option>
                 </select>
               </div>
             </div>
           </div>
-          <button type="button" class="btn btn-generate" id="btn-start-gen" onclick="startKaggleGen()" disabled>
+          <button type="button" class="btn btn-generate" id="btn-start-gen" onclick="startAudioGen()" disabled>
             🎵 Track generieren
           </button>
           <div id="gen-status" class="gen-status" style="display:none"></div>
@@ -710,8 +709,8 @@
     btn.disabled = false;
   }
 
-  // Start Kaggle generation
-  window.startKaggleGen = function() {
+  // Start audio generation
+  window.startAudioGen = function() {
     if (!selectedHouse) return alert('Bitte zuerst ein Haus wählen');
     const house = houses[selectedHouse];
     const slug = document.getElementById('slug').value;
@@ -724,7 +723,7 @@
     btn.disabled = true;
     btn.textContent = '⏳ Wird gestartet...';
     statusEl.style.display = 'block';
-    statusEl.innerHTML = '⏳ Kaggle-Job wird erstellt...';
+    statusEl.innerHTML = '⏳ Audio-Job wird erstellt...';
 
     const fd = new FormData();
     fd.append('slug', slug);

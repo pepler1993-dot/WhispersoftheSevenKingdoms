@@ -26,10 +26,7 @@
       <div class="config-item"><div class="label">Modell</div><div class="value">{{ health.model or '—' }}</div></div>
       <div class="config-item"><div class="label">Status</div><div class="value">{{ '✅ Online' if health.available else '❌ Offline' }}</div></div>
       {% else %}
-      <div class="config-item"><div class="label">CLI</div><div class="value">{{ 'ok' if health.kaggle_bin else 'fehlt' }}</div></div>
-      <div class="config-item"><div class="label">Token</div><div class="value">{{ 'ok' if health.token_present else 'fehlt' }}</div></div>
-      <div class="config-item"><div class="label">Template</div><div class="value">{{ 'ok' if health.template_present else 'fehlt' }}</div></div>
-      <div class="config-item"><div class="label">Upload Dir</div><div class="value">{{ 'ok' if health.upload_dir_present else 'fehlt' }}</div></div>
+      <div class="config-item"><div class="label">Status</div><div class="value">{{ '✅ Verfügbar' if health.available else '❌ Nicht verfügbar' }}</div></div>
       {% endif %}
     </div>
     <div style="margin-top:12px;color:var(--text-secondary);font-size:14px">
@@ -44,13 +41,10 @@
   <section class="panel panel-accent-gold">
     <h2>Neuen Audio-Job starten</h2>
     <form method="post" action="/admin/audio/generate">
-      <div class="form-group">
-        <label for="slug">Slug</label>
-        <input type="text" name="slug" id="slug" class="form-input" required placeholder="z.B. whispers-of-winterfell" />
-      </div>
+      <input type="hidden" name="slug" id="slug" />
       <div class="form-group">
         <label for="title">Titel</label>
-        <input type="text" name="title" id="title" class="form-input" placeholder="Whispers of Winterfell" />
+        <input type="text" name="title" id="title" class="form-input" required placeholder="Whispers of Winterfell" oninput="document.getElementById('slug').value = this.value.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')" />
       </div>
       <div class="grid two">
         <div class="form-group">
@@ -81,14 +75,7 @@
         </div>
       </div>
       {% else %}
-      <div class="form-group">
-        <label for="model">Model</label>
-        <select name="model" id="model" class="form-select">
-          <option value="small">small</option>
-          <option value="medium" selected>medium</option>
-          <option value="large">large</option>
-        </select>
-      </div>
+      <input type="hidden" name="model" value="stable-audio" />
       <div class="form-group">
         <label for="preset_name">Preset</label>
         <select name="preset_name" id="preset_name" class="form-select">

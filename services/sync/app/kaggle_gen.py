@@ -415,11 +415,11 @@ def get_audio_generator(provider: str | None = None) -> AudioGenerator:
     Provider selection: env AUDIO_PROVIDER or explicit argument.
     Options: 'kaggle' (default), 'stable-audio-local'
     """
-    chosen = provider or os.environ.get('AUDIO_PROVIDER', 'kaggle')
-    if chosen == 'stable-audio-local':
-        from app.stable_audio_gen import StableAudioGenerator
-        return StableAudioGenerator()
-    return KaggleGenerator()
+    chosen = provider or os.environ.get('AUDIO_PROVIDER', 'stable-audio-local')
+    if chosen == 'kaggle':
+        return KaggleGenerator()
+    from app.stable_audio_gen import StableAudioGenerator
+    return StableAudioGenerator()
 
 
 def get_audio_generator_health() -> dict[str, Any]:
