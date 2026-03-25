@@ -3,6 +3,16 @@
 Alle relevanten Änderungen am Projekt werden hier dokumentiert.
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [v2.6.0] – 2026-03-25
+
+### Added
+- **One-Click Workflow**: Audio → Pipeline → Upload in einem Rutsch
+  - Orchestrator pollt automatisch und startet nächste Phase
+  - Phase-Anzeige: 🎵 Audio → 🎬 Render → 📤 Upload → ✅ Fertig
+  - Auto-Upload Option (opt-in)
+  - Eigenes Store-Modul `stores/workflows.py`
+  - Nav-Link "One-Click" in Sidebar
+
 ## [v2.5.0] – 2026-03-25
 
 ### Added
