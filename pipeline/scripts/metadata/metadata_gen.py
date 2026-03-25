@@ -52,7 +52,7 @@ DESCRIPTION_TEMPLATE = """{hook}
 
 🎵 What you'll hear:
 {content_description}
-
+{timestamps}
 ━━━━━━━━━━━━━━━━━━━
 
 🐺 Whispers of the Seven Kingdoms
@@ -236,6 +236,15 @@ def generate_description(song_meta):
         instrument = INSTRUMENT_MAP.get(mood, "ambient sounds")
         content_desc = f"Soft {instrument.lower()} melodies woven with gentle ambient sounds. Designed for deep sleep, meditation, and quiet study."
 
+    # Timestamps (if available)
+    timestamps_path = os.path.join(REPO_ROOT, "data", "upload", "songs", f"{song_meta.get('slug', '')}_timestamps.json")
+    if os.path.exists(timestamps_path):
+        with open(timestamps_path, encoding="utf-8") as f:
+            timestamps = json.load(f)
+        ts_block = "\n⏱️ Timestamps:\n" + "\n".join(f"{ts['time']} – {ts['label']}" for ts in timestamps)
+    else:
+        ts_block = ""
+
     # SEO sentence
     seo_sentence = (
         f"Relaxing {theme.lower()} sleep music inspired by Game of Thrones, "
@@ -252,6 +261,7 @@ def generate_description(song_meta):
         hook=hook,
         lore_paragraph=lore_paragraph,
         content_description=content_desc,
+        timestamps=ts_block,
         playlist_name=playlist_name,
         seo_sentence=seo_sentence,
         hashtags=hashtags,
@@ -290,7 +300,7 @@ def generate_tags(song_meta):
 
 
 def generate_playlist(song_meta):
-    """Bestimmt passende Playlists."""
+    """Bestimmt passende Playlists (Cross-Pollination: min 3, max 6)."""
     playlists = ["Game of Thrones Sleep Music – Full Collection"]
 
     lore = find_lore(_extract_theme(song_meta))
@@ -302,10 +312,32 @@ def generate_playlist(song_meta):
         playlists.append("Peaceful & Calm – Gentle Sleep Music from Westeros")
     if any(m in moods for m in ["dark", "haunting", "mysterious"]):
         playlists.append("Dark & Mysterious – Haunting Ambient")
+    if any(m in moods for m in ["calm", "peaceful"]):
+        playlists.append("Study & Focus – Westeros Background Music")
     if any(m in moods for m in ["mystical", "meditative"]):
         playlists.append("Meditation & Relaxation – Westeros Mindfulness")
 
-    return playlists
+    # Ensure minimum 3 playlists
+    if len(playlists) < 3:
+        fallbacks = [
+            "8 Hours Deep Sleep – Westeros Edition",
+            "Peaceful & Calm – Gentle Sleep Music from Westeros",
+            "Study & Focus – Westeros Background Music",
+        ]
+        for fb in fallbacks:
+            if fb not in playlists:
+                playlists.append(fb)
+            if len(playlists) >= 3:
+                break
+
+    # Deduplicate, cap at 6
+    seen = set()
+    unique = []
+    for p in playlists:
+        if p not in seen:
+            seen.add(p)
+            unique.append(p)
+    return unique[:6]
 
 
 def generate_metadata(song_meta, duration_str="8 Hours"):
@@ -314,6 +346,18 @@ def generate_metadata(song_meta, duration_str="8 Hours"):
     description = generate_description(song_meta)
     tags = generate_tags(song_meta)
     playlists = generate_playlist(song_meta)
+
+    # Endscreen recommendation
+    lore = find_lore(_extract_theme(song_meta))
+    moods = song_meta.get("mood", [])
+    if any(m in moods for m in ["dark", "haunting"]):
+        endscreen_playlist = "Dark & Mysterious – Haunting Ambient"
+    elif any(m in moods for m in ["mystical", "meditative"]):
+        endscreen_playlist = "Meditation & Relaxation – Westeros Mindfulness"
+    elif lore:
+        endscreen_playlist = lore["playlist"]
+    else:
+        endscreen_playlist = "Game of Thrones Sleep Music – Full Collection"
 
     return {
         "slug": song_meta["slug"],
@@ -324,8 +368,12 @@ def generate_metadata(song_meta, duration_str="8 Hours"):
         "description": description,
         "tags": tags,
         "playlists": playlists,
-        "privacy": "private",  # Sicher starten, manuell auf public
-        "category": "10",  # Music
+        "endscreen": {
+            "recommended_playlist": endscreen_playlist,
+            "strategy": "Next video from same playlist (autoplay) + playlist link",
+        },
+        "privacy": "private",
+        "category": "10",
         "language": "en",
     }
 

@@ -392,16 +392,77 @@ class StableAudioGenerator(AudioGenerator):
         if self._job_cancelled(job_id, db, log=True):
             return
 
+        # Generate timestamps from clip boundaries
+        timestamps = self._generate_timestamps(num_clips, effective_clip, crossfade, job.get('house') or slug)
+        timestamp_str = '\n'.join(f'{ts["time"]} – {ts["label"]}' for ts in timestamps)
+        db.append_audio_job_log(job_id, 'system', f'Timestamps:\n{timestamp_str}', now_iso())
+
         # Done!
         file_size_mb = local_path.stat().st_size / 1024 / 1024
         finish_ts = now_iso()
         db.update_audio_job(job_id, status='complete', finished_at=finish_ts,
                             output_path=str(local_path), provider='stable-audio-local')
+
+        # Save timestamps to metadata JSON for YouTube description
+        import json as _json
+        ts_path = local_path.parent / f'{slug}_timestamps.json'
+        ts_path.write_text(_json.dumps(timestamps, indent=2, ensure_ascii=False), encoding='utf-8')
         db.append_audio_job_log(
             job_id, 'system',
             f'✅ Track complete: {local_path.name} ({file_size_mb:.1f} MB)',
             finish_ts,
         )
+
+    # Thematic timestamp labels per house
+    TIMESTAMP_LABELS = {
+        'winterfell': ['Arrival at Winterfell', 'The Godswood by Moonlight', 'Snow on the Battlements',
+                        'The Crypts Below', 'Hearthfire', 'Northern Lights', 'The Long Rest',
+                        'Bran\'s Lullaby', 'Dawn Over Winterfell', 'Winter Dreams'],
+        'kings_landing': ['The Red Keep at Dusk', 'Candlelight in the Throne Room', 'Streets of Flea Bottom',
+                          'The Sept of Baelor', 'Blackwater Bay', 'A Lannister\'s Rest',
+                          'The Small Council', 'Night at the Harbour', 'King\'s Dream', 'Dawn of the Crown'],
+        'targaryen': ['Shores of Dragonstone', 'The Painted Table', 'Dragon\'s Breath',
+                      'Old Valyria', 'Fire and Blood', 'The Last Dragon', 'Throne of Scales',
+                      'Embers in the Dark', 'Wings Over the Sea', 'Valyrian Dreams'],
+        'the_wall': ['Castle Black', 'The Night\'s Watch', 'Beyond the Wall', 'Frozen Wastes',
+                     'The Haunted Forest', 'White Walker\'s March', 'Craster\'s Keep',
+                     'The Fist of the First Men', 'Hardhome', 'The Long Night'],
+        'highgarden': ['Morning in the Gardens', 'The Rose Arbor', 'Sunlit Terraces',
+                       'The Mander River', 'Butterflies and Bees', 'Tyrell\'s Feast',
+                       'Twilight Blossoms', 'The Reach at Dawn', 'Golden Harvest', 'Petals in the Wind'],
+        'dorne': ['Water Gardens by Night', 'Desert Starlight', 'The Shadow City',
+                  'Sunspear at Dusk', 'Oasis Dreams', 'Sand and Silk',
+                  'The Prince\'s Tower', 'Moonrise Over Dorne', 'Spice Market Lullaby', 'Dornish Dawn'],
+        'godswood': ['The Heart Tree', 'Whispers of the Old Gods', 'Moss and Stone',
+                     'The Stream of Memory', 'Roots of Time', 'Sacred Silence',
+                     'Night in the Grove', 'Ancient Prayers', 'Leaves of Prophecy', 'The Weirwood Dreams'],
+        'castamere': ['Rains of Castamere', 'The Empty Halls', 'Echoes of Gold',
+                      'A Lion\'s Lament', 'Stone and Shadow', 'The Fallen House',
+                      'Dripping Corridors', 'Ghosts of the Rock', 'Mourning Light', 'The Silence After'],
+    }
+
+    def _generate_timestamps(self, num_clips: int, effective_clip: int, crossfade: int, house: str) -> list[dict]:
+        """Generate timestamps with thematic labels from clip boundaries."""
+        house_lower = house.lower().replace('-', '_').replace(' ', '_')
+        # Find matching house labels
+        labels = None
+        for key, vals in self.TIMESTAMP_LABELS.items():
+            if key in house_lower or house_lower in key:
+                labels = vals
+                break
+        if not labels:
+            labels = [f'Chapter {i+1}' for i in range(num_clips)]
+
+        timestamps = []
+        for i in range(num_clips):
+            offset_seconds = i * effective_clip
+            hours = offset_seconds // 3600
+            minutes = (offset_seconds % 3600) // 60
+            seconds = offset_seconds % 60
+            time_str = f'{hours}:{minutes:02d}:{seconds:02d}'
+            label = labels[i % len(labels)]
+            timestamps.append({'time': time_str, 'label': label, 'offset_seconds': offset_seconds})
+        return timestamps
 
     def _stitch_clips(self, clips: list[str], output: str, crossfade: int) -> None:
         """Stitch clips with crossfade using ffmpeg on the worker."""
