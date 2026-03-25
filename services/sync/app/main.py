@@ -559,6 +559,14 @@ def _humanize_task_detail_for_manager(task_id: str, detail: dict[str, Any]) -> d
         if issue_body and issue_body != detailed_description:
             detailed_description = issue_body
     
+    protocol_flags: list[str] = []
+    if state.get('phase') == 'stale':
+        protocol_flags.append('Claim ist stale / Lease abgelaufen')
+    if state.get('phase') in {'working', 'blocked'} and state.get('owner_agent') and not state.get('heartbeat_at'):
+        protocol_flags.append('Aktive Aufgabe ohne Heartbeat-Zeitstempel')
+    if state.get('phase') == 'released' and any(event.get('event_type') == 'task.completed' for event in detail.get('task_events') or []):
+        protocol_flags.append('Task wurde completed, ist aber aktuell als released markiert')
+
     return {
         **detail,
         'human': human,
@@ -572,6 +580,7 @@ def _humanize_task_detail_for_manager(task_id: str, detail: dict[str, Any]) -> d
         'heartbeat_at_display': _format_berlin(state.get('heartbeat_at'), with_seconds=True),
         'issue_number': snapshot.get('issue_number'),
         'detailed_description': detailed_description,  # Neue detaillierte Beschreibung
+        'protocol_flags': protocol_flags,
     }
 
 app.mount('/static', StaticFiles(directory=str(BASE_DIR / 'static')), name='static')
@@ -629,6 +638,81 @@ def _mark_task_stale_if_needed(task_id: str) -> dict[str, Any] | None:
         updated['latest_seq'] = seq
         _write_task_state(task_id, updated)
     return updated
+
+
+def _sweep_stale_tasks() -> list[dict[str, Any]]:
+    updated_tasks: list[dict[str, Any]] = []
+    for task in db.list_task_states(include_done=True):
+        current = db.get_task_state(task['task_id'])
+        if not current:
+            continue
+        if is_stale(current) and current.get('phase') != 'stale':
+            updated = _mark_task_stale_if_needed(task['task_id'])
+            if updated:
+                updated_tasks.append(updated)
+    return updated_tasks
+
+
+def _build_protocol_health() -> dict[str, Any]:
+    _sweep_stale_tasks()
+    tasks = db.list_task_states(include_done=True)
+    active_tasks = [task for task in tasks if task.get('phase') in {'working', 'blocked'}]
+    stale_tasks = [task for task in tasks if task.get('phase') == 'stale']
+    missing_heartbeat = [
+        task for task in active_tasks
+        if task.get('owner_agent') and not task.get('heartbeat_at')
+    ]
+
+    active_by_agent: dict[str, list[dict[str, Any]]] = {}
+    for task in active_tasks:
+        owner = task.get('owner_agent')
+        if not owner:
+            continue
+        active_by_agent.setdefault(owner, []).append(task)
+
+    multiple_active_assignments = [
+        {
+            'agent_id': agent_id,
+            'count': len(agent_tasks),
+            'task_ids': [task.get('task_id') for task in agent_tasks],
+        }
+        for agent_id, agent_tasks in active_by_agent.items()
+        if len(agent_tasks) > 1
+    ]
+
+    released_after_completion = []
+    for task in tasks:
+        if task.get('phase') != 'released':
+            continue
+        events, _latest_seq = db.get_task_events(task['task_id'], after_seq=0)
+        if any(event.get('event_type') == 'task.completed' for event in events):
+            released_after_completion.append(task)
+
+    warnings = []
+    if stale_tasks:
+        warnings.append(f'{len(stale_tasks)} stale claim(s) detected')
+    if missing_heartbeat:
+        warnings.append(f'{len(missing_heartbeat)} active task(s) missing heartbeat timestamp')
+    if multiple_active_assignments:
+        warnings.append(f'{len(multiple_active_assignments)} agent(s) hold multiple active tasks')
+    if released_after_completion:
+        warnings.append(f'{len(released_after_completion)} task(s) were completed but are still marked released')
+
+    status = 'ok' if not warnings else 'warn'
+    return {
+        'status': status,
+        'warnings': warnings,
+        'stale_tasks': stale_tasks,
+        'missing_heartbeat': missing_heartbeat,
+        'multiple_active_assignments': multiple_active_assignments,
+        'released_after_completion': released_after_completion,
+        'counts': {
+            'stale_tasks': len(stale_tasks),
+            'missing_heartbeat': len(missing_heartbeat),
+            'multiple_active_assignments': len(multiple_active_assignments),
+            'released_after_completion': len(released_after_completion),
+        },
+    }
 
 
 @app.get('/healthz')
@@ -854,6 +938,7 @@ def get_task(task_id: str) -> dict[str, Any]:
 
 @app.get('/admin', response_class=HTMLResponse)
 def admin_dashboard(request: Request):
+    protocol_health = _build_protocol_health()
     summary = db.get_dashboard_summary()
     # Activity timeline: recent pipeline runs + audio jobs
     recent_runs = db.list_runs(limit=5)
@@ -862,6 +947,7 @@ def admin_dashboard(request: Request):
         'request': request,
         'page': 'dashboard',
         'summary': summary,
+        'protocol_health': protocol_health,
         'recent_runs': recent_runs,
         'recent_audio': recent_audio,
     })
@@ -912,12 +998,14 @@ def admin_events(request: Request, limit: int = Query(default=100, ge=1, le=500)
 @app.get('/admin/system', response_class=HTMLResponse)
 def admin_system(request: Request):
     system = db.get_system_summary()
+    protocol_health = _build_protocol_health()
     system['latest_github_event_at_display'] = _format_berlin(system.get('latest_github_event_at'), with_seconds=True)
     system['latest_task_update_at_display'] = _format_berlin(system.get('latest_task_update_at'), with_seconds=True)
     return templates.TemplateResponse('system.html', {
         'request': request,
         'page': 'ops',
         'system': system,
+        'protocol_health': protocol_health,
     })
 
 
@@ -943,6 +1031,7 @@ def admin_ops(
 ):
     allowed_tabs = {'tasks', 'events', 'system'}
     current_tab = tab if tab in allowed_tabs else 'tasks'
+    protocol_health = _build_protocol_health()
     raw_tasks = db.list_tasks_for_admin(phase=phase, owner=owner, query=q, include_done=include_done)
     tasks = [_humanize_task_for_manager(task, db.get_task_detail(task['task_id'])) for task in raw_tasks]
     events = [{**event, 'received_at_display': _format_berlin(event.get('received_at'), with_seconds=True), 'summary': _event_manager_summary(event)} for event in db.list_github_events(limit=limit)]
@@ -958,9 +1047,15 @@ def admin_ops(
         'events': events,
         'system': system,
         'summary': summary,
+        'protocol_health': protocol_health,
         'limit': limit,
         'filters': {'phase': phase, 'owner': owner, 'q': q, 'include_done': include_done},
     })
+
+
+@app.get('/api/protocol-health')
+def api_protocol_health() -> dict[str, Any]:
+    return _build_protocol_health()
 
 
 @app.get('/admin/api/server-stats')

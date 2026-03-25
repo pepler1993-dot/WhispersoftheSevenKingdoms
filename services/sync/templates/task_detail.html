@@ -27,6 +27,16 @@
       <strong>Aufgabenbeschreibung:</strong><br />
       {{ detail.detailed_description | default(detail.human.summary) }}
     </div>
+    {% if detail.protocol_flags %}
+    <div class="output-files" style="margin-top:14px; border-left:3px solid var(--danger,#d14343); padding-left:12px;">
+      <strong>Protocol-Hinweise:</strong>
+      <ul style="margin:8px 0 0 18px;">
+        {% for flag in detail.protocol_flags %}
+        <li>{{ flag }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
   </section>
 
   <section class="panel panel-accent-blue">
