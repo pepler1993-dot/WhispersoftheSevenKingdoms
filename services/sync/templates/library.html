@@ -71,6 +71,11 @@
         <div class="thumb-meta">
           <div class="thumb-name">{{ item.name }}</div>
           <div class="thumb-sub">{{ item.size }} · {{ item.modified }}</div>
+          <form method="post" action="/admin/library/delete" onsubmit="return confirm('Thumbnail wirklich löschen?');" style="margin-top:8px;">
+            <input type="hidden" name="asset_type" value="thumbnails" />
+            <input type="hidden" name="filename" value="{{ item.name }}" />
+            <button type="submit" class="btn btn-danger btn-sm">Löschen</button>
+          </form>
         </div>
       </div>
       {% else %}
@@ -97,6 +102,11 @@
       <div class="thumb-meta">
         <div class="thumb-name">{{ item.name }}</div>
         <div class="thumb-sub">{{ item.size }} · {{ item.modified }}</div>
+        <form method="post" action="/admin/library/delete" onsubmit="return confirm('Background wirklich löschen?');" style="margin-top:8px;">
+          <input type="hidden" name="asset_type" value="backgrounds" />
+          <input type="hidden" name="filename" value="{{ item.name }}" />
+          <button type="submit" class="btn btn-danger btn-sm">Löschen</button>
+        </form>
       </div>
     </div>
     {% else %}

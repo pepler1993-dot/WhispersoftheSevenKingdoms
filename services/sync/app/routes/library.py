@@ -111,6 +111,27 @@ def admin_library_create_metadata(
     return RedirectResponse(f'/admin/library?success=Metadata+{clean_slug}.json+{action}', status_code=303)
 
 
+@router.post('/admin/library/delete')
+def admin_library_delete(asset_type: str = Form(...), filename: str = Form(...)):
+    mapping = {
+        'thumbnails': PIPELINE_DIR / 'data' / 'upload' / 'thumbnails',
+        'backgrounds': PIPELINE_DIR / 'data' / 'assets' / 'backgrounds',
+    }
+    if asset_type not in mapping:
+        return RedirectResponse('/admin/library?error=Löschen+ist+für+diesen+Asset-Typ+nicht+erlaubt', status_code=303)
+
+    safe_name = Path(filename).name
+    if not safe_name:
+        return RedirectResponse('/admin/library?error=Ungültiger+Dateiname', status_code=303)
+
+    path = mapping[asset_type] / safe_name
+    if not path.exists() or not path.is_file():
+        return RedirectResponse('/admin/library?error=Datei+nicht+gefunden', status_code=303)
+
+    path.unlink()
+    return RedirectResponse(f'/admin/library?success={asset_type}+Datei+{safe_name}+gelöscht', status_code=303)
+
+
 @router.post('/admin/library/upload')
 async def admin_library_upload(asset_type: str = Form(...), file: UploadFile = File(...)):
     mapping = {
