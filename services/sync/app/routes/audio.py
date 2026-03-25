@@ -107,6 +107,29 @@ def admin_audio_job_logs(job_id: str, after_id: int = Query(default=0, ge=0)):
     return {'logs': logs, 'status': job['status'], 'error_message': job.get('error_message')}
 
 
+@router.post('/admin/audio/jobs/{job_id}/retry')
+def admin_audio_job_retry(job_id: str):
+    job = shared.db.get_audio_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail='Audio job not found')
+
+    status = job.get('status', '')
+    if status not in ('error', 'cancelled'):
+        raise HTTPException(status_code=409, detail=f'Can only retry failed/cancelled jobs (current: {status})')
+
+    new_job_id = create_audio_job(
+        slug=job['slug'],
+        title=job.get('title', job['slug']),
+        prompt_text=job.get('prompt_text', ''),
+        preset_name=job.get('preset_name'),
+        minutes=job.get('minutes') or 42,
+        model=job.get('model', 'medium'),
+        clip_seconds=job.get('clip_seconds') or 30,
+        db=shared.db,
+    )
+    return RedirectResponse(url=f'/admin/audio/jobs/{new_job_id}', status_code=303)
+
+
 @router.post('/admin/audio/jobs/{job_id}/cancel')
 def admin_audio_job_cancel(job_id: str):
     job = shared.db.get_audio_job(job_id)

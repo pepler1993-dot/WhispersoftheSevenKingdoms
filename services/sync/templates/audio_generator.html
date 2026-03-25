@@ -138,7 +138,14 @@
         <td><a href="/admin/audio/jobs/{{ job.job_id }}">{{ job.job_id }}</a></td>
         <td>{{ job.slug }}</td>
         <td>{{ job.model or '—' }}</td>
-        <td><span class="badge {{ job.status }}">{{ job.status }}</span></td>
+        <td>
+          <span class="badge {{ job.status }}">{{ job.status }}</span>
+          {% if job.status in ('error', 'cancelled') %}
+          <form method="post" action="/admin/audio/jobs/{{ job.job_id }}/retry" style="display:inline; margin-left:6px;">
+            <button type="submit" class="btn btn-secondary btn-sm" style="padding:2px 8px; font-size:0.7rem;">🔄</button>
+          </form>
+          {% endif %}
+        </td>
         <td>{{ job.preset_name or 'custom' }}</td>
         <td>{{ job.created_at[:19] if job.created_at else '—' }}</td>
       </tr>
