@@ -161,6 +161,10 @@
         </div>
       </div>
       <input type="hidden" name="audio_job_id" id="audio_job_id" />
+      <input type="hidden" name="audio_source" id="audio_source" value="library" />
+      <input type="hidden" name="gen_minutes" id="gen_minutes_hidden" value="42" />
+      <input type="hidden" name="gen_model" id="gen_model_hidden" value="medium" />
+      <input type="hidden" name="gen_prompt" id="gen_prompt_hidden" value="" />
     </div>
     </section>
 
@@ -724,7 +728,16 @@
     document.getElementById('audio-generate').style.display = mode === 'generate' ? 'block' : 'none';
     document.getElementById('btn-library').classList.toggle('active', mode === 'library');
     document.getElementById('btn-generate').classList.toggle('active', mode === 'generate');
+    document.getElementById('audio_source').value = mode;
   };
+
+  // Sync generate settings to hidden fields
+  document.getElementById('gen-minutes').addEventListener('change', function() {
+    document.getElementById('gen_minutes_hidden').value = this.value;
+  });
+  document.getElementById('gen-model').addEventListener('change', function() {
+    document.getElementById('gen_model_hidden').value = this.value;
+  });
 
   // Update generate card when house is selected
   function updateGenerateCard(house) {
@@ -737,6 +750,8 @@
     name.textContent = house.display_name + ' – Audio Track';
     const pc = (house.prompts || []).length;
     info.textContent = pc + ' Prompts · ' + (house.defaults?.minutes || 42) + ' Min · MusicGen Medium';
+    // Sync prompt to hidden field for form submission
+    document.getElementById('gen_prompt_hidden').value = (house.prompts || []).join('\n');
     btn.disabled = false;
   }
 

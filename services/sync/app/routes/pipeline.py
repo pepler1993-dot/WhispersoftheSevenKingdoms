@@ -27,6 +27,9 @@ from app.pipeline_runner import (
     trigger_upload,
 )
 from app.pipeline_queue import enqueue_run, get_queue_status
+from app.kaggle_gen import create_audio_job, list_prompt_presets
+from app.stores.workflows import create_workflow, get_workflow
+from app.pipeline_workflow import start_workflow
 
 router = APIRouter()
 
@@ -192,6 +195,10 @@ def admin_pipeline_start(
     thumbnail_avoid: str = Form(''),
     house: str = Form(''),
     thumbnail_file: str = Form(''),
+    audio_source: str = Form('library'),
+    gen_minutes: int = Form(42),
+    gen_model: str = Form('medium'),
+    gen_prompt: str = Form(''),
 ):
     title = title.strip()
     slug = slugify(title)
@@ -207,9 +214,77 @@ def admin_pipeline_start(
         (PIPELINE_DIR / 'data' / 'upload' / 'songs' / f'{slug}{ext}').exists()
         for ext in ALLOWED_AUDIO_EXT
     )
+
+    # ── Generate mode: start full workflow (Audio → Pipeline → Upload) ──
+    if not audio_found and audio_source == 'generate':
+        prompt_text = gen_prompt.strip()
+        if not prompt_text:
+            # Build prompt from house template
+            houses = _load_house_templates()
+            h = houses.get(house or theme, {})
+            prompts = h.get('prompts', [])
+            prompt_text = '\n'.join(prompts) if prompts else f'{theme} ambient sleep music'
+
+        audio_job_id = create_audio_job(
+            slug=slug,
+            title=title,
+            prompt_text=prompt_text,
+            preset_name=None,
+            minutes=gen_minutes,
+            model=gen_model,
+            clip_seconds=30,
+            db=shared.db,
+        )
+
+        metadata = _build_song_metadata(
+            slug=slug, title=title, theme=theme, mood=mood,
+            notes=notes, duration_hint=duration_hint, tags=tags,
+            music_style=music_style, music_influences=music_influences,
+            music_tempo=music_tempo, music_energy=music_energy,
+            music_avoid=music_avoid, thumbnail_scene=thumbnail_scene,
+            thumbnail_elements=thumbnail_elements, thumbnail_text=thumbnail_text,
+            thumbnail_style=thumbnail_style, thumbnail_avoid=thumbnail_avoid,
+        )
+
+        metadata_path = PIPELINE_DIR / 'data' / 'upload' / 'metadata' / f'{slug}.json'
+        metadata_path.parent.mkdir(parents=True, exist_ok=True)
+        metadata_path.write_text(json.dumps(metadata, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+
+        pipeline_config = {
+            'minutes': minutes,
+            'loop_hours': loop_hours,
+            'crossfade': crossfade,
+            'audio_preset': audio_preset,
+            'animated': animated,
+            'public': public,
+            'skip_post_process': skip_post_process,
+            'mood': mood or None,
+            'house': house or theme or None,
+            'metadata': metadata,
+        }
+
+        now = datetime.now(shared.CET).isoformat()
+        workflow_id = uuid.uuid4().hex[:12]
+
+        create_workflow(shared.db, {
+            'workflow_id': workflow_id,
+            'title': title,
+            'slug': slug,
+            'phase': 'audio',
+            'status': 'running',
+            'audio_job_id': audio_job_id,
+            'config': pipeline_config,
+            'auto_upload': public,
+            'created_at': now,
+            'updated_at': now,
+        })
+
+        start_workflow(workflow_id, audio_job_id, slug, title, pipeline_config, public, shared.db)
+        return RedirectResponse(url=f'/admin/workflow/{workflow_id}', status_code=303)
+
     if not audio_found:
         return RedirectResponse(
-            url=f'/admin/pipeline/new?slug={slug}&error=Kein+Audio-Track+f\u00fcr+"{slug}"+gefunden.+Generiere+zuerst+einen+Track+im+Audio+Lab.',
+            url=f'/admin/pipeline/new?slug={slug}&error=Kein+Audio-Track+f\u00fcr+"{slug}"+gefunden.+W\u00e4hle+"Neu+generieren"+als+Audio-Quelle.',
             status_code=303,
         )
 
