@@ -58,6 +58,7 @@ def admin_audio_generate(
     minutes: int = Form(42),
     model: str = Form('medium'),
     clip_seconds: int = Form(30),
+    steps: int = Form(50),
 ):
     slug = slug.strip().lower()
     title = title.strip() or slug.replace('-', ' ').title()
@@ -80,6 +81,7 @@ def admin_audio_generate(
         model=model,
         clip_seconds=clip_seconds,
         db=shared.db,
+        steps=steps,
     )
     return RedirectResponse(url=f'/admin/audio/jobs/{job_id}', status_code=303)
 

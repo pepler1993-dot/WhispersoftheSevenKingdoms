@@ -6,13 +6,14 @@
 
 ---
 
-## ⚠️ PFLICHT: Agent Sync Service nutzen!
-- **Jede Aufgabe** muss als GitHub Issue angelegt werden, damit sie als Task im Sync Service erscheint
-- **Regelmäßig** den Stand vom Sync Service pullen (Tasks, Events, Status)
-- **Kein stilles Arbeiten** – alles läuft über den Sync Service nach Protokoll
+## ⚠️ PFLICHT: Ticket-System im Sync Service nutzen!
+- **Jede Aufgabe** läuft über das **Ticket-System** im Sync Service Dashboard (NICHT über GitHub Issues/Tasks)
+- **Tickets holen:** `GET https://unsuitable-amina-tyrannizingly.ngrok-free.dev/api/tickets`
+- **Ticket claimen:** `POST https://unsuitable-amina-tyrannizingly.ngrok-free.dev/admin/tickets/{ID}/update` mit `status=in_progress&assigned_to=Name`
+- **Kein stilles Arbeiten** – alles läuft über Tickets nach Protokoll
 - **Dashboard URL:** `https://unsuitable-amina-tyrannizingly.ngrok-free.dev` (wird bald `dashboard.ka189.de` via Cloudflare Tunnel)
-- **Webhook:** GitHub → Sync Service ✅
-- **Guardrails-Konzept:** siehe `docs/architecture/AGENT_SYNC_GUARDRAILS_CONCEPT.md`
+- **Workflow:** Ticket holen → claimen → Branch erstellen → arbeiten → im Chat melden → Review + Merge → Ticket auf done
+- GitHub Issues und Tasks sind **veraltet** — Tickets im Dashboard sind die Single Source of Truth
 
 ---
 

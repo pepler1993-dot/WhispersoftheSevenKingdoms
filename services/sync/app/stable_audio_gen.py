@@ -201,7 +201,7 @@ class StableAudioGenerator(AudioGenerator):
         prompts = job.get('prompts', []) or []
         minutes = int(job.get('minutes') or 3)
         clip_seconds = min(int(job.get('clip_seconds') or MAX_CLIP_DURATION), MAX_CLIP_DURATION)
-        steps = int(job.get('steps') or 40)
+        steps = int(job.get('steps') or 50)
         crossfade = 4
 
         if not prompts:
@@ -255,13 +255,16 @@ class StableAudioGenerator(AudioGenerator):
             remote_path = f'{GPU_WORKER_OUTPUT_DIR}/{clip_slug}.wav'
 
             remaining_clips = num_clips - i
-            est_remaining = (remaining_clips * est_seconds_per_clip) / 60
+            spc = actual_clip_duration if actual_clip_duration else est_seconds_per_clip
+            est_remaining = (remaining_clips * spc) / 60
+            est_label = "" if actual_clip_duration else " (Schätzung)"
             db.append_audio_job_log(
                 job_id, 'system',
-                f"Generating clip {i + 1}/{num_clips} (~{est_seconds_per_clip}s, ~{est_remaining:.0f} min übrig): \"{prompt[:80]}\"",
+                f"Generating clip {i + 1}/{num_clips} (~{spc:.0f}s/clip, ~{est_remaining:.0f} min übrig{est_label}): \"{prompt[:80]}\"",
                 now_iso(),
             )
 
+            clip_start = time.monotonic()
             try:
                 if use_daemon:
                     if not self._submit_daemon_job(clip_slug, prompt, clip_seconds, steps):
@@ -278,7 +281,10 @@ class StableAudioGenerator(AudioGenerator):
                         raise RuntimeError(result.get('error', 'Unknown daemon error'))
 
                     elapsed = result.get('elapsed_seconds', '?')
-                    db.append_audio_job_log(job_id, 'worker', f"Clip {i+1} done in {elapsed}s", now_iso())
+                    clip_wall = time.monotonic() - clip_start
+                    if actual_clip_duration is None:
+                        actual_clip_duration = clip_wall
+                    db.append_audio_job_log(job_id, 'worker', f"Clip {i+1} done in {elapsed}s (wall: {clip_wall:.0f}s)", now_iso())
 
                     # Update estimate based on actual render time
                     if isinstance(elapsed, (int, float)) and elapsed > 0:

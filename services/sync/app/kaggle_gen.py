@@ -477,6 +477,7 @@ def create_audio_job(
     model: str,
     clip_seconds: int,
     db: AgentSyncDB,
+    steps: int = 50,
 ) -> str:
     job_id = uuid.uuid4().hex[:12]
     prompts = [line.strip() for line in prompt_text.splitlines() if line.strip()]
@@ -494,6 +495,7 @@ def create_audio_job(
         'minutes': minutes,
         'model': model,
         'clip_seconds': clip_seconds,
+        'steps': steps,
         'status': 'queued',
         'created_at': now_iso(),
     }
