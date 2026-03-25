@@ -6,10 +6,10 @@ Leichtere Aufgaben. UI/UX, Docs, Templates, Frontend-Polish.
 
 ### 1. Docs-Startseite vereinfachen (#4) — Priority B
 Docs Homepage übersichtlicher machen.
-- [ ] Weniger Infos auf einmal anzeigen
-- [ ] Klare Einstiegspunkte: Getting Started, Audio Lab, Pipeline, Library
-- [ ] Besseres Spacing + Card-Grouping
-- [ ] Mobile + Desktop testen
+- [x] Weniger Infos auf einmal anzeigen
+- [x] Klare Einstiegspunkte: Getting Started, Audio Lab, Pipeline, Library
+- [x] Besseres Spacing + Card-Grouping
+- [x] Mobile + Desktop testen
 
 ### 2. Dashboard-Docs aus User-Perspektive (#5) — Priority B
 Docs sollen erklären wie man das System NUTZT, nicht wie man es lokal aufsetzt.
@@ -46,10 +46,10 @@ Eigene Test-Rolle mit Workflow definieren.
 
 ### 1. Docs-Startseite vereinfachen (#4) — Priority B
 Docs Homepage übersichtlicher machen.
-- [ ] Weniger Infos auf einmal anzeigen
-- [ ] Klare Einstiegspunkte: Getting Started, Audio Lab, Pipeline, Library
-- [ ] Besseres Spacing + Card-Grouping
-- [ ] Mobile + Desktop testen
+- [x] Weniger Infos auf einmal anzeigen
+- [x] Klare Einstiegspunkte: Getting Started, Audio Lab, Pipeline, Library
+- [x] Besseres Spacing + Card-Grouping
+- [x] Mobile + Desktop testen
 
 ### 2. Dashboard-Docs aus User-Perspektive (#5) — Priority B
 Docs sollen erklären wie man das System NUTZT, nicht wie man es lokal aufsetzt.
