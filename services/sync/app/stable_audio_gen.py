@@ -201,7 +201,7 @@ class StableAudioGenerator(AudioGenerator):
         prompts = job.get('prompts', []) or []
         minutes = int(job.get('minutes') or 3)
         clip_seconds = min(int(job.get('clip_seconds') or MAX_CLIP_DURATION), MAX_CLIP_DURATION)
-        steps = int(job.get('steps') or 30)
+        steps = int(job.get('steps') or 40)
         crossfade = 4
 
         if not prompts:
@@ -384,16 +384,16 @@ class StableAudioGenerator(AudioGenerator):
         inputs = ' '.join(f'-i {c}' for c in clips)
 
         if len(clips) == 2:
-            filter_str = f'[0][1]acrossfade=d={crossfade}:c1=tri:c2=tri'
+            filter_str = f'[0][1]acrossfade=d={crossfade}:c1=exp:c2=exp[out]; [out]loudnorm=I=-16:TP=-1.5:LRA=11'
         else:
             parts = []
             for i in range(1, len(clips)):
                 if i == 1:
-                    parts.append(f'[0][1]acrossfade=d={crossfade}:c1=tri:c2=tri[a{i:02d}]')
+                    parts.append(f'[0][1]acrossfade=d={crossfade}:c1=exp:c2=exp[a{i:02d}]')
                 elif i == len(clips) - 1:
-                    parts.append(f'[a{i-1:02d}][{i}]acrossfade=d={crossfade}:c1=tri:c2=tri')
+                    parts.append(f'[a{i-1:02d}][{i}]acrossfade=d={crossfade}:c1=exp:c2=exp[out]; [out]loudnorm=I=-16:TP=-1.5:LRA=11')
                 else:
-                    parts.append(f'[a{i-1:02d}][{i}]acrossfade=d={crossfade}:c1=tri:c2=tri[a{i:02d}]')
+                    parts.append(f'[a{i-1:02d}][{i}]acrossfade=d={crossfade}:c1=exp:c2=exp[a{i:02d}]')
             filter_str = '; '.join(parts)
 
         cmd = f'ffmpeg -y {inputs} -filter_complex "{filter_str}" {output}'
