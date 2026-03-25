@@ -39,7 +39,6 @@
 
     <div class="config-header">
       <div>
-        <div class="workflow-kicker">Step 2 · Configure</div>
         <h2 id="config-title-label">Konfiguration</h2>
         <p class="step-desc" id="config-house-info"></p>
       </div>
@@ -48,7 +47,6 @@
     <section class="step-card">
       <div class="step-card-header">
         <div>
-          <div class="workflow-kicker">Step 2A · Mood & Identity</div>
           <h3>Stimmung und Titel</h3>
         </div>
       </div>
@@ -98,7 +96,6 @@
     <section class="step-card">
       <div class="step-card-header">
         <div>
-          <div class="workflow-kicker">Step 2B · Audio Source</div>
           <h3>Audio bestimmen</h3>
         </div>
       </div>
@@ -119,7 +116,7 @@
           <option value="{{ t.stem }}">{{ t.label }}</option>
           {% endfor %}
         </select>
-        <p class="step-desc">Tracks aus <code>data/upload/songs/</code></p>
+
       </div>
 
       <!-- Option B: Generate new audio track -->
@@ -146,7 +143,7 @@
               </div>
             </div>
           </div>
-          <p class="step-desc" style="margin-top:12px;">Audio wird automatisch generiert wenn du unten auf "Video erstellen" drückst.</p>
+
         </div>
       </div>
       <input type="hidden" name="audio_job_id" id="audio_job_id" />
@@ -160,7 +157,6 @@
     <section class="step-card">
       <div class="step-card-header">
         <div>
-          <div class="workflow-kicker">Step 3 · Render Setup</div>
           <h3>Thumbnail, Rendering und Launch</h3>
         </div>
       </div>
@@ -174,7 +170,7 @@
           <option value="{{ t }}">{{ t }}</option>
           {% endfor %}
         </select>
-        <p class="step-desc">Wird nur für das Thumbnail benutzt · Verwaltung in der <a href="/admin/library">Library</a></p>
+
         <div id="thumbnail-source-preview" class="step-desc" style="margin-top:8px; padding:10px 12px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; background:rgba(255,255,255,0.03);">
           {% if prefill_thumbnail_source %}
           Voraussichtliche Quelle: <strong>{{ prefill_thumbnail_source.label }}</strong>{% if prefill_thumbnail_source.filename %} · {{ prefill_thumbnail_source.filename }}{% endif %}
@@ -192,7 +188,7 @@
           <option value="{{ bg }}">{{ bg }}</option>
           {% endfor %}
         </select>
-        <p class="step-desc">Wird nur fürs Video benutzt · Standard kommt sonst aus <code>data/assets/backgrounds/</code></p>
+
         <div id="background-source-preview" class="step-desc" style="margin-top:8px; padding:10px 12px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; background:rgba(255,255,255,0.03);">
           Voraussichtlicher Video-Hintergrund: <strong>Theme-Standard / automatisch</strong>
         </div>
