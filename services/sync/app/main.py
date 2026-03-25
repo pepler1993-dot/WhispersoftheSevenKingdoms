@@ -1635,7 +1635,7 @@ def admin_pipeline_start(
     )
     if not audio_found:
         return RedirectResponse(
-            url=f'/admin/pipeline/new?slug={slug}&error=Kein+Audio-Track+für+"{slug}"+gefunden.+Generiere+zuerst+einen+Track+über+"Neu+generieren+(Kaggle)".',
+            url=f'/admin/pipeline/new?slug={slug}&error=Kein+Audio-Track+für+"{slug}"+gefunden.+Generiere+zuerst+einen+Track+im+Audio+Lab.',
             status_code=303,
         )
 
