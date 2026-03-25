@@ -35,12 +35,14 @@ def _enrich_metadata_items(items: list[dict[str, str]]) -> list[dict[str, str]]:
 def admin_library(request: Request, success: str | None = Query(default=None), error: str | None = Query(default=None)):
     songs = _list_library_dir(PIPELINE_DIR / 'data' / 'upload' / 'songs', {'.mp3', '.wav', '.ogg'})
     thumbnails = _list_library_dir(PIPELINE_DIR / 'data' / 'upload' / 'thumbnails', {'.jpg', '.jpeg', '.png', '.webp'})
+    backgrounds = _list_library_dir(PIPELINE_DIR / 'data' / 'assets' / 'backgrounds', {'.jpg', '.jpeg', '.png', '.webp'})
     metadata = _enrich_metadata_items(_list_library_dir(PIPELINE_DIR / 'data' / 'upload' / 'metadata', {'.json', '.md'}))
     return shared.templates.TemplateResponse(request, 'library.html', {
         'request': request,
         'page': 'library',
         'songs': songs,
         'thumbnails': thumbnails,
+        'backgrounds': backgrounds,
         'metadata': metadata,
         'success_message': success or '',
         'error_message': error or '',
@@ -114,6 +116,7 @@ async def admin_library_upload(asset_type: str = Form(...), file: UploadFile = F
     mapping = {
         'songs': (PIPELINE_DIR / 'data' / 'upload' / 'songs', {'.mp3', '.wav', '.ogg'}),
         'thumbnails': (PIPELINE_DIR / 'data' / 'upload' / 'thumbnails', {'.jpg', '.jpeg', '.png', '.webp'}),
+        'backgrounds': (PIPELINE_DIR / 'data' / 'assets' / 'backgrounds', {'.jpg', '.jpeg', '.png', '.webp'}),
         'metadata': (PIPELINE_DIR / 'data' / 'upload' / 'metadata', {'.json', '.md'}),
     }
     if asset_type not in mapping:
@@ -135,6 +138,7 @@ def admin_library_preview(asset_type: str, filename: str):
     mapping = {
         'songs': PIPELINE_DIR / 'data' / 'upload' / 'songs',
         'thumbnails': PIPELINE_DIR / 'data' / 'upload' / 'thumbnails',
+        'backgrounds': PIPELINE_DIR / 'data' / 'assets' / 'backgrounds',
         'metadata': PIPELINE_DIR / 'data' / 'upload' / 'metadata',
     }
     if asset_type not in mapping:
