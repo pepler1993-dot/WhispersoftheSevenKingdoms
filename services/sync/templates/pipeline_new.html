@@ -594,7 +594,7 @@
 
 <script>
 (function() {
-  function selectDuration(hours) {
+  window.selectDuration = function selectDuration(hours) {
     document.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('active'));
     document.querySelector(`.duration-btn[data-hours="${hours}"]`).classList.add('active');
     document.getElementById('loop_hours').value = hours;
