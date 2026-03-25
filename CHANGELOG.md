@@ -3,6 +3,31 @@
 Alle relevanten Änderungen am Projekt werden hier dokumentiert.
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [v2.4.0] – 2026-03-25
+
+### Added
+- **Ticket-System**: Neuer Dashboard-Bereich `/admin/tickets` für Bugs, Features, Improvements
+  - Ticket-Formular, Detailseite mit Status-Änderung, Filter nach Typ/Status
+  - JSON API unter `/api/tickets`
+  - Eigenes Store-Modul `stores/tickets.py` (modulare Architektur)
+- **Audio Cancel Flow**: Echtes Cancellation mit State Guards (Jarvis, Co-authored)
+  - Cancel-Checks an allen kritischen Stages (Kaggle + Stable Audio)
+  - Final-State-Schutz (kein Cancel auf complete/cancelled/error)
+  - Cancelled als eigener UI-State (Warning statt Error)
+  - Cancel-Button auch im `downloading` State sichtbar
+
+### Changed
+- **Refactoring**: `main.py` von 2000 auf 85 Zeilen reduziert
+  - 10 Route-Module unter `app/routes/`
+  - Shared Helpers, Models, State ausgelagert
+  - Arbeitsanweisung für paralleles Arbeiten (Jarvis/Pako/Smith)
+
+### Fixed
+- Python 3.11 Kompatibilität (f-string Backslash)
+- Starlette 1.0 TemplateResponse Signatur-Änderung
+- DB aus Git-Tracking entfernt (verhindert Merge-Korruption)
+- `.venv/` in `.gitignore`
+
 ## [v2.1.0] – 2026-03-24
 
 ### Added
