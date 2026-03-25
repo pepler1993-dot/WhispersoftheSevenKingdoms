@@ -89,6 +89,28 @@
         "White noise filtered to sound like endless blizzard. Subtle warm undertone buried deep, like hope hidden in winter. Meditative, surrendering to cold. No melody.",
         "Very low frequency drone with crystalline high overtones. The sound of deep winter, absolute stillness beneath the storm. 30 BPM barely perceptible pulse. No drums."
       ]
+    },
+    "background_prompts": {
+      "winterfell": {
+        "prompt": "Dark frozen castle at night, snow falling gently, warm light from windows, direwolf silhouette, northern lights in sky, photorealistic, 1920x1080",
+        "bg_key": "stark_winterfell"
+      },
+      "godswood": {
+        "prompt": "Ancient weirwood tree with red leaves in moonlit forest clearing, gentle mist, carved face glowing, sacred atmosphere, 1920x1080",
+        "bg_key": "stark_godswood"
+      },
+      "the_crypts": {
+        "prompt": "Deep underground stone corridor with torches, ancient statues of kings, fog on ground, cold blue light, 1920x1080",
+        "bg_key": "stark_crypts"
+      },
+      "beyond_winterfell": {
+        "prompt": "Vast snowy wilderness with pine forest, wolf tracks in snow, northern lights, distant mountains, 1920x1080",
+        "bg_key": "stark_beyond"
+      },
+      "the_long_night": {
+        "prompt": "Endless blizzard, pure white and dark blue, barely visible landscape, absolute winter, minimal, 1920x1080",
+        "bg_key": "stark_longnight"
+      }
     }
   },
   "lannister": {
@@ -181,6 +203,28 @@
         "Deep warm pad with distant harp ornaments. The sound of a feast winding down, guests falling asleep. Rich, satisfied, peaceful. No rhythm.",
         "Solo flute playing a gentle lullaby in a warm hall. Fire embers, silk curtains rustling. The lion sleeps tonight. 50 BPM, extremely quiet. No percussion."
       ]
+    },
+    "background_prompts": {
+      "casterly_rock": {
+        "prompt": "Golden cliff fortress overlooking the sea at sunset, warm golden light, lion banners, opulent, 1920x1080",
+        "bg_key": "lannister_casterly"
+      },
+      "kings_landing": {
+        "prompt": "Red Keep at night with torchlight, Blackwater Bay below, warm Mediterranean atmosphere, 1920x1080",
+        "bg_key": "lannister_kingslanding"
+      },
+      "castamere": {
+        "prompt": "Ruined castle in rain, grey stone crumbling, melancholic atmosphere, distant lightning, 1920x1080",
+        "bg_key": "lannister_castamere"
+      },
+      "the_sept": {
+        "prompt": "Cathedral interior with hundreds of candles, stained glass, golden light, sacred silence, 1920x1080",
+        "bg_key": "lannister_sept"
+      },
+      "lannister_feast": {
+        "prompt": "Grand banquet hall with roaring fireplace, long wooden table, warm candlelight, red and gold tapestries, 1920x1080",
+        "bg_key": "lannister_feast"
+      }
     }
   },
   "targaryen": {
@@ -273,6 +317,28 @@
         "Soft female voice pad (no lyrics) over deep fire drone. Blood-red warmth, ancient rite atmosphere. Rebirth, transformation. 40 BPM. No drums.",
         "Sub-bass drone with crackling fire overtones. Dragon egg hatching textures, shell cracking. New beginning from fire. Extremely slow. No percussion."
       ]
+    },
+    "background_prompts": {
+      "dragonstone": {
+        "prompt": "Dark volcanic island fortress at dusk, crashing waves, dragon-shaped architecture, red sky, 1920x1080",
+        "bg_key": "targaryen_dragonstone"
+      },
+      "old_valyria": {
+        "prompt": "Ancient ruined city with glowing magical crystals, volcanic landscape, ethereal mist, lost civilization, 1920x1080",
+        "bg_key": "targaryen_valyria"
+      },
+      "dragons_lair": {
+        "prompt": "Deep cave with glowing embers, dragon sleeping on gold hoard, warm orange light, vast underground, 1920x1080",
+        "bg_key": "targaryen_lair"
+      },
+      "the_painted_table": {
+        "prompt": "Dark stone room with carved map table, single candle, war planning atmosphere, dramatic shadows, 1920x1080",
+        "bg_key": "targaryen_table"
+      },
+      "fire_and_blood": {
+        "prompt": "Ritual fire in ancient temple, dragon eggs, red and black atmosphere, primal power, 1920x1080",
+        "bg_key": "targaryen_fire"
+      }
     }
   },
   "baratheon": {
@@ -364,6 +430,28 @@
         "Gentle tide on rocky beach with soft wind. Seagull in distance, driftwood creaking. Morning after the storm. Quiet, washed clean. No drums.",
         "Layered ocean ambient at night. Close waves, distant swells, deep current. The bay at rest, briefly. Hypnotic, endless. No percussion."
       ]
+    },
+    "background_prompts": {
+      "storms_end": {
+        "prompt": "Massive coastal fortress in thunderstorm, crashing waves, lightning, dramatic sky, 1920x1080",
+        "bg_key": "baratheon_stormsend"
+      },
+      "the_stormlands": {
+        "prompt": "Wild forest in heavy rain, ancient oaks bending in wind, dark dramatic atmosphere, 1920x1080",
+        "bg_key": "baratheon_stormlands"
+      },
+      "roberts_rebellion": {
+        "prompt": "Battlefield at dawn, mist rising, abandoned weapons, peaceful aftermath, golden sunrise, 1920x1080",
+        "bg_key": "baratheon_rebellion"
+      },
+      "the_great_hall": {
+        "prompt": "Warm great hall with roaring hearth, hunting trophies, wooden beams, feast aftermath, 1920x1080",
+        "bg_key": "baratheon_hall"
+      },
+      "shipbreaker_bay": {
+        "prompt": "Rocky coastline with violent waves at night, lighthouse beam cutting through fog, 1920x1080",
+        "bg_key": "baratheon_shipbreaker"
+      }
     }
   },
   "arryn": {
@@ -456,6 +544,28 @@
         "Deep cold drone with occasional eagle cry. Moonlight on stone, open wall to nothing. Meditative resignation. No drums.",
         "Layered wind and silence alternating. The purest ambient: sky, stone, breath. Nothing else exists. No percussion, no melody."
       ]
+    },
+    "background_prompts": {
+      "the_eyrie": {
+        "prompt": "White castle on mountaintop above clouds, eagles soaring, crystal clear sky, ethereal, 1920x1080",
+        "bg_key": "arryn_eyrie"
+      },
+      "the_vale": {
+        "prompt": "Lush green valley surrounded by mountains, gentle river, wildflowers, warm sunshine, 1920x1080",
+        "bg_key": "arryn_vale"
+      },
+      "the_moon_door": {
+        "prompt": "Open doorway in castle wall showing vast drop into clouds below, vertigo perspective, cold blue, 1920x1080",
+        "bg_key": "arryn_moondoor"
+      },
+      "the_bloody_gate": {
+        "prompt": "Narrow mountain pass between towering cliffs, stone gate, misty, guardian atmosphere, 1920x1080",
+        "bg_key": "arryn_bloodygate"
+      },
+      "sky_cells": {
+        "prompt": "Open-air prison cell on cliff edge, stars visible, vast night sky, freedom in captivity, 1920x1080",
+        "bg_key": "arryn_skycells"
+      }
     }
   },
   "tully": {
@@ -548,6 +658,28 @@
         "Ambient pad with bridge-stone echo. River below, stars above. Meeting point, in-between space. No melody, no beats.",
         "Gentle harp with water spray textures. Evening at the crossing, both sides at peace. Bridge as connection, not barrier. No percussion."
       ]
+    },
+    "background_prompts": {
+      "riverrun": {
+        "prompt": "Castle between two rivers at golden hour, flowing water, stone bridge, peaceful, 1920x1080",
+        "bg_key": "tully_riverrun"
+      },
+      "the_trident": {
+        "prompt": "Great river with three forks at sunset, wide and peaceful, golden reflections, 1920x1080",
+        "bg_key": "tully_trident"
+      },
+      "the_riverlands": {
+        "prompt": "Fertile farmland with gentle rain, wheat fields, distant village, green and golden, 1920x1080",
+        "bg_key": "tully_riverlands"
+      },
+      "harrenhal": {
+        "prompt": "Massive melted ruins of enormous castle, dark and haunting, dragon-fire scarred towers, 1920x1080",
+        "bg_key": "tully_harrenhal"
+      },
+      "the_twins": {
+        "prompt": "Twin castle towers connected by stone bridge over wide river, moonlight, 1920x1080",
+        "bg_key": "tully_twins"
+      }
     }
   },
   "tyrell": {
@@ -640,6 +772,28 @@
         "Solo flute in moonlit garden acoustic. Water lily textures, frog chorus very distant. Nature's night music. 45 BPM, extremely quiet. No drums.",
         "Layered ambient: fountain, night insects, gentle breeze through roses. The most beautiful place in Westeros, at night. No percussion."
       ]
+    },
+    "background_prompts": {
+      "highgarden": {
+        "prompt": "Beautiful rose garden in warm sunlight, castle in background, butterflies, fountain, 1920x1080",
+        "bg_key": "tyrell_highgarden"
+      },
+      "the_reach": {
+        "prompt": "Golden wheat fields stretching to horizon, warm summer sunset, rolling hills, 1920x1080",
+        "bg_key": "tyrell_reach"
+      },
+      "oldtown": {
+        "prompt": "Ancient library with towering bookshelves, candlelight, Hightower visible through window, 1920x1080",
+        "bg_key": "tyrell_oldtown"
+      },
+      "the_arbor": {
+        "prompt": "Mediterranean vineyard at sunset, grapevines, warm sea in background, golden light, 1920x1080",
+        "bg_key": "tyrell_arbor"
+      },
+      "rose_garden": {
+        "prompt": "Moonlit rose garden with fountain, fireflies, night-blooming flowers, magical, 1920x1080",
+        "bg_key": "tyrell_rosegarden"
+      }
     }
   },
   "greyjoy": {
@@ -732,6 +886,28 @@
         "Layered ambient: old tide, old wind, old stone. Nothing new on Old Wyk, only eternal. No drums.",
         "Deep resonant drone like the island itself humming. Primordial, pre-history, the bedrock of iron. 30 BPM pulse. No percussion."
       ]
+    },
+    "background_prompts": {
+      "pyke": {
+        "prompt": "Dark iron fortress on sea cliffs, crashing waves, fog, stone bridges between towers, 1920x1080",
+        "bg_key": "greyjoy_pyke"
+      },
+      "the_iron_islands": {
+        "prompt": "Rocky barren island shores, rough sea, fishing boats, grey stormy sky, 1920x1080",
+        "bg_key": "greyjoy_ironislands"
+      },
+      "the_drowned_god": {
+        "prompt": "Underwater temple with bioluminescent light, deep ocean, ancient stone altar, 1920x1080",
+        "bg_key": "greyjoy_drownedgod"
+      },
+      "the_silence": {
+        "prompt": "Ghost ship drifting in dead calm foggy sea, eerie green light, no wind, 1920x1080",
+        "bg_key": "greyjoy_silence"
+      },
+      "old_wyk": {
+        "prompt": "Ancient island with standing stones on cliff, prehistoric atmosphere, moss and lichen, 1920x1080",
+        "bg_key": "greyjoy_oldwyk"
+      }
     }
   },
   "martell": {
@@ -824,6 +1000,28 @@
         "Layered ambient: sand against walls, interior echo, distant hawk. The fortress that never fell. No beats.",
         "Warm pad with sun-baked stone textures. Evening cool settling on ancient walls. Martell persistence as lullaby. No percussion."
       ]
+    },
+    "background_prompts": {
+      "sunspear": {
+        "prompt": "Desert palace at sunset, warm sandstone, orange groves, spear and sun banner, 1920x1080",
+        "bg_key": "martell_sunspear"
+      },
+      "water_gardens": {
+        "prompt": "Beautiful fountain courtyard with palm trees, cool water pools, warm evening light, 1920x1080",
+        "bg_key": "martell_watergardens"
+      },
+      "the_desert": {
+        "prompt": "Vast sand dunes under starry night sky, campfire glow, Milky Way visible, 1920x1080",
+        "bg_key": "martell_desert"
+      },
+      "the_shadow_city": {
+        "prompt": "Narrow desert city streets at night, warm lanterns, spice market closed, mysterious, 1920x1080",
+        "bg_key": "martell_shadowcity"
+      },
+      "the_sandship": {
+        "prompt": "Ancient sandstone fortress in desert, wind-worn walls, sunset, unbowed strength, 1920x1080",
+        "bg_key": "martell_sandship"
+      }
     }
   },
   "the_wall": {
@@ -916,6 +1114,28 @@
         "Layered emptiness: wind through empty windows, snow drift, frozen rope swinging. No one here, finally peaceful. No drums.",
         "Sub-bass rumble with blizzard textures. Hardhome remembered only by the ice. The coldest sleep, the deepest rest. No percussion."
       ]
+    },
+    "background_prompts": {
+      "castle_black": {
+        "prompt": "Dark fortress at base of massive ice wall, torches, Night's Watch cloaks, 1920x1080",
+        "bg_key": "wall_castleblack"
+      },
+      "the_wall_top": {
+        "prompt": "View from top of 700-foot ice wall, endless frozen landscape north, wind, 1920x1080",
+        "bg_key": "wall_top"
+      },
+      "beyond_the_wall": {
+        "prompt": "Frozen wasteland with dead trees, blue-white landscape, desolate, haunting beauty, 1920x1080",
+        "bg_key": "wall_beyond"
+      },
+      "the_haunted_forest": {
+        "prompt": "Dark frozen forest with twisted trees, snow, eerie shadows, unseen danger, 1920x1080",
+        "bg_key": "wall_hauntedforest"
+      },
+      "hardhome": {
+        "prompt": "Abandoned wildling village in snow, broken structures, eerie silence, Arctic, 1920x1080",
+        "bg_key": "wall_hardhome"
+      }
     }
   }
 }

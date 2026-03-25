@@ -738,6 +738,15 @@
             document.getElementById('slug').value = slugify(vName);
             document.getElementById('theme').value = vName;
             document.getElementById('assets-slug').textContent = slugify(vName);
+            // Auto-select background image from preset
+            const bgPrompts = house.background_prompts || {};
+            const bgData = bgPrompts[vKey];
+            if (bgData && bgData.bg_key) {
+              const bgSelect = document.getElementById('library-background');
+              const bgFile = bgData.bg_key + '.jpg';
+              const opt = [...bgSelect.options].find(o => o.value === bgFile);
+              if (opt) { bgSelect.value = bgFile; }
+            }
             // Update title with variant
             const duration = (document.getElementById('loop_hours').value || 3) + ' Hours';
             titleInput.value = vName + ' – ' + duration + ' Sleep Music | Whispers of the Seven Kingdoms';
