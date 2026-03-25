@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Neues Ticket{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Neues Ticket</h1>
+  <div class="page-subtitle">Bug melden, Feature anfragen oder Verbesserung vorschlagen.</div>
+</div>
+
+<section class="panel" style="max-width: 700px;">
+  <form method="post" action="/admin/tickets/create" class="ticket-form">
+    <div class="form-group">
+      <label for="title">Titel *</label>
+      <input type="text" id="title" name="title" required placeholder="Kurze Beschreibung des Problems/Wunsches" class="form-input" />
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="type">Typ</label>
+        <select id="type" name="type" class="form-input">
+          <option value="bug">🐛 Bug</option>
+          <option value="feature">✨ Feature</option>
+          <option value="improvement">🔧 Verbesserung</option>
+          <option value="task">📋 Task</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="priority">Priorität</label>
+        <select id="priority" name="priority" class="form-input">
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+          <option value="critical">Critical</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Beschreibung</label>
+      <textarea id="description" name="description" rows="6" placeholder="Was genau passiert? Was sollte stattdessen passieren? Schritte zum Reproduzieren?" class="form-input"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="created_by">Erstellt von</label>
+      <select id="created_by" name="created_by" class="form-input">
+        <option value="Eddi">Eddi</option>
+        <option value="Kevin">Kevin</option>
+        <option value="Iwan">Iwan</option>
+        <option value="Smith">Smith</option>
+        <option value="Jarvis">Jarvis</option>
+        <option value="Pako">Pako</option>
+      </select>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Ticket erstellen</button>
+      <a href="/admin/tickets" class="btn btn-secondary">Abbrechen</a>
+    </div>
+  </form>
+</section>
+
+<style>
+  .ticket-form .form-group { margin-bottom: 16px; }
+  .ticket-form label { display: block; margin-bottom: 6px; font-weight: 500; color: var(--text-secondary); font-size: 13px; }
+  .ticket-form .form-input { width: 100%; padding: 10px 12px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-size: 14px; }
+  .ticket-form .form-input:focus { border-color: var(--accent); outline: none; }
+  .ticket-form textarea.form-input { resize: vertical; font-family: inherit; }
+  .ticket-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .ticket-form .form-actions { display: flex; gap: 10px; margin-top: 20px; }
+  @media (max-width: 600px) { .ticket-form .form-row { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}

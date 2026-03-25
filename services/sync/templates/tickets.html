@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}Tickets{% endblock %}
+{% block content %}
+<div class="page-header page-header-flex">
+  <div>
+    <h1>Tickets</h1>
+    <div class="page-subtitle">Bugs, Features und Verbesserungen — direkt aus dem Dashboard verwalten.</div>
+  </div>
+  <div class="header-actions">
+    <a href="/admin/tickets/new" class="btn btn-primary btn-sm">
+      <i data-lucide="plus" style="width:14px;height:14px"></i> Neues Ticket
+    </a>
+  </div>
+</div>
+
+<section class="ops-summary-grid">
+  <div class="panel panel-accent-blue ops-metric">
+    <div class="label">Offen</div>
+    <div class="value">{{ counts.get('open', 0) }}</div>
+  </div>
+  <div class="panel panel-accent-gold ops-metric">
+    <div class="label">In Arbeit</div>
+    <div class="value">{{ counts.get('in_progress', 0) }}</div>
+  </div>
+  <div class="panel panel-accent-teal ops-metric">
+    <div class="label">Erledigt</div>
+    <div class="value">{{ counts.get('done', 0) }}</div>
+  </div>
+  <div class="panel panel-accent-purple ops-metric">
+    <div class="label">Gesamt</div>
+    <div class="value">{{ tickets|length }}</div>
+  </div>
+</section>
+
+<form method="get" class="filters panel inline-form">
+  <select name="status">
+    <option value="" {% if filter_status == 'all' %}selected{% endif %}>Alle Status</option>
+    <option value="open" {% if filter_status == 'open' %}selected{% endif %}>Offen</option>
+    <option value="in_progress" {% if filter_status == 'in_progress' %}selected{% endif %}>In Arbeit</option>
+    <option value="done" {% if filter_status == 'done' %}selected{% endif %}>Erledigt</option>
+    <option value="closed" {% if filter_status == 'closed' %}selected{% endif %}>Geschlossen</option>
+  </select>
+  <select name="ticket_type">
+    <option value="" {% if filter_type == 'all' %}selected{% endif %}>Alle Typen</option>
+    <option value="bug" {% if filter_type == 'bug' %}selected{% endif %}>🐛 Bug</option>
+    <option value="feature" {% if filter_type == 'feature' %}selected{% endif %}>✨ Feature</option>
+    <option value="improvement" {% if filter_type == 'improvement' %}selected{% endif %}>🔧 Verbesserung</option>
+    <option value="task" {% if filter_type == 'task' %}selected{% endif %}>📋 Task</option>
+  </select>
+  <button type="submit" class="btn btn-secondary btn-sm">Filtern</button>
+</form>
+
+<section class="panel">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Titel</th>
+          <th>Typ</th>
+          <th>Priorität</th>
+          <th>Status</th>
+          <th>Erstellt von</th>
+          <th>Erstellt</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in tickets %}
+        <tr>
+          <td data-label="ID"><a href="/admin/tickets/{{ t.ticket_id }}"><code>{{ t.ticket_id }}</code></a></td>
+          <td data-label="Titel"><a href="/admin/tickets/{{ t.ticket_id }}">{{ t.title }}</a></td>
+          <td data-label="Typ">
+            {% if t.type == 'bug' %}🐛 Bug
+            {% elif t.type == 'feature' %}✨ Feature
+            {% elif t.type == 'improvement' %}🔧 Verbesserung
+            {% else %}📋 {{ t.type|capitalize }}{% endif %}
+          </td>
+          <td data-label="Priorität">
+            <span class="badge {% if t.priority == 'critical' %}stale{% elif t.priority == 'high' %}running{% elif t.priority == 'medium' %}waiting{% else %}completed{% endif %}">
+              {{ t.priority|capitalize }}
+            </span>
+          </td>
+          <td data-label="Status">
+            <span class="badge {% if t.status == 'open' %}waiting{% elif t.status == 'in_progress' %}running{% elif t.status == 'done' %}completed{% else %}stale{% endif %}">
+              {{ t.status|replace('_', ' ')|capitalize }}
+            </span>
+          </td>
+          <td data-label="Erstellt von">{{ t.created_by or '—' }}</td>
+          <td data-label="Erstellt">{{ t.created_at[:10] }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="empty-state">Keine Tickets vorhanden — <a href="/admin/tickets/new">Erstes Ticket erstellen</a></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
