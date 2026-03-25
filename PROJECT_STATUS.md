@@ -1,5 +1,5 @@
 # PROJECT STATUS – Whispers of the Seven Kingdoms
-> Letzte Aktualisierung: 2026-03-25T13:00:01Z
+> Letzte Aktualisierung: 2026-03-25T19:00:01Z
 > Aktualisiert von: Smith
 
 **Agents: Lest diese Datei zuerst. Sie enthält alles was ihr wissen müsst.**
@@ -201,8 +201,24 @@ cc1dc9a feat(audio-lab): pass house_templates to audio page (#63)
 ---
 *Diese Datei wird bei jedem Meilenstein aktualisiert. Smith pflegt sie.*
 
-## 🕐 Letzte Commits (auto-generated 2026-03-25T13:00:01Z)
+
+## 🕐 Letzte Commits (auto-generated 2026-03-25T19:00:01Z)
 ```
+a60d1b6 docs: v2.8.0 release notes - branding automation
+1064c6b feat(branding): auto-timestamps, cross-pollination playlists, endscreen (#8a8b4565 #6567f7d5 #08a9a3e2)
+d5275f8 feat(library): manage video backgrounds in library
+4deffb4 feat(pipeline): auto-description integration + metadata preview API (#ad9d134c)
+d3dfbf4 feat(pipeline): show thumbnail source in runs overview (#6e27a315)
+e049c53 feat(pipeline): separate thumbnail and video background inputs
+c781b77 docs: v2.7.1 release notes + deploy rules in PROJECT_STATUS
+0b5f114 fix(audio): steps parameter now passed from UI to generator (#11bd5b4d)
+0cf3b9f refine(library): harden metadata form workflow
+36fba57 feat(library): add metadata creation form
+5fd7221 fix(audio): accurate time estimates based on actual clip render time (#11bd5b4d)
+c87cbd6 fix(audio): correct time estimate in job logs (#11bd5b4d)
+1f9ad2d feat(audio): enhance prompts for all remaining houses
+e057d0a feat(audio): improve quality - 40 steps default, better prompts, loudnorm
+2dcfe40 auto: update PROJECT_STATUS.md (2026-03-25T13:00:01Z)
 bca903a Merge jarvis/audio-lab-loadtime: async health check on audio page
 c85bab4 docs: v2.7.0 release notes
 0c6d5b4 feat(gpu): live GPU metrics widget on dashboard (#9ce9b100)
@@ -223,25 +239,5 @@ e25eaa9 docs: v2.6.0 release notes
 7fbaed7 fix: redirect / to /admin
 bbb97c9 docs: v2.4.0 release notes
 5d7370c feat(audio): proper cancel flow with state guards + cancelled UI
-2f683d2 feat(tickets): add ticket system - routes, store, templates, nav
-5756aa5 chore: remove DB from tracking, add .venv to gitignore
-0d24fe0 fix: Starlette 1.0 TemplateResponse compat (request as first arg)
-7d890d6 fix: Python 3.11 compat - no backslash in f-string expr
-b5bd8d5 docs: add parallel work guidelines for agents
-7bec9e6 refactor: split main.py into modular FastAPI routers
-4ed204e docs(backlog): mark done items, split backlogs per agent
-7534219 Merge branch 'smith/task-fixes'
-8f0a38b Merge remote-tracking branch 'origin/jarvis/claim-expiry-hardening-2026-03-25'
-d7b9478 feat(sync): add protocol health visibility for claims
-e002528 refactor(audio): remove Kaggle UI, default to GPU worker
-ca23901 fix(slug): auto-generate from title, remove manual slug input
-35c971d Merge remote-tracking branch 'origin/feature/auto-slug'
-2068890 docs(status): record claim status and pako slug ownership
-e75964b docs(backlog): add audio-pipeline workflow follow-ups
-bbdc458 Integrate automatic slug generation in frontend and backend
-65cdb39 Add automatic slug generation script
-34e73df Delete testfile.md
-27b2140 Add testfile.md
-44c91e0 auto: update PROJECT_STATUS.md (2026-03-25T07:00:02Z)
 ```
 ---
