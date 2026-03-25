@@ -1,480 +1,242 @@
 {
-  "winterfell": {
+  "stark": {
     "display_name": "Winterfell",
+    "house": "House Stark",
+    "motto": "Winter is Coming",
+    "seat": "Winterfell",
     "sigil": "🐺",
-    "house": "Stark",
-    "color": "#82B4DC",
-    "bg_color": "#0F192D",
-    "moods": [
-      "calm",
-      "cold",
-      "melancholic",
-      "peaceful",
-      "meditative"
-    ],
-    "default_mood": [
-      "calm",
-      "cold"
-    ],
-    "title_template": "Whispers of Winterfell – {duration} Deep Sleep & Relaxation Music",
-    "defaults": {
-      "minutes": 42,
-      "loop_hours": 3,
-      "crossfade": 8,
-      "audio_preset": "ambient",
-      "music_tempo": "slow",
-      "music_energy": "low"
-    },
-    "music_brief": {
-      "style": "nordic ambient sleep music",
-      "influences": [
-        "frozen northern castle",
-        "soft piano",
-        "cold wind textures",
-        "gentle strings",
-        "crackling fireplace"
-      ],
-      "avoid": [
-        "drums",
-        "vocals",
-        "sudden changes",
-        "harsh percussion"
-      ]
-    },
-    "thumbnail_brief": {
-      "scene": "Winterfell at night in cold blue moonlight",
-      "style": "dark, atmospheric, cold tones",
-      "elements": [
-        "snow",
-        "castle silhouette",
-        "soft fog",
-        "moonlight"
-      ]
-    },
+    "color": "#7eb8d4",
+    "bg_color": "#0f192d",
+    "mood": "cold",
     "prompts": [
       "Gentle ambient sleep music inspired by a frozen northern castle. Soft piano melody with reverb over sustained string pads and cold wind textures. Slow tempo at 60 BPM, very quiet dynamics. Calm, meditative, melancholic. No vocals, no drums, no percussion.",
       "Deep ambient drone with layered cello harmonics. Distant choir-like pad sounds, frost crystallizing textures, subtle low-frequency warmth. Extremely slow evolution, hypnotic repetition. No rhythm, no beats.",
       "Soft fingerpicked acoustic guitar with heavy hall reverb. Gentle sustained violin notes, breathing wind textures, falling snow ambience. 55 BPM, pianissimo dynamics throughout. Peaceful, nostalgic, bittersweet.",
       "Warm analog synth pad slowly evolving over 30 seconds. Subtle granular ice textures, distant low brass warmth, soft filtered noise resembling blizzard. Ambient, formless, deeply relaxing. No melody, no rhythm.",
       "Delicate music box melody with extreme reverb and delay. Soft string ensemble sustain, winter wind field recording blended underneath. Very slow, barely moving. Lullaby-like, ancient, frozen in time."
-    ]
+    ],
+    "variants": {
+      "winterfell": "The castle at night – snow, hearth, direwolves",
+      "godswood": "Ancient weirwood trees, meditation, nature sounds",
+      "the_crypts": "Deep below Winterfell, echoing stone, ancestors",
+      "beyond_winterfell": "The Wolfswood, cold streams, northern wilderness",
+      "the_long_night": "Deep winter, howling wind, endless darkness"
+    }
   },
-  "kings_landing": {
-    "display_name": "King's Landing",
-    "sigil": "👑",
-    "house": "Lannister",
-    "color": "#DCA850",
-    "bg_color": "#2D190A",
-    "moods": [
-      "warm",
-      "regal",
-      "peaceful",
-      "elegant",
-      "calm"
-    ],
-    "default_mood": [
-      "warm",
-      "regal"
-    ],
-    "title_template": "Echoes of King's Landing – {duration} Deep Sleep & Relaxation Music",
-    "defaults": {
-      "minutes": 42,
-      "loop_hours": 3,
-      "crossfade": 8,
-      "audio_preset": "ambient",
-      "music_tempo": "slow",
-      "music_energy": "low"
-    },
-    "music_brief": {
-      "style": "warm ambient sleep music with mediterranean influences",
-      "influences": [
-        "royal palace",
-        "candlelit halls",
-        "warm evening breeze",
-        "gentle harp",
-        "soft strings"
-      ],
-      "avoid": [
-        "drums",
-        "vocals",
-        "sudden changes"
-      ]
-    },
-    "thumbnail_brief": {
-      "scene": "King's Landing palace at golden sunset",
-      "style": "warm, golden tones, regal",
-      "elements": [
-        "golden light",
-        "palace towers",
-        "warm haze",
-        "evening sky"
-      ]
-    },
+  "lannister": {
+    "display_name": "Casterly Rock",
+    "house": "House Lannister",
+    "motto": "Hear Me Roar",
+    "seat": "Casterly Rock",
+    "sigil": "🦁",
+    "color": "#d4a843",
+    "bg_color": "#2d1a0a",
+    "mood": "warm",
     "prompts": [
       "Warm ambient music with gentle classical harp arpeggios and soft legato strings. Mediterranean summer night atmosphere. 65 BPM, mezzo-piano dynamics. Royal, elegant, peaceful. No vocals, no drums.",
       "Soft baroque-inspired harpsichord with heavy reverb and warm pad underneath. Distant flute ornaments, candlelight atmosphere. Slow and stately, rich harmonic movement. No percussion.",
       "Lush string quartet playing very softly, slow sustained bowing. Gentle harp glissandos, warm room reverb. Regal and intimate, like a quiet evening in a palace. 58 BPM, pianissimo.",
       "Ambient pad with golden warm timbre, subtle plucked lute melody. Soft choir aahs in the distance, Mediterranean breeze textures. Deeply calming, opulent, sleepy. No rhythm section.",
       "Solo classical guitar with nylon strings, slow tremolo technique. Warm string pad accompaniment, distant bell tower chimes. Peaceful night in an ancient city. Very quiet, very slow."
-    ]
+    ],
+    "variants": {
+      "casterly_rock": "The golden halls, wealth and power, warm torchlight",
+      "kings_landing": "The Red Keep at night, throne room, Blackwater Bay",
+      "castamere": "Ruins in the rain, melancholic cello, faded glory",
+      "the_sept": "Sept of Baelor, candlelight, choir echoes",
+      "lannister_feast": "Grand banquet, soft harp, wine and warmth"
+    }
   },
   "targaryen": {
-    "display_name": "Targaryen",
+    "display_name": "Dragonstone",
+    "house": "House Targaryen",
+    "motto": "Fire and Blood",
+    "seat": "Dragonstone",
     "sigil": "🐉",
-    "house": "Targaryen",
-    "color": "#C83C28",
-    "bg_color": "#280A0A",
-    "moods": [
-      "dark",
-      "ethereal",
-      "mystical",
-      "ancient",
-      "vast"
-    ],
-    "default_mood": [
-      "dark",
-      "ethereal"
-    ],
-    "title_template": "Targaryen Dreams – {duration} Deep Sleep & Dark Ambient Music",
-    "defaults": {
-      "minutes": 42,
-      "loop_hours": 3,
-      "crossfade": 8,
-      "audio_preset": "dark",
-      "music_tempo": "very slow",
-      "music_energy": "low"
-    },
-    "music_brief": {
-      "style": "dark ethereal ambient, mystical sleep music",
-      "influences": [
-        "ancient dragon lore",
-        "deep drones",
-        "mystical atmosphere",
-        "soft choir pads"
-      ],
-      "avoid": [
-        "drums",
-        "vocals",
-        "bright melodies",
-        "sudden changes"
-      ]
-    },
-    "thumbnail_brief": {
-      "scene": "Dragon silhouette against a blood-red sky at night",
-      "style": "dark, dramatic, red and black tones",
-      "elements": [
-        "dragon shadow",
-        "fire glow",
-        "dark clouds",
-        "ancient ruins"
-      ]
-    },
+    "color": "#c44040",
+    "bg_color": "#1a0a0a",
+    "mood": "mystical",
     "prompts": [
       "Ethereal ambient music with mysterious dark choir pads and ancient temple atmosphere. Deep reverb on everything, subtle dragon-breath wind textures. 55 BPM, pianissimo dynamics. No vocals, no drums, no percussion.",
       "Dark ambient drone with layered low brass sustain and shimmering high-frequency textures like distant fire. Slow evolving pad, mystical and otherworldly. Extremely minimal movement. No rhythm, no melody.",
       "Soft duduk-like woodwind melody with heavy reverb over warm analog synth pad. Volcanic heat atmosphere, embers floating. 50 BPM, very quiet. Ancient, powerful yet peaceful. No drums.",
       "Deep cello sustained notes with granular fire crackle textures blended underneath. Distant ethereal female voice pad (not lyrics, just texture). Dark, meditative, timeless. No beats.",
       "Warm string ensemble playing extremely slowly, each note lasting 8 seconds. Subtle metallic shimmer textures, heat haze atmosphere. Royal and ancient, deeply hypnotic. No percussion."
-    ]
+    ],
+    "variants": {
+      "dragonstone": "Volcanic shores, ancient fortress, crashing waves",
+      "old_valyria": "Lost civilization, ethereal ruins, distant magic",
+      "dragons_lair": "Dragon breath, embers, deep cave echoes",
+      "the_painted_table": "War council, flickering candles, strategy",
+      "fire_and_blood": "Ritual fire, chanting, primal power"
+    }
   },
-  "the_wall": {
-    "display_name": "The Wall",
-    "sigil": "🧊",
-    "house": "Night's Watch",
-    "color": "#A0B8D0",
-    "bg_color": "#0A1420",
-    "moods": [
-      "dark",
-      "cold",
-      "vast",
-      "desolate",
-      "meditative"
-    ],
-    "default_mood": [
-      "dark",
-      "cold"
-    ],
-    "title_template": "Beyond The Wall – {duration} Deep Sleep & Dark Ambient Music",
-    "defaults": {
-      "minutes": 42,
-      "loop_hours": 3,
-      "crossfade": 8,
-      "audio_preset": "dark",
-      "music_tempo": "very slow",
-      "music_energy": "minimal"
-    },
-    "music_brief": {
-      "style": "dark ambient, frozen landscape soundscape",
-      "influences": [
-        "ice and wind",
-        "vast emptiness",
-        "deep drones",
-        "distant horns",
-        "frozen silence"
-      ],
-      "avoid": [
-        "drums",
-        "vocals",
-        "bright melodies",
-        "fast tempo"
-      ]
-    },
-    "thumbnail_brief": {
-      "scene": "The Wall towering in darkness with aurora borealis",
-      "style": "dark, icy, vast, minimal",
-      "elements": [
-        "ice wall",
-        "northern lights",
-        "snow",
-        "darkness"
-      ]
-    },
+  "baratheon": {
+    "display_name": "Storm's End",
+    "house": "House Baratheon",
+    "motto": "Ours is the Fury",
+    "seat": "Storm's End",
+    "sigil": "🦌",
+    "color": "#e8c840",
+    "bg_color": "#1a1a0a",
+    "mood": "dark",
     "prompts": [
-      "Dark ambient music with frozen wasteland atmosphere. Deep bass drones at 30Hz, howling arctic wind field recordings. Vast, desolate, endless. Extremely slow evolution. No melody, no rhythm, no vocals.",
-      "Ice cave ambience with resonant dripping textures and deep sub-bass rumble. Distant horn call echoing across tundra. 40 BPM at most, barely perceptible pulse. Isolating, cold, immense.",
-      "Low cello drone with heavy distortion and reverb. Blizzard wind noise layered with granular ice crystal textures. Dark, foreboding, hypnotic. No percussion, no vocals.",
-      "Massive reverb space with occasional deep brass stabs fading into silence. Wind howl textures, frozen ground creaking sounds. Sparse, monumental, lonely. Each sound event 20+ seconds apart.",
-      "Soft filtered white noise resembling arctic wind over deep warm pad. Subtle pitch bending, glacial movement. Meditative and vast, like standing at the edge of the world. No drums, no melody."
-    ]
+      "Dark ambient music with distant thunder and heavy rain on stone walls. Deep brass drones, storm energy, fortress atmosphere. 55 BPM, mezzo-piano dynamics. Powerful yet calming. No vocals, no drums.",
+      "Stormy coastal ambient with crashing waves and howling wind. Deep cello sustain, occasional lightning flash textures. Raw, untamed, majestic. No rhythm, no percussion.",
+      "Warm fireplace ambience inside a stone fortress during a storm. Soft piano melody with rain percussion outside. Cozy despite the fury. 50 BPM, pianissimo. No vocals.",
+      "Deep war drum heartbeat at 40 BPM (very subtle) with storm ambient overlay. Brass warmth, distant thunder rolling. Noble, strong, protective. No melody.",
+      "Solo violin melody with heavy reverb in a great hall. Rain against windows, wind howling outside. Bittersweet strength, resilient beauty. 52 BPM, very quiet."
+    ],
+    "variants": {
+      "storms_end": "Coastal fortress, endless storms, crashing waves",
+      "the_stormlands": "Wild forests, thunder, untamed nature",
+      "roberts_rebellion": "War drums fading to peace, aftermath, memories",
+      "the_great_hall": "Feast and fire, warmth inside the storm",
+      "shipbreaker_bay": "Violent sea, lighthouse, sailors' lullaby"
+    }
   },
-  "highgarden": {
+  "arryn": {
+    "display_name": "The Eyrie",
+    "house": "House Arryn",
+    "motto": "As High as Honor",
+    "seat": "The Eyrie",
+    "sigil": "🦅",
+    "color": "#a8c8e8",
+    "bg_color": "#0a1a2d",
+    "mood": "calm",
+    "prompts": [
+      "High altitude ambient with thin mountain air textures and distant eagle calls. Soft flute melody with extreme reverb, clouds passing below. 55 BPM, pianissimo. Serene, elevated, pure. No drums, no vocals.",
+      "Crystal clear bell tones echoing across mountain peaks. Soft string pad, cold pure air atmosphere. Majestic height, spiritual clarity. Extremely slow evolution. No rhythm.",
+      "Gentle harp arpeggios floating in vast open sky ambience. Distant choir pad, sunrise over mountains. Heavenly, noble, untouchable. 50 BPM, very quiet. No percussion.",
+      "Wind ambient through high castle windows with soft celesta melody. Snow-capped peaks visible below, infinite sky above. Meditative, pure, elevated. No drums, no vocals.",
+      "Solo oboe with heavy mountain reverb over warm analog pad. Eagle wing textures, updraft wind sounds. Ancient honor, quiet strength. 48 BPM, pianissimo throughout."
+    ],
+    "variants": {
+      "the_eyrie": "Mountain fortress above the clouds, thin air, eagles",
+      "the_vale": "Fertile valley below, rivers, gentle mountain breeze",
+      "the_moon_door": "Vertigo, vast emptiness below, cold wind",
+      "the_bloody_gate": "Mountain pass, echoing stone, guardian silence",
+      "sky_cells": "Open air prison, stars at night, freedom in captivity"
+    }
+  },
+  "tully": {
+    "display_name": "Riverrun",
+    "house": "House Tully",
+    "motto": "Family, Duty, Honor",
+    "seat": "Riverrun",
+    "sigil": "🪼",
+    "color": "#4a8ab5",
+    "bg_color": "#0a1520",
+    "mood": "calm",
+    "prompts": [
+      "Gentle river ambient with soft water flowing over stones. Warm acoustic guitar fingerpicking with reverb, peaceful riverside atmosphere. 58 BPM, piano dynamics. Calming, familial, grounded. No drums, no vocals.",
+      "Layered water sounds — gentle stream, distant waterfall, rain on river surface. Soft flute melody weaving through. Lush, green, alive. No percussion, very quiet.",
+      "Warm string quartet playing softly by a riverside. Fish jumping textures, gentle breeze through reeds. Domestic, safe, nurturing. 55 BPM, pianissimo.",
+      "Soft harp melody with river water sounds underneath. Sunset atmosphere, golden light on water. Peaceful, dutiful, loyal. No rhythm section, no vocals.",
+      "Ambient pad with water resonance textures. Distant church bell, evening by the river. Family gathering, quiet contentment. Extremely slow, meditative. No drums."
+    ],
+    "variants": {
+      "riverrun": "Castle between rivers, flowing water, fish jumping",
+      "the_trident": "Great river, battle echoes faded to peace",
+      "the_riverlands": "Fertile plains, gentle rain, farming villages",
+      "harrenhal": "Massive ruins, haunted halls, dark history",
+      "the_twins": "Bridge fortress, crossing waters, passage"
+    }
+  },
+  "tyrell": {
     "display_name": "Highgarden",
+    "house": "House Tyrell",
+    "motto": "Growing Strong",
+    "seat": "Highgarden",
     "sigil": "🌹",
-    "house": "Tyrell",
-    "color": "#5CB870",
-    "bg_color": "#0A2810",
-    "moods": [
-      "peaceful",
-      "gentle",
-      "warm",
-      "light",
-      "serene"
-    ],
-    "default_mood": [
-      "peaceful",
-      "gentle"
-    ],
-    "title_template": "Gardens of Highgarden – {duration} Gentle Sleep & Relaxation Music",
-    "defaults": {
-      "minutes": 42,
-      "loop_hours": 3,
-      "crossfade": 8,
-      "audio_preset": "gentle",
-      "music_tempo": "slow",
-      "music_energy": "low"
-    },
-    "music_brief": {
-      "style": "gentle pastoral ambient, garden soundscape",
-      "influences": [
-        "blooming gardens",
-        "birdsong",
-        "gentle breeze",
-        "soft flute",
-        "flowing water"
-      ],
-      "avoid": [
-        "drums",
-        "vocals",
-        "dark tones",
-        "harsh sounds"
-      ]
-    },
-    "thumbnail_brief": {
-      "scene": "Beautiful garden at golden hour with roses",
-      "style": "warm, green, soft golden light",
-      "elements": [
-        "roses",
-        "garden paths",
-        "soft sunlight",
-        "green foliage"
-      ]
-    },
+    "color": "#5cb85c",
+    "bg_color": "#0a200a",
+    "mood": "warm",
     "prompts": [
       "Gentle pastoral ambient music with soft baroque flute melody and warm harp arpeggios. Blooming garden atmosphere, birdsong textures in the distance. 65 BPM, piano dynamics. No drums, no vocals.",
       "Warm acoustic guitar fingerpicking with heavy spring reverb. Soft string pad accompaniment, gentle breeze and leaf rustle textures. Sunny, peaceful, idyllic. 60 BPM, very quiet.",
       "Lush string quartet playing legato at pianissimo. Gentle woodwind ornaments, flower garden ambience. Rich harmonic movement, warm and inviting. No percussion, no vocals.",
       "Soft celesta melody with music box quality over warm analog pad. Butterfly wing textures, warm sunshine atmosphere. Delicate, dreamy, innocent. 55 BPM, extremely gentle.",
       "Ambient harp glissandos with long reverb tails over soft choir aahs. Garden fountain water textures blended underneath. Heavenly, serene, timeless. No rhythm section."
-    ]
+    ],
+    "variants": {
+      "highgarden": "Rose gardens, sunlight, birdsong, warm breeze",
+      "the_reach": "Golden wheat fields, harvest, warm summer",
+      "oldtown": "The Citadel, ancient library, scholar's candle",
+      "the_arbor": "Vineyard, wine, Mediterranean evening",
+      "rose_garden": "Midnight garden, moonflowers, gentle fountain"
+    }
   },
-  "dorne": {
-    "display_name": "Dorne",
+  "greyjoy": {
+    "display_name": "Pyke",
+    "house": "House Greyjoy",
+    "motto": "We Do Not Sow",
+    "seat": "Pyke",
+    "sigil": "🐙",
+    "color": "#2a6a6a",
+    "bg_color": "#0a1515",
+    "mood": "dark",
+    "prompts": [
+      "Dark ocean ambient with deep underwater drones and distant ship creaking. Salt wind textures, crashing waves against iron cliffs. 45 BPM, low dynamics. Harsh, untamed, free. No vocals, no drums.",
+      "Heavy rain on wooden ship deck with deep sea ambient underneath. Soft shanty-inspired melody on concertina, very slow and mournful. Lonely, vast ocean. No percussion.",
+      "Submarine-like deep bass drones with water pressure textures. Occasional whale-call sounds, bioluminescent shimmer. Abyssal, mysterious, ancient. No rhythm, no melody.",
+      "Wind howling through broken stone bridges over the sea. Distant foghorn, iron chains clinking. Desolate island fortress, salt-worn and proud. 40 BPM, very quiet.",
+      "Solo cello with ocean wave rhythm as backdrop. Seagull calls in distance, cold spray textures. Bittersweet freedom, the drowned god's lullaby. 50 BPM, pianissimo. No drums."
+    ],
+    "variants": {
+      "pyke": "Iron fortress on sea cliffs, crashing waves, salt wind",
+      "the_iron_islands": "Rocky shores, fishing boats, harsh life",
+      "the_drowned_god": "Underwater temple, deep sea, ritual drowning",
+      "the_silence": "Ghost ship, foggy sea, eerie calm",
+      "old_wyk": "Ancient island, standing stones, old magic"
+    }
+  },
+  "martell": {
+    "display_name": "Sunspear",
+    "house": "House Martell",
+    "motto": "Unbowed, Unbent, Unbroken",
+    "seat": "Sunspear",
     "sigil": "☀️",
-    "house": "Martell",
-    "color": "#E8A030",
-    "bg_color": "#281A08",
-    "moods": [
-      "warm",
-      "exotic",
-      "peaceful",
-      "sandy",
-      "mystical"
-    ],
-    "default_mood": [
-      "warm",
-      "exotic"
-    ],
-    "title_template": "Dornish Nights – {duration} Deep Sleep & Relaxation Music",
-    "defaults": {
-      "minutes": 42,
-      "loop_hours": 3,
-      "crossfade": 8,
-      "audio_preset": "ambient",
-      "music_tempo": "slow",
-      "music_energy": "low"
-    },
-    "music_brief": {
-      "style": "desert ambient, warm exotic sleep music",
-      "influences": [
-        "desert night",
-        "warm sand",
-        "distant oud",
-        "soft percussion shimmer",
-        "starry sky"
-      ],
-      "avoid": [
-        "heavy drums",
-        "vocals",
-        "cold tones",
-        "sudden changes"
-      ]
-    },
-    "thumbnail_brief": {
-      "scene": "Desert palace under a starry night sky",
-      "style": "warm, sandy, exotic, orange tones",
-      "elements": [
-        "sand dunes",
-        "palace silhouette",
-        "stars",
-        "warm glow"
-      ]
-    },
+    "color": "#d4843a",
+    "bg_color": "#201008",
+    "mood": "exotic",
     "prompts": [
       "Warm desert ambient with soft oud melody and gentle nylon string guitar. Starry night oasis atmosphere, distant sand wind textures. 58 BPM, mezzo-piano. No drums, no vocals.",
       "Middle-eastern inspired ambient with soft qanun plucking and warm pad. Spice market at night, warm breeze, palm trees rustling. Exotic, peaceful, sensual. No percussion.",
       "Deep warm synth pad with subtle arabic scale ornaments on soft flute. Desert night sky, cooling sand, distant campfire crackle. Meditative, ancient, vast. 50 BPM.",
       "Soft frame drum pattern at 55 BPM (very quiet, barely audible pulse) with oud harmonics and warm reverb. Moonlit palace courtyard, fountain water. Intimate, luxurious, sleepy.",
       "Layered ambient drones in warm golden tones with subtle sand grain textures. Occasional soft bell chime, desert wind. Timeless, expansive, deeply relaxing. No melody, no rhythm."
-    ]
+    ],
+    "variants": {
+      "sunspear": "Palace at sunset, warm stone, orange groves",
+      "water_gardens": "Fountains, children playing, cool shade",
+      "the_desert": "Endless sand dunes, starry night, campfire",
+      "the_shadow_city": "Market at night, spices, lanterns",
+      "the_sandship": "Ancient fortress, desert wind, unbowed spirit"
+    }
   },
-  "godswood": {
-    "display_name": "Godswood",
-    "sigil": "🌳",
-    "house": "Old Gods",
-    "color": "#8B4513",
-    "bg_color": "#140A05",
-    "moods": [
-      "meditative",
-      "ancient",
-      "spiritual",
-      "peaceful",
-      "mystical"
-    ],
-    "default_mood": [
-      "meditative",
-      "ancient"
-    ],
-    "title_template": "Godswood Meditation – {duration} Deep Sleep & Spiritual Music",
-    "defaults": {
-      "minutes": 42,
-      "loop_hours": 3,
-      "crossfade": 8,
-      "audio_preset": "ambient",
-      "music_tempo": "very slow",
-      "music_energy": "minimal"
-    },
-    "music_brief": {
-      "style": "spiritual meditation ambient, ancient forest soundscape",
-      "influences": [
-        "weirwood tree",
-        "ancient forest",
-        "rustling leaves",
-        "deep meditation",
-        "spiritual drones"
-      ],
-      "avoid": [
-        "drums",
-        "vocals",
-        "modern sounds",
-        "fast tempo"
-      ]
-    },
-    "thumbnail_brief": {
-      "scene": "Ancient weirwood tree with red leaves in dark forest",
-      "style": "dark, mystical, natural, earth tones",
-      "elements": [
-        "weirwood tree",
-        "red leaves",
-        "dark forest",
-        "moss"
-      ]
-    },
+  "the_wall": {
+    "display_name": "The Wall",
+    "house": "Night's Watch",
+    "motto": "Night gathers, and now my watch begins",
+    "seat": "Castle Black",
+    "sigil": "🧊",
+    "color": "#8899aa",
+    "bg_color": "#050810",
+    "mood": "dark",
     "prompts": [
-      "Ancient forest ambient with deep meditation drones and rustling leaf textures. Soft wooden flute melody, spiritual and calm. 50 BPM, pianissimo throughout. No drums, no vocals.",
-      "Granular wood creaking and forest atmosphere over deep warm pad. Distant bird call, gentle stream water sound. Sacred, primordial, grounding. Extremely slow movement. No rhythm.",
-      "Soft bowed psaltery or dulcimer with extreme reverb in forest space. Layered leaf rustle and gentle wind textures. Ancient, mystical, connected to earth. 45 BPM, barely there.",
-      "Deep throat singing inspired drone with forest ambience overlay. Heartbeat-like sub-bass pulse at 60 BPM (very subtle). Roots, earth, ancient wisdom. No percussion, no vocals.",
-      "Ambient pad evolving through natural minor scale very slowly. Owl call in distance, night forest atmosphere, soft moss textures. Sacred grove at midnight, deeply peaceful. No drums."
-    ]
-  },
-  "castamere": {
-    "display_name": "Castamere",
-    "sigil": "🦁",
-    "house": "Lannister",
-    "color": "#C0392B",
-    "bg_color": "#1A0808",
-    "moods": [
-      "dark",
-      "melancholic",
-      "haunting",
-      "tragic",
-      "somber"
+      "Dark ambient music with frozen wasteland atmosphere. Deep bass drones at 30Hz, howling arctic wind field recordings. Vast, desolate, endless. Extremely slow evolution. No melody, no rhythm, no vocals.",
+      "Ice cave ambience with resonant dripping textures and deep sub-bass rumble. Distant horn call echoing across tundra. 40 BPM at most, barely perceptible pulse. Isolating, cold, immense.",
+      "Low cello drone with heavy distortion and reverb. Blizzard wind noise layered with granular ice crystal textures. Dark, foreboding, hypnotic. No percussion, no vocals.",
+      "Massive reverb space with occasional deep brass stabs fading into silence. Wind howl textures, frozen ground creaking sounds. Sparse, monumental, lonely. Each sound event 20+ seconds apart.",
+      "Soft filtered white noise resembling arctic wind over deep warm pad. Subtle pitch bending, glacial movement. Meditative and vast, like standing at the edge of the world. No drums, no melody."
     ],
-    "default_mood": [
-      "dark",
-      "melancholic"
-    ],
-    "title_template": "Rains of Castamere – {duration} Deep Sleep & Melancholic Music",
-    "defaults": {
-      "minutes": 42,
-      "loop_hours": 3,
-      "crossfade": 8,
-      "audio_preset": "dark",
-      "music_tempo": "slow",
-      "music_energy": "low"
-    },
-    "music_brief": {
-      "style": "melancholic dark ambient, tragic beauty sleep music",
-      "influences": [
-        "ruined castle",
-        "rain",
-        "distant cello",
-        "echoing halls",
-        "tragic memory"
-      ],
-      "avoid": [
-        "fast tempo",
-        "vocals",
-        "bright melodies",
-        "percussion"
-      ]
-    },
-    "thumbnail_brief": {
-      "scene": "Ruined castle in the rain at night",
-      "style": "dark, moody, rain, red accents",
-      "elements": [
-        "ruins",
-        "rain",
-        "red banners",
-        "darkness"
-      ]
-    },
-    "prompts": [
-      "Melancholic ambient with distant solo cello playing slow sustained notes. Rain on stone textures, ruined castle atmosphere. Haunting, beautiful, sorrowful. 48 BPM, pianissimo. No drums, no vocals.",
-      "Dark piano chords with extreme reverb, each chord ringing for 10 seconds. Dripping water in empty halls, cold stone echo. Lonely, ghostly, elegant. No rhythm, no percussion.",
-      "Soft viola melody in minor key over warm pad drone. Gentle rain field recording, abandoned corridors atmosphere. Bittersweet, nostalgic, fading glory. 52 BPM, very quiet.",
-      "Deep organ-like pad with subtle choir texture. Distant thunder rumble, rain against windows. Grand but empty, majestic in ruin. Extremely slow harmonic movement. No beats.",
-      "Solo acoustic guitar in minor key with heavy room reverb. Rain textures, stone dripping, cold wind through broken windows. Beautiful desolation, peaceful mourning. 50 BPM, no other instruments."
-    ]
+    "variants": {
+      "castle_black": "Night's Watch fortress, torches, oath-taking",
+      "the_wall_top": "700 feet of ice, endless view north, wind",
+      "beyond_the_wall": "Frozen wasteland, white walkers, desolation",
+      "the_haunted_forest": "Dark trees, cracking ice, unseen danger",
+      "hardhome": "Abandoned wildling village, eerie silence, snow"
+    }
   }
 }

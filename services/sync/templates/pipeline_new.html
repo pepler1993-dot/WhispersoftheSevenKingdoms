@@ -33,7 +33,23 @@
   </div>
 </section>
 
-<!-- Config (shown after house selection) -->
+<!-- Variant + Duration (shown after house selection) -->
+<section class="panel panel-accent-gold" id="variant-panel" style="display:none">
+  <h2 id="variant-house-name">Variante wählen</h2>
+  <div class="variant-grid" id="variant-grid"></div>
+
+  <div id="duration-panel" style="display:none; margin-top:20px;">
+    <h3>Länge</h3>
+    <div class="duration-grid">
+      <button type="button" class="duration-btn" data-hours="1" onclick="selectDuration(1)">1 Stunde</button>
+      <button type="button" class="duration-btn active" data-hours="3" onclick="selectDuration(3)">3 Stunden</button>
+      <button type="button" class="duration-btn" data-hours="5" onclick="selectDuration(5)">5 Stunden</button>
+      <button type="button" class="duration-btn" data-hours="8" onclick="selectDuration(8)">8 Stunden</button>
+    </div>
+  </div>
+</section>
+
+<!-- Config (shown after variant + duration selection) -->
 <section class="panel panel-config" id="config-panel" style="display:none">
   <form method="post" action="/admin/pipeline/start" id="run-form">
 
@@ -195,27 +211,39 @@
       </div>
     </div>
 
-    <!-- Advanced Settings (collapsed) -->
+    <!-- Video & Publish Options (visible) -->
+    <div style="display:flex; gap:24px; flex-wrap:wrap; margin-bottom:16px;">
+      <div class="form-check" data-tooltip="Rendert Partikeleffekte (Schnee, Funken etc. je nach House). Standard für alle Videos.">
+        <input type="checkbox" name="animated" id="animated" value="true" checked />
+        <label for="animated">🎬 Animiertes Video</label>
+      </div>
+      <div class="form-check">
+        <input type="checkbox" name="public" id="public" value="true" />
+        <label for="public">🌍 Öffentlich auf YouTube</label>
+      </div>
+    </div>
+
+    <!-- Advanced Settings (collapsed, pre-filled from house presets) -->
     <details class="advanced-toggle" id="advanced">
-      <summary>⚙️ Erweiterte Einstellungen <span class="inline-help" data-tooltip="Nur anfassen, wenn du vom Preset abweichen willst. Die Defaults sind bewusst auf den typischen Sleep-Music-Flow abgestimmt.">ⓘ</span></summary>
+      <summary>⚙️ Erweiterte Einstellungen</summary>
       <div class="advanced-content">
         <div class="grid two">
           <div class="form-group">
             <label for="adv-minutes">Dauer (Minuten)</label>
-            <input type="number" id="adv-minutes" class="form-input" value="42" min="1" max="720" />
+            <input type="number" id="adv-minutes" class="form-input" value="20" min="1" max="720" />
           </div>
           <div class="form-group">
-            <label for="adv-loop">Loop (Stunden) <span class="inline-help" data-tooltip="Verlängert das Ausgangsaudio per Looping auf die gewünschte Zielzeit. Mehr Stunden bedeuten nicht mehr echte Generierung, sondern längere Wiederverwendung mit Crossfades.">ⓘ</span></label>
+            <label for="adv-loop">Loop (Stunden)</label>
             <input type="number" id="adv-loop" class="form-input" value="3" min="0" max="12" step="0.5" />
           </div>
         </div>
         <div class="grid two">
           <div class="form-group">
-            <label for="adv-crossfade">Crossfade (Sek) <span class="inline-help" data-tooltip="Übergangszeit zwischen zwei Loop-Segmenten. Hilft, harte Schnitte und hörbare Nähte zu vermeiden.">ⓘ</span></label>
+            <label for="adv-crossfade">Crossfade (Sek)</label>
             <input type="number" id="adv-crossfade" class="form-input" value="8" min="0" max="30" />
           </div>
           <div class="form-group">
-            <label for="adv-preset">Audio-Preset <span class="inline-help" data-tooltip="Steuert das Post-Processing-Profil für den finalen Mix. Ambient ist der sichere Default für den aktuellen Use-Case.">ⓘ</span></label>
+            <label for="adv-preset">Audio-Preset</label>
             <select id="adv-preset" class="form-select">
               <option value="ambient">🌙 Ambient</option>
               <option value="dark">🖤 Dark</option>
@@ -237,14 +265,6 @@
           <input type="text" id="adv-thumb-scene" class="form-input" />
         </div>
         <div class="form-group">
-          <div class="form-check" data-tooltip="Rendert Bewegungen und Partikel. Sieht lebendiger aus, dauert aber länger als der statische Standard.">
-            <input type="checkbox" name="animated" id="animated" value="true" />
-            <label for="animated">🎬 Animiertes Video</label>
-          </div>
-          <div class="form-check">
-            <input type="checkbox" name="public" id="public" value="true" />
-            <label for="public">🌍 Öffentlich auf YouTube</label>
-          </div>
           <div class="form-check" data-tooltip="Lässt EQ, Loudness, Limiter und andere Bearbeitungsschritte aus. Eigentlich nur für schnelle Tests oder Rohmaterial gedacht.">
             <input type="checkbox" name="skip_post_process" id="skip_post_process" value="true" />
             <label for="skip_post_process">⏭️ Post-Processing überspringen</label>
@@ -261,6 +281,62 @@
 </section>
 
 <style>
+.variant-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+.variant-card {
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.variant-card:hover {
+  border-color: var(--gold);
+  background: rgba(255,255,255,0.06);
+}
+.variant-card.selected {
+  border-color: var(--gold);
+  background: rgba(201,165,58,0.12);
+}
+.variant-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+.variant-style {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+.duration-grid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.duration-btn {
+  padding: 12px 24px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.duration-btn:hover {
+  border-color: var(--gold);
+}
+.duration-btn.active {
+  border-color: var(--gold);
+  background: rgba(201,165,58,0.15);
+  color: var(--gold);
+}
 .workflow-steps {
   display: flex;
   gap: 10px;
@@ -512,6 +588,22 @@
 
 <script>
 (function() {
+  function selectDuration(hours) {
+    document.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.duration-btn[data-hours="${hours}"]`).classList.add('active');
+    document.getElementById('loop_hours').value = hours;
+    document.getElementById('adv-loop').value = hours;
+    // Update title with new duration
+    const titleInput = document.getElementById('title');
+    if (titleInput.value) {
+      titleInput.value = titleInput.value.replace(/\d+\s*Hours?/i, hours + ' Hours');
+    }
+    // Show config panel
+    const configPanel = document.getElementById('config-panel');
+    configPanel.style.display = 'block';
+    setTimeout(() => configPanel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+  }
+
   const houses = {{ houses | tojson }};
   const cards = document.querySelectorAll('.house-card');
   const configPanel = document.getElementById('config-panel');
@@ -640,10 +732,39 @@
       document.getElementById('config-title-label').innerHTML = house.sigil + ' ' + house.display_name;
       document.getElementById('config-house-info').textContent = 'House ' + house.house + ' – alle Einstellungen vorausgefüllt';
 
-      // show config
-      configPanel.style.display = 'block';
-      configPanel.style.borderTopColor = house.color || 'var(--gold)';
-      setTimeout(() => configPanel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+      // show variant panel first
+      const variantPanel = document.getElementById('variant-panel');
+      const variantGrid = document.getElementById('variant-grid');
+      document.getElementById('variant-house-name').innerHTML = house.sigil + ' ' + house.display_name + ' — Variante';
+      variantGrid.innerHTML = '';
+      const variants = house.variants || [];
+      if (variants.length > 0) {
+        variants.forEach((v, i) => {
+          const btn = document.createElement('div');
+          btn.className = 'variant-card';
+          btn.innerHTML = '<div class="variant-name">' + v.name + '</div><div class="variant-style">' + (v.style || '') + '</div>';
+          btn.addEventListener('click', () => {
+            variantGrid.querySelectorAll('.variant-card').forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            document.getElementById('notes').value = v.name + ' — ' + (v.style || '');
+            if (v.mood) document.getElementById('mood-input').value = v.mood;
+            // Update title with variant
+            const duration = (document.getElementById('loop_hours').value || 3) + ' Hours';
+            titleInput.value = v.name + ' – ' + duration + ' Sleep Music | Whispers of the Seven Kingdoms';
+            document.getElementById('thumbnail_text').value = titleInput.value;
+            document.getElementById('duration-panel').style.display = 'block';
+          });
+          variantGrid.appendChild(btn);
+        });
+        variantPanel.style.display = 'block';
+        configPanel.style.display = 'none';
+        setTimeout(() => variantPanel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+      } else {
+        variantPanel.style.display = 'none';
+        configPanel.style.display = 'block';
+        configPanel.style.borderTopColor = house.color || 'var(--gold)';
+        setTimeout(() => configPanel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+      }
 
       if (librarySelect) {
         const opt = [...librarySelect.options].find(o => o.value === slugify(house.display_name));
