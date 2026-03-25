@@ -18,7 +18,7 @@ def admin_library(request: Request, success: str | None = Query(default=None), e
     songs = _list_library_dir(PIPELINE_DIR / 'data' / 'upload' / 'songs', {'.mp3', '.wav', '.ogg'})
     thumbnails = _list_library_dir(PIPELINE_DIR / 'data' / 'upload' / 'thumbnails', {'.jpg', '.jpeg', '.png', '.webp'})
     metadata = _list_library_dir(PIPELINE_DIR / 'data' / 'upload' / 'metadata', {'.json', '.md'})
-    return shared.templates.TemplateResponse('library.html', {
+    return shared.templates.TemplateResponse(request, 'library.html', {
         'request': request,
         'page': 'library',
         'songs': songs,

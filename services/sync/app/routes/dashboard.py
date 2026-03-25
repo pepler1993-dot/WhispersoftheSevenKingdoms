@@ -21,7 +21,7 @@ def admin_dashboard(request: Request):
     summary = shared.db.get_dashboard_summary()
     recent_runs = shared.db.list_runs(limit=5)
     recent_audio = shared.db.list_audio_jobs(limit=5)
-    return shared.templates.TemplateResponse('dashboard.html', {
+    return shared.templates.TemplateResponse(request, 'dashboard.html', {
         'request': request,
         'page': 'dashboard',
         'summary': summary,
@@ -74,6 +74,6 @@ def admin_server_stats():
 @router.get('/admin/releases', response_class=HTMLResponse)
 def admin_releases(request: Request):
     releases = _get_release_notes()
-    return shared.templates.TemplateResponse('releases.html', {
+    return shared.templates.TemplateResponse(request, 'releases.html', {
         'request': request, 'page': 'releases', 'releases': releases,
     })

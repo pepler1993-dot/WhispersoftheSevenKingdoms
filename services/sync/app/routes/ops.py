@@ -38,7 +38,7 @@ def admin_ops(
     system['latest_github_event_at_display'] = _format_berlin(system.get('latest_github_event_at'), with_seconds=True)
     system['latest_task_update_at_display'] = _format_berlin(system.get('latest_task_update_at'), with_seconds=True)
     summary = shared.db.get_dashboard_summary()
-    return shared.templates.TemplateResponse('ops.html', {
+    return shared.templates.TemplateResponse(request, 'ops.html', {
         'request': request,
         'page': 'ops',
         'current_tab': current_tab,
@@ -61,7 +61,7 @@ def admin_tasks(
     include_done: bool = Query(default=False),
 ):
     tasks = [_humanize_task_for_manager(task, shared.db.get_task_detail(task['task_id'])) for task in shared.db.list_tasks_for_admin(phase=phase, owner=owner, query=q, include_done=include_done)]
-    return shared.templates.TemplateResponse('tasks.html', {
+    return shared.templates.TemplateResponse(request, 'tasks.html', {
         'request': request,
         'page': 'ops',
         'tasks': tasks,
@@ -75,7 +75,7 @@ def admin_task_detail(request: Request, task_id: str):
     if not detail:
         raise HTTPException(status_code=404, detail='Task not found')
     detail = _humanize_task_detail_for_manager(task_id, detail)
-    return shared.templates.TemplateResponse('task_detail.html', {
+    return shared.templates.TemplateResponse(request, 'task_detail.html', {
         'request': request,
         'page': 'ops',
         'task_id': task_id,
@@ -86,7 +86,7 @@ def admin_task_detail(request: Request, task_id: str):
 @router.get('/admin/events', response_class=HTMLResponse)
 def admin_events(request: Request, limit: int = Query(default=100, ge=1, le=500)):
     events = shared.db.list_github_events(limit=limit)
-    return shared.templates.TemplateResponse('events.html', {
+    return shared.templates.TemplateResponse(request, 'events.html', {
         'request': request,
         'page': 'ops',
         'events': events,
@@ -100,7 +100,7 @@ def admin_system(request: Request):
     protocol_health = _build_protocol_health()
     system['latest_github_event_at_display'] = _format_berlin(system.get('latest_github_event_at'), with_seconds=True)
     system['latest_task_update_at_display'] = _format_berlin(system.get('latest_task_update_at'), with_seconds=True)
-    return shared.templates.TemplateResponse('system.html', {
+    return shared.templates.TemplateResponse(request, 'system.html', {
         'request': request,
         'page': 'ops',
         'system': system,

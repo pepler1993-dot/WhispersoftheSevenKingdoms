@@ -40,7 +40,7 @@ def admin_docs(request: Request, q: str | None = Query(default=None)):
         {'title': 'Dashboard lokal starten', 'href': '/admin/docs/dashboard-local-start', 'icon': 'monitor-play'},
         {'title': 'Architecture Diagram', 'href': '/admin/docs/architecture-diagram', 'icon': 'network'},
     ]
-    return shared.templates.TemplateResponse('docs.html', {'request': request, 'page': 'docs', 'sections': sections, 'query': q or '', 'quicklinks': quicklinks})
+    return shared.templates.TemplateResponse(request, 'docs.html', {'page': 'docs', 'sections': sections, 'query': q or '', 'quicklinks': quicklinks})
 
 
 @router.get('/admin/docs/{slug}', response_class=HTMLResponse)
@@ -52,4 +52,4 @@ def admin_doc_detail(request: Request, slug: str):
         markdown = doc['path'].read_text(encoding='utf-8')
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail='Doc file missing')
-    return shared.templates.TemplateResponse('doc_detail.html', {'request': request, 'page': 'docs', 'doc': doc, 'doc_html': _markdown_to_html(markdown)})
+    return shared.templates.TemplateResponse(request, 'doc_detail.html', {'page': 'docs', 'doc': doc, 'doc_html': _markdown_to_html(markdown)})

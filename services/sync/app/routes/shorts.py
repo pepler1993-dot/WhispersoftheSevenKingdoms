@@ -23,7 +23,7 @@ router = APIRouter()
 def admin_shorts(request: Request, success: str | None = Query(default=None), error: str | None = Query(default=None)):
     library_tracks = list_library_tracks_for_pipeline(shared.db)
     short_runs = [run for run in shared.db.list_runs(limit=100) if (run.get('config') or {}).get('content_type') == 'short']
-    return shared.templates.TemplateResponse('shorts.html', {
+    return shared.templates.TemplateResponse(request, 'shorts.html', {
         'request': request,
         'page': 'shorts',
         'library_tracks': library_tracks,
@@ -126,7 +126,7 @@ def admin_shorts_detail(request: Request, run_id: str, success: str | None = Que
         for f in sorted(output_dir.iterdir()):
             if f.is_file():
                 output_files.append({'name': f.name, 'size': f'{f.stat().st_size / 1024 / 1024:.1f} MB'})
-    return shared.templates.TemplateResponse('short_detail.html', {
+    return shared.templates.TemplateResponse(request, 'short_detail.html', {
         'request': request,
         'page': 'shorts',
         'run': run,

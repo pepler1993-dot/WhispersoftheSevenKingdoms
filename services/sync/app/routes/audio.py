@@ -24,7 +24,7 @@ def admin_audio(request: Request):
     health = get_audio_generator_health()
     presets = list_prompt_presets()
     jobs = shared.db.list_audio_jobs(limit=100)
-    return shared.templates.TemplateResponse('audio_generator.html', {
+    return shared.templates.TemplateResponse(request, 'audio_generator.html', {
         'request': request,
         'page': 'audio',
         'health': health,
@@ -75,7 +75,7 @@ def admin_audio_job_detail(request: Request, job_id: str):
     if not job:
         raise HTTPException(status_code=404, detail='Audio job not found')
     logs = shared.db.get_audio_job_logs(job_id, limit=1000)
-    return shared.templates.TemplateResponse('audio_job_detail.html', {
+    return shared.templates.TemplateResponse(request, 'audio_job_detail.html', {
         'request': request,
         'page': 'audio',
         'job': job,

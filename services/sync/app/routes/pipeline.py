@@ -39,7 +39,7 @@ MAX_UPLOAD_SIZE = 500 * 1024 * 1024  # 500 MB
 def admin_pipeline(request: Request):
     runs = shared.db.list_runs(limit=100)
     houses = _load_house_templates()
-    return shared.templates.TemplateResponse('pipeline_runs.html', {
+    return shared.templates.TemplateResponse(request, 'pipeline_runs.html', {
         'request': request,
         'page': 'pipeline',
         'runs': runs,
@@ -55,7 +55,7 @@ def admin_pipeline_new(request: Request, slug: str | None = Query(default=None),
     library_tracks = list_library_tracks_for_pipeline(shared.db)
     thumb_dir = Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'output' / 'thumbnails'
     library_thumbnails = sorted(f.name for f in thumb_dir.iterdir() if f.is_file() and f.suffix in {'.jpg', '.jpeg', '.png', '.webp'}) if thumb_dir.exists() else []
-    return shared.templates.TemplateResponse('pipeline_new.html', {
+    return shared.templates.TemplateResponse(request, 'pipeline_new.html', {
         'request': request,
         'page': 'pipeline',
         'assets': assets,
@@ -230,7 +230,7 @@ def admin_pipeline_run_detail(request: Request, run_id: str):
             if f.is_file():
                 output_files.append({'name': f.name, 'size': f'{f.stat().st_size / 1024 / 1024:.1f} MB'})
 
-    return shared.templates.TemplateResponse('pipeline_run_detail.html', {
+    return shared.templates.TemplateResponse(request, 'pipeline_run_detail.html', {
         'request': request,
         'page': 'pipeline',
         'run': run,
