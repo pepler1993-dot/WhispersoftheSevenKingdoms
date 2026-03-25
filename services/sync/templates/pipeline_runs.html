@@ -11,16 +11,35 @@
   </a>
 </div>
 
+{% if queue and (queue.queued_count > 0 or queue.running_count > 0) %}
+<div class="queue-banner panel" style="margin-bottom: 16px; border-left: 3px solid var(--gold);">
+  <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+    <div>
+      <strong>Pipeline Queue</strong>
+      <span class="badge running" style="margin-left:8px;">{{ queue.running_count }} läuft</span>
+      {% if queue.queued_count > 0 %}
+      <span class="badge waiting" style="margin-left:4px;">{{ queue.queued_count }} wartet</span>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
 {% if runs %}
 <div class="video-grid">
   {% for run in runs %}
-  <a href="/admin/pipeline/run/{{ run.run_id }}" class="video-card" style="--card-accent: {% if run.status == 'running' %}var(--good){% elif run.status == 'failed' %}var(--bad){% elif run.status == 'uploaded' %}var(--blue){% else %}var(--gold){% endif %}">
+  <a href="/admin/pipeline/run/{{ run.run_id }}" class="video-card" style="--card-accent: {% if run.status == 'queued' %}var(--warning, #d97706){% elif run.status == 'running' %}var(--good){% elif run.status == 'failed' %}var(--bad){% elif run.status == 'uploaded' %}var(--blue){% else %}var(--gold){% endif %}">
     <div class="video-card-top">
-      <span class="badge {{ run.status }}">{{ run.status }}</span>
+      <span class="badge {{ run.status }}">{% if run.status == 'queued' %}⏳ Warteschlange{% else %}{{ run.status }}{% endif %}</span>
       <span class="video-card-id">{{ run.run_id[:8] }}</span>
     </div>
     <div class="video-card-title">{{ run.title or run.slug }}</div>
     <div class="video-card-slug">{{ run.slug }}</div>
+    {% if run.status == 'queued' %}
+    <div class="video-card-progress">
+      <span class="progress-label" style="color:var(--gold)">Wartet auf freien Slot...</span>
+    </div>
+    {% endif %}
     {% if run.status == 'running' %}
     <div class="video-card-progress">
       <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>

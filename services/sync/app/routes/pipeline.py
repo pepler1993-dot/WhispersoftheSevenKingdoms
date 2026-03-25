@@ -24,9 +24,9 @@ from app.pipeline_runner import (
     list_available_assets,
     list_available_themes,
     list_library_tracks_for_pipeline,
-    start_run_async,
     trigger_upload,
 )
+from app.pipeline_queue import enqueue_run, get_queue_status
 
 router = APIRouter()
 
@@ -39,11 +39,13 @@ MAX_UPLOAD_SIZE = 500 * 1024 * 1024  # 500 MB
 def admin_pipeline(request: Request):
     runs = shared.db.list_runs(limit=100)
     houses = _load_house_templates()
+    queue = get_queue_status(shared.db)
     return shared.templates.TemplateResponse(request, 'pipeline_runs.html', {
         'request': request,
         'page': 'pipeline',
         'runs': runs,
         'houses': houses,
+        'queue': queue,
     })
 
 
@@ -212,7 +214,7 @@ def admin_pipeline_start(
         'created_at': now,
     })
 
-    start_run_async(run_id, slug, config, shared.db)
+    enqueue_run(run_id, slug, config, shared.db)
     return RedirectResponse(url=f'/admin/pipeline/run/{run_id}', status_code=303)
 
 
@@ -265,8 +267,12 @@ def admin_pipeline_run_cancel(run_id: str):
     run = shared.db.get_run(run_id)
     if not run:
         raise HTTPException(status_code=404, detail='Run not found')
+    if run['status'] == 'queued':
+        shared.db.update_run(run_id, status='cancelled', finished_at=datetime.now(shared.CET).isoformat())
+        shared.db.append_run_log(run_id, 'system', 'Job aus Warteschlange entfernt.', datetime.now(shared.CET).isoformat())
+        return RedirectResponse(url=f'/admin/pipeline/run/{run_id}', status_code=303)
     if run['status'] != 'running':
-        raise HTTPException(status_code=409, detail='Can only cancel running pipelines')
+        raise HTTPException(status_code=409, detail='Can only cancel running or queued pipelines')
     cancel_run(run_id, shared.db)
     return RedirectResponse(url=f'/admin/pipeline/run/{run_id}', status_code=303)
 
@@ -277,3 +283,8 @@ def admin_pipeline_preview_file(slug: str, filename: str):
     if not path:
         raise HTTPException(status_code=404, detail='File not found')
     return FileResponse(path)
+
+
+@router.get('/api/pipeline/queue')
+def api_pipeline_queue():
+    return get_queue_status(shared.db)

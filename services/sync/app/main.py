@@ -85,3 +85,8 @@ app.include_router(library_router)
 app.include_router(docs_router)
 app.include_router(shorts_router)
 app.include_router(tickets_router)
+
+# ── Startup: recover queued pipeline jobs ─────────────────────────────────
+
+from app.pipeline_queue import _ensure_worker  # noqa: E402
+_ensure_worker(db)
