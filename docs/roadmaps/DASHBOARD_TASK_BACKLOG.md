@@ -52,6 +52,64 @@ It is written as a practical backlog for implementation planning, not as a raw t
 - Audio Lab no longer presents misleading Kaggle-first UI.
 - Pipeline and Audio Lab use the same current generation model.
 
+## 3a. Audio-to-pipeline workflow is still too fragmented
+**Goal:** A user should be able to start production in one coherent flow instead of manually hopping between audio generation, pipeline start, and upload steps.
+
+### Tasks
+- Allow a pipeline configuration to optionally auto-upload to YouTube after successful completion.
+- Add an explicit "generate audio and continue directly into pipeline" mode so users do not need to first trigger audio generation and then separately start the pipeline.
+- Support a true overnight flow where audio, thumbnail, metadata, video, QA, and optional upload can run in one go without another manual click.
+- Clarify in the UI whether a run is waiting for audio, actively generating audio, rendering video, awaiting manual review, or uploading.
+- Review whether the current safety stance for automatic upload should stay opt-in per run, opt-in per preset, or both.
+
+### Acceptance criteria
+- A user can launch a single run that includes audio generation and pipeline execution.
+- Auto-upload can be enabled intentionally without needing to press a second upload button after completion.
+- The run state clearly communicates which phase the workflow is currently in.
+
+## 3b. Audio job cancel is unreliable or missing
+**Goal:** Users must be able to stop an audio generation job cleanly from the dashboard.
+
+### Tasks
+- Trace the cancel flow from UI action to worker/process termination.
+- Verify cancel behavior for queued, pushing, running, and downloading audio-job states.
+- Make sure cancel updates job status consistently in storage and UI.
+- Show a clear error or unsupported-state message when a job cannot be cancelled yet.
+- Add regression coverage so cancel does not silently fail again.
+
+### Acceptance criteria
+- A running or queued audio job can be cancelled from the dashboard.
+- The resulting state is visible and consistent.
+- Failed cancellation attempts surface a visible reason instead of doing nothing.
+
+## 3c. Thumbnail source/provenance is unclear
+**Goal:** Users should be able to tell where the thumbnail used by a pipeline run came from.
+
+### Tasks
+- Show whether a thumbnail was selected from Library, uploaded manually, or auto-generated from the briefing.
+- Surface the exact source file/path or generation mode on the run detail page.
+- Make it obvious which thumbnail will be used before a run starts.
+- Review fallback logic so unexpected thumbnail selection can be diagnosed quickly.
+
+### Acceptance criteria
+- Before and after a run, the dashboard shows which thumbnail source was chosen.
+- Unexpected thumbnail usage can be traced without reading backend code.
+
+## 3d. Pipeline jobs should support queueing and sequential execution
+**Goal:** Users should be able to line up multiple productions so the next one starts automatically when the previous one finishes.
+
+### Tasks
+- Add first-class queue support for pipeline jobs instead of only one-off manual starts.
+- Define queue semantics for waiting, running, completed, failed, cancelled, and blocked jobs.
+- Ensure only the allowed number of concurrent runs execute at once, with the default being sequential processing.
+- Add queue visibility in the dashboard with order, status, and estimated next start.
+- Define how queued jobs interact with audio generation, optional auto-upload, and retry behavior.
+
+### Acceptance criteria
+- A user can add multiple pipeline jobs to a queue.
+- When one job finishes, the next job starts automatically according to queue policy.
+- Queue order and current status are visible in the dashboard.
+
 ## Priority B — dashboard usability and content clarity
 
 ## 4. Documentation start page is too dense
