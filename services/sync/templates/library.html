@@ -105,14 +105,103 @@
       </tbody>
     </table>
   </div>
-  <form method="post" action="/admin/library/upload" enctype="multipart/form-data" style="margin-top:16px; max-width: 460px;">
-    <input type="hidden" name="asset_type" value="metadata" />
-    <div class="form-group">
-      <label for="meta_file">Metadata JSON hochladen</label>
-      <input id="meta_file" name="file" type="file" class="form-input" accept=".json,.md" required />
-    </div>
-    <button type="submit" class="btn btn-primary btn-sm">Metadata hochladen</button>
-  </form>
+  <div class="grid two" style="margin-top:16px; align-items:start;">
+    <form method="post" action="/admin/library/upload" enctype="multipart/form-data" style="max-width: 460px;">
+      <input type="hidden" name="asset_type" value="metadata" />
+      <div class="form-group">
+        <label for="meta_file">Metadata JSON hochladen</label>
+        <input id="meta_file" name="file" type="file" class="form-input" accept=".json,.md" required />
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">Metadata hochladen</button>
+    </form>
+
+    <form method="post" action="/admin/library/create-metadata" class="metadata-form">
+      <div class="section-header-inline" style="margin-bottom:10px;"><h3>Metadata direkt erstellen</h3><span class="section-note">ohne JSON-Datei von Hand</span></div>
+      <div class="form-group">
+        <label for="meta_title">Titel</label>
+        <input id="meta_title" name="title" type="text" class="form-input" required oninput="document.getElementById('meta_slug').value=this.value.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')" />
+      </div>
+      <div class="grid two">
+        <div class="form-group">
+          <label for="meta_slug">Slug</label>
+          <input id="meta_slug" name="slug" type="text" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label for="meta_theme">Theme</label>
+          <input id="meta_theme" name="theme" type="text" class="form-input" required placeholder="winterfell" />
+        </div>
+      </div>
+      <div class="grid two">
+        <div class="form-group">
+          <label for="meta_mood">Mood</label>
+          <input id="meta_mood" name="mood" type="text" class="form-input" placeholder="calm, mystical" />
+        </div>
+        <div class="form-group">
+          <label for="meta_tags">Tags</label>
+          <input id="meta_tags" name="tags" type="text" class="form-input" placeholder="sleep, ambient, fantasy" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="meta_notes">Notizen</label>
+        <textarea id="meta_notes" name="notes" rows="3" class="form-input"></textarea>
+      </div>
+      <div class="grid two">
+        <div class="form-group">
+          <label for="meta_duration_hint">Duration Hint</label>
+          <input id="meta_duration_hint" name="duration_hint" type="text" class="form-input" value="long-form sleep track" />
+        </div>
+        <div class="form-group">
+          <label for="meta_music_style">Musik-Stil</label>
+          <input id="meta_music_style" name="music_style" type="text" class="form-input" />
+        </div>
+      </div>
+      <div class="grid two">
+        <div class="form-group">
+          <label for="meta_music_influences">Einflüsse</label>
+          <input id="meta_music_influences" name="music_influences" type="text" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label for="meta_music_avoid">Vermeiden</label>
+          <input id="meta_music_avoid" name="music_avoid" type="text" class="form-input" />
+        </div>
+      </div>
+      <div class="grid two">
+        <div class="form-group">
+          <label for="meta_music_tempo">Tempo</label>
+          <input id="meta_music_tempo" name="music_tempo" type="text" class="form-input" value="slow" />
+        </div>
+        <div class="form-group">
+          <label for="meta_music_energy">Energy</label>
+          <input id="meta_music_energy" name="music_energy" type="text" class="form-input" value="low" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="meta_thumb_scene">Thumbnail-Szene</label>
+        <input id="meta_thumb_scene" name="thumbnail_scene" type="text" class="form-input" />
+      </div>
+      <div class="grid two">
+        <div class="form-group">
+          <label for="meta_thumb_elements">Thumbnail-Elemente</label>
+          <input id="meta_thumb_elements" name="thumbnail_elements" type="text" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label for="meta_thumb_text">Thumbnail-Text</label>
+          <input id="meta_thumb_text" name="thumbnail_text" type="text" class="form-input" />
+        </div>
+      </div>
+      <div class="grid two">
+        <div class="form-group">
+          <label for="meta_thumb_style">Thumbnail-Stil</label>
+          <input id="meta_thumb_style" name="thumbnail_style" type="text" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label for="meta_thumb_avoid">Thumbnail vermeiden</label>
+          <input id="meta_thumb_avoid" name="thumbnail_avoid" type="text" class="form-input" />
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">Metadata erstellen</button>
+    </form>
+  </div>
 </section>
 
 <style>
@@ -145,6 +234,12 @@
   font-size: 0.74rem;
   color: var(--muted);
   margin-top: 4px;
+}
+.metadata-form .form-group {
+  margin-bottom: 12px;
+}
+.metadata-form .form-input {
+  width: 100%;
 }
 </style>
 {% endblock %}
