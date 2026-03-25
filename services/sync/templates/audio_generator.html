@@ -18,23 +18,15 @@
       <h2>Generator Status</h2>
       <span class="section-note" data-tooltip="Hier sieht man, ob Provider, CLI, Token und Zielpfade grundsätzlich bereit sind. Grün heißt nicht automatisch, dass jeder Run erfolgreich sein wird — nur dass die Startbedingungen stimmen.">Was bedeutet das?</span>
     </div>
-    <div class="config-grid">
-      <div class="config-item"><div class="label">Provider</div><div class="value">{{ health.provider }}</div></div>
-      {% if health.provider == 'stable-audio-local' %}
-      <div class="config-item"><div class="label">GPU</div><div class="value">{{ health.gpu or 'nicht erreichbar' }}</div></div>
-      <div class="config-item"><div class="label">Host</div><div class="value">{{ health.host or '—' }}</div></div>
-      <div class="config-item"><div class="label">Modell</div><div class="value">{{ health.model or '—' }}</div></div>
-      <div class="config-item"><div class="label">Status</div><div class="value">{{ '✅ Online' if health.available else '❌ Offline' }}</div></div>
-      {% else %}
-      <div class="config-item"><div class="label">Status</div><div class="value">{{ '✅ Verfügbar' if health.available else '❌ Nicht verfügbar' }}</div></div>
-      {% endif %}
+    <div class="config-grid" id="audio-health-grid">
+      <div class="config-item"><div class="label">Provider</div><div class="value" data-health="provider">prüfe…</div></div>
+      <div class="config-item"><div class="label">GPU</div><div class="value" data-health="gpu">—</div></div>
+      <div class="config-item"><div class="label">Host</div><div class="value" data-health="host">—</div></div>
+      <div class="config-item"><div class="label">Modell</div><div class="value" data-health="model">—</div></div>
+      <div class="config-item"><div class="label">Status</div><div class="value" data-health="status">⏳ Prüfe Status…</div></div>
     </div>
-    <div style="margin-top:12px;color:var(--text-secondary);font-size:14px">
-      {% if health.available %}
-        Generator ist grundsätzlich startklar. Der Run hängt ab hier trotzdem noch von Provider-Runtime, Modell und Remote-Execution ab — also bereit, aber nicht magisch unfehlbar.
-      {% else %}
-        Generator ist noch nicht vollständig bereit. Ohne CLI, Token, Upload-Ziel und Template läuft hier nichts außer ehrlichen Fehlermeldungen.
-      {% endif %}
+    <div id="audio-health-message" style="margin-top:12px;color:var(--text-secondary);font-size:14px">
+      Generator-Status wird geladen …
     </div>
   </section>
 
@@ -51,15 +43,12 @@
           <label for="minutes">Ziel-Dauer (Minuten)</label>
           <input type="number" name="minutes" id="minutes" class="form-input" value="42" min="1" max="180" />
         </div>
-        {% if health.provider != 'stable-audio-local' %}
-        <div class="form-group">
+        <div class="form-group" id="clip-seconds-wrapper" style="display:none">
           <label for="clip_seconds">Clip-Länge</label>
           <input type="number" name="clip_seconds" id="clip_seconds" class="form-input" value="30" min="10" max="60" />
         </div>
-        {% endif %}
       </div>
-      {% if health.provider == 'stable-audio-local' %}
-      <div class="grid two">
+      <div class="grid two" id="stable-audio-fields" style="display:none">
         <div class="form-group">
           <label for="steps">Inference Steps</label>
           <select name="steps" id="steps" class="form-select">
@@ -69,14 +58,13 @@
           </select>
         </div>
         <div class="form-group">
-          <label for="clip_seconds">Max. Clip-Länge (Sek.)</label>
-          <input type="number" name="clip_seconds" id="clip_seconds" class="form-input" value="47" min="10" max="47" />
+          <label for="clip_seconds_stable">Max. Clip-Länge (Sek.)</label>
+          <input type="number" id="clip_seconds_stable" class="form-input" value="47" min="10" max="47" />
           <div class="metric-help">Stable Audio Open max: 47s pro Clip</div>
         </div>
       </div>
-      {% else %}
-      <input type="hidden" name="model" value="stable-audio" />
-      <div class="form-group">
+      <input type="hidden" name="model" id="audio-model" value="stable-audio" />
+      <div class="form-group" id="preset-wrapper" style="display:none">
         <label for="preset_name">Preset</label>
         <select name="preset_name" id="preset_name" class="form-select">
           <option value="">— kein Preset —</option>
@@ -85,7 +73,6 @@
           {% endfor %}
         </select>
       </div>
-      {% endif %}
       <div class="form-group">
         <label for="house_preset">Prompt-Vorlage (House)</label>
         <select name="house_preset" id="house_preset" class="form-select" onchange="fillPresetPrompts()">
@@ -116,6 +103,66 @@
     </form>
   </section>
 </div>
+
+<script>
+(function() {
+  const providerEl = document.querySelector('[data-health="provider"]');
+  const gpuEl = document.querySelector('[data-health="gpu"]');
+  const hostEl = document.querySelector('[data-health="host"]');
+  const modelEl = document.querySelector('[data-health="model"]');
+  const statusEl = document.querySelector('[data-health="status"]');
+  const messageEl = document.getElementById('audio-health-message');
+  const stableFields = document.getElementById('stable-audio-fields');
+  const presetWrapper = document.getElementById('preset-wrapper');
+  const clipWrapper = document.getElementById('clip-seconds-wrapper');
+  const clipStable = document.getElementById('clip_seconds_stable');
+  const clipInput = document.getElementById('clip_seconds');
+  const modelInput = document.getElementById('audio-model');
+
+  function applyProviderLayout(provider) {
+    const stable = provider === 'stable-audio-local';
+    stableFields.style.display = stable ? 'grid' : 'none';
+    presetWrapper.style.display = stable ? 'none' : 'block';
+    clipWrapper.style.display = stable ? 'none' : 'block';
+    modelInput.value = stable ? 'stable-audio' : 'stable-audio';
+    if (stable) {
+      clipInput.value = clipStable.value || '47';
+      clipInput.max = '47';
+    } else {
+      clipInput.value = clipInput.value || '30';
+      clipInput.max = '60';
+    }
+  }
+
+  clipStable.addEventListener('input', function() {
+    clipInput.value = this.value;
+  });
+
+  fetch('/admin/audio/health')
+    .then(r => r.json())
+    .then(health => {
+      providerEl.textContent = health.provider || 'unknown';
+      gpuEl.textContent = health.gpu || '—';
+      hostEl.textContent = health.host || '—';
+      modelEl.textContent = health.model || '—';
+      if (health.provider === 'stable-audio-local') {
+        statusEl.textContent = health.available ? '✅ Online' : '❌ Offline';
+      } else {
+        statusEl.textContent = health.available ? '✅ Verfügbar' : '❌ Nicht verfügbar';
+      }
+      messageEl.textContent = health.available
+        ? 'Generator ist grundsätzlich startklar. Der Run hängt ab hier trotzdem noch von Provider-Runtime, Modell und Remote-Execution ab — also bereit, aber nicht magisch unfehlbar.'
+        : (health.error || 'Generator ist noch nicht vollständig bereit. Ohne CLI, Token, Upload-Ziel und Template läuft hier nichts außer ehrlichen Fehlermeldungen.');
+      applyProviderLayout(health.provider);
+    })
+    .catch(() => {
+      providerEl.textContent = 'unknown';
+      statusEl.textContent = '⚠️ Status konnte nicht geladen werden';
+      messageEl.textContent = 'Die Seite bleibt benutzbar, aber der Generator-Status konnte gerade nicht geprüft werden.';
+      applyProviderLayout('unknown');
+    });
+})();
+</script>
 
 <section class="panel" style="margin-top:18px">
   <div class="status-header">
