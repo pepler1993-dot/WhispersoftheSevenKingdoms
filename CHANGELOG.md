@@ -3,6 +3,21 @@
 Alle relevanten Änderungen am Projekt werden hier dokumentiert.
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [v2.9.0] – 2026-03-25
+
+### Added
+- **Alle 9 GoT-Häuser + The Wall**: Stark 🐺, Lannister 🦁, Targaryen 🐉, Baratheon 🦌, Arryn 🦅, Tully 🪼, Tyrell 🌹, Greyjoy 🐙, Martell ☀️, The Wall 🧊
+- **5 Varianten pro Haus**: Verschiedene Stimmungen/Orte zum Auswählen
+- **House-Presets**: Defaults für Dauer, Loop, Crossfade, Musik-Stil, Thumbnail aus Haus-Config
+- Motto, Sitz, Sigil für jedes Haus
+
+### Changed
+- **Animiertes Video** ist jetzt Default (vorher unchecked)
+- Animated + Public Checkboxen über die erweiterten Einstellungen verschoben
+- Erweiterte Einstellungen werden aus House-Presets vorausgefüllt
+- Default Dauer: 20 Minuten Song + 3h Loop (statt 42 Minuten)
+- Redundante Tooltips und Step-Labels aus Create-Seite entfernt
+
 ## [v2.8.0] – 2026-03-25
 
 ### Added
