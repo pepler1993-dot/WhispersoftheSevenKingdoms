@@ -3,6 +3,20 @@
 Alle relevanten Änderungen am Projekt werden hier dokumentiert.
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [v2.5.0] – 2026-03-25
+
+### Added
+- **Pipeline Job Queue**: Warteschlange mit sequentieller Ausführung (max 1 gleichzeitig)
+  - Queue-Banner auf Pipeline-Übersicht (running/waiting)
+  - Cancel für queued Jobs, Auto-Recovery bei Server-Restart
+  - API: `/api/pipeline/queue`
+- **Thumbnail Source Tracking** (Jarvis): Quelle des Thumbnails wird erkannt + angezeigt
+  - Library / Upload / Briefing / Fallback Unterscheidung
+  - Live-Preview auf Create-Seite, Details auf Run-Seite
+
+### Fixed
+- `/` → `/admin` Redirect
+
 ## [v2.4.0] – 2026-03-25
 
 ### Added
