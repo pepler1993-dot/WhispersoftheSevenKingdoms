@@ -24,17 +24,29 @@ router = APIRouter()
 
 @router.get('/admin/audio', response_class=HTMLResponse)
 def admin_audio(request: Request):
-    health = get_audio_generator_health()
     presets = list_prompt_presets()
     jobs = shared.db.list_audio_jobs(limit=100)
+    health_placeholder = {
+        'provider': 'checking',
+        'available': None,
+        'gpu': None,
+        'host': None,
+        'model': None,
+        'error': None,
+    }
     return shared.templates.TemplateResponse(request, 'audio_generator.html', {
         'request': request,
         'page': 'audio',
-        'health': health,
+        'health': health_placeholder,
         'presets': presets,
         'jobs': jobs,
         'house_templates': _load_house_templates(),
     })
+
+
+@router.get('/admin/audio/health')
+def admin_audio_health():
+    return get_audio_generator_health()
 
 
 @router.post('/admin/audio/generate')
