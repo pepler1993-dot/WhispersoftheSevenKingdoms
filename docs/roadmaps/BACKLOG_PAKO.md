@@ -6,12 +6,12 @@ Leichtere Aufgaben. UI/UX, Docs, Templates, Frontend-Polish.
 
 ### 1. Docs-Startseite vereinfachen (#4) — Priority B
 Docs Homepage übersichtlicher machen.
-- Weniger Infos auf einmal anzeigen
-- Klare Einstiegspunkte: Getting Started, Audio Lab, Pipeline, Library
-- Besseres Spacing + Card-Grouping
-- Mobile + Desktop testen
+- [ ] Weniger Infos auf einmal anzeigen
+- [ ] Klare Einstiegspunkte: Getting Started, Audio Lab, Pipeline, Library
+- [ ] Besseres Spacing + Card-Grouping
+- [ ] Mobile + Desktop testen
 
-### 2. Dashboard-Docs aus User-Persperspektive (#5) — Priority B
+### 2. Dashboard-Docs aus User-Perspektive (#5) — Priority B
 Docs sollen erklären wie man das System NUTZT, nicht wie man es lokal aufsetzt.
 - Developer-Sprache raus
 - Setup-Anweisungen in eigenen Bereich verschieben
@@ -46,38 +46,38 @@ Eigene Test-Rolle mit Workflow definieren.
 
 ### 1. Docs-Startseite vereinfachen (#4) — Priority B
 Docs Homepage übersichtlicher machen.
-- Weniger Infos auf einmal anzeigen
-- Klare Einstiegspunkte: Getting Started, Audio Lab, Pipeline, Library
-- Besseres Spacing + Card-Grouping
-- Mobile + Desktop testen
+- [ ] Weniger Infos auf einmal anzeigen
+- [ ] Klare Einstiegspunkte: Getting Started, Audio Lab, Pipeline, Library
+- [ ] Besseres Spacing + Card-Grouping
+- [ ] Mobile + Desktop testen
 
 ### 2. Dashboard-Docs aus User-Perspektive (#5) — Priority B
 Docs sollen erklären wie man das System NUTZT, nicht wie man es lokal aufsetzt.
-- Developer-Sprache raus
-- Setup-Anweisungen in eigenen Bereich verschieben
-- Task-basierte Erklärungen ("So erstellst du einen Audio-Job")
+- [x] Developer-Sprache raus
+- [x] Setup-Anweisungen in eigenen Bereich verschieben
+- [x] Task-basierte Erklärungen ("So erstellst du einen Audio-Job")
 
 ### 3. Mobile Bottom-Navigation fixen (#8) — Priority B
 Bottom-Nav soll zuverlässig funktionieren.
-- Alle Views mit Bottom-Nav testen
-- Active States + Layout-Jumps fixen
-- Scroll-Verhalten, Fixed Positioning, Z-Index prüfen
-- Tap-Targets vergrößern wo nötig
+- [x] Alle Views mit Bottom-Nav testen
+- [x] Active States + Layout-Jumps fixen
+- [x] Scroll-Verhalten, Fixed Positioning, Z-Index prüfen
+- [x] Tap-Targets vergrößern wo nötig
 
 ### 4. Songs in Library: Playback + Upload (#10) — Priority C
 Song-Verwaltung in Library verbessern.
-- Direktlink Library → Audio Lab
-- In-Dashboard Audio-Player für Preview
-- Dateidetails anzeigen (Größe, Dauer, Format)
+- [x] Direktlink Library → Audio Lab
+- [x] In-Dashboard Audio-Player für Preview
+- [x] Dateidetails anzeigen (Größe, Dauer, Format)
 
 ### 5. Thumbnail-Editor Konzept (#11) — Priority C
 MVP-Plan für Thumbnail-Erstellung im Dashboard.
-- Template-basierter Editor: Text + Emblem + Overlay
-- Export-Format + Speicherort in Library definieren
-- Entscheidung: Template-Editor first vs. Free-Form Editor
+- [x] Template-basierter Editor: Text + Emblem + Overlay
+- [x] Export-Format + Speicherort in Library definieren
+- [x] Entscheidung: Template-Editor first vs. Free-Form Editor
 
 ### 6. Pako als UI/UX Tester formalisieren (#19) — Priority F
 Eigene Test-Rolle mit Workflow definieren.
-- Test-Workflow: Screenshots, Findings, Follow-up Tasks
-- Checkliste für UI-Reviews nach jedem Merge
-- Findings als Issues anlegen
+- [x] Test-Workflow: Screenshots, Findings, Follow-up Tasks
+- [x] Checkliste für UI-Reviews nach jedem Merge
+- [x] Findings als Issues anlegen
