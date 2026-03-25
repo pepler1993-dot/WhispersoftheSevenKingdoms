@@ -1,5 +1,5 @@
 # PROJECT STATUS – Whispers of the Seven Kingdoms
-> Letzte Aktualisierung: 2026-03-25T07:00:02Z
+> Letzte Aktualisierung: 2026-03-25T13:00:01Z
 > Aktualisiert von: Smith
 
 **Agents: Lest diese Datei zuerst. Sie enthält alles was ihr wissen müsst.**
@@ -189,3 +189,48 @@ cc1dc9a feat(audio-lab): pass house_templates to audio page (#63)
 
 ---
 *Diese Datei wird bei jedem Meilenstein aktualisiert. Smith pflegt sie.*
+
+## 🕐 Letzte Commits (auto-generated 2026-03-25T13:00:01Z)
+```
+bca903a Merge jarvis/audio-lab-loadtime: async health check on audio page
+c85bab4 docs: v2.7.0 release notes
+0c6d5b4 feat(gpu): live GPU metrics widget on dashboard (#9ce9b100)
+14f7307 fix(tickets): redirect to overview after create, add assignee, fix prio colors
+5121262 feat(audio): retry failed/cancelled jobs (#7a562945)
+f1a9cfa Update USER_STORIES with Eddi's answer to open questions
+9998e45 docs: add USER_STORIES.md with use cases and workflows
+8499ebb perf(audio): lazy-load generator health on audio lab
+58ebc8c fix(pipeline): remove separate 'Track generieren' button from pipeline/new
+fbef3dd feat(pipeline): one-click generate+render+upload from pipeline/new
+cc82ec2 refactor(workflow): integrate one-click into pipeline/new instead of separate page
+e25eaa9 docs: v2.6.0 release notes
+54de36d feat(workflow): one-click audio-to-pipeline flow
+056ca3a docs: v2.5.0 release notes
+24f9c1e Merge jarvis/thumbnail-source-2026-03-25: thumbnail provenance tracking
+7388ffd feat(pipeline): show thumbnail source provenance
+7013a94 feat(pipeline): job queue with sequential execution
+7fbaed7 fix: redirect / to /admin
+bbb97c9 docs: v2.4.0 release notes
+5d7370c feat(audio): proper cancel flow with state guards + cancelled UI
+2f683d2 feat(tickets): add ticket system - routes, store, templates, nav
+5756aa5 chore: remove DB from tracking, add .venv to gitignore
+0d24fe0 fix: Starlette 1.0 TemplateResponse compat (request as first arg)
+7d890d6 fix: Python 3.11 compat - no backslash in f-string expr
+b5bd8d5 docs: add parallel work guidelines for agents
+7bec9e6 refactor: split main.py into modular FastAPI routers
+4ed204e docs(backlog): mark done items, split backlogs per agent
+7534219 Merge branch 'smith/task-fixes'
+8f0a38b Merge remote-tracking branch 'origin/jarvis/claim-expiry-hardening-2026-03-25'
+d7b9478 feat(sync): add protocol health visibility for claims
+e002528 refactor(audio): remove Kaggle UI, default to GPU worker
+ca23901 fix(slug): auto-generate from title, remove manual slug input
+35c971d Merge remote-tracking branch 'origin/feature/auto-slug'
+2068890 docs(status): record claim status and pako slug ownership
+e75964b docs(backlog): add audio-pipeline workflow follow-ups
+bbdc458 Integrate automatic slug generation in frontend and backend
+65cdb39 Add automatic slug generation script
+34e73df Delete testfile.md
+27b2140 Add testfile.md
+44c91e0 auto: update PROJECT_STATUS.md (2026-03-25T07:00:02Z)
+```
+---
