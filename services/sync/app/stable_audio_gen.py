@@ -230,9 +230,14 @@ class StableAudioGenerator(AudioGenerator):
         num_clips = max(1, int((minutes * 60) / effective_clip) + 1)
         total_duration = (num_clips * effective_clip + crossfade) / 60
 
+        # Estimate render time: ~4s per step on GTX 1070
+        est_seconds_per_clip = steps * 4
+        est_total_minutes = (num_clips * est_seconds_per_clip) / 60
+
         db.append_audio_job_log(
             job_id, 'system',
-            f"Plan: {num_clips} clips × {clip_seconds}s ({steps} steps) ≈ {total_duration:.1f} min",
+            f"Plan: {num_clips} clips × {clip_seconds}s ({steps} steps) "
+            f"≈ {est_seconds_per_clip}s/clip ≈ {est_total_minutes:.0f} min Renderzeit",
             now_iso(),
         )
 
@@ -248,9 +253,11 @@ class StableAudioGenerator(AudioGenerator):
             clip_slug = f'{job_id}_clip_{i:03d}'
             remote_path = f'{GPU_WORKER_OUTPUT_DIR}/{clip_slug}.wav'
 
+            remaining_clips = num_clips - i
+            est_remaining = (remaining_clips * est_seconds_per_clip) / 60
             db.append_audio_job_log(
                 job_id, 'system',
-                f"Generating clip {i + 1}/{num_clips}: \"{prompt[:120]}\"",
+                f"Generating clip {i + 1}/{num_clips} (~{est_seconds_per_clip}s, ~{est_remaining:.0f} min übrig): \"{prompt[:80]}\"",
                 now_iso(),
             )
 
