@@ -1593,7 +1593,7 @@ def admin_pipeline_assets():
 
 @app.post('/admin/pipeline/start')
 def admin_pipeline_start(
-    slug: str = Form(...),
+    slug: str = Form(''),
     title: str = Form(...),
     theme: str = Form(...),
     minutes: int = Form(42),
@@ -1619,7 +1619,7 @@ def admin_pipeline_start(
     thumbnail_avoid: str = Form(''),
     house: str = Form(''),
 ):
-    slug = slug.strip().lower()
+    slug = slug.strip().lower() if slug else slugify(title)
     title = title.strip()
     theme = theme.strip()
     if not slug:

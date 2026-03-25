@@ -678,8 +678,15 @@
   document.getElementById('adv-influences').addEventListener('input', function() { document.getElementById('music_influences').value = this.value; });
   document.getElementById('adv-thumb-scene').addEventListener('input', function() { document.getElementById('thumbnail_scene').value = this.value; });
 
-  // title → thumbnail text sync
-  titleInput.addEventListener('input', function() { document.getElementById('thumbnail_text').value = this.value; });
+  // title → slug + thumbnail text sync
+  titleInput.addEventListener('input', function() {
+    const slugField = document.getElementById('slug');
+    if (slugField && !slugField.value) {
+      slugField.value = slugify(this.value);
+      document.getElementById('assets-slug').textContent = slugify(this.value);
+    }
+    document.getElementById('thumbnail_text').value = this.value;
+  });
 
   // Audio source toggle
   window.showAudioSource = function(mode) {
