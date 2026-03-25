@@ -138,3 +138,10 @@ Stand: 25.03.2026 | Erstversion basierend auf aktuellem Dashboard + bisherigem F
 - [ ] Welche Seiten benutzt ihr nie / was ist überflüssig?
 - [ ] Braucht ihr Mobile-Zugang (Handy) oder nur Desktop?
 - [ ] Soll es Benachrichtigungen geben (Telegram, Email) wenn ein Video fertig ist?
+
+## Antwort von Eddi auf Offene Fragen
+- Wir wollen täglich am besten 2-3 Videos veröffentlichen
+- Der Upload soll default manuell sein aber es soll eine Auto-Publish Option geben
+- Aktuell benutzen wir eigentlich alles, aber die Library Seite ist noch nicht gut genug, da fehler Features und UX Anpassungen. Das Besprechen wir aber seperat.
+- Wir können das Dashboard schon über Handy öffnen im Browser, sieht aber noch nicht so gut aus und nicht so übersichtlich wie auf dem Dekstop PC
+- Falls es möglich ist wäre eine Telegram Nachricht gut in unsere Gruppe wenn ein Video fertig ist
