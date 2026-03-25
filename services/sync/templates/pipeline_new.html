@@ -183,6 +183,9 @@
         <option value="{{ bg }}">{{ bg }}</option>
         {% endfor %}
       </select>
+      <div id="bg-preview" style="margin-top:10px; display:none;">
+        <img id="bg-preview-img" src="" alt="Hintergrund-Preview" style="width:100%; max-width:480px; border-radius:8px; border:1px solid rgba(255,255,255,0.1);" />
+      </div>
     </div>
     <div id="thumbnail-source-preview" style="display:none"></div>
     <div id="background-source-preview" style="display:none"></div>
@@ -745,7 +748,7 @@
               const bgSelect = document.getElementById('library-background');
               const bgFile = bgData.bg_key + '.jpg';
               const opt = [...bgSelect.options].find(o => o.value === bgFile);
-              if (opt) { bgSelect.value = bgFile; }
+              if (opt) { bgSelect.value = bgFile; updateBackgroundSourcePreview(); }
             }
             // Update title with variant
             const duration = (document.getElementById('loop_hours').value || 3) + ' Hours';
@@ -847,17 +850,26 @@
   }
 
   function updateBackgroundSourcePreview() {
-    const preview = document.getElementById('background-source-preview');
     const selected = document.getElementById('library-background').value;
+    const bgPreview = document.getElementById('bg-preview');
+    const bgImg = document.getElementById('bg-preview-img');
+    if (selected) {
+      bgImg.src = '/static/backgrounds/' + selected;
+      bgPreview.style.display = 'block';
+    } else {
+      bgPreview.style.display = 'none';
+    }
+    // Keep old preview hidden
+    const preview = document.getElementById('background-source-preview');
     const house = document.getElementById('house').value || document.getElementById('theme').value;
     if (selected) {
-      preview.innerHTML = 'Voraussichtlicher Video-Hintergrund: <strong>Explizit gewählt</strong> · ' + selected;
+      preview.innerHTML = '';
       return;
     }
     if (house) {
-      preview.innerHTML = 'Voraussichtlicher Video-Hintergrund: <strong>Theme-Standard</strong> · ' + house + '.jpg';
+      preview.innerHTML = '';
     } else {
-      preview.innerHTML = 'Voraussichtlicher Video-Hintergrund: <strong>Theme-Standard / automatisch</strong>';
+      preview.innerHTML = '';
     }
   }
 

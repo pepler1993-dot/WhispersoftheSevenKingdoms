@@ -60,6 +60,11 @@ app = FastAPI(title='agent-sync-service')
 
 app.mount('/static', StaticFiles(directory=str(BASE_DIR / 'static')), name='static')
 
+# Background images from data/assets/backgrounds
+_bg_dir = BASE_DIR.parent.parent / 'data' / 'assets' / 'backgrounds'
+if _bg_dir.exists():
+    app.mount('/static/backgrounds', StaticFiles(directory=str(_bg_dir)), name='backgrounds')
+
 # ── Router includes ──────────────────────────────────────────────────────
 
 from app.routes.health import router as health_router          # noqa: E402
