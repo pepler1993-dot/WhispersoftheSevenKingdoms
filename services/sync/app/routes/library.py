@@ -132,8 +132,33 @@ def admin_library_delete(asset_type: str = Form(...), filename: str = Form(...))
     return RedirectResponse(f'/admin/library?success={asset_type}+Datei+{safe_name}+gelöscht', status_code=303)
 
 
+@router.post('/admin/library/delete-multi')
+def admin_library_delete_multi(asset_type: str = Form(...), filenames: list[str] = Form(default=[])):
+    mapping = {
+        'thumbnails': PIPELINE_DIR / 'data' / 'upload' / 'thumbnails',
+        'backgrounds': PIPELINE_DIR / 'data' / 'assets' / 'backgrounds',
+    }
+    if asset_type not in mapping:
+        return RedirectResponse('/admin/library?error=Mehrfach-Löschen+ist+für+diesen+Asset-Typ+nicht+erlaubt', status_code=303)
+    if not filenames:
+        return RedirectResponse('/admin/library?error=Keine+Dateien+ausgewählt', status_code=303)
+
+    base = mapping[asset_type]
+    deleted = 0
+    for filename in filenames:
+        safe_name = Path(filename).name
+        if not safe_name:
+            continue
+        path = base / safe_name
+        if path.exists() and path.is_file():
+            path.unlink()
+            deleted += 1
+
+    return RedirectResponse(f'/admin/library?success={deleted}+{asset_type}+Datei(en)+gelöscht', status_code=303)
+
+
 @router.post('/admin/library/upload')
-async def admin_library_upload(asset_type: str = Form(...), file: UploadFile = File(...)):
+async def admin_library_upload(asset_type: str = Form(...), file: list[UploadFile] = File(...)):
     mapping = {
         'songs': (PIPELINE_DIR / 'data' / 'upload' / 'songs', {'.mp3', '.wav', '.ogg'}),
         'thumbnails': (PIPELINE_DIR / 'data' / 'upload' / 'thumbnails', {'.jpg', '.jpeg', '.png', '.webp'}),
@@ -143,15 +168,20 @@ async def admin_library_upload(asset_type: str = Form(...), file: UploadFile = F
     if asset_type not in mapping:
         return RedirectResponse('/admin/library?error=Ung%C3%BCltiger+Asset-Typ', status_code=303)
     target_dir, allowed = mapping[asset_type]
-    filename = Path(file.filename or '').name
-    if not filename:
-        return RedirectResponse('/admin/library?error=Dateiname+fehlt', status_code=303)
-    if Path(filename).suffix.lower() not in allowed:
-        return RedirectResponse('/admin/library?error=Dateityp+nicht+erlaubt', status_code=303)
     target_dir.mkdir(parents=True, exist_ok=True)
-    content = await file.read()
-    (target_dir / filename).write_bytes(content)
-    return RedirectResponse(f'/admin/library?success={asset_type}+Datei+{filename}+hochgeladen', status_code=303)
+    uploaded = 0
+    for uploaded_file in file:
+        filename = Path(uploaded_file.filename or '').name
+        if not filename:
+            continue
+        if Path(filename).suffix.lower() not in allowed:
+            return RedirectResponse(f'/admin/library?error=Dateityp+für+{filename}+nicht+erlaubt', status_code=303)
+        content = await uploaded_file.read()
+        (target_dir / filename).write_bytes(content)
+        uploaded += 1
+    if uploaded == 0:
+        return RedirectResponse('/admin/library?error=Keine+gültigen+Dateien+hochgeladen', status_code=303)
+    return RedirectResponse(f'/admin/library?success={uploaded}+{asset_type}+Datei(en)+hochgeladen', status_code=303)
 
 
 @router.get('/admin/library/preview/{asset_type}/{filename}')

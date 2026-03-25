@@ -64,62 +64,86 @@
 
   <section class="panel panel-accent-purple">
     <div class="section-header-inline"><h2>Thumbnails</h2><span class="section-note">für vorhandene Thumbnail-Auswahl</span></div>
-    <div class="thumb-grid">
-      {% for item in thumbnails %}
-      <div class="thumb-card">
-        <img src="/admin/library/preview/thumbnails/{{ item.name }}" alt="{{ item.name }}" class="thumb-preview" />
-        <div class="thumb-meta">
-          <div class="thumb-name">{{ item.name }}</div>
-          <div class="thumb-sub">{{ item.size }} · {{ item.modified }}</div>
-          <form method="post" action="/admin/library/delete" onsubmit="return confirm('Thumbnail wirklich löschen?');" style="margin-top:8px;">
-            <input type="hidden" name="asset_type" value="thumbnails" />
-            <input type="hidden" name="filename" value="{{ item.name }}" />
-            <button type="submit" class="btn btn-danger btn-sm">Löschen</button>
-          </form>
-        </div>
+    <form method="post" action="/admin/library/delete-multi" onsubmit="return confirm('Ausgewählte Thumbnails wirklich löschen?');">
+      <input type="hidden" name="asset_type" value="thumbnails" />
+      <div class="form-actions-inline" style="justify-content:flex-end; margin-bottom:10px;">
+        <button type="submit" class="btn btn-danger btn-sm">Ausgewählte löschen</button>
       </div>
-      {% else %}
-      <div class="empty-state">Keine Thumbnails vorhanden</div>
-      {% endfor %}
-    </div>
+      <div class="thumb-grid">
+        {% for item in thumbnails %}
+        <div class="thumb-card">
+          <label class="thumb-select">
+            <input type="checkbox" name="filenames" value="{{ item.name }}" />
+            <span>Auswählen</span>
+          </label>
+          <img src="/admin/library/preview/thumbnails/{{ item.name }}" alt="{{ item.name }}" class="thumb-preview" />
+          <div class="thumb-meta">
+            <div class="thumb-name">{{ item.name }}</div>
+            <div class="thumb-sub">{{ item.size }} · {{ item.modified }}</div>
+            <form method="post" action="/admin/library/delete" onsubmit="return confirm('Thumbnail wirklich löschen?');" style="margin-top:8px;">
+              <input type="hidden" name="asset_type" value="thumbnails" />
+              <input type="hidden" name="filename" value="{{ item.name }}" />
+              <button type="submit" class="icon-btn icon-btn-danger" aria-label="Thumbnail löschen" title="Thumbnail löschen">
+                <i data-lucide="trash-2" style="width:16px;height:16px"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+        {% else %}
+        <div class="empty-state">Keine Thumbnails vorhanden</div>
+        {% endfor %}
+      </div>
+    </form>
     <form method="post" action="/admin/library/upload" enctype="multipart/form-data" style="margin-top:16px;">
       <input type="hidden" name="asset_type" value="thumbnails" />
       <div class="form-group">
         <label for="thumb_file">Thumbnail hochladen</label>
-        <input id="thumb_file" name="file" type="file" class="form-input" accept=".jpg,.jpeg,.png,.webp" required />
+        <input id="thumb_file" name="file" type="file" class="form-input" accept=".jpg,.jpeg,.png,.webp" multiple required />
       </div>
-      <button type="submit" class="btn btn-primary btn-sm">Thumbnail hochladen</button>
+      <button type="submit" class="btn btn-primary btn-sm">Thumbnails hochladen</button>
     </form>
   </section>
 </div>
 
 <section class="panel panel-accent-blue" style="margin-top:18px; margin-bottom:18px;">
   <div class="section-header-inline"><h2>Video Backgrounds</h2><span class="section-note">für den eigentlichen Video-Hintergrund</span></div>
-  <div class="thumb-grid">
-    {% for item in backgrounds %}
-    <div class="thumb-card">
-      <img src="/admin/library/preview/backgrounds/{{ item.name }}" alt="{{ item.name }}" class="thumb-preview" />
-      <div class="thumb-meta">
-        <div class="thumb-name">{{ item.name }}</div>
-        <div class="thumb-sub">{{ item.size }} · {{ item.modified }}</div>
-        <form method="post" action="/admin/library/delete" onsubmit="return confirm('Background wirklich löschen?');" style="margin-top:8px;">
-          <input type="hidden" name="asset_type" value="backgrounds" />
-          <input type="hidden" name="filename" value="{{ item.name }}" />
-          <button type="submit" class="btn btn-danger btn-sm">Löschen</button>
-        </form>
-      </div>
+  <form method="post" action="/admin/library/delete-multi" onsubmit="return confirm('Ausgewählte Backgrounds wirklich löschen?');">
+    <input type="hidden" name="asset_type" value="backgrounds" />
+    <div class="form-actions-inline" style="justify-content:flex-end; margin-bottom:10px;">
+      <button type="submit" class="btn btn-danger btn-sm">Ausgewählte löschen</button>
     </div>
-    {% else %}
-    <div class="empty-state">Keine Backgrounds vorhanden</div>
-    {% endfor %}
-  </div>
+    <div class="thumb-grid">
+      {% for item in backgrounds %}
+      <div class="thumb-card">
+        <label class="thumb-select">
+          <input type="checkbox" name="filenames" value="{{ item.name }}" />
+          <span>Auswählen</span>
+        </label>
+        <img src="/admin/library/preview/backgrounds/{{ item.name }}" alt="{{ item.name }}" class="thumb-preview" />
+        <div class="thumb-meta">
+          <div class="thumb-name">{{ item.name }}</div>
+          <div class="thumb-sub">{{ item.size }} · {{ item.modified }}</div>
+          <form method="post" action="/admin/library/delete" onsubmit="return confirm('Background wirklich löschen?');" style="margin-top:8px;">
+            <input type="hidden" name="asset_type" value="backgrounds" />
+            <input type="hidden" name="filename" value="{{ item.name }}" />
+            <button type="submit" class="icon-btn icon-btn-danger" aria-label="Background löschen" title="Background löschen">
+              <i data-lucide="trash-2" style="width:16px;height:16px"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+      {% else %}
+      <div class="empty-state">Keine Backgrounds vorhanden</div>
+      {% endfor %}
+    </div>
+  </form>
   <form method="post" action="/admin/library/upload" enctype="multipart/form-data" style="margin-top:16px; max-width: 460px;">
     <input type="hidden" name="asset_type" value="backgrounds" />
     <div class="form-group">
       <label for="bg_file">Background hochladen</label>
-      <input id="bg_file" name="file" type="file" class="form-input" accept=".jpg,.jpeg,.png,.webp" required />
+      <input id="bg_file" name="file" type="file" class="form-input" accept=".jpg,.jpeg,.png,.webp" multiple required />
     </div>
-    <button type="submit" class="btn btn-primary btn-sm">Background hochladen</button>
+    <button type="submit" class="btn btn-primary btn-sm">Backgrounds hochladen</button>
   </form>
 </section>
 
@@ -262,6 +286,7 @@
   border-radius: var(--radius-sm);
   overflow: hidden;
   background: var(--surface);
+  position: relative;
 }
 .thumb-preview {
   width: 100%;
@@ -281,6 +306,36 @@
   font-size: 0.74rem;
   color: var(--muted);
   margin-top: 4px;
+}
+.thumb-select {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.65);
+  color: #fff;
+  font-size: 0.72rem;
+}
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  cursor: pointer;
+}
+.icon-btn-danger {
+  border-color: rgba(220, 38, 38, 0.4);
+  color: #ff8f8f;
 }
 .metadata-form .form-group {
   margin-bottom: 12px;
