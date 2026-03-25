@@ -35,6 +35,50 @@ ALLOWED_THUMB_EXT = {'.jpg', '.jpeg', '.png', '.webp'}
 MAX_UPLOAD_SIZE = 500 * 1024 * 1024  # 500 MB
 
 
+def _detect_thumbnail_source(slug: str, selected_thumbnail: str | None, metadata: dict[str, Any]) -> dict[str, Any]:
+    selected_thumbnail = (selected_thumbnail or '').strip()
+    upload_dir = PIPELINE_DIR / 'data' / 'upload' / 'thumbnails'
+    output_dir = PIPELINE_DIR / 'data' / 'output' / 'thumbnails'
+
+    if selected_thumbnail:
+        selected_path = output_dir / selected_thumbnail
+        return {
+            'type': 'library',
+            'label': 'Aus Thumbnail-Library gewählt',
+            'path': str(selected_path.relative_to(PIPELINE_DIR)) if selected_path.exists() else f'data/output/thumbnails/{selected_thumbnail}',
+            'filename': selected_thumbnail,
+            'fallback_reason': None,
+        }
+
+    upload_match = next((upload_dir / f'{slug}{ext}' for ext in ALLOWED_THUMB_EXT if (upload_dir / f'{slug}{ext}').exists()), None)
+    if upload_match:
+        return {
+            'type': 'upload',
+            'label': 'Manuell hochgeladenes Thumbnail',
+            'path': str(upload_match.relative_to(PIPELINE_DIR)),
+            'filename': upload_match.name,
+            'fallback_reason': None,
+        }
+
+    thumb_brief = (metadata or {}).get('thumbnail_brief') or {}
+    if any((thumb_brief.get('scene'), thumb_brief.get('elements'), thumb_brief.get('style'), thumb_brief.get('text'))):
+        return {
+            'type': 'briefing',
+            'label': 'Wird aus dem Thumbnail-Briefing generiert',
+            'path': None,
+            'filename': None,
+            'fallback_reason': None,
+        }
+
+    return {
+        'type': 'fallback',
+        'label': 'Fallback / unbekannte Quelle',
+        'path': None,
+        'filename': None,
+        'fallback_reason': 'Kein Library-Thumbnail, kein Upload und kein verwertbares Thumbnail-Briefing gefunden.',
+    }
+
+
 @router.get('/admin/pipeline', response_class=HTMLResponse)
 def admin_pipeline(request: Request):
     runs = shared.db.list_runs(limit=100)
@@ -57,6 +101,8 @@ def admin_pipeline_new(request: Request, slug: str | None = Query(default=None),
     library_tracks = list_library_tracks_for_pipeline(shared.db)
     thumb_dir = Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'output' / 'thumbnails'
     library_thumbnails = sorted(f.name for f in thumb_dir.iterdir() if f.is_file() and f.suffix in {'.jpg', '.jpeg', '.png', '.webp'}) if thumb_dir.exists() else []
+    prefill_slug = (slug or '').strip().lower()
+    prefill_thumbnail_source = _detect_thumbnail_source(prefill_slug, None, {}) if prefill_slug else None
     return shared.templates.TemplateResponse(request, 'pipeline_new.html', {
         'request': request,
         'page': 'pipeline',
@@ -65,7 +111,8 @@ def admin_pipeline_new(request: Request, slug: str | None = Query(default=None),
         'houses': houses,
         'library_tracks': library_tracks,
         'library_thumbnails': library_thumbnails,
-        'prefill_slug': (slug or '').strip().lower(),
+        'prefill_slug': prefill_slug,
+        'prefill_thumbnail_source': prefill_thumbnail_source,
         'error_message': error or '',
     })
 
@@ -144,6 +191,7 @@ def admin_pipeline_start(
     thumbnail_style: str = Form(''),
     thumbnail_avoid: str = Form(''),
     house: str = Form(''),
+    thumbnail_file: str = Form(''),
 ):
     title = title.strip()
     slug = slugify(title)
@@ -189,6 +237,8 @@ def admin_pipeline_start(
     metadata_path.parent.mkdir(parents=True, exist_ok=True)
     metadata_path.write_text(json.dumps(metadata, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
 
+    thumbnail_source = _detect_thumbnail_source(slug, thumbnail_file, metadata)
+
     config = {
         'minutes': minutes,
         'loop_hours': loop_hours,
@@ -200,6 +250,7 @@ def admin_pipeline_start(
         'mood': mood or None,
         'house': house or theme or None,
         'metadata': metadata,
+        'thumbnail_source': thumbnail_source,
     }
 
     run_id = uuid.uuid4().hex[:12]

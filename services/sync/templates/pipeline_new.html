@@ -182,6 +182,13 @@
         {% endfor %}
       </select>
       <p class="step-desc">Vorhandene Thumbnails aus der Bibliothek · Verwaltung in der <a href="/admin/library">Library</a></p>
+      <div id="thumbnail-source-preview" class="step-desc" style="margin-top:8px; padding:10px 12px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; background:rgba(255,255,255,0.03);">
+        {% if prefill_thumbnail_source %}
+        Voraussichtliche Quelle: <strong>{{ prefill_thumbnail_source.label }}</strong>{% if prefill_thumbnail_source.filename %} · {{ prefill_thumbnail_source.filename }}{% endif %}
+        {% else %}
+        Voraussichtliche Quelle: <strong>Wird automatisch bestimmt</strong>
+        {% endif %}
+      </div>
     </div>
 
     <!-- Advanced Settings (collapsed) -->
@@ -675,7 +682,8 @@
   document.getElementById('adv-preset').addEventListener('change', function() { document.getElementById('audio_preset').value = this.value; });
   document.getElementById('adv-music-style').addEventListener('input', function() { document.getElementById('music_style').value = this.value; });
   document.getElementById('adv-influences').addEventListener('input', function() { document.getElementById('music_influences').value = this.value; });
-  document.getElementById('adv-thumb-scene').addEventListener('input', function() { document.getElementById('thumbnail_scene').value = this.value; });
+  document.getElementById('adv-thumb-scene').addEventListener('input', function() { document.getElementById('thumbnail_scene').value = this.value; updateThumbnailSourcePreview(); });
+  document.getElementById('library-thumbnail').addEventListener('change', updateThumbnailSourcePreview);
 
   // title → slug (always auto-generated) + thumbnail text sync
   titleInput.addEventListener('input', function() {
@@ -685,7 +693,30 @@
       document.getElementById('assets-slug').textContent = slugify(this.value);
     }
     document.getElementById('thumbnail_text').value = this.value;
+    updateThumbnailSourcePreview();
   });
+
+  function updateThumbnailSourcePreview() {
+    const preview = document.getElementById('thumbnail-source-preview');
+    const selected = document.getElementById('library-thumbnail').value;
+    const slug = document.getElementById('slug').value;
+    const scene = document.getElementById('thumbnail_scene').value;
+    const text = document.getElementById('thumbnail_text').value;
+
+    if (selected) {
+      preview.innerHTML = 'Voraussichtliche Quelle: <strong>Aus Thumbnail-Library gewählt</strong> · ' + selected;
+      return;
+    }
+    if (slug) {
+      if (scene || text) {
+        preview.innerHTML = 'Voraussichtliche Quelle: <strong>Wird aus dem Thumbnail-Briefing generiert</strong>';
+      } else {
+        preview.innerHTML = 'Voraussichtliche Quelle: <strong>Fallback / noch unklar</strong>';
+      }
+    } else {
+      preview.innerHTML = 'Voraussichtliche Quelle: <strong>Wird automatisch bestimmt</strong>';
+    }
+  }
 
   // Audio source toggle
   window.showAudioSource = function(mode) {
@@ -843,6 +874,8 @@
         .catch(() => {});
     }, 10000);
   }
+
+  updateThumbnailSourcePreview();
 
   {% if prefill_slug %}
   // auto-select house from prefill slug
