@@ -860,9 +860,21 @@
           if (d.status === 'complete') {
             clearInterval(iv);
             clearInterval(timerIv);
-            statusEl.innerHTML = '✅ Track fertig! Seite wird neu geladen...';
+            statusEl.innerHTML = '✅ Track fertig! Du kannst jetzt das Video erstellen.';
             document.getElementById('btn-start-gen').textContent = '✅ Track generiert!';
-            setTimeout(() => location.reload(), 2000);
+            // Auto-select the generated track in library dropdown
+            const libSelect = document.getElementById('library-audio');
+            if (libSelect) {
+              const slug = document.getElementById('slug').value;
+              setTimeout(() => {
+                location.reload(); // Reload so library dropdown picks up new track
+              }, 1500);
+            }
+            // Scroll to submit button
+            const submitBtn = document.querySelector('button[type="submit"]');
+            if (submitBtn) {
+              setTimeout(() => submitBtn.scrollIntoView({ behavior: 'smooth', block: 'center' }), 2000);
+            }
           } else if (d.status === 'error' || d.status === 'cancelled') {
             clearInterval(iv);
             clearInterval(timerIv);
