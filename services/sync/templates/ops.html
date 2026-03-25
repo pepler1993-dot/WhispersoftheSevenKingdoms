@@ -36,6 +36,29 @@
   </div>
 </section>
 
+{% if protocol_health.warnings %}
+<section class="panel panel-accent-crimson" style="margin-bottom:18px;">
+  <div class="section-header-inline">
+    <div>
+      <h2>Protocol Health</h2>
+      <div class="page-subtitle">Warnungen zu Claims, Heartbeats und Workflow-Semantik.</div>
+    </div>
+    <span class="badge stale">{{ protocol_health.warnings|length }} Warnung{% if protocol_health.warnings|length != 1 %}en{% endif %}</span>
+  </div>
+  <ul class="list">
+    {% for warning in protocol_health.warnings %}
+    <li><strong>{{ warning }}</strong></li>
+    {% endfor %}
+  </ul>
+  <div class="cards" style="margin-top:14px;">
+    <div class="card stat"><div class="label">Stale Claims</div><div class="value">{{ protocol_health.counts.stale_tasks }}</div></div>
+    <div class="card stat"><div class="label">Missing Heartbeats</div><div class="value">{{ protocol_health.counts.missing_heartbeat }}</div></div>
+    <div class="card stat"><div class="label">Mehrfach aktiv</div><div class="value">{{ protocol_health.counts.multiple_active_assignments }}</div></div>
+    <div class="card stat"><div class="label">Done→Released Fehler</div><div class="value">{{ protocol_health.counts.released_after_completion }}</div></div>
+  </div>
+</section>
+{% endif %}
+
 <div class="ops-tabs" role="tablist" aria-label="Operations Navigation">
   <a href="/admin/ops?tab=tasks{% if filters.q %}&q={{ filters.q | urlencode }}{% endif %}{% if filters.owner %}&owner={{ filters.owner | urlencode }}{% endif %}{% if filters.phase %}&phase={{ filters.phase | urlencode }}{% endif %}{% if filters.include_done %}&include_done=true{% endif %}" class="ops-tab {% if current_tab == 'tasks' %}active{% endif %}">
     <i data-lucide="list-checks"></i>

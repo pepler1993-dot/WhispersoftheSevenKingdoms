@@ -506,6 +506,23 @@ class AgentSyncDB:
             'recent_github_events': recent_github_events,
         }
 
+    def get_system_summary(self) -> dict[str, Any]:
+        with self._connect() as conn:
+            counts: dict[str, int] = {}
+            for table in ('github_events', 'task_snapshots', 'task_events', 'task_states', 'pipeline_runs', 'audio_jobs'):
+                row = conn.execute(f'SELECT COUNT(*) AS count FROM {table}').fetchone()
+                counts[table] = int(row['count'] or 0)
+
+            latest_github_row = conn.execute('SELECT MAX(received_at) AS latest FROM github_events').fetchone()
+            latest_task_row = conn.execute('SELECT MAX(updated_at) AS latest FROM task_states').fetchone()
+
+        return {
+            'db_path': str(self.db_path),
+            'counts': counts,
+            'latest_github_event_at': latest_github_row['latest'] if latest_github_row else None,
+            'latest_task_update_at': latest_task_row['latest'] if latest_task_row else None,
+        }
+
     def list_tasks_for_admin(
         self,
         phase: str | None = None,
