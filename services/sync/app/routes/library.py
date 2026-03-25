@@ -7,7 +7,7 @@ from fastapi import APIRouter, File, Form, HTTPException, Query, Request, Upload
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 
 from app import shared
-from app.helpers import _list_library_dir
+from app.helpers import _build_song_metadata, _list_library_dir, slugify
 from app.pipeline_runner import PIPELINE_DIR
 
 router = APIRouter()
@@ -27,6 +27,63 @@ def admin_library(request: Request, success: str | None = Query(default=None), e
         'success_message': success or '',
         'error_message': error or '',
     })
+
+
+@router.post('/admin/library/create-metadata')
+def admin_library_create_metadata(
+    title: str = Form(...),
+    slug: str = Form(''),
+    theme: str = Form(...),
+    mood: str = Form(''),
+    notes: str = Form(''),
+    duration_hint: str = Form('long-form sleep track'),
+    tags: str = Form(''),
+    music_style: str = Form(''),
+    music_influences: str = Form(''),
+    music_tempo: str = Form('slow'),
+    music_energy: str = Form('low'),
+    music_avoid: str = Form(''),
+    thumbnail_scene: str = Form(''),
+    thumbnail_elements: str = Form(''),
+    thumbnail_text: str = Form(''),
+    thumbnail_style: str = Form(''),
+    thumbnail_avoid: str = Form(''),
+):
+    clean_title = title.strip()
+    clean_slug = slugify(slug or clean_title)
+    clean_theme = theme.strip()
+
+    if not clean_title:
+        return RedirectResponse('/admin/library?error=Titel+ist+erforderlich', status_code=303)
+    if not clean_slug:
+        return RedirectResponse('/admin/library?error=Slug+konnte+nicht+gebildet+werden', status_code=303)
+    if not clean_theme:
+        return RedirectResponse('/admin/library?error=Theme+ist+erforderlich', status_code=303)
+
+    metadata = _build_song_metadata(
+        slug=clean_slug,
+        title=clean_title,
+        theme=clean_theme,
+        mood=mood,
+        notes=notes,
+        duration_hint=duration_hint,
+        tags=tags,
+        music_style=music_style,
+        music_influences=music_influences,
+        music_tempo=music_tempo,
+        music_energy=music_energy,
+        music_avoid=music_avoid,
+        thumbnail_scene=thumbnail_scene,
+        thumbnail_elements=thumbnail_elements,
+        thumbnail_text=thumbnail_text,
+        thumbnail_style=thumbnail_style,
+        thumbnail_avoid=thumbnail_avoid,
+    )
+
+    target = PIPELINE_DIR / 'data' / 'upload' / 'metadata' / f'{clean_slug}.json'
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(__import__('json').dumps(metadata, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+    return RedirectResponse(f'/admin/library?success=Metadata+{clean_slug}.json+erstellt', status_code=303)
 
 
 @router.post('/admin/library/upload')
