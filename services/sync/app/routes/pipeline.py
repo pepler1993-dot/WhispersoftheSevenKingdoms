@@ -458,3 +458,27 @@ def admin_pipeline_preview_file(slug: str, filename: str):
 @router.get('/api/pipeline/queue')
 def api_pipeline_queue():
     return get_queue_status(shared.db)
+
+
+@router.get('/api/pipeline/preview-metadata')
+def api_preview_metadata(slug: str = '', house: str = '', duration: str = '3 Hours'):
+    """Preview auto-generated YouTube metadata (description, tags, playlists) before pipeline run."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        'metadata_gen',
+        str(PIPELINE_DIR / 'pipeline' / 'scripts' / 'metadata' / 'metadata_gen.py'),
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    # Build minimal song meta from slug + house
+    song_meta = {'slug': slug, 'theme': house or slug.replace('-', ' ').title(), 'mood': ['calm']}
+
+    # Try loading actual metadata file
+    meta_path = PIPELINE_DIR / 'data' / 'upload' / 'metadata' / f'{slug}.json'
+    if meta_path.exists():
+        import json
+        song_meta = json.loads(meta_path.read_text(encoding='utf-8'))
+
+    metadata = mod.generate_metadata(song_meta, duration)
+    return metadata

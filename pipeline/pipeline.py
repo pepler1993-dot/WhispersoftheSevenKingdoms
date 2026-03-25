@@ -326,7 +326,7 @@ def main():
     metadata_cmd = [
         sys.executable, 'pipeline/scripts/metadata/metadata_gen.py',
         '--song', slug,
-        '--duration', f'{args.minutes} Minutes',
+        '--duration', f'{args.loop_hours} Hours' if args.loop_hours and args.loop_hours > 0 else f'{args.minutes} Minutes',
         '--output', str(metadata_out),
     ]
 
