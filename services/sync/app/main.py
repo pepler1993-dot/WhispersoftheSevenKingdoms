@@ -74,6 +74,7 @@ from app.routes.docs import router as docs_router              # noqa: E402
 from app.routes.shorts import router as shorts_router          # noqa: E402
 from app.routes.tickets import router as tickets_router        # noqa: E402
 from app.routes.workflows import router as workflows_router    # noqa: E402
+from app.routes.gpu import router as gpu_router                # noqa: E402
 
 app.include_router(health_router)
 app.include_router(tasks_router)
@@ -87,6 +88,7 @@ app.include_router(docs_router)
 app.include_router(shorts_router)
 app.include_router(tickets_router)
 app.include_router(workflows_router)
+app.include_router(gpu_router)
 
 # ── Startup ──────────────────────────────────────────────────────────────
 

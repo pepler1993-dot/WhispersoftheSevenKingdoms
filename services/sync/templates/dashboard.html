@@ -56,6 +56,21 @@
     <div class="gauge-label">💾 Disk</div>
     <div class="gauge-detail" id="detail-disk">– / – GB</div>
   </div>
+  <div class="gauge-card" id="gpu-card">
+    <div class="gauge-ring" id="gauge-gpu">
+      <svg viewBox="0 0 120 120">
+        <g transform="rotate(-90 60 60)">
+          <circle cx="60" cy="60" r="52" class="gauge-bg"/>
+          <circle cx="60" cy="60" r="52" class="gauge-fill" id="ring-gpu" stroke-dasharray="0 327"/>
+        </g>
+        <text x="60" y="56" class="gauge-value" id="text-gpu">–</text>
+        <text x="60" y="74" class="gauge-unit">%</text>
+      </svg>
+    </div>
+    <div class="gauge-label">🎮 GPU</div>
+    <div class="gauge-detail" id="detail-gpu">Verbinde...</div>
+    <div class="gauge-detail" id="detail-gpu-temp"></div>
+  </div>
   <div class="gauge-card load-card" title="Server-Last basiert auf dem 1-Minuten-Load pro CPU-Kern. Das ist nicht dasselbe wie CPU-Prozent und reagiert auch auf blockierte Prozesse oder I/O-Wartezeit.">
     <div class="load-emoji" id="load-emoji">😴</div>
     <div class="load-status" id="load-status">Lädt...</div>
@@ -137,6 +152,31 @@ async function refreshStats() {
 }
 refreshStats();
 setInterval(refreshStats, 5000);
+
+async function refreshGpu() {
+  try {
+    const r = await fetch('/api/gpu/metrics');
+    const g = await r.json();
+    const ring = document.getElementById('ring-gpu');
+    const text = document.getElementById('text-gpu');
+    const detail = document.getElementById('detail-gpu');
+    const temp = document.getElementById('detail-gpu-temp');
+    if (!g.available) {
+      text.textContent = '—';
+      detail.textContent = g.error || 'Offline';
+      ring.setAttribute('stroke-dasharray', '0 327');
+      return;
+    }
+    const pct = g.gpu_util;
+    ring.setAttribute('stroke-dasharray', (pct / 100 * 327) + ' 327');
+    ring.style.stroke = pct > 90 ? 'var(--bad)' : pct > 50 ? 'var(--gold)' : 'var(--good)';
+    text.textContent = Math.round(pct);
+    detail.textContent = g.name + ' · ' + Math.round(g.mem_used_mb) + '/' + Math.round(g.mem_total_mb) + ' MB';
+    temp.textContent = g.temperature + '°C · Fan ' + Math.round(g.fan_speed) + '% · ' + Math.round(g.power_draw) + 'W';
+  } catch(e) { console.error('GPU fetch failed', e); }
+}
+refreshGpu();
+setInterval(refreshGpu, 10000);
 </script>
 
 <div class="grid two">
