@@ -3,6 +3,21 @@
 Alle relevanten Änderungen am Projekt werden hier dokumentiert.
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [v2.7.0] – 2026-03-25
+
+### Added
+- **GPU Metrics Widget**: Live GPU-Auslastung, VRAM, Temperatur, Fan, Watt auf dem Dashboard
+  - Auto-Refresh alle 10s, Warning-Thresholds
+  - API: `/api/gpu/metrics`
+- **Audio Job Retry**: 🔄 Button für failed/cancelled Jobs (Detail + Liste)
+- **Ticket Bearbeiter**: `assigned_to` Feld in Tickets (wer arbeitet dran)
+- **User Stories**: `docs/USER_STORIES.md` mit 9 Use Cases
+
+### Fixed
+- Ticket-Redirect nach Erstellen → Übersicht statt Detailseite
+- Prioritäts-Badges konsistent (Low hatte falsche Farbe)
+- One-Click Flow integriert in pipeline/new (kein separater Button mehr)
+
 ## [v2.6.0] – 2026-03-25
 
 ### Added
