@@ -21,37 +21,18 @@ router = APIRouter()
 @router.get('/admin/ops', response_class=HTMLResponse)
 def admin_ops(
     request: Request,
-    tab: str = Query(default='tasks'),
-    phase: str | None = Query(default=None),
-    owner: str | None = Query(default=None),
-    q: str | None = Query(default=None),
-    include_done: bool = Query(default=False),
     limit: int = Query(default=100, ge=1, le=500),
 ):
-    allowed_tabs = {'tasks', 'events', 'system'}
-    current_tab = tab if tab in allowed_tabs else 'tasks'
-    protocol_health = _build_protocol_health()
-    raw_tasks = shared.db.list_tasks_for_admin(phase=phase, owner=owner, query=q, include_done=include_done)
-    tasks = [_humanize_task_for_manager(task, shared.db.get_task_detail(task['task_id'])) for task in raw_tasks]
     events = [{**event, 'received_at_display': _format_berlin(event.get('received_at'), with_seconds=True), 'summary': _event_manager_summary(event)} for event in shared.db.list_github_events(limit=limit)]
     system = shared.db.get_system_summary()
-    system['latest_github_event_at_display'] = _format_berlin(system.get('latest_github_event_at'), with_seconds=True)
-    system['latest_task_update_at_display'] = _format_berlin(system.get('latest_task_update_at'), with_seconds=True)
-    summary = shared.db.get_dashboard_summary()
     from app.stores.tickets import list_tickets, ticket_counts
     recent_tickets = list_tickets(shared.db, limit=8)
     tcounts = ticket_counts(shared.db)
     return shared.templates.TemplateResponse(request, 'ops.html', {
         'request': request,
         'page': 'ops',
-        'current_tab': current_tab,
-        'tasks': tasks,
         'events': events,
         'system': system,
-        'summary': summary,
-        'protocol_health': protocol_health,
-        'limit': limit,
-        'filters': {'phase': phase, 'owner': owner, 'q': q, 'include_done': include_done},
         'recent_tickets': recent_tickets,
         'ticket_counts': tcounts,
     })

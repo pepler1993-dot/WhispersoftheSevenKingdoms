@@ -4,296 +4,478 @@
 <div class="page-header page-header-flex">
   <div>
     <h1>Operations</h1>
-    <div class="page-subtitle">Projektsteuerung für Eddi, Kevin und Iwan — verständlich statt Maschinenraum-Rohdaten.</div>
+    <div class="page-subtitle">Server-Monitoring, Tickets und System-Übersicht.</div>
   </div>
   <div class="header-actions">
-    <a href="/admin/tasks" class="btn btn-secondary btn-sm">Task-Ansicht</a>
-    <a href="/admin/events" class="btn btn-secondary btn-sm">Event-Ansicht</a>
-    <a href="/admin/system" class="btn btn-secondary btn-sm">System</a>
+    <a href="/admin/tickets" class="btn btn-primary btn-sm">
+      <i data-lucide="ticket" style="width:14px;height:14px"></i> Tickets
+    </a>
+    <a href="/admin/releases" class="btn btn-secondary btn-sm">Releases</a>
   </div>
 </div>
 
-<section class="ops-summary-grid">
-  <div class="panel panel-accent-blue ops-metric">
-    <div class="label">Aktiv in Arbeit</div>
-    <div class="value">{{ summary.active_leases|length }}</div>
-    <div class="metric-help">Tasks, an denen gerade aktiv gearbeitet wird</div>
+{# ── Quick Stats ──────────────────────────────────────────────── #}
+<div class="ops-stats">
+  <div class="ops-stat">
+    <div class="ops-stat-icon">🎫</div>
+    <div class="ops-stat-body">
+      <div class="ops-stat-value">{{ ticket_counts.get('open', 0) + ticket_counts.get('in_progress', 0) }}</div>
+      <div class="ops-stat-label">Offene Tickets</div>
+    </div>
   </div>
-  <div class="panel panel-accent-purple ops-metric">
-    <div class="label">Letzte Ereignisse</div>
-    <div class="value">{{ summary.recent_task_events|length }}</div>
-    <div class="metric-help">frisch eingegangene Task-Ereignisse</div>
+  <div class="ops-stat">
+    <div class="ops-stat-icon">🐛</div>
+    <div class="ops-stat-body">
+      <div class="ops-stat-value">{{ ticket_counts.get('open', 0) }}</div>
+      <div class="ops-stat-label">Offen</div>
+    </div>
   </div>
-  <div class="panel panel-accent-teal ops-metric">
-    <div class="label">GitHub Events</div>
-    <div class="value">{{ system.counts.github_events if system.counts else '—' }}</div>
-    <div class="metric-help">eingegangene Webhook-Events insgesamt</div>
+  <div class="ops-stat">
+    <div class="ops-stat-icon">🔧</div>
+    <div class="ops-stat-body">
+      <div class="ops-stat-value">{{ ticket_counts.get('in_progress', 0) }}</div>
+      <div class="ops-stat-label">In Arbeit</div>
+    </div>
   </div>
-  <div class="panel panel-accent-gold ops-metric">
-    <div class="label">Tasks gesamt</div>
-    <div class="value">{{ system.counts.task_states if system.counts else '—' }}</div>
-    <div class="metric-help">bekannte Aufgaben im Sync-Service</div>
+  <div class="ops-stat">
+    <div class="ops-stat-icon">✅</div>
+    <div class="ops-stat-body">
+      <div class="ops-stat-value">{{ ticket_counts.get('done', 0) + ticket_counts.get('closed', 0) }}</div>
+      <div class="ops-stat-label">Erledigt</div>
+    </div>
   </div>
-  <div class="panel panel-accent-crimson ops-metric">
-    <div class="label">Offene Tickets</div>
-    <div class="value">{{ ticket_counts.get('open', 0) + ticket_counts.get('in_progress', 0) }}</div>
-    <div class="metric-help">{{ ticket_counts.get('open', 0) }} offen · {{ ticket_counts.get('in_progress', 0) }} in Arbeit</div>
+  <div class="ops-stat">
+    <div class="ops-stat-icon">📡</div>
+    <div class="ops-stat-body">
+      <div class="ops-stat-value">{{ system.counts.github_events if system.counts else '0' }}</div>
+      <div class="ops-stat-label">GitHub Events</div>
+    </div>
   </div>
+</div>
+
+{# ── Server Monitoring ────────────────────────────────────────── #}
+<div class="grid two" style="margin-bottom: 24px;">
+
+  {# ── LXC 103: Agent-Sync ──────────────────────────────────── #}
+  <section class="server-panel">
+    <div class="server-panel-header">
+      <div class="server-panel-title">
+        <span class="server-icon">🖥️</span>
+        <div>
+          <h2>LXC 103 — Agent-Sync</h2>
+          <div class="server-panel-sub">Dashboard & Pipeline Service</div>
+        </div>
+      </div>
+      <div class="server-status" id="lxc-status">
+        <span class="server-status-dot online"></span> Online
+      </div>
+    </div>
+    <div class="gauge-grid">
+      <div class="gauge-card-sm">
+        <div class="gauge-ring-sm"><svg viewBox="0 0 100 100"><g transform="rotate(-90 50 50)"><circle cx="50" cy="50" r="42" class="gauge-bg-sm"/><circle cx="50" cy="50" r="42" class="gauge-fill-sm" id="ring-lxc-cpu" stroke-dasharray="0 264"/></g><text x="50" y="48" class="gauge-val-sm" id="text-lxc-cpu">–</text><text x="50" y="62" class="gauge-unit-sm">%</text></svg></div>
+        <div class="gauge-lbl">CPU</div>
+        <div class="gauge-det" id="det-lxc-cpu">–</div>
+      </div>
+      <div class="gauge-card-sm">
+        <div class="gauge-ring-sm"><svg viewBox="0 0 100 100"><g transform="rotate(-90 50 50)"><circle cx="50" cy="50" r="42" class="gauge-bg-sm"/><circle cx="50" cy="50" r="42" class="gauge-fill-sm" id="ring-lxc-ram" stroke-dasharray="0 264"/></g><text x="50" y="48" class="gauge-val-sm" id="text-lxc-ram">–</text><text x="50" y="62" class="gauge-unit-sm">%</text></svg></div>
+        <div class="gauge-lbl">RAM</div>
+        <div class="gauge-det" id="det-lxc-ram">–</div>
+      </div>
+      <div class="gauge-card-sm">
+        <div class="gauge-ring-sm"><svg viewBox="0 0 100 100"><g transform="rotate(-90 50 50)"><circle cx="50" cy="50" r="42" class="gauge-bg-sm"/><circle cx="50" cy="50" r="42" class="gauge-fill-sm" id="ring-lxc-disk" stroke-dasharray="0 264"/></g><text x="50" y="48" class="gauge-val-sm" id="text-lxc-disk">–</text><text x="50" y="62" class="gauge-unit-sm">%</text></svg></div>
+        <div class="gauge-lbl">Disk</div>
+        <div class="gauge-det" id="det-lxc-disk">–</div>
+      </div>
+      <div class="gauge-card-sm load-card-sm">
+        <div class="load-emoji-sm" id="lxc-load-emoji">😴</div>
+        <div class="load-status-sm" id="lxc-load-status">...</div>
+        <div class="gauge-lbl">Last</div>
+        <div class="gauge-det" id="det-lxc-load">–</div>
+        <div class="gauge-det" id="det-lxc-uptime">–</div>
+      </div>
+    </div>
+  </section>
+
+  {# ── GPU Worker ───────────────────────────────────────────── #}
+  <section class="server-panel server-panel-gpu">
+    <div class="server-panel-header">
+      <div class="server-panel-title">
+        <span class="server-icon">🎮</span>
+        <div>
+          <h2>GPU Worker</h2>
+          <div class="server-panel-sub">Stable Audio / Rendering VM</div>
+        </div>
+      </div>
+      <div class="server-status" id="gpu-status">
+        <span class="server-status-dot" id="gpu-status-dot"></span>
+        <span id="gpu-status-text">Verbinde...</span>
+      </div>
+    </div>
+    <div class="gauge-grid">
+      <div class="gauge-card-sm">
+        <div class="gauge-ring-sm"><svg viewBox="0 0 100 100"><g transform="rotate(-90 50 50)"><circle cx="50" cy="50" r="42" class="gauge-bg-sm"/><circle cx="50" cy="50" r="42" class="gauge-fill-sm" id="ring-gpu-util" stroke-dasharray="0 264"/></g><text x="50" y="48" class="gauge-val-sm" id="text-gpu-util">–</text><text x="50" y="62" class="gauge-unit-sm">%</text></svg></div>
+        <div class="gauge-lbl">GPU</div>
+        <div class="gauge-det" id="det-gpu-name">–</div>
+      </div>
+      <div class="gauge-card-sm">
+        <div class="gauge-ring-sm"><svg viewBox="0 0 100 100"><g transform="rotate(-90 50 50)"><circle cx="50" cy="50" r="42" class="gauge-bg-sm"/><circle cx="50" cy="50" r="42" class="gauge-fill-sm" id="ring-gpu-mem" stroke-dasharray="0 264"/></g><text x="50" y="48" class="gauge-val-sm" id="text-gpu-mem">–</text><text x="50" y="62" class="gauge-unit-sm">%</text></svg></div>
+        <div class="gauge-lbl">VRAM</div>
+        <div class="gauge-det" id="det-gpu-mem">–</div>
+      </div>
+      <div class="gauge-card-sm">
+        <div class="gauge-ring-sm"><svg viewBox="0 0 100 100"><g transform="rotate(-90 50 50)"><circle cx="50" cy="50" r="42" class="gauge-bg-sm"/><circle cx="50" cy="50" r="42" class="gauge-fill-sm" id="ring-gpu-temp" stroke-dasharray="0 264"/></g><text x="50" y="48" class="gauge-val-sm" id="text-gpu-temp">–</text><text x="50" y="62" class="gauge-unit-sm">°C</text></svg></div>
+        <div class="gauge-lbl">Temp</div>
+        <div class="gauge-det" id="det-gpu-power">–</div>
+      </div>
+      <div class="gauge-card-sm">
+        <div class="gauge-ring-sm"><svg viewBox="0 0 100 100"><g transform="rotate(-90 50 50)"><circle cx="50" cy="50" r="42" class="gauge-bg-sm"/><circle cx="50" cy="50" r="42" class="gauge-fill-sm" id="ring-gpu-fan" stroke-dasharray="0 264"/></g><text x="50" y="48" class="gauge-val-sm" id="text-gpu-fan">–</text><text x="50" y="62" class="gauge-unit-sm">%</text></svg></div>
+        <div class="gauge-lbl">Fan</div>
+        <div class="gauge-det" id="det-gpu-fan">–</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+{# ── Tickets ──────────────────────────────────────────────────── #}
+<section class="ops-panel">
+  <div class="section-header-inline">
+    <h2>🎫 Tickets</h2>
+    <a href="/admin/tickets" class="section-link">Alle Tickets →</a>
+  </div>
+  {% if recent_tickets %}
+  <div class="mini-list">
+    {% for t in recent_tickets %}
+    <a href="/admin/tickets/{{ t.ticket_id }}" class="mini-item">
+      <div class="mini-dot mini-dot-{{ t.status }}"></div>
+      <div class="mini-info">
+        <div class="mini-title">{% if t.type == 'bug' %}🐛{% elif t.type == 'feature' %}✨{% elif t.type == 'improvement' %}🔧{% else %}📋{% endif %} {{ t.title }}</div>
+        <div class="mini-sub">{{ t.created_at[:10] if t.created_at else '—' }} · {{ t.created_by or 'unbekannt' }}</div>
+      </div>
+      <span class="mini-badge mini-badge-{{ t.priority }}">{{ t.priority }}</span>
+      <span class="mini-badge mini-badge-{{ t.status }}">{{ t.status }}</span>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state-sm">Keine Tickets vorhanden — <a href="/admin/tickets/new">Ticket erstellen</a></div>
+  {% endif %}
 </section>
 
-{# ── Server Stats (moved from Studio) ────────────────────────── #}
-<div class="server-stats-grid" id="server-stats">
-  <div class="gauge-card">
-    <div class="gauge-ring"><svg viewBox="0 0 120 120"><g transform="rotate(-90 60 60)"><circle cx="60" cy="60" r="52" class="gauge-bg"/><circle cx="60" cy="60" r="52" class="gauge-fill" id="ring-cpu" stroke-dasharray="0 327"/></g><text x="60" y="56" class="gauge-value" id="text-cpu">–</text><text x="60" y="74" class="gauge-unit">%</text></svg></div>
-    <div class="gauge-label">🖥️ CPU</div>
-    <div class="gauge-detail" id="detail-cpu">– Cores</div>
+{# ── GitHub Events (collapsible) ──────────────────────────────── #}
+<details class="ops-panel ops-details">
+  <summary class="ops-details-summary">
+    <h2>📡 GitHub Events</h2>
+    <span class="section-count">{{ events|length }}</span>
+  </summary>
+  {% if events %}
+  <div class="mini-list" style="margin-top:12px;">
+    {% for event in events[:10] %}
+    <div class="mini-item" style="cursor:default;">
+      <div class="mini-dot" style="background:var(--blue,#3b82f6);"></div>
+      <div class="mini-info">
+        <div class="mini-title">{{ event.summary }}</div>
+        <div class="mini-sub">{{ event.sender or '—' }} · {{ event.received_at_display }}</div>
+      </div>
+    </div>
+    {% endfor %}
   </div>
-  <div class="gauge-card">
-    <div class="gauge-ring"><svg viewBox="0 0 120 120"><g transform="rotate(-90 60 60)"><circle cx="60" cy="60" r="52" class="gauge-bg"/><circle cx="60" cy="60" r="52" class="gauge-fill" id="ring-ram" stroke-dasharray="0 327"/></g><text x="60" y="56" class="gauge-value" id="text-ram">–</text><text x="60" y="74" class="gauge-unit">%</text></svg></div>
-    <div class="gauge-label">🧠 RAM</div>
-    <div class="gauge-detail" id="detail-ram">– / – GB</div>
-  </div>
-  <div class="gauge-card">
-    <div class="gauge-ring"><svg viewBox="0 0 120 120"><g transform="rotate(-90 60 60)"><circle cx="60" cy="60" r="52" class="gauge-bg"/><circle cx="60" cy="60" r="52" class="gauge-fill" id="ring-disk" stroke-dasharray="0 327"/></g><text x="60" y="56" class="gauge-value" id="text-disk">–</text><text x="60" y="74" class="gauge-unit">%</text></svg></div>
-    <div class="gauge-label">💾 Disk</div>
-    <div class="gauge-detail" id="detail-disk">– / – GB</div>
-  </div>
-  <div class="gauge-card load-card">
-    <div class="load-emoji" id="load-emoji">😴</div>
-    <div class="load-status" id="load-status">Lädt...</div>
-    <div class="gauge-label">⚡ Server-Last</div>
-    <div class="gauge-detail" id="detail-load">Load: –</div>
-    <div class="gauge-detail" id="detail-uptime">Uptime: –</div>
-  </div>
-</div>
+  {% else %}
+  <div class="empty-state-sm" style="margin-top:12px;">Keine GitHub Events</div>
+  {% endif %}
+</details>
+
 <script>
 (function(){
-  var CIRC = 2 * Math.PI * 52;
-  function setGauge(id, p) {
-    var ring = document.getElementById('ring-' + id);
-    var text = document.getElementById('text-' + id);
+  var C = 2 * Math.PI * 42; // small gauge circumference
+  function sg(id, p) {
+    var r = document.getElementById('ring-' + id);
+    var t = document.getElementById('text-' + id);
+    if (!r || !t) return;
     p = Math.min(100, Math.max(0, p));
-    ring.setAttribute('stroke-dasharray', (p / 100 * CIRC) + ' ' + CIRC);
-    text.textContent = Math.round(p);
-    ring.style.stroke = p > 90 ? '#ef4444' : p > 70 ? '#f59e0b' : p > 50 ? '#3b82f6' : '#10b981';
+    r.setAttribute('stroke-dasharray', (p / 100 * C) + ' ' + C);
+    t.textContent = Math.round(p);
+    r.style.stroke = p > 90 ? '#ef4444' : p > 70 ? '#f59e0b' : p > 50 ? '#3b82f6' : '#10b981';
   }
-  function timeSince(iso) {
+  function ts(iso) {
     var s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
     var d = Math.floor(s/86400), h = Math.floor((s%86400)/3600), m = Math.floor((s%3600)/60);
     return (d ? d+'d ' : '') + h+'h '+m+'m';
   }
-  function refresh() {
+  function refreshLXC() {
     fetch('/admin/api/server-stats').then(function(r){return r.json()}).then(function(d){
-      setGauge('cpu', d.cpu.percent);
-      setGauge('ram', d.memory.percent);
-      setGauge('disk', d.disk.percent);
-      document.getElementById('detail-cpu').textContent = d.cpu.cores + ' Cores';
-      document.getElementById('detail-ram').textContent = d.memory.used_gb.toFixed(1) + ' / ' + d.memory.total_gb.toFixed(1) + ' GB';
-      document.getElementById('detail-disk').textContent = d.disk.used_gb.toFixed(1) + ' / ' + d.disk.total_gb.toFixed(1) + ' GB';
+      sg('lxc-cpu', d.cpu.percent);
+      sg('lxc-ram', d.memory.percent);
+      sg('lxc-disk', d.disk.percent);
+      document.getElementById('det-lxc-cpu').textContent = d.cpu.cores + ' Cores';
+      document.getElementById('det-lxc-ram').textContent = d.memory.used_gb.toFixed(1) + '/' + d.memory.total_gb.toFixed(1) + ' GB';
+      document.getElementById('det-lxc-disk').textContent = d.disk.used_gb.toFixed(1) + '/' + d.disk.total_gb.toFixed(1) + ' GB';
       var cores = Math.max(1, d.cpu.cores);
       var ratio = d.cpu.load_1m / cores;
       var emoji = ratio < 0.5 ? '😌' : ratio < 1 ? '🙂' : ratio < 1.5 ? '😅' : ratio < 2 ? '😓' : '🚨';
       var status = ratio < 0.5 ? 'Leicht' : ratio < 1 ? 'Normal' : ratio < 1.5 ? 'Erhöht' : ratio < 2 ? 'Hoch' : 'Sehr hoch';
-      document.getElementById('load-emoji').textContent = emoji;
-      document.getElementById('load-status').textContent = status;
-      document.getElementById('detail-load').textContent = 'Load: ' + d.cpu.load_1m.toFixed(2) + ' (' + ratio.toFixed(2) + '/Kern)';
-      document.getElementById('detail-uptime').textContent = 'Uptime: ' + timeSince(d.boot_time);
+      document.getElementById('lxc-load-emoji').textContent = emoji;
+      document.getElementById('lxc-load-status').textContent = status;
+      document.getElementById('det-lxc-load').textContent = 'Load ' + d.cpu.load_1m.toFixed(2);
+      document.getElementById('det-lxc-uptime').textContent = 'Up ' + ts(d.boot_time);
     }).catch(function(){});
   }
-  refresh(); setInterval(refresh, 5000);
+  function refreshGPU() {
+    fetch('/api/gpu/metrics').then(function(r){return r.json()}).then(function(g){
+      var dot = document.getElementById('gpu-status-dot');
+      var stxt = document.getElementById('gpu-status-text');
+      if (!g.available) {
+        dot.className = 'server-status-dot offline';
+        stxt.textContent = g.error || 'Offline';
+        return;
+      }
+      dot.className = 'server-status-dot online';
+      stxt.textContent = 'Online';
+      sg('gpu-util', g.gpu_util);
+      var memPct = g.mem_total_mb > 0 ? (g.mem_used_mb / g.mem_total_mb * 100) : 0;
+      sg('gpu-mem', memPct);
+      sg('gpu-temp', g.temperature);  // 0-100 scale works for temp
+      sg('gpu-fan', g.fan_speed);
+      document.getElementById('det-gpu-name').textContent = g.name || 'GPU';
+      document.getElementById('det-gpu-mem').textContent = Math.round(g.mem_used_mb) + '/' + Math.round(g.mem_total_mb) + ' MB';
+      document.getElementById('det-gpu-power').textContent = Math.round(g.power_draw) + 'W';
+      document.getElementById('det-gpu-fan').textContent = 'Speed';
+    }).catch(function(){
+      var dot = document.getElementById('gpu-status-dot');
+      var stxt = document.getElementById('gpu-status-text');
+      if (dot) dot.className = 'server-status-dot offline';
+      if (stxt) stxt.textContent = 'Nicht erreichbar';
+    });
+  }
+  refreshLXC(); refreshGPU();
+  setInterval(refreshLXC, 5000);
+  setInterval(refreshGPU, 10000);
 })();
 </script>
 
-{# ── Tickets quick view ───────────────────────────────────────── #}
-<section class="panel" style="margin-bottom:18px;">
-  <div class="section-header-inline">
-    <h2>🎫 Tickets</h2>
-    <a href="/admin/tickets" class="section-note" style="text-decoration:none;">Alle Tickets →</a>
-  </div>
-  {% if recent_tickets %}
-  <div style="overflow-x:auto;">
-    <table class="ops-table" style="width:100%;">
-      <thead><tr><th>Titel</th><th>Typ</th><th>Priorität</th><th>Status</th><th>Erstellt</th></tr></thead>
-      <tbody>
-        {% for t in recent_tickets %}
-        <tr>
-          <td><a href="/admin/tickets/{{ t.ticket_id }}">{{ t.title }}</a></td>
-          <td>{% if t.type == 'bug' %}🐛{% elif t.type == 'feature' %}✨{% elif t.type == 'improvement' %}🔧{% else %}📋{% endif %} {{ t.type }}</td>
-          <td><span class="badge badge-{{ t.priority }}">{{ t.priority }}</span></td>
-          <td><span class="badge badge-{{ t.status }}">{{ t.status }}</span></td>
-          <td>{{ t.created_at[:10] if t.created_at else '—' }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  {% else %}
-  <div class="empty-state" style="padding:20px; text-align:center; color:var(--muted);">Keine Tickets vorhanden</div>
-  {% endif %}
-</section>
+<style>
+/* ── Stats ────────────────────────────────────────────────── */
+.ops-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.ops-stat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.ops-stat-icon { font-size: 1.4rem; }
+.ops-stat-value { font-size: 1.3rem; font-weight: 800; }
+.ops-stat-label { font-size: 0.7rem; color: var(--muted); }
 
-{% if protocol_health.warnings %}
-<section class="panel panel-accent-crimson" style="margin-bottom:18px;">
-  <div class="section-header-inline">
-    <div>
-      <h2>Protocol Health</h2>
-      <div class="page-subtitle">Warnungen zu Claims, Heartbeats und Workflow-Semantik.</div>
-    </div>
-    <span class="badge stale">{{ protocol_health.warnings|length }} Warnung{% if protocol_health.warnings|length != 1 %}en{% endif %}</span>
-  </div>
-  <ul class="list">
-    {% for warning in protocol_health.warnings %}
-    <li><strong>{{ warning }}</strong></li>
-    {% endfor %}
-  </ul>
-  <div class="cards" style="margin-top:14px;">
-    <div class="card stat"><div class="label">Stale Claims</div><div class="value">{{ protocol_health.counts.stale_tasks }}</div></div>
-    <div class="card stat"><div class="label">Missing Heartbeats</div><div class="value">{{ protocol_health.counts.missing_heartbeat }}</div></div>
-    <div class="card stat"><div class="label">Mehrfach aktiv</div><div class="value">{{ protocol_health.counts.multiple_active_assignments }}</div></div>
-    <div class="card stat"><div class="label">Done→Released Fehler</div><div class="value">{{ protocol_health.counts.released_after_completion }}</div></div>
-  </div>
-</section>
-{% endif %}
+/* ── Server panels ────────────────────────────────────────── */
+.server-panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.server-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #10b981, #3b82f6);
+}
+.server-panel-gpu::before {
+  background: linear-gradient(90deg, #8b5cf6, #ec4899);
+}
+.server-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.server-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.server-icon { font-size: 1.5rem; }
+.server-panel-title h2 { font-size: 0.95rem; font-weight: 700; margin: 0; }
+.server-panel-sub { font-size: 0.72rem; color: var(--muted); margin-top: 1px; }
+.server-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+.server-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #6b7280;
+}
+.server-status-dot.online {
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34,197,94,0.4);
+}
+.server-status-dot.offline { background: #ef4444; }
 
-<div class="ops-tabs" role="tablist" aria-label="Operations Navigation">
-  <a href="/admin/ops?tab=tasks{% if filters.q %}&q={{ filters.q | urlencode }}{% endif %}{% if filters.owner %}&owner={{ filters.owner | urlencode }}{% endif %}{% if filters.phase %}&phase={{ filters.phase | urlencode }}{% endif %}{% if filters.include_done %}&include_done=true{% endif %}" class="ops-tab {% if current_tab == 'tasks' %}active{% endif %}">
-    <i data-lucide="list-checks"></i>
-    <span>Tasks</span>
-  </a>
-  <a href="/admin/ops?tab=events" class="ops-tab {% if current_tab == 'events' %}active{% endif %}">
-    <i data-lucide="webhook"></i>
-    <span>Events</span>
-  </a>
-  <a href="/admin/ops?tab=system" class="ops-tab {% if current_tab == 'system' %}active{% endif %}">
-    <i data-lucide="server-cog"></i>
-    <span>System</span>
-  </a>
-</div>
+/* ── Gauges (small) ───────────────────────────────────────── */
+.gauge-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.gauge-card-sm {
+  text-align: center;
+  padding: 8px 4px;
+}
+.gauge-ring-sm {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 6px;
+}
+.gauge-ring-sm svg { width: 100%; height: 100%; }
+.gauge-bg-sm {
+  fill: none;
+  stroke: rgba(255,255,255,0.06);
+  stroke-width: 6;
+}
+.gauge-fill-sm {
+  fill: none;
+  stroke: #10b981;
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.8s ease, stroke 0.5s ease;
+}
+.gauge-val-sm {
+  text-anchor: middle;
+  fill: var(--text, #fff);
+  font-size: 20px;
+  font-weight: 800;
+}
+.gauge-unit-sm {
+  text-anchor: middle;
+  fill: var(--muted, #888);
+  font-size: 10px;
+}
+.gauge-lbl {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.gauge-det {
+  font-size: 0.65rem;
+  color: var(--muted);
+}
+.load-card-sm { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.load-emoji-sm { font-size: 1.8rem; margin-bottom: 2px; }
+.load-status-sm { font-size: 0.78rem; font-weight: 700; margin-bottom: 4px; }
 
-{% if current_tab == 'tasks' %}
-<form method="get" class="filters panel inline-form ops-filter-bar">
-  <input type="hidden" name="tab" value="tasks" />
-  <input type="text" name="q" value="{{ filters.q or '' }}" placeholder="Issue- oder Task-ID suchen" />
-  <input type="text" name="owner" value="{{ filters.owner or '' }}" placeholder="Agent / Bearbeiter" />
-  <input type="text" name="phase" value="{{ filters.phase or '' }}" placeholder="Status (working, released, done ...)" />
-  <label class="form-check compact" style="margin:0" data-tooltip="Zeigt auch bereits erledigte Tasks an.">
-    <input type="checkbox" name="include_done" value="true" {% if filters.include_done %}checked{% endif %} />
-    erledigte zeigen
-  </label>
-  <button type="submit" class="btn btn-primary btn-sm">
-    <i data-lucide="search" style="width:14px;height:14px"></i> Filtern
-  </button>
-</form>
+/* ── Panels ───────────────────────────────────────────────── */
+.ops-panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.section-header-inline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.section-header-inline h2 { font-size: 0.95rem; font-weight: 700; margin: 0; }
+.section-link {
+  font-size: 0.74rem;
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 500;
+}
+.section-link:hover { color: var(--text); }
+.section-count {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+}
 
-<section class="panel">
-  <div class="section-header-inline">
-    <div>
-      <h2>Aufgabenübersicht</h2>
-      <div class="page-subtitle">Wer arbeitet woran, was ist erledigt und was wurde zuletzt gemacht?</div>
-    </div>
-  </div>
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Aufgabe</th>
-          <th>Status</th>
-          <th>Zuletzt von</th>
-          <th>Zusammenfassung</th>
-          <th>Letzte Änderung</th>
-          <th>Lease bis</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for task in tasks %}
-        <tr>
-          <td>
-            <a href="/admin/tasks/{{ task.task_id | urlencode }}">{{ task.assignment_title }}</a>
-            <div class="metric-help" style="margin-top:4px">{{ task.task_id }}</div>
-          </td>
-          <td><span class="badge {{ task.phase }}">{{ task.phase_label }}</span></td>
-          <td>{{ task.last_agent }}</td>
-          <td style="white-space:normal; min-width:260px">{{ task.summary }}</td>
-          <td>{{ task.updated_at_display }}</td>
-          <td>{{ task.lease_until_display }}</td>
-        </tr>
-        {% else %}
-        <tr><td colspan="6" class="empty-state">Keine Tasks gefunden</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</section>
-{% elif current_tab == 'events' %}
-<section class="panel">
-  <div class="section-header-inline">
-    <div>
-      <h2>GitHub-Ereignisse</h2>
-      <div class="page-subtitle">Was von GitHub tatsächlich beim Service angekommen ist.</div>
-    </div>
-  </div>
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Task</th>
-          <th>Zusammenfassung</th>
-          <th>Von</th>
-          <th>Zeit (Berlin)</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for event in events %}
-        <tr>
-          <td data-label="Task">{{ event.task_id or '—' }}</td>
-          <td data-label="Zusammenfassung" style="white-space:normal; min-width:280px">{{ event.summary }}</td>
-          <td data-label="Von">{{ event.sender or '—' }}</td>
-          <td data-label="Zeit (Berlin)">{{ event.received_at_display }}</td>
-        </tr>
-        {% else %}
-        <tr><td colspan="4" class="empty-state">Keine Events</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</section>
-{% else %}
-<div class="grid two">
-  <section class="panel panel-accent-blue">
-    <div class="section-header-inline">
-      <div>
-        <h2>Systemzustand</h2>
-        <div class="page-subtitle">Basisinfos zum laufenden Sync-Service.</div>
-      </div>
-    </div>
-    <ul class="list">
-      <li>
-        <div class="label" style="margin-bottom:2px">Datenbank</div>
-        <div class="mono" style="font-size:0.78rem;color:var(--text-secondary)">{{ system.db_path }}</div>
-      </li>
-      <li>
-        <div class="label" style="margin-bottom:2px">Letztes GitHub Event</div>
-        <div class="system-value">{{ system.latest_github_event_at_display }}</div>
-      </li>
-      <li>
-        <div class="label" style="margin-bottom:2px">Letztes Task Update</div>
-        <div class="system-value">{{ system.latest_task_update_at_display }}</div>
-      </li>
-    </ul>
-  </section>
+/* ── Details (collapsible) ────────────────────────────────── */
+.ops-details summary { cursor: pointer; list-style: none; }
+.ops-details summary::-webkit-details-marker { display: none; }
+.ops-details-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ops-details-summary h2 { font-size: 0.95rem; font-weight: 700; margin: 0; }
 
-  <section class="panel panel-accent-teal">
-    <h2>Zähler</h2>
-    <div class="cards" style="margin-bottom:0">
-      {% for key, value in system.counts.items() %}
-      <div class="card stat">
-        <div class="label">{{ key }}</div>
-        <div class="value">{{ value }}</div>
-      </div>
-      {% endfor %}
-    </div>
-  </section>
-</div>
-{% endif %}
+/* ── Mini list ────────────────────────────────────────────── */
+.mini-list { display: flex; flex-direction: column; }
+.mini-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+  color: var(--text);
+  transition: opacity 0.1s;
+}
+.mini-item:last-child { border-bottom: none; }
+.mini-item:hover { opacity: 0.85; }
+.mini-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.mini-dot-open { background: var(--warning, #d97706); }
+.mini-dot-in_progress { background: var(--blue, #3b82f6); }
+.mini-dot-done { background: var(--good, #22c55e); }
+.mini-dot-closed { background: #6b7280; }
+.mini-info { flex: 1; min-width: 0; }
+.mini-title {
+  font-size: 0.84rem; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mini-sub { font-size: 0.7rem; color: var(--muted); margin-top: 1px; }
+.mini-badge {
+  font-size: 0.63rem; font-weight: 700;
+  padding: 2px 8px; border-radius: 999px;
+  text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0;
+}
+.mini-badge-open { background: rgba(217,119,6,0.15); color: #fbbf24; }
+.mini-badge-in_progress { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.mini-badge-done { background: rgba(34,197,94,0.15); color: #4ade80; }
+.mini-badge-closed { background: rgba(107,114,128,0.15); color: #9ca3af; }
+.mini-badge-low { background: rgba(107,114,128,0.1); color: #9ca3af; }
+.mini-badge-medium { background: rgba(59,130,246,0.1); color: #60a5fa; }
+.mini-badge-high { background: rgba(245,158,11,0.15); color: #fbbf24; }
+.mini-badge-critical { background: rgba(239,68,68,0.15); color: #f87171; }
+
+.empty-state-sm {
+  padding: 24px; text-align: center;
+  color: var(--muted); font-size: 0.84rem;
+}
+.empty-state-sm a { color: var(--gold, #c9a53a); }
+
+/* ── Mobile ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .ops-stats { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .ops-stat { padding: 10px; gap: 8px; }
+  .gauge-grid { grid-template-columns: repeat(2, 1fr); }
+  .gauge-ring-sm { width: 60px; height: 60px; }
+}
+</style>
 {% endblock %}
-
