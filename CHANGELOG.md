@@ -3,6 +3,43 @@
 Alle relevanten Änderungen am Projekt werden hier dokumentiert.
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [v3.0.0] – 2026-03-26
+
+### ✨ Whisper Studio Rebranding
+- Dashboard umbenannt zu **Whisper Studio** mit neuem Branding
+- Logo als Favicon, Apple Touch Icon, Web Manifest (iPhone Home-Screen)
+- Rundes Logo in der Sidebar, klickbar zur Studio Overview
+
+### 🎬 Pipeline Runs Redesign
+- Runs nach Status gruppiert: Laufend, Warteschlange, Hochgeladen, Gerendert, Fehlgeschlagen, Abgebrochen
+- **YouTube-Style Cards** für hochgeladene + gerenderte Videos mit Thumbnail-Preview
+- **Hero Live Cards** für laufende Runs mit Shimmer-Progressbar und LIVE-Badge
+- **Nummerierte Warteschlange** mit Amber-Spinner
+- Fehlgeschlagen/Abgebrochen visuell abgedimmt
+
+### 🏠 Studio & Operations Split
+- **Studio Overview**: Stats, aktive Runs, Pipeline + Audio + Shorts Mini-Listen
+- **Operations Overview**: Server-Monitoring (Whisper Studio + GPU Worker getrennt), Tickets, GitHub Events
+- Tasks komplett durch Tickets ersetzt
+
+### 🛡️ Stabilität
+- **Recovery nach Restart**: Pipeline Runs + Audio Jobs werden automatisch bereinigt
+- `SKIP_RECOVERY=1` Env-Var für Dev-Server
+- **Dev-Server** auf Port 8001 mit eigener DB (kein Einfluss auf Production)
+
+### 📚 Library
+- **Bilder umbenennen** (Thumbnails, Backgrounds, Songs)
+- **iPhone Multi-Upload Fix** (async fetch statt Form-Submit)
+
+### 🎫 Tickets
+- Beschreibung inline bearbeitbar
+- Tickets in Mobile Bottom-Navigation
+- Operations zeigt Ticket-Übersicht
+
+### 🔧 Fixes
+- Background-Preview nutzt Library-Endpoint statt Static-Mount
+- Cloudflare Quick Tunnel als Übergangslösung eingerichtet
+
 ## [v2.9.0] – 2026-03-25
 
 ### Added
