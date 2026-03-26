@@ -1,15 +1,32 @@
 {% extends 'base.html' %}
-{% block title %}Run {{ run.run_id }}{% endblock %}
+{% block title %}{{ run.title or run.slug }}{% endblock %}
 {% block content %}
-<div class="status-header">
-  <h1>{{ run.title or run.slug }}</h1>
-  <span class="badge {{ run.status }}">{{ run.status }}</span>
+
+{# ── Header ───────────────────────────────────────────────────── #}
+<div class="run-detail-header">
+  <a href="/admin/pipeline/logs" class="back-link">
+    <i data-lucide="arrow-left" style="width:16px;height:16px"></i> Alle Runs
+  </a>
+  <div class="run-detail-title-row">
+    <h1>{{ run.title or run.slug }}</h1>
+    <span class="run-status-pill run-status-{{ run.status }}">
+      {% if run.status == 'running' %}<span class="status-dot-pulse"></span>{% endif %}
+      {{ run.status }}
+    </span>
+  </div>
+  <div class="run-detail-sub">
+    <code>{{ run.run_id }}</code>
+    <span>·</span>
+    <span>{{ run.slug }}</span>
+    {% if run.created_at %}
+    <span>·</span>
+    <span>{{ run.created_at[:16] }}</span>
+    {% endif %}
+  </div>
 </div>
 
-<div class="action-bar detail-actions-stack">
-  <a href="/admin/pipeline" class="btn btn-secondary btn-sm">
-    <i data-lucide="arrow-left" style="width:14px;height:14px"></i> Alle Runs
-  </a>
+{# ── Actions ──────────────────────────────────────────────────── #}
+<div class="run-actions">
   {% if run.status in ('running', 'queued') %}
   <form method="post" action="/admin/pipeline/run/{{ run.run_id }}/cancel" style="margin:0">
     <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Run wirklich abbrechen?')">
@@ -19,60 +36,129 @@
   {% endif %}
   {% if run.status == 'rendered' %}
   <form method="post" action="/admin/pipeline/run/{{ run.run_id }}/upload" style="margin:0">
-    <button type="submit" class="btn btn-success" onclick="return confirm('Video jetzt zu YouTube hochladen?')">
+    <button type="submit" class="btn btn-primary" onclick="return confirm('Video jetzt zu YouTube hochladen?')">
       <i data-lucide="upload" style="width:16px;height:16px"></i> Upload zu YouTube
     </button>
   </form>
   {% endif %}
   {% if run.status == 'uploaded' %}
-  <span class="success-banner">
-    <i data-lucide="check-circle" style="width:18px;height:18px"></i> Upload abgeschlossen
-  </span>
+  <div class="run-success-banner">
+    <i data-lucide="check-circle" style="width:16px;height:16px"></i> Erfolgreich hochgeladen
+  </div>
   {% endif %}
 </div>
 
 {% if run.error_message %}
-<div class="panel error-panel">
-  <strong>Fehler:</strong> {{ run.error_message }}
+<div class="run-error-box">
+  <strong>❌ Fehler:</strong> {{ run.error_message }}
 </div>
 {% endif %}
 
-<div class="panel">
-  <h2>Konfiguration</h2>
-  <div class="config-grid">
-    <div class="config-item"><div class="label">Slug</div><div class="value">{{ run.slug }}</div></div>
-    <div class="config-item"><div class="label">Run ID</div><div class="value" style="font-size:0.7rem;word-break:break-all;white-space:normal">{{ run.run_id }}</div></div>
-    {% if run.config %}
-    <div class="config-item"><div class="label">Minuten</div><div class="value">{{ run.config.get('minutes', 42) }}</div></div>
-    <div class="config-item"><div class="label">Loop Hours</div><div class="value">{{ run.config.get('loop_hours', 0) }}</div></div>
-    <div class="config-item"><div class="label">Audio Preset</div><div class="value">{{ run.config.get('audio_preset', 'ambient') }}</div></div>
-    <div class="config-item"><div class="label">Animated</div><div class="value">{{ 'Ja' if run.config.get('animated') else 'Nein' }}</div></div>
-    <div class="config-item"><div class="label">Public</div><div class="value">{{ 'Ja' if run.config.get('public') else 'Nein' }}</div></div>
-    {% if run.config.get('house') %}
-    <div class="config-item"><div class="label">House / Theme</div><div class="value">{{ run.config.house }}</div></div>
-    {% endif %}
-    {% set thumb = run.config.get('thumbnail_source', {}) %}
-    {% set bg = run.config.get('background_source', {}) %}
-    <div class="config-item"><div class="label">Thumbnail-Quelle</div><div class="value">{{ thumb.get('label', '—') }}</div></div>
-    <div class="config-item"><div class="label">Thumbnail-Datei</div><div class="value">{{ thumb.get('filename') or '—' }}</div></div>
-    <div class="config-item"><div class="label">Thumbnail-Pfad</div><div class="value" style="font-size:0.7rem;word-break:break-all;white-space:normal">{{ thumb.get('path') or '—' }}</div></div>
-    <div class="config-item"><div class="label">Thumbnail-Fallback</div><div class="value">{{ thumb.get('fallback_reason') or '—' }}</div></div>
-    <div class="config-item"><div class="label">Video-Hintergrund</div><div class="value">{{ bg.get('label', '—') }}</div></div>
-    <div class="config-item"><div class="label">Hintergrund-Datei</div><div class="value">{{ bg.get('filename') or '—' }}</div></div>
-    <div class="config-item"><div class="label">Hintergrund-Pfad</div><div class="value" style="font-size:0.7rem;word-break:break-all;white-space:normal">{{ bg.get('path') or '—' }}</div></div>
-    <div class="config-item"><div class="label">Hintergrund-Fallback</div><div class="value">{{ bg.get('fallback_reason') or '—' }}</div></div>
-    {% endif %}
-    <div class="config-item"><div class="label">Gestartet</div><div class="value" style="font-size:0.75rem">{{ run.started_at[:19] if run.started_at else '&mdash;' }}</div></div>
-    <div class="config-item"><div class="label">Beendet</div><div class="value" style="font-size:0.75rem">{{ run.finished_at[:19] if run.finished_at else '&mdash;' }}</div></div>
+{# ── Info Cards ───────────────────────────────────────────────── #}
+{% if run.config %}
+{% set cfg = run.config %}
+<div class="run-info-grid">
+  {% if cfg.get('house') %}
+  <div class="info-card info-card-accent">
+    <div class="info-icon">🏰</div>
+    <div class="info-body">
+      <div class="info-label">Haus</div>
+      <div class="info-value">{{ cfg.house | capitalize }}</div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="info-card">
+    <div class="info-icon">🕐</div>
+    <div class="info-body">
+      <div class="info-label">Video-Dauer</div>
+      <div class="info-value">{{ cfg.get('loop_hours', 0) }}h</div>
+    </div>
+  </div>
+
+  <div class="info-card">
+    <div class="info-icon">🎵</div>
+    <div class="info-body">
+      <div class="info-label">Audio</div>
+      <div class="info-value">{{ cfg.get('minutes', 42) }} Min</div>
+    </div>
+  </div>
+
+  <div class="info-card">
+    <div class="info-icon">{{ '✨' if cfg.get('animated') else '🖼️' }}</div>
+    <div class="info-body">
+      <div class="info-label">Rendering</div>
+      <div class="info-value">{{ 'Animiert' if cfg.get('animated') else 'Statisch' }}</div>
+    </div>
+  </div>
+
+  <div class="info-card">
+    <div class="info-icon">{{ '🌍' if cfg.get('public') else '🔒' }}</div>
+    <div class="info-body">
+      <div class="info-label">Sichtbarkeit</div>
+      <div class="info-value">{{ 'Öffentlich' if cfg.get('public') else 'Privat' }}</div>
+    </div>
+  </div>
+
+  <div class="info-card">
+    <div class="info-icon">{{ '🚀' if cfg.get('auto_upload') else '✋' }}</div>
+    <div class="info-body">
+      <div class="info-label">Upload</div>
+      <div class="info-value">{{ 'Automatisch' if cfg.get('auto_upload') else 'Manuell' }}</div>
+    </div>
   </div>
 </div>
 
+{# ── Assets (Background + Thumbnail) ─────────────────────────── #}
+{% set thumb = cfg.get('thumbnail_source', {}) %}
+{% set bg = cfg.get('background_source', {}) %}
+{% if thumb or bg %}
+<div class="run-assets">
+  {% if bg.get('filename') or bg.get('label') %}
+  <div class="asset-tag">🎞️ {{ bg.get('label', bg.get('filename', '—')) }}</div>
+  {% endif %}
+  {% if thumb.get('filename') or thumb.get('label') %}
+  <div class="asset-tag">🖼️ {{ thumb.get('label', thumb.get('filename', '—')) }}</div>
+  {% endif %}
+  {% if cfg.get('crossfade') %}
+  <div class="asset-tag">🔀 {{ cfg.crossfade }}s Crossfade</div>
+  {% endif %}
+</div>
+{% endif %}
+{% endif %}
+
+{# ── Timeline ─────────────────────────────────────────────────── #}
+<div class="run-timeline">
+  <div class="timeline-step {% if run.created_at %}done{% endif %}">
+    <div class="timeline-dot"></div>
+    <div class="timeline-content">
+      <div class="timeline-label">Erstellt</div>
+      <div class="timeline-time">{{ run.created_at[:16] if run.created_at else '—' }}</div>
+    </div>
+  </div>
+  <div class="timeline-step {% if run.started_at %}done{% endif %}">
+    <div class="timeline-dot"></div>
+    <div class="timeline-content">
+      <div class="timeline-label">Gestartet</div>
+      <div class="timeline-time">{{ run.started_at[:16] if run.started_at else '—' }}</div>
+    </div>
+  </div>
+  <div class="timeline-step {% if run.finished_at %}done{% endif %}">
+    <div class="timeline-dot"></div>
+    <div class="timeline-content">
+      <div class="timeline-label">Beendet</div>
+      <div class="timeline-time">{{ run.finished_at[:16] if run.finished_at else '—' }}</div>
+    </div>
+  </div>
+</div>
+
+{# ── Preview ──────────────────────────────────────────────────── #}
 {% if run.status in ('rendered', 'uploaded') and output_files %}
-<div class="panel panel-accent-gold">
-  <h2>Preview</h2>
+<section class="run-panel">
+  <h2>📺 Preview</h2>
   {% for f in output_files %}
     {% if f.name == 'video.mp4' %}
-    <div style="margin-bottom:18px">
+    <div class="video-wrap">
       <video class="preview-video" controls preload="metadata">
         <source src="/admin/pipeline/preview/{{ run.slug }}/video.mp4" type="video/mp4" />
       </video>
@@ -80,42 +166,42 @@
     {% endif %}
   {% endfor %}
 
-  <div class="grid two">
+  <div class="grid two" style="margin-top:16px;">
     {% for f in output_files %}
       {% if f.name.endswith('.jpg') or f.name.endswith('.png') %}
       <div>
-        <h3>Thumbnail</h3>
+        <h3 style="font-size:0.85rem; margin-bottom:8px;">Thumbnail</h3>
         <img class="preview-thumb" src="/admin/pipeline/preview/{{ run.slug }}/{{ f.name }}" alt="Thumbnail" />
       </div>
       {% endif %}
       {% if f.name == 'metadata.json' %}
       <div>
-        <h3>Metadata</h3>
-        <div class="preview-meta" id="preview-meta">Wird geladen&hellip;</div>
+        <h3 style="font-size:0.85rem; margin-bottom:8px;">YouTube Metadata</h3>
+        <div class="preview-meta" id="preview-meta">Wird geladen…</div>
       </div>
       {% endif %}
     {% endfor %}
   </div>
 
   <div class="output-files">
-    <strong>Output-Dateien:</strong>
     {% for f in output_files %}
-      {{ f.name }} ({{ f.size }}){% if not loop.last %}, {% endif %}
+    <span class="output-file-tag">📄 {{ f.name }} <small>({{ f.size }})</small></span>
     {% endfor %}
   </div>
-</div>
+</section>
 {% endif %}
 
-<div class="panel">
-  <h2>Logs</h2>
+{# ── Logs ─────────────────────────────────────────────────────── #}
+<section class="run-panel">
+  <h2>📋 Logs</h2>
   <div class="log-viewer" id="log-viewer">
     {% for log in logs %}
     <div class="log-line {{ log.stream }}">{{ log.message }}</div>
     {% else %}
-    <div class="log-line system">Warte auf Logs&hellip;</div>
+    <div class="log-line system">Warte auf Logs…</div>
     {% endfor %}
   </div>
-</div>
+</section>
 
 <script>
 (function() {
@@ -165,13 +251,230 @@
         var html = '';
         if (data.titles && data.titles.primary) html += '<div><strong>Titel:</strong> ' + data.titles.primary + '</div>';
         else if (data.title) html += '<div><strong>Titel:</strong> ' + data.title + '</div>';
-        if (data.description) html += '<div style="margin-top:8px"><strong>Description:</strong><pre style="margin:4px 0">' + data.description.substring(0, 500) + '</pre></div>';
-        if (data.tags) html += '<div style="margin-top:8px"><strong>Tags:</strong> ' + (Array.isArray(data.tags) ? data.tags.join(', ') : data.tags) + '</div>';
-        if (data.privacy) html += '<div style="margin-top:8px"><strong>Privacy:</strong> ' + data.privacy + '</div>';
-        metaEl.innerHTML = html || '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+        if (data.description) html += '<div style="margin-top:6px"><strong>Beschreibung:</strong><div style="margin-top:4px;font-size:0.78rem;color:var(--muted);white-space:pre-wrap;max-height:200px;overflow-y:auto;">' + data.description.substring(0, 500) + '</div></div>';
+        if (data.tags) html += '<div style="margin-top:6px"><strong>Tags:</strong> <span style="font-size:0.78rem;color:var(--muted)">' + (Array.isArray(data.tags) ? data.tags.join(', ') : data.tags) + '</span></div>';
+        if (data.privacy) html += '<div style="margin-top:6px"><strong>Privacy:</strong> ' + data.privacy + '</div>';
+        metaEl.innerHTML = html || '<pre style="font-size:0.75rem;">' + JSON.stringify(data, null, 2) + '</pre>';
       })
       .catch(function() { metaEl.textContent = 'Metadata konnte nicht geladen werden'; });
   }
 })();
 </script>
+
+<style>
+/* ── Header ───────────────────────────────────────────────── */
+.run-detail-header { margin-bottom: 20px; }
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-decoration: none;
+  margin-bottom: 12px;
+}
+.back-link:hover { color: var(--text); }
+.run-detail-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.run-detail-title-row h1 { margin: 0; font-size: 1.3rem; }
+.run-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.run-status-running { background: rgba(34,197,94,0.15); color: #4ade80; }
+.run-status-queued { background: rgba(217,119,6,0.15); color: #fbbf24; }
+.run-status-rendered { background: rgba(201,165,58,0.15); color: var(--gold, #c9a53a); }
+.run-status-uploaded { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.run-status-failed { background: rgba(239,68,68,0.15); color: #f87171; }
+.run-status-cancelled { background: rgba(107,114,128,0.15); color: #9ca3af; }
+.run-status-created { background: rgba(107,114,128,0.15); color: #9ca3af; }
+.run-status-uploading { background: rgba(139,92,246,0.15); color: #c084fc; }
+.status-dot-pulse {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #22c55e;
+  animation: dot-pulse 1.5s ease-in-out infinite;
+}
+@keyframes dot-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.3); }
+  50% { box-shadow: 0 0 0 5px rgba(34,197,94,0); }
+}
+.run-detail-sub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+.run-detail-sub code {
+  font-size: 0.7rem;
+  background: var(--surface);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* ── Actions ──────────────────────────────────────────────── */
+.run-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.run-success-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(34,197,94,0.1);
+  border: 1px solid rgba(34,197,94,0.3);
+  border-radius: 8px;
+  color: #4ade80;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.run-error-box {
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  font-size: 0.84rem;
+  color: #fca5a5;
+}
+
+/* ── Info Cards ───────────────────────────────────────────── */
+.run-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.info-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.info-card-accent { border-left: 3px solid var(--gold, #c9a53a); }
+.info-icon { font-size: 1.3rem; }
+.info-label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.info-value { font-size: 0.92rem; font-weight: 700; }
+
+/* ── Assets ───────────────────────────────────────────────── */
+.run-assets {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.asset-tag {
+  padding: 4px 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+/* ── Timeline ─────────────────────────────────────────────── */
+.run-timeline {
+  display: flex;
+  gap: 0;
+  margin-bottom: 24px;
+  padding: 16px 20px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.timeline-step {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+}
+.timeline-step::after {
+  content: '';
+  flex: 1;
+  height: 2px;
+  background: var(--line);
+}
+.timeline-step:last-child::after { display: none; }
+.timeline-step.done .timeline-dot { background: var(--gold, #c9a53a); border-color: var(--gold, #c9a53a); }
+.timeline-step.done::after { background: var(--gold, #c9a53a); }
+.timeline-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: var(--surface);
+  flex-shrink: 0;
+}
+.timeline-label { font-size: 0.72rem; font-weight: 600; }
+.timeline-time { font-size: 0.65rem; color: var(--muted); }
+
+/* ── Panel ────────────────────────────────────────────────── */
+.run-panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.run-panel h2 { font-size: 0.95rem; font-weight: 700; margin: 0 0 14px 0; }
+
+/* ── Preview ──────────────────────────────────────────────── */
+.video-wrap { margin-bottom: 16px; }
+.preview-video { width: 100%; border-radius: 10px; max-height: 480px; background: #000; }
+.preview-thumb { width: 100%; border-radius: 8px; border: 1px solid var(--line); }
+.preview-meta {
+  font-size: 0.82rem;
+  padding: 12px;
+  background: var(--surface);
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+.output-files {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+.output-file-tag {
+  padding: 4px 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+/* ── Mobile ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .run-detail-title-row h1 { font-size: 1.1rem; }
+  .run-detail-sub { flex-wrap: wrap; gap: 4px; font-size: 0.68rem; }
+  .run-info-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .info-card { padding: 10px; gap: 8px; }
+  .info-icon { font-size: 1.1rem; }
+  .info-value { font-size: 0.84rem; }
+  .run-timeline { flex-direction: column; gap: 8px; padding: 14px; }
+  .timeline-step::after { display: none; }
+  .run-panel { padding: 14px; }
+  .preview-video { max-height: 300px; }
+}
+</style>
 {% endblock %}
