@@ -38,6 +38,9 @@ def admin_ops(
     system['latest_github_event_at_display'] = _format_berlin(system.get('latest_github_event_at'), with_seconds=True)
     system['latest_task_update_at_display'] = _format_berlin(system.get('latest_task_update_at'), with_seconds=True)
     summary = shared.db.get_dashboard_summary()
+    from app.stores.tickets import list_tickets, ticket_counts
+    recent_tickets = list_tickets(shared.db, limit=8)
+    tcounts = ticket_counts(shared.db)
     return shared.templates.TemplateResponse(request, 'ops.html', {
         'request': request,
         'page': 'ops',
@@ -49,6 +52,8 @@ def admin_ops(
         'protocol_health': protocol_health,
         'limit': limit,
         'filters': {'phase': phase, 'owner': owner, 'q': q, 'include_done': include_done},
+        'recent_tickets': recent_tickets,
+        'ticket_counts': tcounts,
     })
 
 

@@ -22,17 +22,35 @@ def root_redirect():
 
 @router.get('/admin', response_class=HTMLResponse)
 def admin_dashboard(request: Request):
-    protocol_health = _build_protocol_health()
-    summary = shared.db.get_dashboard_summary()
-    recent_runs = shared.db.list_runs(limit=5)
-    recent_audio = shared.db.list_audio_jobs(limit=5)
+    all_runs = shared.db.list_runs(limit=100)
+    recent_audio = shared.db.list_audio_jobs(limit=10)
+
+    # Count by status
+    status_counts: dict[str, int] = {}
+    for r in all_runs:
+        status_counts[r['status']] = status_counts.get(r['status'], 0) + 1
+
+    # Active runs (running + queued)
+    active_runs = [r for r in all_runs if r['status'] in ('running', 'queued')]
+    active_audio = [j for j in recent_audio if j['status'] in ('queued', 'pushing', 'running', 'downloading')]
+
+    # Shorts
+    recent_shorts = [r for r in all_runs if (r.get('config') or {}).get('content_type') == 'short'][:5]
+
     return shared.templates.TemplateResponse(request, 'dashboard.html', {
         'request': request,
         'page': 'dashboard',
-        'summary': summary,
-        'protocol_health': protocol_health,
-        'recent_runs': recent_runs,
-        'recent_audio': recent_audio,
+        'recent_runs': all_runs[:8],
+        'recent_audio': recent_audio[:8],
+        'recent_shorts': recent_shorts,
+        'active_runs': active_runs,
+        'active_audio': active_audio,
+        'count_running': status_counts.get('running', 0),
+        'count_queued': status_counts.get('queued', 0),
+        'count_rendered': status_counts.get('rendered', 0),
+        'count_uploaded': status_counts.get('uploaded', 0),
+        'count_audio_active': len(active_audio),
+        'count_shorts': len(recent_shorts),
     })
 
 

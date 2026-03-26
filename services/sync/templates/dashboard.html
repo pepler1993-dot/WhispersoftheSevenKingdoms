@@ -1,251 +1,397 @@
 {% extends 'base.html' %}
-{% block title %}Dashboard{% endblock %}
+{% block title %}Studio{% endblock %}
 {% block content %}
 <div class="page-header page-header-flex">
   <div>
-    <h1>Overview</h1>
-    <div class="page-subtitle">Die schnelle Lage: was läuft, was hängt, was zuletzt passiert ist.</div>
+    <h1>Studio</h1>
+    <div class="page-subtitle">Alles rund um Content-Produktion: Videos, Audio und Shorts.</div>
   </div>
   <div class="header-actions">
-    <a href="/admin/pipeline" class="btn btn-primary btn-sm">Neues Video</a>
-    <a href="/admin/audio" class="btn btn-secondary btn-sm">Audio Jobs</a>
-    <a href="/admin/ops" class="btn btn-secondary btn-sm">Operations</a>
+    <a href="/admin/pipeline/new" class="btn btn-primary btn-sm">
+      <i data-lucide="plus" style="width:14px;height:14px"></i> Neues Video
+    </a>
+    <a href="/admin/audio" class="btn btn-secondary btn-sm">Audio Lab</a>
   </div>
 </div>
 
-<div class="server-stats-grid" id="server-stats">
-  <div class="gauge-card">
-    <div class="gauge-ring" id="gauge-cpu">
-      <svg viewBox="0 0 120 120">
-        <g transform="rotate(-90 60 60)">
-          <circle cx="60" cy="60" r="52" class="gauge-bg"/>
-          <circle cx="60" cy="60" r="52" class="gauge-fill" id="ring-cpu" stroke-dasharray="0 327"/>
-        </g>
-        <text x="60" y="56" class="gauge-value" id="text-cpu">–</text>
-        <text x="60" y="74" class="gauge-unit">%</text>
-      </svg>
+{# ── Studio Stats ─────────────────────────────────────────────── #}
+<div class="studio-stats">
+  <div class="studio-stat">
+    <div class="studio-stat-icon">🎬</div>
+    <div class="studio-stat-body">
+      <div class="studio-stat-value">{{ count_running }}</div>
+      <div class="studio-stat-label">Laufend</div>
     </div>
-    <div class="gauge-label">🖥️ CPU</div>
-    <div class="gauge-detail" id="detail-cpu">– Cores</div>
   </div>
-  <div class="gauge-card">
-    <div class="gauge-ring" id="gauge-ram">
-      <svg viewBox="0 0 120 120">
-        <g transform="rotate(-90 60 60)">
-          <circle cx="60" cy="60" r="52" class="gauge-bg"/>
-          <circle cx="60" cy="60" r="52" class="gauge-fill" id="ring-ram" stroke-dasharray="0 327"/>
-        </g>
-        <text x="60" y="56" class="gauge-value" id="text-ram">–</text>
-        <text x="60" y="74" class="gauge-unit">%</text>
-      </svg>
+  <div class="studio-stat">
+    <div class="studio-stat-icon">⏳</div>
+    <div class="studio-stat-body">
+      <div class="studio-stat-value">{{ count_queued }}</div>
+      <div class="studio-stat-label">Warteschlange</div>
     </div>
-    <div class="gauge-label">🧠 RAM</div>
-    <div class="gauge-detail" id="detail-ram">– / – GB</div>
   </div>
-  <div class="gauge-card">
-    <div class="gauge-ring" id="gauge-disk">
-      <svg viewBox="0 0 120 120">
-        <g transform="rotate(-90 60 60)">
-          <circle cx="60" cy="60" r="52" class="gauge-bg"/>
-          <circle cx="60" cy="60" r="52" class="gauge-fill" id="ring-disk" stroke-dasharray="0 327"/>
-        </g>
-        <text x="60" y="56" class="gauge-value" id="text-disk">–</text>
-        <text x="60" y="74" class="gauge-unit">%</text>
-      </svg>
+  <div class="studio-stat">
+    <div class="studio-stat-icon">✅</div>
+    <div class="studio-stat-body">
+      <div class="studio-stat-value">{{ count_rendered }}</div>
+      <div class="studio-stat-label">Gerendert</div>
     </div>
-    <div class="gauge-label">💾 Disk</div>
-    <div class="gauge-detail" id="detail-disk">– / – GB</div>
   </div>
-  <div class="gauge-card" id="gpu-card">
-    <div class="gauge-ring" id="gauge-gpu">
-      <svg viewBox="0 0 120 120">
-        <g transform="rotate(-90 60 60)">
-          <circle cx="60" cy="60" r="52" class="gauge-bg"/>
-          <circle cx="60" cy="60" r="52" class="gauge-fill" id="ring-gpu" stroke-dasharray="0 327"/>
-        </g>
-        <text x="60" y="56" class="gauge-value" id="text-gpu">–</text>
-        <text x="60" y="74" class="gauge-unit">%</text>
-      </svg>
+  <div class="studio-stat">
+    <div class="studio-stat-icon">🚀</div>
+    <div class="studio-stat-body">
+      <div class="studio-stat-value">{{ count_uploaded }}</div>
+      <div class="studio-stat-label">Hochgeladen</div>
     </div>
-    <div class="gauge-label">🎮 GPU</div>
-    <div class="gauge-detail" id="detail-gpu">Verbinde...</div>
-    <div class="gauge-detail" id="detail-gpu-temp"></div>
   </div>
-  <div class="gauge-card load-card" title="Server-Last basiert auf dem 1-Minuten-Load pro CPU-Kern. Das ist nicht dasselbe wie CPU-Prozent und reagiert auch auf blockierte Prozesse oder I/O-Wartezeit.">
-    <div class="load-emoji" id="load-emoji">😴</div>
-    <div class="load-status" id="load-status">Lädt...</div>
-    <div class="gauge-label">⚡ Server-Last</div>
-    <div class="gauge-detail" id="detail-load">Load: – / Kern</div>
-    <div class="gauge-detail" id="detail-uptime">Uptime: –</div>
+  <div class="studio-stat">
+    <div class="studio-stat-icon">🎵</div>
+    <div class="studio-stat-body">
+      <div class="studio-stat-value">{{ count_audio_active }}</div>
+      <div class="studio-stat-label">Audio Jobs aktiv</div>
+    </div>
+  </div>
+  <div class="studio-stat">
+    <div class="studio-stat-icon">📱</div>
+    <div class="studio-stat-body">
+      <div class="studio-stat-value">{{ count_shorts }}</div>
+      <div class="studio-stat-label">Shorts</div>
+    </div>
   </div>
 </div>
 
-<section class="overview-strip">
-  <div class="panel panel-accent-gold overview-callout">
-    <div class="label">Jetzt wichtig</div>
-    <div class="value">{{ summary.active_leases|length }}</div>
-    <div class="metric-help">aktive Tasks mit Lease</div>
+{# ── Active now (running pipeline + audio) ────────────────────── #}
+{% if active_runs %}
+<section class="studio-section">
+  <div class="section-head">
+    <h2>🔥 Gerade aktiv</h2>
   </div>
-  <div class="panel panel-accent-crimson overview-callout">
-    <div class="label">Pipeline Runs</div>
-    <div class="value">{{ recent_runs|length }}</div>
-    <div class="metric-help">letzte sichtbare Durchläufe</div>
+  {% for run in active_runs %}
+  <a href="/admin/pipeline/run/{{ run.run_id }}" class="active-card">
+    <div class="active-glow"></div>
+    <div class="active-badge"><span class="active-dot"></span> {% if run.status == 'running' %}RENDERING{% else %}QUEUED{% endif %}</div>
+    <div class="active-body">
+      <div class="active-title">{{ run.title or run.slug }}</div>
+      <div class="active-sub">{{ run.slug }} · Pipeline Run</div>
+      {% if run.status == 'running' %}
+      <div class="active-progress">
+        <div class="active-bar"><div class="active-bar-fill"></div></div>
+      </div>
+      {% endif %}
+    </div>
+  </a>
+  {% endfor %}
+  {% for job in active_audio %}
+  <a href="/admin/audio/jobs/{{ job.job_id }}" class="active-card active-card-audio">
+    <div class="active-glow audio-glow"></div>
+    <div class="active-badge active-badge-audio"><span class="active-dot audio-dot"></span> GENERATING</div>
+    <div class="active-body">
+      <div class="active-title">{{ job.title or job.slug }}</div>
+      <div class="active-sub">{{ job.slug }} · Audio Job</div>
+    </div>
+  </a>
+  {% endfor %}
+</section>
+{% endif %}
+
+{# ── Recent Pipeline Runs + Audio Jobs side by side ───────────── #}
+<div class="grid two">
+  <section class="studio-panel">
+    <div class="section-header-inline">
+      <h2>🎬 Pipeline Runs</h2>
+      <a href="/admin/pipeline" class="section-link">Alle anzeigen →</a>
+    </div>
+    {% if recent_runs %}
+    <div class="mini-list">
+      {% for run in recent_runs %}
+      <a href="/admin/pipeline/run/{{ run.run_id }}" class="mini-item">
+        <div class="mini-dot mini-dot-{{ run.status }}"></div>
+        <div class="mini-info">
+          <div class="mini-title">{{ run.title or run.slug }}</div>
+          <div class="mini-sub">{{ run.created_at[:10] if run.created_at else '—' }}</div>
+        </div>
+        <span class="mini-badge mini-badge-{{ run.status }}">{{ run.status }}</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state-sm">Noch keine Pipeline Runs</div>
+    {% endif %}
+  </section>
+
+  <section class="studio-panel">
+    <div class="section-header-inline">
+      <h2>🎵 Audio Jobs</h2>
+      <a href="/admin/audio" class="section-link">Alle anzeigen →</a>
+    </div>
+    {% if recent_audio %}
+    <div class="mini-list">
+      {% for job in recent_audio %}
+      <a href="/admin/audio/jobs/{{ job.job_id }}" class="mini-item">
+        <div class="mini-dot mini-dot-{{ job.status }}"></div>
+        <div class="mini-info">
+          <div class="mini-title">{{ job.title or job.slug }}</div>
+          <div class="mini-sub">{{ job.created_at[:10] if job.created_at else '—' }}</div>
+        </div>
+        <span class="mini-badge mini-badge-{{ job.status }}">{{ job.status }}</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state-sm">Noch keine Audio Jobs — <a href="/admin/audio">starte einen</a>!</div>
+    {% endif %}
+  </section>
+</div>
+
+{# ── Shorts ───────────────────────────────────────────────────── #}
+<section class="studio-panel" style="margin-top: 4px;">
+  <div class="section-header-inline">
+    <h2>📱 Shorts</h2>
+    <a href="/admin/shorts" class="section-link">Alle anzeigen →</a>
   </div>
-  <div class="panel panel-accent-purple overview-callout">
-    <div class="label">Audio Jobs</div>
-    <div class="value">{{ recent_audio|length }}</div>
-    <div class="metric-help">zuletzt gestartete Generierungen</div>
+  {% if recent_shorts %}
+  <div class="mini-list">
+    {% for run in recent_shorts %}
+    <a href="/admin/pipeline/run/{{ run.run_id }}" class="mini-item">
+      <div class="mini-dot mini-dot-{{ run.status }}"></div>
+      <div class="mini-info">
+        <div class="mini-title">{{ run.title or run.slug }}</div>
+        <div class="mini-sub">{{ run.created_at[:10] if run.created_at else '—' }}</div>
+      </div>
+      <span class="mini-badge mini-badge-{{ run.status }}">{{ run.status }}</span>
+    </a>
+    {% endfor %}
   </div>
+  {% else %}
+  <div class="empty-state-sm">Noch keine Shorts — <a href="/admin/shorts">erstelle einen</a>!</div>
+  {% endif %}
 </section>
 
-<div class="cards">
-  {% for phase, count in summary.phase_counts.items() %}
-  <div class="card stat">
-    <div class="label">{{ phase }}</div>
-    <div class="value">{{ count }}</div>
-  </div>
-  {% endfor %}
-</div>
-
-<script>
-const CIRC = 2 * Math.PI * 52; // ~326.7
-function setGauge(id, percent) {
-  const ring = document.getElementById('ring-' + id);
-  const text = document.getElementById('text-' + id);
-  const p = Math.min(100, Math.max(0, percent));
-  const dash = (p / 100) * CIRC;
-  ring.setAttribute('stroke-dasharray', dash + ' ' + CIRC);
-  text.textContent = Math.round(p);
-  // Color
-  const color = p > 90 ? '#ef4444' : p > 70 ? '#f59e0b' : p > 50 ? '#3b82f6' : '#10b981';
-  ring.style.stroke = color;
+<style>
+/* ── Studio Stats ────────────────────────────────────────── */
+.studio-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 28px;
 }
-function timeSince(isoStr) {
-  const s = Math.floor((Date.now() - new Date(isoStr).getTime()) / 1000);
-  const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60);
-  return (d ? d + 'd ' : '') + h + 'h ' + m + 'm';
+.studio-stat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
 }
-async function refreshStats() {
-  try {
-    const r = await fetch('/admin/api/server-stats');
-    const d = await r.json();
-    setGauge('cpu', d.cpu.percent);
-    setGauge('ram', d.memory.percent);
-    setGauge('disk', d.disk.percent);
-    document.getElementById('detail-cpu').textContent = d.cpu.cores + ' Cores';
-    document.getElementById('detail-ram').textContent = d.memory.used_gb.toFixed(1) + ' / ' + d.memory.total_gb.toFixed(1) + ' GB';
-    document.getElementById('detail-disk').textContent = d.disk.used_gb.toFixed(1) + ' / ' + d.disk.total_gb.toFixed(1) + ' GB';
-    // Load pro Kern: entspanntere, verständlichere Einordnung als zuvor
-    const cores = Math.max(1, d.cpu.cores || 1);
-    const ratio = d.cpu.load_1m / cores;
-    let emoji, status;
-    if (ratio < 0.5) { emoji = '😌'; status = 'Leicht'; }
-    else if (ratio < 1.0) { emoji = '🙂'; status = 'Normal'; }
-    else if (ratio < 1.5) { emoji = '😅'; status = 'Erhöht'; }
-    else if (ratio < 2.0) { emoji = '😓'; status = 'Hoch'; }
-    else { emoji = '🚨'; status = 'Sehr hoch'; }
-    document.getElementById('load-emoji').textContent = emoji;
-    document.getElementById('load-status').textContent = status;
-    document.getElementById('detail-load').textContent = 'Load: ' + d.cpu.load_1m.toFixed(2) + ' (' + ratio.toFixed(2) + ' / Kern)';
-    document.getElementById('detail-uptime').textContent = 'Uptime: ' + timeSince(d.boot_time);
-  } catch(e) { console.error('Stats fetch failed', e); }
+.studio-stat-icon { font-size: 1.5rem; }
+.studio-stat-value { font-size: 1.4rem; font-weight: 800; }
+.studio-stat-label { font-size: 0.72rem; color: var(--muted); font-weight: 500; }
+
+/* ── Active cards ────────────────────────────────────────── */
+.studio-section { margin-bottom: 28px; }
+.active-card {
+  display: block;
+  position: relative;
+  background: linear-gradient(135deg, rgba(34,197,94,0.08), rgba(16,185,129,0.03));
+  border: 1px solid rgba(34,197,94,0.25);
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 10px;
+  text-decoration: none;
+  color: var(--text);
+  overflow: hidden;
+  transition: all 0.2s ease;
 }
-refreshStats();
-setInterval(refreshStats, 5000);
-
-async function refreshGpu() {
-  try {
-    const r = await fetch('/api/gpu/metrics');
-    const g = await r.json();
-    const ring = document.getElementById('ring-gpu');
-    const text = document.getElementById('text-gpu');
-    const detail = document.getElementById('detail-gpu');
-    const temp = document.getElementById('detail-gpu-temp');
-    if (!g.available) {
-      text.textContent = '—';
-      detail.textContent = g.error || 'Offline';
-      ring.setAttribute('stroke-dasharray', '0 327');
-      return;
-    }
-    const pct = g.gpu_util;
-    ring.setAttribute('stroke-dasharray', (pct / 100 * 327) + ' 327');
-    ring.style.stroke = pct > 90 ? 'var(--bad)' : pct > 50 ? 'var(--gold)' : 'var(--good)';
-    text.textContent = Math.round(pct);
-    detail.textContent = g.name + ' · ' + Math.round(g.mem_used_mb) + '/' + Math.round(g.mem_total_mb) + ' MB';
-    temp.textContent = g.temperature + '°C · Fan ' + Math.round(g.fan_speed) + '% · ' + Math.round(g.power_draw) + 'W';
-  } catch(e) { console.error('GPU fetch failed', e); }
+.active-card:hover {
+  border-color: rgba(34,197,94,0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(34,197,94,0.12);
 }
-refreshGpu();
-setInterval(refreshGpu, 10000);
-</script>
+.active-card-audio {
+  background: linear-gradient(135deg, rgba(139,92,246,0.08), rgba(168,85,247,0.03));
+  border-color: rgba(139,92,246,0.25);
+}
+.active-card-audio:hover {
+  border-color: rgba(139,92,246,0.5);
+  box-shadow: 0 6px 24px rgba(139,92,246,0.12);
+}
+.active-glow {
+  position: absolute;
+  top: -40%;
+  right: -15%;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(34,197,94,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.audio-glow { background: radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%); }
+.active-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(34,197,94,0.15);
+  border: 1px solid rgba(34,197,94,0.3);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: #4ade80;
+  margin-bottom: 10px;
+}
+.active-badge-audio {
+  background: rgba(139,92,246,0.15);
+  border-color: rgba(139,92,246,0.3);
+  color: #c084fc;
+}
+.active-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  animation: pulse-active 1.5s ease-in-out infinite;
+}
+.audio-dot { background: #a855f7; }
+@keyframes pulse-active {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.3); }
+  50% { box-shadow: 0 0 0 5px rgba(34,197,94,0); }
+}
+.active-body { position: relative; z-index: 1; }
+.active-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 3px; }
+.active-sub { font-size: 0.74rem; color: var(--muted); }
+.active-progress { margin-top: 12px; }
+.active-bar {
+  height: 5px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.active-bar-fill {
+  height: 100%;
+  width: 55%;
+  background: linear-gradient(90deg, #22c55e, #3dd4bc, #22c55e);
+  background-size: 200% 100%;
+  border-radius: 3px;
+  animation: shimmer 2.5s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 
-<div class="grid two">
-  <section class="panel panel-accent-crimson">
-    <h2>🎬 Letzte Pipeline Runs</h2>
-    <ul class="list">
-      {% for run in recent_runs %}
-      <li class="timeline-item">
-        <a href="/admin/pipeline/run/{{ run.run_id }}">{{ run.title or run.slug }}</a>
-        <div class="timeline-meta">
-          <span class="badge badge-{{ run.status }}">{{ run.status }}</span>
-          <span class="timeline-time">{{ run.created_at[:16] if run.created_at else '–' }}</span>
-        </div>
-      </li>
-      {% else %}
-      <li class="empty-state">Noch keine Pipeline Runs</li>
-      {% endfor %}
-    </ul>
-  </section>
+/* ── Studio panels ───────────────────────────────────────── */
+.studio-panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.section-header-inline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.section-header-inline h2 { font-size: 0.95rem; font-weight: 700; margin: 0; }
+.section-link {
+  font-size: 0.74rem;
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 500;
+}
+.section-link:hover { color: var(--text); }
 
-  <section class="panel panel-accent-purple">
-    <h2>🎵 Letzte Audio Jobs</h2>
-    <ul class="list">
-      {% for job in recent_audio %}
-      <li class="timeline-item">
-        <a href="/admin/audio/jobs/{{ job.job_id }}">{{ job.title or job.slug }}</a>
-        <div class="timeline-meta">
-          <span class="badge badge-{{ job.status }}">{{ job.status }}</span>
-          <span class="timeline-time">{{ job.created_at[:16] if job.created_at else '–' }}</span>
-        </div>
-      </li>
-      {% else %}
-      <li class="empty-state">Noch keine Audio Jobs – starte einen im Audio Generator!</li>
-      {% endfor %}
-    </ul>
-  </section>
-</div>
+/* ── Mini list (runs, jobs, shorts) ──────────────────────── */
+.mini-list { display: flex; flex-direction: column; }
+.mini-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+  color: var(--text);
+  transition: background 0.1s;
+}
+.mini-item:last-child { border-bottom: none; }
+.mini-item:hover { opacity: 0.85; }
+.mini-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.mini-dot-running { background: var(--good, #22c55e); }
+.mini-dot-queued { background: var(--warning, #d97706); }
+.mini-dot-rendered { background: var(--gold, #c9a53a); }
+.mini-dot-uploaded { background: var(--blue, #3b82f6); }
+.mini-dot-complete { background: var(--blue, #3b82f6); }
+.mini-dot-failed, .mini-dot-error { background: var(--bad, #ef4444); }
+.mini-dot-cancelled { background: #6b7280; }
+.mini-dot-pushing, .mini-dot-downloading { background: var(--warning, #d97706); }
+.mini-info { flex: 1; min-width: 0; }
+.mini-title {
+  font-size: 0.84rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mini-sub { font-size: 0.7rem; color: var(--muted); margin-top: 1px; }
+.mini-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+.mini-badge-running { background: rgba(34,197,94,0.15); color: #4ade80; }
+.mini-badge-queued { background: rgba(217,119,6,0.15); color: #fbbf24; }
+.mini-badge-rendered { background: rgba(201,165,58,0.15); color: var(--gold, #c9a53a); }
+.mini-badge-uploaded { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.mini-badge-complete { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.mini-badge-failed, .mini-badge-error { background: rgba(239,68,68,0.15); color: #f87171; }
+.mini-badge-cancelled { background: rgba(107,114,128,0.15); color: #9ca3af; }
+.mini-badge-pushing, .mini-badge-downloading { background: rgba(217,119,6,0.15); color: #fbbf24; }
 
-<div class="grid two">
-  <section class="panel panel-accent-teal">
-    <div class="section-header-inline">
-      <h2>📋 Active Tasks</h2>
-      <a class="section-note" href="/admin/ops?tab=tasks">Zu Operations</a>
-    </div>
-    <ul class="list">
-      {% for task in summary.active_leases %}
-      <li>
-        <a href="/admin/tasks/{{ task.task_id }}">{{ task.task_id }}</a>
-        &mdash; {{ task.owner_agent }}
-        <span class="badge {{ task.phase }}">{{ task.phase }}</span>
-      </li>
-      {% else %}
-      <li class="empty-state">Keine aktiven Leases</li>
-      {% endfor %}
-    </ul>
-  </section>
+.empty-state-sm {
+  padding: 24px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+.empty-state-sm a { color: var(--gold, #c9a53a); }
 
-  <section class="panel panel-accent-blue">
-    <div class="section-header-inline">
-      <h2>📡 Recent Task Events</h2>
-      <a class="section-note" href="/admin/ops?tab=events">Zu Operations</a>
-    </div>
-    <ul class="list mono">
-      {% for event in summary.recent_task_events[:5] %}
-      <li>#{{ event.seq }} {{ event.task_id }} &mdash; {{ event.event_type }}</li>
-      {% else %}
-      <li class="empty-state">Keine Events</li>
-      {% endfor %}
-    </ul>
-  </section>
-</div>
+/* ── Section head ────────────────────────────────────────── */
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.section-head h2 { font-size: 1rem; font-weight: 700; margin: 0; }
+
+/* ── Empty state ─────────────────────────────────────────── */
+.empty-state-box {
+  text-align: center;
+  padding: 60px 20px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.empty-state-icon { font-size: 3rem; margin-bottom: 12px; }
+.empty-state-text { color: var(--muted); font-size: 1rem; }
+
+/* ── Mobile ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .studio-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .studio-stat { padding: 12px; gap: 8px; }
+  .studio-stat-icon { font-size: 1.2rem; }
+  .studio-stat-value { font-size: 1.1rem; }
+}
+</style>
 {% endblock %}
