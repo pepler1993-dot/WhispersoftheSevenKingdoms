@@ -157,6 +157,42 @@ def admin_library_delete_multi(asset_type: str = Form(...), filenames: list[str]
     return RedirectResponse(f'/admin/library?success={deleted}+{asset_type}+Datei(en)+gelöscht', status_code=303)
 
 
+@router.post('/admin/library/rename')
+def admin_library_rename(asset_type: str = Form(...), old_name: str = Form(...), new_name: str = Form(...)):
+    mapping = {
+        'thumbnails': PIPELINE_DIR / 'data' / 'upload' / 'thumbnails',
+        'backgrounds': PIPELINE_DIR / 'data' / 'assets' / 'backgrounds',
+        'songs': PIPELINE_DIR / 'data' / 'upload' / 'songs',
+    }
+    if asset_type not in mapping:
+        return RedirectResponse('/admin/library?error=Umbenennen+ist+für+diesen+Asset-Typ+nicht+erlaubt', status_code=303)
+
+    safe_old = Path(old_name).name
+    safe_new = Path(new_name).name
+    if not safe_old or not safe_new:
+        return RedirectResponse('/admin/library?error=Ungültiger+Dateiname', status_code=303)
+
+    # Preserve original extension if new name has none
+    old_ext = Path(safe_old).suffix.lower()
+    new_ext = Path(safe_new).suffix.lower()
+    if not new_ext and old_ext:
+        safe_new = safe_new + old_ext
+    elif new_ext != old_ext and old_ext:
+        safe_new = Path(safe_new).stem + old_ext
+
+    base = mapping[asset_type]
+    src = base / safe_old
+    dst = base / safe_new
+
+    if not src.exists() or not src.is_file():
+        return RedirectResponse('/admin/library?error=Quelldatei+nicht+gefunden', status_code=303)
+    if dst.exists():
+        return RedirectResponse(f'/admin/library?error=Datei+{safe_new}+existiert+bereits', status_code=303)
+
+    src.rename(dst)
+    return RedirectResponse(f'/admin/library?success={safe_old}+umbenannt+zu+{safe_new}', status_code=303)
+
+
 @router.post('/admin/library/upload')
 async def admin_library_upload(asset_type: str = Form(...), file: list[UploadFile] = File(...)):
     mapping = {

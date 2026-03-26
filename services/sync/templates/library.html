@@ -80,13 +80,18 @@
           <div class="thumb-meta">
             <div class="thumb-name">{{ item.name }}</div>
             <div class="thumb-sub">{{ item.size }} · {{ item.modified }}</div>
-            <form method="post" action="/admin/library/delete" onsubmit="return confirm('Thumbnail wirklich löschen?');" style="margin-top:8px;">
-              <input type="hidden" name="asset_type" value="thumbnails" />
-              <input type="hidden" name="filename" value="{{ item.name }}" />
-              <button type="submit" class="icon-btn icon-btn-danger" aria-label="Thumbnail löschen" title="Thumbnail löschen">
-                <i data-lucide="trash-2" style="width:16px;height:16px"></i>
+            <div class="thumb-actions" style="margin-top:8px; display:flex; gap:6px; align-items:center;">
+              <button type="button" class="icon-btn" aria-label="Umbenennen" title="Umbenennen" onclick="renameAsset('thumbnails','{{ item.name }}')">
+                <i data-lucide="pencil" style="width:16px;height:16px"></i>
               </button>
-            </form>
+              <form method="post" action="/admin/library/delete" onsubmit="return confirm('Thumbnail wirklich löschen?');" style="margin:0;">
+                <input type="hidden" name="asset_type" value="thumbnails" />
+                <input type="hidden" name="filename" value="{{ item.name }}" />
+                <button type="submit" class="icon-btn icon-btn-danger" aria-label="Thumbnail löschen" title="Thumbnail löschen">
+                  <i data-lucide="trash-2" style="width:16px;height:16px"></i>
+                </button>
+              </form>
+            </div>
           </div>
         </div>
         {% else %}
@@ -123,13 +128,18 @@
         <div class="thumb-meta">
           <div class="thumb-name">{{ item.name }}</div>
           <div class="thumb-sub">{{ item.size }} · {{ item.modified }}</div>
-          <form method="post" action="/admin/library/delete" onsubmit="return confirm('Background wirklich löschen?');" style="margin-top:8px;">
-            <input type="hidden" name="asset_type" value="backgrounds" />
-            <input type="hidden" name="filename" value="{{ item.name }}" />
-            <button type="submit" class="icon-btn icon-btn-danger" aria-label="Background löschen" title="Background löschen">
-              <i data-lucide="trash-2" style="width:16px;height:16px"></i>
+          <div class="thumb-actions" style="margin-top:8px; display:flex; gap:6px; align-items:center;">
+            <button type="button" class="icon-btn" aria-label="Umbenennen" title="Umbenennen" onclick="renameAsset('backgrounds','{{ item.name }}')">
+              <i data-lucide="pencil" style="width:16px;height:16px"></i>
             </button>
-          </form>
+            <form method="post" action="/admin/library/delete" onsubmit="return confirm('Background wirklich löschen?');" style="margin:0;">
+              <input type="hidden" name="asset_type" value="backgrounds" />
+              <input type="hidden" name="filename" value="{{ item.name }}" />
+              <button type="submit" class="icon-btn icon-btn-danger" aria-label="Background löschen" title="Background löschen">
+                <i data-lucide="trash-2" style="width:16px;height:16px"></i>
+              </button>
+            </form>
+          </div>
         </div>
       </div>
       {% else %}
@@ -348,5 +358,83 @@
   gap: 10px;
   align-items: center;
 }
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 999;
+  background: rgba(0,0,0,0.6); display: flex;
+  align-items: center; justify-content: center;
+}
+.modal-box {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius-sm); padding: 24px;
+  min-width: 320px; max-width: 460px; width: 90%;
+}
 </style>
+
+<!-- Rename modal -->
+<div id="renameModal" class="modal-overlay" style="display:none;">
+  <div class="modal-box">
+    <h3>Datei umbenennen</h3>
+    <form id="renameForm" method="post" action="/admin/library/rename">
+      <input type="hidden" name="asset_type" id="rename_asset_type" />
+      <input type="hidden" name="old_name" id="rename_old_name" />
+      <div class="form-group">
+        <label for="rename_new_name">Neuer Name</label>
+        <input id="rename_new_name" name="new_name" type="text" class="form-input" required />
+        <div class="metric-help">Dateiendung wird automatisch beibehalten.</div>
+      </div>
+      <div class="form-actions-inline" style="margin-top:12px;">
+        <button type="submit" class="btn btn-primary btn-sm">Umbenennen</button>
+        <button type="button" class="btn btn-sm" onclick="closeRenameModal()">Abbrechen</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function renameAsset(assetType, oldName) {
+  document.getElementById('rename_asset_type').value = assetType;
+  document.getElementById('rename_old_name').value = oldName;
+  var stem = oldName.replace(/\.[^.]+$/, '');
+  document.getElementById('rename_new_name').value = stem;
+  document.getElementById('renameModal').style.display = 'flex';
+  setTimeout(function() {
+    var inp = document.getElementById('rename_new_name');
+    inp.focus(); inp.select();
+  }, 50);
+}
+function closeRenameModal() {
+  document.getElementById('renameModal').style.display = 'none';
+}
+document.getElementById('renameModal').addEventListener('click', function(e) {
+  if (e.target === this) closeRenameModal();
+});
+
+/* Async upload – fixes iPhone hanging on multi-file uploads */
+document.querySelectorAll('form[action="/admin/library/upload"]').forEach(function(form) {
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var btn = form.querySelector('button[type="submit"]');
+    var origText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Uploading…';
+
+    var formData = new FormData(form);
+    fetch('/admin/library/upload', {
+      method: 'POST',
+      body: formData,
+      redirect: 'follow'
+    }).then(function(resp) {
+      if (resp.redirected) {
+        window.location.href = resp.url;
+      } else {
+        window.location.href = '/admin/library?success=Upload+abgeschlossen';
+      }
+    }).catch(function(err) {
+      btn.disabled = false;
+      btn.textContent = origText;
+      alert('Upload fehlgeschlagen: ' + err.message);
+    });
+  });
+});
+</script>
 {% endblock %}
