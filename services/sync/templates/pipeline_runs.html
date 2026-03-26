@@ -118,30 +118,37 @@
 </section>
 {% endif %}
 
-{# ── Uploaded ─────────────────────────────────────────────────── #}
+{# ── Uploaded (YouTube-style) ──────────────────────────────────── #}
 {% if uploaded %}
 <section class="run-section">
   <div class="section-head">
     <h2>🚀 Hochgeladen</h2>
     <span class="section-count">{{ uploaded|length }}</span>
   </div>
-  <div class="run-list">
+  <div class="yt-grid">
     {% for run in uploaded %}
-    <a href="/admin/pipeline/run/{{ run.run_id }}" class="run-row run-row-uploaded">
-      <div class="run-status-indicator uploaded-dot"></div>
-      <div class="run-info">
-        <div class="run-title">{{ run.title or run.slug }}</div>
-        <div class="run-sub">{{ run.slug }} · {{ run.run_id[:8] }}</div>
-      </div>
-      <div class="run-duration">
-        {% if run.started_at and run.finished_at %}
-        {{ run.started_at[:16] }} → {{ run.finished_at[11:16] }}
+    <a href="/admin/pipeline/run/{{ run.run_id }}" class="yt-card">
+      <div class="yt-thumb-wrap">
+        <img class="yt-thumb" src="/admin/pipeline/preview/{{ run.slug }}/thumbnail.jpg" alt="{{ run.title or run.slug }}" onerror="this.style.display='none'; this.parentElement.classList.add('yt-thumb-fallback');" />
+        <div class="yt-play-overlay">
+          <div class="yt-play-btn">▶</div>
+        </div>
+        {% if run.config and run.config.get('loop_hours') %}
+        <span class="yt-duration">{{ run.config.loop_hours }}h</span>
         {% endif %}
       </div>
-      <div class="run-time">
-        {% if run.config and run.config.get('loop_hours') %}{{ run.config.loop_hours }}h Video{% endif %}
+      <div class="yt-info">
+        <div class="yt-title">{{ run.title or run.slug }}</div>
+        <div class="yt-meta">
+          <span>{{ run.slug }}</span>
+          {% if run.started_at and run.finished_at %}
+          <span>{{ run.started_at[:10] }}</span>
+          {% endif %}
+        </div>
+        {% if run.started_at and run.finished_at %}
+        <div class="yt-render-time">Render: {{ run.started_at[11:16] }} → {{ run.finished_at[11:16] }}</div>
+        {% endif %}
       </div>
-      <i data-lucide="chevron-right" class="run-arrow"></i>
     </a>
     {% endfor %}
   </div>
@@ -397,6 +404,117 @@
   opacity: 0.4;
 }
 .run-row:hover .run-arrow { opacity: 1; }
+
+/* ── YouTube-style uploaded cards ───────────────────────────── */
+.yt-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+.yt-card {
+  text-decoration: none;
+  color: var(--text);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  transition: all 0.2s ease;
+}
+.yt-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg, 0 8px 24px rgba(0,0,0,0.3));
+  border-color: var(--blue, #3b82f6);
+}
+.yt-thumb-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #0a0a0a;
+  overflow: hidden;
+}
+.yt-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.yt-thumb-fallback {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+}
+.yt-thumb-fallback::after {
+  content: '🎬';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+}
+.yt-play-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  background: rgba(0,0,0,0.35);
+}
+.yt-card:hover .yt-play-overlay { opacity: 1; }
+.yt-play-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.9);
+  color: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  padding-left: 4px;
+}
+.yt-duration {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.yt-info {
+  padding: 12px 14px 14px;
+}
+.yt-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.yt-meta {
+  display: flex;
+  gap: 8px;
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+.yt-meta span::after {
+  content: '·';
+  margin-left: 8px;
+  color: var(--muted);
+}
+.yt-meta span:last-child::after { content: ''; margin: 0; }
+.yt-render-time {
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
 
 /* ── Empty state ───────────────────────────────────────────── */
 .empty-state-box {
