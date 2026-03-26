@@ -181,8 +181,8 @@ h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; }
 }
 
 .brand-logo-img {
-  width: 80px;
-  height: 80px;
+  width: 110px;
+  height: 110px;
   border-radius: 50%;
   object-fit: cover;
   filter: drop-shadow(0 0 10px rgba(201,165,58,0.3));
