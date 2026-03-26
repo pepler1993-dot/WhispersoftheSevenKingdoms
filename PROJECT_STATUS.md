@@ -1,5 +1,5 @@
 # PROJECT STATUS – Whispers of the Seven Kingdoms
-> Letzte Aktualisierung: 2026-03-26T07:00:01Z
+> Letzte Aktualisierung: 2026-03-26T13:00:01Z
 > Aktualisiert von: Smith
 
 **Agents: Lest diese Datei zuerst. Sie enthält alles was ihr wissen müsst.**
@@ -202,42 +202,43 @@ cc1dc9a feat(audio-lab): pass house_templates to audio page (#63)
 *Diese Datei wird bei jedem Meilenstein aktualisiert. Smith pflegt sie.*
 
 
-## 🕐 Letzte Commits (auto-generated 2026-03-25T19:00:01Z)
+
+## 🕐 Letzte Commits (auto-generated 2026-03-26T13:00:01Z)
 ```
-a60d1b6 docs: v2.8.0 release notes - branding automation
-1064c6b feat(branding): auto-timestamps, cross-pollination playlists, endscreen (#8a8b4565 #6567f7d5 #08a9a3e2)
-d5275f8 feat(library): manage video backgrounds in library
-4deffb4 feat(pipeline): auto-description integration + metadata preview API (#ad9d134c)
-d3dfbf4 feat(pipeline): show thumbnail source in runs overview (#6e27a315)
-e049c53 feat(pipeline): separate thumbnail and video background inputs
-c781b77 docs: v2.7.1 release notes + deploy rules in PROJECT_STATUS
-0b5f114 fix(audio): steps parameter now passed from UI to generator (#11bd5b4d)
-0cf3b9f refine(library): harden metadata form workflow
-36fba57 feat(library): add metadata creation form
-5fd7221 fix(audio): accurate time estimates based on actual clip render time (#11bd5b4d)
-c87cbd6 fix(audio): correct time estimate in job logs (#11bd5b4d)
-1f9ad2d feat(audio): enhance prompts for all remaining houses
-e057d0a feat(audio): improve quality - 40 steps default, better prompts, loudnorm
-2dcfe40 auto: update PROJECT_STATUS.md (2026-03-25T13:00:01Z)
-bca903a Merge jarvis/audio-lab-loadtime: async health check on audio page
-c85bab4 docs: v2.7.0 release notes
-0c6d5b4 feat(gpu): live GPU metrics widget on dashboard (#9ce9b100)
-14f7307 fix(tickets): redirect to overview after create, add assignee, fix prio colors
-5121262 feat(audio): retry failed/cancelled jobs (#7a562945)
-f1a9cfa Update USER_STORIES with Eddi's answer to open questions
-9998e45 docs: add USER_STORIES.md with use cases and workflows
-8499ebb perf(audio): lazy-load generator health on audio lab
-58ebc8c fix(pipeline): remove separate 'Track generieren' button from pipeline/new
-fbef3dd feat(pipeline): one-click generate+render+upload from pipeline/new
-cc82ec2 refactor(workflow): integrate one-click into pipeline/new instead of separate page
-e25eaa9 docs: v2.6.0 release notes
-54de36d feat(workflow): one-click audio-to-pipeline flow
-056ca3a docs: v2.5.0 release notes
-24f9c1e Merge jarvis/thumbnail-source-2026-03-25: thumbnail provenance tracking
-7388ffd feat(pipeline): show thumbnail source provenance
-7013a94 feat(pipeline): job queue with sequential execution
-7fbaed7 fix: redirect / to /admin
-bbb97c9 docs: v2.4.0 release notes
-5d7370c feat(audio): proper cancel flow with state guards + cancelled UI
+d8d02bb fix(thumbnail): less blur (5), brighter (0.7)
+656305d fix(thumbnail): reduce blur radius 18→10
+f8a945e feat(thumbnail): use background image as blurred thumbnail base
+3499c7d refine(run-detail): remove asset tags, crossfade to info cards, house variant
+088585f redesign(pipeline): run detail page overhaul
+33e2bf3 release: v3.0.1 – auto-upload fix, mobile improvements
+dbffcf8 fix: auto-upload + public flag now work correctly
+266d43a fix(brand): logo 110px
+6b552f6 fix: force CSS cache bust
+938dfd7 fix(brand): larger logo (80px) centered below Whisper Studio text
+223dc37 fix: add cache-buster to CSS (version query param)
+259953b fix: status badges inline with date on mobile overview
+a2bc6ab fix: mobile overflow for Pipeline Runs + Audio Jobs panels in overview
+36fe7ff fix: mobile responsiveness for Studio, Pipeline, Operations
+62ebd77 release: v3.0.0 – Whisper Studio
+538aa00 fix(brand): round logo with gold border, clickable to overview
+f70a634 fix(brand): larger sidebar logo (48px, hi-res source)
+ad5d135 fix(ops): rename LXC 103 to Whisper Studio
+db04b02 brand: add logo as favicon, apple-touch-icon, web manifest
+ab927cd brand: rename to Whisper Studio
+b420eca redesign(ops): full overhaul – server monitoring split, tickets, no tasks
+7efb846 fix(dashboard): pipeline 'Alle anzeigen' links to /pipeline/logs
+4c931da fix: skip recovery on dev server via SKIP_RECOVERY=1 env var
+e1c4464 fix(dashboard): queued runs show amber/orange instead of green
+f6b8425 redesign(dashboard): split into Studio overview + Operations overview
+5f1087e redesign(pipeline): hero live cards, numbered queue, YT-style rendered, muted failed/cancelled
+0ca8c51 feat(pipeline): YouTube-style cards for uploaded videos
+f39ec5c refine(pipeline): separate Running and Queued into own sections
+bc25512 refine(pipeline): reorder sections – uploaded first, then rendered, failed, cancelled
+35ccf11 redesign(pipeline): category-based run overview with stats bar
+e7c69e7 fix(pipeline): background preview uses library endpoint instead of static mount
+d48e069 fix: recover pipeline runs + audio jobs after service restart
+7b97a3f feat(tickets): editable description + tickets in mobile bottom nav
+a0b4090 feat(library): rename assets + fix iPhone multi-upload hang
+a43c62d auto: update PROJECT_STATUS.md (2026-03-26T07:00:01Z)
 ```
 ---
