@@ -174,22 +174,24 @@ h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; }
 
 .brand-logo {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 6px;
 }
 
 .brand-logo-img {
-  width: 48px;
-  height: 48px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   object-fit: cover;
-  filter: drop-shadow(0 0 8px rgba(201,165,58,0.35));
-  border: 2px solid rgba(201,165,58,0.3);
-  transition: border-color 0.2s ease;
+  filter: drop-shadow(0 0 10px rgba(201,165,58,0.3));
+  border: 2px solid rgba(201,165,58,0.25);
+  transition: all 0.25s ease;
 }
 .brand-logo-img:hover {
-  border-color: rgba(201,165,58,0.7);
+  border-color: rgba(201,165,58,0.6);
+  transform: scale(1.05);
 }
 
 .brand-logo-text {
