@@ -3,6 +3,18 @@
 Alle relevanten Änderungen am Projekt werden hier dokumentiert.
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [v3.0.1] – 2026-03-26
+
+### Fixed
+- **Auto YouTube Upload** funktioniert jetzt — Upload wird automatisch nach Rendering gestartet
+- **Öffentlich auf YouTube** Flag wird korrekt an den Uploader weitergegeben
+- **Mobile Responsiveness**: Studio Overview, Pipeline Runs und Operations passen jetzt sauber auf Handy-Screens
+- **Status-Badges** in der Overview werden auf dem Handy inline neben dem Datum angezeigt (kein Abschneiden mehr)
+- **CSS Cache-Buster**: CSS wird bei Version-Updates automatisch neu geladen (kein Hard-Refresh nötig)
+
+### Changed
+- **Logo** größer (110px) und zentriert unter dem Branding-Namen in der Sidebar
+
 ## [v3.0.0] – 2026-03-26
 
 ### ✨ Whisper Studio Rebranding
