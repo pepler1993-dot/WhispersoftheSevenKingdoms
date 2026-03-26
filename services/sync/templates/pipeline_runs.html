@@ -106,17 +106,17 @@
 </section>
 {% endif %}
 
-{# ── Rendered (ready for upload) ──────────────────────────────── #}
-{% if rendered %}
+{# ── Uploaded ─────────────────────────────────────────────────── #}
+{% if uploaded %}
 <section class="run-section">
   <div class="section-head">
-    <h2>✅ Gerendert</h2>
-    <span class="section-count">{{ rendered|length }}</span>
+    <h2>🚀 Hochgeladen</h2>
+    <span class="section-count">{{ uploaded|length }}</span>
   </div>
   <div class="run-list">
-    {% for run in rendered %}
-    <a href="/admin/pipeline/run/{{ run.run_id }}" class="run-row run-row-rendered">
-      <div class="run-status-indicator rendered-dot"></div>
+    {% for run in uploaded %}
+    <a href="/admin/pipeline/run/{{ run.run_id }}" class="run-row run-row-uploaded">
+      <div class="run-status-indicator uploaded-dot"></div>
       <div class="run-info">
         <div class="run-title">{{ run.title or run.slug }}</div>
         <div class="run-sub">{{ run.slug }} · {{ run.run_id[:8] }}</div>
@@ -136,17 +136,17 @@
 </section>
 {% endif %}
 
-{# ── Uploaded ─────────────────────────────────────────────────── #}
-{% if uploaded %}
+{# ── Rendered (ready for upload) ──────────────────────────────── #}
+{% if rendered %}
 <section class="run-section">
   <div class="section-head">
-    <h2>🚀 Hochgeladen</h2>
-    <span class="section-count">{{ uploaded|length }}</span>
+    <h2>✅ Gerendert</h2>
+    <span class="section-count">{{ rendered|length }}</span>
   </div>
   <div class="run-list">
-    {% for run in uploaded %}
-    <a href="/admin/pipeline/run/{{ run.run_id }}" class="run-row run-row-uploaded">
-      <div class="run-status-indicator uploaded-dot"></div>
+    {% for run in rendered %}
+    <a href="/admin/pipeline/run/{{ run.run_id }}" class="run-row run-row-rendered">
+      <div class="run-status-indicator rendered-dot"></div>
       <div class="run-info">
         <div class="run-title">{{ run.title or run.slug }}</div>
         <div class="run-sub">{{ run.slug }} · {{ run.run_id[:8] }}</div>
