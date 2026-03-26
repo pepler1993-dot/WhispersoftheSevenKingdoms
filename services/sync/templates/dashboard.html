@@ -67,9 +67,9 @@
     <h2>🔥 Gerade aktiv</h2>
   </div>
   {% for run in active_runs %}
-  <a href="/admin/pipeline/run/{{ run.run_id }}" class="active-card">
-    <div class="active-glow"></div>
-    <div class="active-badge"><span class="active-dot"></span> {% if run.status == 'running' %}RENDERING{% else %}QUEUED{% endif %}</div>
+  <a href="/admin/pipeline/run/{{ run.run_id }}" class="active-card {% if run.status == 'queued' %}active-card-queued{% endif %}">
+    <div class="active-glow {% if run.status == 'queued' %}queued-glow{% endif %}"></div>
+    <div class="active-badge {% if run.status == 'queued' %}active-badge-queued{% endif %}"><span class="active-dot {% if run.status == 'queued' %}queued-dot{% endif %}"></span> {% if run.status == 'running' %}RENDERING{% else %}QUEUED{% endif %}</div>
     <div class="active-body">
       <div class="active-title">{{ run.title or run.slug }}</div>
       <div class="active-sub">{{ run.slug }} · Pipeline Run</div>
@@ -208,6 +208,14 @@
   transform: translateY(-2px);
   box-shadow: 0 6px 24px rgba(34,197,94,0.12);
 }
+.active-card-queued {
+  background: linear-gradient(135deg, rgba(217,119,6,0.08), rgba(245,158,11,0.03));
+  border-color: rgba(217,119,6,0.25);
+}
+.active-card-queued:hover {
+  border-color: rgba(217,119,6,0.5);
+  box-shadow: 0 6px 24px rgba(217,119,6,0.12);
+}
 .active-card-audio {
   background: linear-gradient(135deg, rgba(139,92,246,0.08), rgba(168,85,247,0.03));
   border-color: rgba(139,92,246,0.25);
@@ -225,6 +233,7 @@
   background: radial-gradient(circle, rgba(34,197,94,0.06) 0%, transparent 70%);
   pointer-events: none;
 }
+.queued-glow { background: radial-gradient(circle, rgba(217,119,6,0.06) 0%, transparent 70%); }
 .audio-glow { background: radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%); }
 .active-badge {
   display: inline-flex;
@@ -240,6 +249,11 @@
   color: #4ade80;
   margin-bottom: 10px;
 }
+.active-badge-queued {
+  background: rgba(217,119,6,0.15);
+  border-color: rgba(217,119,6,0.3);
+  color: #fbbf24;
+}
 .active-badge-audio {
   background: rgba(139,92,246,0.15);
   border-color: rgba(139,92,246,0.3);
@@ -251,6 +265,11 @@
   border-radius: 50%;
   background: #22c55e;
   animation: pulse-active 1.5s ease-in-out infinite;
+}
+.queued-dot { background: #d97706; animation-name: pulse-queued; }
+@keyframes pulse-queued {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(217,119,6,0.3); }
+  50% { box-shadow: 0 0 0 5px rgba(217,119,6,0); }
 }
 .audio-dot { background: #a855f7; }
 @keyframes pulse-active {
