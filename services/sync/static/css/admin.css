@@ -179,9 +179,11 @@ h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; }
   margin-bottom: 6px;
 }
 
-.brand-logo-icon {
-  font-size: 1.4rem;
-  filter: drop-shadow(0 0 8px rgba(201,165,58,0.4));
+.brand-logo-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  filter: drop-shadow(0 0 6px rgba(201,165,58,0.3));
 }
 
 .brand-logo-text {

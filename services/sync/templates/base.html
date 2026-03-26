@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}Whisper Studio{% endblock %}</title>
   <meta name="color-scheme" content="dark" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Whisper Studio" />
+  <link rel="icon" type="image/x-icon" href="/static/img/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/img/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/static/img/favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/img/apple-touch-icon.png" />
+  <link rel="manifest" href="/static/manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -24,7 +32,7 @@
     <aside class="sidebar" id="sidebar">
       <div class="brand brand-premium">
         <div class="brand-logo">
-          <span class="brand-logo-icon">⚔️</span>
+          <img src="/static/img/favicon-32x32.png" alt="Logo" class="brand-logo-img" />
           <span class="brand-logo-text">Whisper Studio</span>
         </div>
         <div class="brand-sub">Seven Kingdoms · Content Production</div>
