@@ -18,6 +18,38 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def recover_interrupted_runs(db: AgentSyncDB) -> int:
+    """On startup, recover runs that were interrupted by a restart.
+
+    - 'running' runs → mark as 'failed' (subprocess is gone)
+    - 'queued' runs → re-enqueue them so they actually run
+    """
+    runs = db.list_runs(limit=200)
+    recovered = 0
+    requeued = []
+
+    for run in runs:
+        if run['status'] == 'running':
+            db.update_run(
+                run['run_id'],
+                status='failed',
+                finished_at=_now_iso(),
+                error_message='Service restarted while run was in progress.',
+                pid=None,
+            )
+            db.append_run_log(run['run_id'], 'system', 'Recovered after restart: marked as failed.', _now_iso())
+            recovered += 1
+        elif run['status'] == 'queued':
+            requeued.append(run)
+
+    # Re-enqueue queued runs (they'll be picked up by the worker)
+    for run in requeued:
+        db.append_run_log(run['run_id'], 'system', 'Re-queued after service restart.', _now_iso())
+        recovered += 1
+
+    return recovered
+
+
 def enqueue_run(run_id: str, slug: str, config: dict[str, Any], db: AgentSyncDB) -> None:
     """Add a run to the queue and ensure the worker is running."""
     db.update_run(run_id, status='queued')
