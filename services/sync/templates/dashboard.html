@@ -108,9 +108,8 @@
         <div class="mini-dot mini-dot-{{ run.status }}"></div>
         <div class="mini-info">
           <div class="mini-title">{{ run.title or run.slug }}</div>
-          <div class="mini-sub">{{ run.created_at[:10] if run.created_at else '—' }}</div>
+          <div class="mini-sub">{{ run.created_at[:10] if run.created_at else '—' }} <span class="mini-badge mini-badge-{{ run.status }}">{{ run.status }}</span></div>
         </div>
-        <span class="mini-badge mini-badge-{{ run.status }}">{{ run.status }}</span>
       </a>
       {% endfor %}
     </div>
@@ -131,9 +130,8 @@
         <div class="mini-dot mini-dot-{{ job.status }}"></div>
         <div class="mini-info">
           <div class="mini-title">{{ job.title or job.slug }}</div>
-          <div class="mini-sub">{{ job.created_at[:10] if job.created_at else '—' }}</div>
+          <div class="mini-sub">{{ job.created_at[:10] if job.created_at else '—' }} <span class="mini-badge mini-badge-{{ job.status }}">{{ job.status }}</span></div>
         </div>
-        <span class="mini-badge mini-badge-{{ job.status }}">{{ job.status }}</span>
       </a>
       {% endfor %}
     </div>
@@ -156,9 +154,8 @@
       <div class="mini-dot mini-dot-{{ run.status }}"></div>
       <div class="mini-info">
         <div class="mini-title">{{ run.title or run.slug }}</div>
-        <div class="mini-sub">{{ run.created_at[:10] if run.created_at else '—' }}</div>
+        <div class="mini-sub">{{ run.created_at[:10] if run.created_at else '—' }} <span class="mini-badge mini-badge-{{ run.status }}">{{ run.status }}</span></div>
       </div>
-      <span class="mini-badge mini-badge-{{ run.status }}">{{ run.status }}</span>
     </a>
     {% endfor %}
   </div>
@@ -426,11 +423,10 @@
   .section-header-inline { flex-wrap: wrap; gap: 8px; }
   .section-header-inline h2 { font-size: 0.88rem; }
 
-  .mini-item { gap: 6px; padding: 8px 0; flex-wrap: wrap; }
+  .mini-item { gap: 8px; padding: 8px 0; }
   .mini-title { font-size: 0.78rem; }
+  .mini-sub { font-size: 0.65rem; display: flex; align-items: center; gap: 6px; }
   .mini-badge { font-size: 0.58rem; padding: 2px 5px; }
-  .mini-info { min-width: 0; flex: 1; }
-  .mini-sub { font-size: 0.65rem; }
 
   .studio-panel { padding: 12px; }
   .section-link { font-size: 0.68rem; }
@@ -439,7 +435,6 @@
 }
 @media (max-width: 400px) {
   .studio-stats { grid-template-columns: repeat(2, 1fr); }
-  .mini-badge { display: none; }
 }
 </style>
 {% endblock %}
