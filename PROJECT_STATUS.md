@@ -1,5 +1,5 @@
 # PROJECT STATUS – Whispers of the Seven Kingdoms
-> Letzte Aktualisierung: 2026-03-26T13:00:01Z
+> Letzte Aktualisierung: 2026-03-26T19:00:01Z
 > Aktualisiert von: Smith
 
 **Agents: Lest diese Datei zuerst. Sie enthält alles was ihr wissen müsst.**
@@ -203,8 +203,10 @@ cc1dc9a feat(audio-lab): pass house_templates to audio page (#63)
 
 
 
-## 🕐 Letzte Commits (auto-generated 2026-03-26T13:00:01Z)
+
+## 🕐 Letzte Commits (auto-generated 2026-03-26T19:00:01Z)
 ```
+066e0ae auto: update PROJECT_STATUS.md (2026-03-26T13:00:01Z)
 d8d02bb fix(thumbnail): less blur (5), brighter (0.7)
 656305d fix(thumbnail): reduce blur radius 18→10
 f8a945e feat(thumbnail): use background image as blurred thumbnail base
@@ -220,25 +222,5 @@ dbffcf8 fix: auto-upload + public flag now work correctly
 a2bc6ab fix: mobile overflow for Pipeline Runs + Audio Jobs panels in overview
 36fe7ff fix: mobile responsiveness for Studio, Pipeline, Operations
 62ebd77 release: v3.0.0 – Whisper Studio
-538aa00 fix(brand): round logo with gold border, clickable to overview
-f70a634 fix(brand): larger sidebar logo (48px, hi-res source)
-ad5d135 fix(ops): rename LXC 103 to Whisper Studio
-db04b02 brand: add logo as favicon, apple-touch-icon, web manifest
-ab927cd brand: rename to Whisper Studio
-b420eca redesign(ops): full overhaul – server monitoring split, tickets, no tasks
-7efb846 fix(dashboard): pipeline 'Alle anzeigen' links to /pipeline/logs
-4c931da fix: skip recovery on dev server via SKIP_RECOVERY=1 env var
-e1c4464 fix(dashboard): queued runs show amber/orange instead of green
-f6b8425 redesign(dashboard): split into Studio overview + Operations overview
-5f1087e redesign(pipeline): hero live cards, numbered queue, YT-style rendered, muted failed/cancelled
-0ca8c51 feat(pipeline): YouTube-style cards for uploaded videos
-f39ec5c refine(pipeline): separate Running and Queued into own sections
-bc25512 refine(pipeline): reorder sections – uploaded first, then rendered, failed, cancelled
-35ccf11 redesign(pipeline): category-based run overview with stats bar
-e7c69e7 fix(pipeline): background preview uses library endpoint instead of static mount
-d48e069 fix: recover pipeline runs + audio jobs after service restart
-7b97a3f feat(tickets): editable description + tickets in mobile bottom nav
-a0b4090 feat(library): rename assets + fix iPhone multi-upload hang
-a43c62d auto: update PROJECT_STATUS.md (2026-03-26T07:00:01Z)
 ```
 ---
