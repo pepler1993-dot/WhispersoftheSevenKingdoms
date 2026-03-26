@@ -67,12 +67,12 @@
 </div>
 {% endif %}
 
-{# ── Active: Running + Queued ─────────────────────────────────── #}
-{% if running or queued %}
+{# ── Running ──────────────────────────────────────────────────── #}
+{% if running %}
 <section class="run-section">
   <div class="section-head">
-    <h2>🔥 Aktiv</h2>
-    <span class="section-count">{{ (running|length) + (queued|length) }}</span>
+    <h2>🔥 Laufend</h2>
+    <span class="section-count">{{ running|length }}</span>
   </div>
   <div class="run-list">
     {% for run in running %}
@@ -90,6 +90,18 @@
       <i data-lucide="chevron-right" class="run-arrow"></i>
     </a>
     {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{# ── Queued ───────────────────────────────────────────────────── #}
+{% if queued %}
+<section class="run-section">
+  <div class="section-head">
+    <h2>⏳ Warteschlange</h2>
+    <span class="section-count">{{ queued|length }}</span>
+  </div>
+  <div class="run-list">
     {% for run in queued %}
     <a href="/admin/pipeline/run/{{ run.run_id }}" class="run-row run-row-queued">
       <div class="run-status-indicator queued-dot"></div>
@@ -97,7 +109,7 @@
         <div class="run-title">{{ run.title or run.slug }}</div>
         <div class="run-sub">{{ run.slug }} · {{ run.run_id[:8] }}</div>
       </div>
-      <div class="run-wait-label">⏳ Wartet auf Slot</div>
+      <div class="run-wait-label">Wartet auf Slot</div>
       <div class="run-time">{{ run.created_at[:16] if run.created_at else '—' }}</div>
       <i data-lucide="chevron-right" class="run-arrow"></i>
     </a>
