@@ -59,11 +59,13 @@
 {% set cfg = run.config %}
 <div class="run-info-grid">
   {% if cfg.get('house') %}
+  {% set bg = cfg.get('background_source', {}) %}
+  {% set variant = bg.get('filename', '')|replace('.jpg','')|replace('.png','')|replace('.webp','') if bg.get('filename') else '' %}
   <div class="info-card info-card-accent">
     <div class="info-icon">🏰</div>
     <div class="info-body">
       <div class="info-label">Haus</div>
-      <div class="info-value">{{ cfg.house | capitalize }}</div>
+      <div class="info-value">{{ cfg.house | capitalize }}{% if variant and variant != cfg.house %} · {{ variant | replace('_', ' ') | capitalize }}{% endif %}</div>
     </div>
   </div>
   {% endif %}
@@ -100,6 +102,16 @@
     </div>
   </div>
 
+  {% if cfg.get('crossfade') %}
+  <div class="info-card">
+    <div class="info-icon">🔀</div>
+    <div class="info-body">
+      <div class="info-label">Crossfade</div>
+      <div class="info-value">{{ cfg.crossfade }}s</div>
+    </div>
+  </div>
+  {% endif %}
+
   <div class="info-card">
     <div class="info-icon">{{ '🚀' if cfg.get('auto_upload') else '✋' }}</div>
     <div class="info-body">
@@ -108,23 +120,6 @@
     </div>
   </div>
 </div>
-
-{# ── Assets (Background + Thumbnail) ─────────────────────────── #}
-{% set thumb = cfg.get('thumbnail_source', {}) %}
-{% set bg = cfg.get('background_source', {}) %}
-{% if thumb or bg %}
-<div class="run-assets">
-  {% if bg.get('filename') or bg.get('label') %}
-  <div class="asset-tag">🎞️ {{ bg.get('label', bg.get('filename', '—')) }}</div>
-  {% endif %}
-  {% if thumb.get('filename') or thumb.get('label') %}
-  <div class="asset-tag">🖼️ {{ thumb.get('label', thumb.get('filename', '—')) }}</div>
-  {% endif %}
-  {% if cfg.get('crossfade') %}
-  <div class="asset-tag">🔀 {{ cfg.crossfade }}s Crossfade</div>
-  {% endif %}
-</div>
-{% endif %}
 {% endif %}
 
 {# ── Timeline ─────────────────────────────────────────────────── #}
