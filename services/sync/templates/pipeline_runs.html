@@ -1,64 +1,63 @@
 {% extends 'base.html' %}
 {% block title %}Videos{% endblock %}
 {% block content %}
+
+{# ── Group runs by status ─────────────────────────────────────── #}
+{% set running = [] %}
+{% set queued = [] %}
+{% set rendered = [] %}
+{% set uploaded = [] %}
+{% set failed = [] %}
+{% set cancelled = [] %}
+{% for run in runs %}
+  {% if run.status == 'running' %}{% set _ = running.append(run) %}
+  {% elif run.status == 'queued' %}{% set _ = queued.append(run) %}
+  {% elif run.status == 'rendered' %}{% set _ = rendered.append(run) %}
+  {% elif run.status == 'uploaded' %}{% set _ = uploaded.append(run) %}
+  {% elif run.status == 'failed' %}{% set _ = failed.append(run) %}
+  {% elif run.status == 'cancelled' %}{% set _ = cancelled.append(run) %}
+  {% endif %}
+{% endfor %}
+
 <div class="status-header">
   <div>
     <h1>Meine Videos</h1>
-    <div class="page-subtitle">Übersicht aller Videos und Pipeline-Runs</div>
+    <div class="page-subtitle">Übersicht aller Pipeline-Runs</div>
   </div>
   <a href="/admin/pipeline/new" class="btn btn-primary">
     <i data-lucide="plus" style="width:18px;height:18px"></i> Neues Video
   </a>
 </div>
 
-{% if queue and (queue.queued_count > 0 or queue.running_count > 0) %}
-<div class="queue-banner panel" style="margin-bottom: 16px; border-left: 3px solid var(--gold);">
-  <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
-    <div>
-      <strong>Pipeline Queue</strong>
-      <span class="badge running" style="margin-left:8px;">{{ queue.running_count }} läuft</span>
-      {% if queue.queued_count > 0 %}
-      <span class="badge waiting" style="margin-left:4px;">{{ queue.queued_count }} wartet</span>
-      {% endif %}
-    </div>
+{# ── Stats bar ────────────────────────────────────────────────── #}
+<div class="run-stats">
+  <div class="stat-pill stat-running">
+    <span class="stat-dot running"></span>
+    <span class="stat-count">{{ running|length }}</span> Laufend
+  </div>
+  <div class="stat-pill stat-queued">
+    <span class="stat-dot queued"></span>
+    <span class="stat-count">{{ queued|length }}</span> Warteschlange
+  </div>
+  <div class="stat-pill stat-rendered">
+    <span class="stat-dot rendered"></span>
+    <span class="stat-count">{{ rendered|length }}</span> Gerendert
+  </div>
+  <div class="stat-pill stat-uploaded">
+    <span class="stat-dot uploaded"></span>
+    <span class="stat-count">{{ uploaded|length }}</span> Hochgeladen
+  </div>
+  <div class="stat-pill stat-failed">
+    <span class="stat-dot failed"></span>
+    <span class="stat-count">{{ failed|length }}</span> Fehlgeschlagen
+  </div>
+  <div class="stat-pill stat-cancelled">
+    <span class="stat-dot cancelled"></span>
+    <span class="stat-count">{{ cancelled|length }}</span> Abgebrochen
   </div>
 </div>
-{% endif %}
 
-{% if runs %}
-<div class="video-grid">
-  {% for run in runs %}
-  <a href="/admin/pipeline/run/{{ run.run_id }}" class="video-card" style="--card-accent: {% if run.status == 'queued' %}var(--warning, #d97706){% elif run.status == 'running' %}var(--good){% elif run.status == 'failed' %}var(--bad){% elif run.status == 'uploaded' %}var(--blue){% else %}var(--gold){% endif %}">
-    <div class="video-card-top">
-      <span class="badge {{ run.status }}">{% if run.status == 'queued' %}⏳ Warteschlange{% else %}{{ run.status }}{% endif %}</span>
-      <span class="video-card-id">{{ run.run_id[:8] }}</span>
-    </div>
-    <div class="video-card-title">{{ run.title or run.slug }}</div>
-    <div class="video-card-slug">{{ run.slug }}</div>
-    {% if run.status == 'queued' %}
-    <div class="video-card-progress">
-      <span class="progress-label" style="color:var(--gold)">Wartet auf freien Slot...</span>
-    </div>
-    {% endif %}
-    {% if run.status == 'running' %}
-    <div class="video-card-progress">
-      <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
-      <span class="progress-label">Läuft...</span>
-    </div>
-    {% endif %}
-    <div class="video-card-meta">
-      <span>{{ run.created_at[:16] if run.created_at else '—' }}</span>
-      {% if run.config and run.config.get('loop_hours') %}
-      <span>{{ run.config.loop_hours }}h</span>
-      {% endif %}
-      {% if run.config and run.config.get('thumbnail_source') %}
-      <span title="Thumbnail: {{ run.config.thumbnail_source.get('label', '?') }}">🖼️ {{ run.config.thumbnail_source.get('label', '?') }}</span>
-      {% endif %}
-    </div>
-  </a>
-  {% endfor %}
-</div>
-{% else %}
+{% if not runs %}
 <div class="empty-state-box">
   <div class="empty-state-icon">🎬</div>
   <div class="empty-state-text">Noch keine Videos erstellt</div>
@@ -68,110 +67,349 @@
 </div>
 {% endif %}
 
+{# ── Active: Running + Queued ─────────────────────────────────── #}
+{% if running or queued %}
+<section class="run-section">
+  <div class="section-head">
+    <h2>🔥 Aktiv</h2>
+    <span class="section-count">{{ (running|length) + (queued|length) }}</span>
+  </div>
+  <div class="run-list">
+    {% for run in running %}
+    <a href="/admin/pipeline/run/{{ run.run_id }}" class="run-row run-row-running">
+      <div class="run-status-indicator running-pulse"></div>
+      <div class="run-info">
+        <div class="run-title">{{ run.title or run.slug }}</div>
+        <div class="run-sub">{{ run.slug }} · {{ run.run_id[:8] }}</div>
+      </div>
+      <div class="run-progress-mini">
+        <div class="progress-bar-mini"><div class="progress-fill-mini"></div></div>
+        <span>Läuft...</span>
+      </div>
+      <div class="run-time">{{ run.started_at[:16] if run.started_at else '—' }}</div>
+      <i data-lucide="chevron-right" class="run-arrow"></i>
+    </a>
+    {% endfor %}
+    {% for run in queued %}
+    <a href="/admin/pipeline/run/{{ run.run_id }}" class="run-row run-row-queued">
+      <div class="run-status-indicator queued-dot"></div>
+      <div class="run-info">
+        <div class="run-title">{{ run.title or run.slug }}</div>
+        <div class="run-sub">{{ run.slug }} · {{ run.run_id[:8] }}</div>
+      </div>
+      <div class="run-wait-label">⏳ Wartet auf Slot</div>
+      <div class="run-time">{{ run.created_at[:16] if run.created_at else '—' }}</div>
+      <i data-lucide="chevron-right" class="run-arrow"></i>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{# ── Rendered (ready for upload) ──────────────────────────────── #}
+{% if rendered %}
+<section class="run-section">
+  <div class="section-head">
+    <h2>✅ Gerendert</h2>
+    <span class="section-count">{{ rendered|length }}</span>
+  </div>
+  <div class="run-list">
+    {% for run in rendered %}
+    <a href="/admin/pipeline/run/{{ run.run_id }}" class="run-row run-row-rendered">
+      <div class="run-status-indicator rendered-dot"></div>
+      <div class="run-info">
+        <div class="run-title">{{ run.title or run.slug }}</div>
+        <div class="run-sub">{{ run.slug }} · {{ run.run_id[:8] }}</div>
+      </div>
+      <div class="run-duration">
+        {% if run.started_at and run.finished_at %}
+        {{ run.started_at[:16] }} → {{ run.finished_at[11:16] }}
+        {% endif %}
+      </div>
+      <div class="run-time">
+        {% if run.config and run.config.get('loop_hours') %}{{ run.config.loop_hours }}h Video{% endif %}
+      </div>
+      <i data-lucide="chevron-right" class="run-arrow"></i>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{# ── Uploaded ─────────────────────────────────────────────────── #}
+{% if uploaded %}
+<section class="run-section">
+  <div class="section-head">
+    <h2>🚀 Hochgeladen</h2>
+    <span class="section-count">{{ uploaded|length }}</span>
+  </div>
+  <div class="run-list">
+    {% for run in uploaded %}
+    <a href="/admin/pipeline/run/{{ run.run_id }}" class="run-row run-row-uploaded">
+      <div class="run-status-indicator uploaded-dot"></div>
+      <div class="run-info">
+        <div class="run-title">{{ run.title or run.slug }}</div>
+        <div class="run-sub">{{ run.slug }} · {{ run.run_id[:8] }}</div>
+      </div>
+      <div class="run-duration">
+        {% if run.started_at and run.finished_at %}
+        {{ run.started_at[:16] }} → {{ run.finished_at[11:16] }}
+        {% endif %}
+      </div>
+      <div class="run-time">
+        {% if run.config and run.config.get('loop_hours') %}{{ run.config.loop_hours }}h Video{% endif %}
+      </div>
+      <i data-lucide="chevron-right" class="run-arrow"></i>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{# ── Failed ───────────────────────────────────────────────────── #}
+{% if failed %}
+<section class="run-section">
+  <div class="section-head">
+    <h2>❌ Fehlgeschlagen</h2>
+    <span class="section-count">{{ failed|length }}</span>
+  </div>
+  <div class="run-list">
+    {% for run in failed %}
+    <a href="/admin/pipeline/run/{{ run.run_id }}" class="run-row run-row-failed">
+      <div class="run-status-indicator failed-dot"></div>
+      <div class="run-info">
+        <div class="run-title">{{ run.title or run.slug }}</div>
+        <div class="run-sub">{{ run.slug }} · {{ run.run_id[:8] }}</div>
+      </div>
+      <div class="run-error">{{ run.error_message[:60] if run.error_message else 'Unbekannter Fehler' }}{% if run.error_message and run.error_message|length > 60 %}…{% endif %}</div>
+      <div class="run-time">{{ run.finished_at[:16] if run.finished_at else '—' }}</div>
+      <i data-lucide="chevron-right" class="run-arrow"></i>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{# ── Cancelled ────────────────────────────────────────────────── #}
+{% if cancelled %}
+<section class="run-section">
+  <div class="section-head">
+    <h2>🚫 Abgebrochen</h2>
+    <span class="section-count">{{ cancelled|length }}</span>
+  </div>
+  <div class="run-list">
+    {% for run in cancelled %}
+    <a href="/admin/pipeline/run/{{ run.run_id }}" class="run-row run-row-cancelled">
+      <div class="run-status-indicator cancelled-dot"></div>
+      <div class="run-info">
+        <div class="run-title">{{ run.title or run.slug }}</div>
+        <div class="run-sub">{{ run.slug }} · {{ run.run_id[:8] }}</div>
+      </div>
+      <div class="run-duration">{{ run.finished_at[:16] if run.finished_at else '—' }}</div>
+      <div class="run-time"></div>
+      <i data-lucide="chevron-right" class="run-arrow"></i>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
 <style>
-.video-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
-}
-
-.video-card {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--card-accent, var(--gold));
-  border-radius: var(--radius);
-  padding: 20px;
-  transition: all 0.25s var(--ease);
-  display: block;
-  color: var(--text);
-  text-decoration: none;
-}
-
-.video-card:hover {
-  border-color: var(--card-accent, var(--gold));
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-  color: var(--text);
-}
-
-.video-card-top {
+/* ── Stats bar ─────────────────────────────────────────────── */
+.run-stats {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
 }
-
-.video-card-id {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.7rem;
+.stat-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--surface);
+  border: 1px solid var(--line);
   color: var(--muted);
 }
+.stat-count { color: var(--text); }
+.stat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.stat-dot.running { background: var(--good, #22c55e); }
+.stat-dot.queued { background: var(--warning, #d97706); }
+.stat-dot.rendered { background: var(--gold, #c9a53a); }
+.stat-dot.uploaded { background: var(--blue, #3b82f6); }
+.stat-dot.failed { background: var(--bad, #ef4444); }
+.stat-dot.cancelled { background: #6b7280; }
 
-.video-card-title {
+/* ── Sections ──────────────────────────────────────────────── */
+.run-section {
+  margin-bottom: 24px;
+}
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.section-head h2 {
   font-size: 1rem;
   font-weight: 700;
-  line-height: 1.3;
-  margin-bottom: 4px;
+  margin: 0;
 }
-
-.video-card-slug {
-  font-size: 0.75rem;
-  color: var(--muted);
-  margin-bottom: 12px;
-}
-
-.video-card-progress {
-  margin: 12px 0;
-}
-
-.progress-bar {
-  height: 6px;
+.section-count {
   background: var(--surface);
-  border-radius: 3px;
-  overflow: hidden;
-  margin-bottom: 6px;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--good), #3dd4bc);
-  border-radius: 3px;
-  animation: progress-pulse 2s ease-in-out infinite;
-}
-
-@keyframes progress-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
-.progress-label {
-  font-size: 0.7rem;
-  color: var(--good);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 0.72rem;
   font-weight: 600;
+  color: var(--muted);
 }
 
-.video-card-meta {
-  display: flex;
-  justify-content: space-between;
+/* ── Run list (row-based) ──────────────────────────────────── */
+.run-list {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius, 10px);
+  overflow: hidden;
+}
+.run-row {
+  display: grid;
+  grid-template-columns: 12px 1fr auto auto 20px;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 18px;
+  text-decoration: none;
+  color: var(--text);
+  border-bottom: 1px solid var(--line);
+  transition: background 0.15s ease;
+}
+.run-row:last-child { border-bottom: none; }
+.run-row:hover { background: rgba(255,255,255,0.03); }
+
+/* Status indicators */
+.run-status-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.running-pulse {
+  background: var(--good, #22c55e);
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+}
+.queued-dot { background: var(--warning, #d97706); }
+.rendered-dot { background: var(--gold, #c9a53a); }
+.uploaded-dot { background: var(--blue, #3b82f6); }
+.failed-dot { background: var(--bad, #ef4444); }
+.cancelled-dot { background: #6b7280; }
+
+/* Run info */
+.run-info { min-width: 0; }
+.run-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.run-sub {
   font-size: 0.72rem;
   color: var(--muted);
-  padding-top: 12px;
-  border-top: 1px solid var(--line);
+  margin-top: 2px;
 }
 
+/* Middle columns */
+.run-duration, .run-time, .run-error, .run-wait-label {
+  font-size: 0.76rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.run-error {
+  color: var(--bad, #ef4444);
+  font-size: 0.72rem;
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.run-wait-label {
+  color: var(--warning, #d97706);
+  font-weight: 600;
+  font-size: 0.76rem;
+}
+
+/* Progress mini */
+.run-progress-mini {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 100px;
+}
+.run-progress-mini span {
+  font-size: 0.7rem;
+  color: var(--good, #22c55e);
+  font-weight: 600;
+}
+.progress-bar-mini {
+  height: 4px;
+  background: var(--surface);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill-mini {
+  height: 100%;
+  width: 60%;
+  background: linear-gradient(90deg, var(--good, #22c55e), #3dd4bc);
+  border-radius: 2px;
+  animation: progress-pulse 2s ease-in-out infinite;
+}
+@keyframes progress-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.run-arrow {
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
+  opacity: 0.4;
+}
+.run-row:hover .run-arrow { opacity: 1; }
+
+/* ── Empty state ───────────────────────────────────────────── */
 .empty-state-box {
   text-align: center;
   padding: 60px 20px;
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: var(--radius, 10px);
 }
-
 .empty-state-icon { font-size: 3rem; margin-bottom: 12px; }
 .empty-state-text { color: var(--muted); font-size: 1rem; }
 
+/* ── Mobile ────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .video-grid { grid-template-columns: 1fr; }
+  .run-row {
+    grid-template-columns: 10px 1fr 20px;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+  .run-duration, .run-time, .run-progress-mini, .run-error, .run-wait-label {
+    grid-column: 2;
+    margin-top: -4px;
+  }
+  .run-stats { gap: 6px; }
+  .stat-pill { padding: 4px 10px; font-size: 0.72rem; }
 }
 </style>
 {% endblock %}
