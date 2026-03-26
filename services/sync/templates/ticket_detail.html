@@ -17,12 +17,30 @@
 
 <div class="ticket-detail-grid">
   <section class="panel ticket-main">
-    <h2>Beschreibung</h2>
-    {% if ticket.description %}
-    <div class="ticket-description">{{ ticket.description }}</div>
-    {% else %}
-    <div class="empty-state">Keine Beschreibung vorhanden.</div>
-    {% endif %}
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h2>Beschreibung</h2>
+      <button type="button" class="btn btn-secondary btn-sm" id="editDescBtn" onclick="toggleDescEdit()">
+        <i data-lucide="pencil" style="width:14px;height:14px"></i> Bearbeiten
+      </button>
+    </div>
+
+    <div id="descView">
+      {% if ticket.description %}
+      <div class="ticket-description">{{ ticket.description }}</div>
+      {% else %}
+      <div class="empty-state">Keine Beschreibung vorhanden.</div>
+      {% endif %}
+    </div>
+
+    <form id="descEdit" method="post" action="/admin/tickets/{{ ticket.ticket_id }}/update" style="display:none;">
+      <div class="form-group">
+        <textarea name="description" rows="8" class="form-input" style="width:100%; font-size:14px; line-height:1.6;">{{ ticket.description or '' }}</textarea>
+      </div>
+      <div class="form-actions-inline" style="margin-top:8px;">
+        <button type="submit" class="btn btn-primary btn-sm">Speichern</button>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="toggleDescEdit()">Abbrechen</button>
+      </div>
+    </form>
 
     {% if ticket.github_issue_url %}
     <div style="margin-top: 16px;">
@@ -32,6 +50,23 @@
     </div>
     {% endif %}
   </section>
+
+  <script>
+  function toggleDescEdit() {
+    var view = document.getElementById('descView');
+    var edit = document.getElementById('descEdit');
+    var btn = document.getElementById('editDescBtn');
+    if (edit.style.display === 'none') {
+      edit.style.display = 'block';
+      view.style.display = 'none';
+      btn.style.display = 'none';
+    } else {
+      edit.style.display = 'none';
+      view.style.display = 'block';
+      btn.style.display = '';
+    }
+  }
+  </script>
 
   <section class="panel ticket-sidebar">
     <h2>Status ändern</h2>
