@@ -104,10 +104,14 @@ from app.pipeline_workflow import _ensure_poll_thread  # noqa: E402
 _ensure_workflows_table(db)
 
 # ── Recover jobs/runs interrupted by restarts ─────────────────────────────
-_recovered_audio = recover_interrupted_jobs(db)
-_recovered_runs = recover_interrupted_runs(db)
-if _recovered_audio or _recovered_runs:
-    print(f'[startup] Recovered {_recovered_audio} audio jobs, {_recovered_runs} pipeline runs after restart.')
+import os as _os
+if _os.environ.get('SKIP_RECOVERY') != '1':
+    _recovered_audio = recover_interrupted_jobs(db)
+    _recovered_runs = recover_interrupted_runs(db)
+    if _recovered_audio or _recovered_runs:
+        print(f'[startup] Recovered {_recovered_audio} audio jobs, {_recovered_runs} pipeline runs after restart.')
+else:
+    print('[startup] Recovery skipped (SKIP_RECOVERY=1)')
 
 _ensure_worker(db)
 _ensure_poll_thread(db)
