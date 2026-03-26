@@ -407,10 +407,30 @@
 
 /* ── Mobile ──────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .studio-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .studio-stat { padding: 12px; gap: 8px; }
-  .studio-stat-icon { font-size: 1.2rem; }
+  .studio-stats { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .studio-stat { padding: 10px; gap: 8px; flex-direction: column; text-align: center; }
+  .studio-stat-icon { font-size: 1.1rem; }
   .studio-stat-value { font-size: 1.1rem; }
+  .studio-stat-label { font-size: 0.65rem; }
+
+  .active-card { padding: 16px; }
+  .active-title { font-size: 0.95rem; }
+  .active-badge { font-size: 0.6rem; padding: 2px 8px; }
+  .active-sub { font-size: 0.7rem; }
+  .active-config { flex-wrap: wrap; gap: 8px; font-size: 0.7rem; }
+
+  .studio-panel { padding: 14px; }
+  .section-header-inline { flex-wrap: wrap; gap: 8px; }
+  .section-header-inline h2 { font-size: 0.88rem; }
+
+  .mini-item { gap: 8px; padding: 8px 0; }
+  .mini-title { font-size: 0.8rem; }
+  .mini-badge { font-size: 0.6rem; padding: 2px 6px; }
+
+  .grid.two { grid-template-columns: 1fr; gap: 12px; }
+}
+@media (max-width: 400px) {
+  .studio-stats { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 {% endblock %}

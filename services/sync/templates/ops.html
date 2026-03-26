@@ -473,9 +473,31 @@
 /* ── Mobile ───────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .ops-stats { grid-template-columns: repeat(3, 1fr); gap: 6px; }
-  .ops-stat { padding: 10px; gap: 8px; }
-  .gauge-grid { grid-template-columns: repeat(2, 1fr); }
+  .ops-stat { padding: 10px; gap: 6px; flex-direction: column; text-align: center; }
+  .ops-stat-icon { font-size: 1.1rem; }
+  .ops-stat-value { font-size: 1.1rem; }
+  .ops-stat-label { font-size: 0.65rem; }
+
+  .grid.two { grid-template-columns: 1fr; gap: 14px; }
+
+  .server-panel { padding: 14px; }
+  .server-panel-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .server-panel-title h2 { font-size: 0.88rem; }
+  .gauge-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .gauge-ring-sm { width: 60px; height: 60px; }
+  .gauge-lbl { font-size: 0.68rem; }
+  .gauge-det { font-size: 0.6rem; }
+  .load-emoji-sm { font-size: 1.4rem; }
+
+  .ops-panel { padding: 14px; }
+  .section-header-inline h2 { font-size: 0.88rem; }
+  .mini-item { gap: 8px; padding: 8px 0; }
+  .mini-title { font-size: 0.8rem; }
+  .mini-badge { font-size: 0.6rem; padding: 2px 6px; }
+}
+@media (max-width: 400px) {
+  .ops-stats { grid-template-columns: repeat(2, 1fr); }
+  .gauge-grid { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 {% endblock %}

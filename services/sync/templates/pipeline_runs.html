@@ -674,27 +674,50 @@
 
 /* ── Mobile ────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .live-card { padding: 18px; }
-  .live-title { font-size: 1rem; }
-  .live-config { flex-wrap: wrap; gap: 10px; }
+  .status-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .run-stats { gap: 4px; }
+  .stat-pill { padding: 4px 8px; font-size: 0.68rem; }
+  .stat-dot { width: 6px; height: 6px; }
+  .run-section { margin-bottom: 20px; }
+  .section-head h2 { font-size: 0.9rem; }
+
+  /* Live cards */
+  .live-card { padding: 16px; }
+  .live-title { font-size: 0.95rem; }
+  .live-sub { font-size: 0.7rem; margin-bottom: 12px; }
+  .live-config { flex-wrap: wrap; gap: 8px; font-size: 0.7rem; }
+  .live-badge { font-size: 0.6rem; padding: 3px 8px; }
+
+  /* Queue */
   .queue-item {
     grid-template-columns: 36px 1fr 20px;
-    gap: 10px;
+    gap: 8px;
     padding: 12px 14px;
   }
-  .queue-details, .queue-waiting { grid-column: 2; margin-top: -2px; }
+  .queue-details, .queue-waiting { grid-column: 2; margin-top: -2px; font-size: 0.7rem; }
+  .queue-title { font-size: 0.84rem; }
+
+  /* YT cards */
+  .yt-grid { grid-template-columns: 1fr; }
+  .yt-title { font-size: 0.88rem; }
+  .yt-info { padding: 10px 12px 12px; }
+
+  /* Muted rows */
   .run-row {
     grid-template-columns: 10px 1fr 20px;
-    gap: 10px;
+    gap: 8px;
     padding: 10px 14px;
   }
   .run-duration, .run-time, .run-error {
     grid-column: 2;
-    margin-top: -4px;
+    margin-top: -2px;
+    font-size: 0.7rem;
   }
-  .run-stats { gap: 6px; }
-  .stat-pill { padding: 4px 10px; font-size: 0.72rem; }
-  .yt-grid { grid-template-columns: 1fr; }
+  .run-title { font-size: 0.82rem; }
+}
+@media (max-width: 400px) {
+  .stat-pill { padding: 3px 6px; font-size: 0.62rem; }
+  .run-stats { flex-wrap: wrap; }
 }
 </style>
 {% endblock %}
