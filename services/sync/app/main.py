@@ -54,7 +54,7 @@ templates.env.globals['app_version'] = APP_VERSION
 
 # ── App ───────────────────────────────────────────────────────────────────
 
-app = FastAPI(title='agent-sync-service')
+app = FastAPI(title='Whisper Studio')
 
 # ── Static files ──────────────────────────────────────────────────────────
 

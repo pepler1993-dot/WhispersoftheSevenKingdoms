@@ -172,21 +172,27 @@ h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; }
   pointer-events: none;
 }
 
-.brand-kicker {
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: #8fb4ff;
-  margin-bottom: 10px;
-  font-weight: 700;
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
 }
 
-.brand-name {
-  font-size: 0.95rem;
+.brand-logo-icon {
+  font-size: 1.4rem;
+  filter: drop-shadow(0 0 8px rgba(201,165,58,0.4));
+}
+
+.brand-logo-text {
+  font-size: 1.1rem;
   font-weight: 800;
   color: var(--text);
-  letter-spacing: -0.01em;
-  line-height: 1.2;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #c9a53a, #e8d48b, #c9a53a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .brand-sub {
@@ -257,9 +263,12 @@ h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; }
 }
 
 .mobile-brand {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 800;
-  color: var(--gold);
+  background: linear-gradient(135deg, #c9a53a, #e8d48b, #c9a53a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .mobile-subbrand {
