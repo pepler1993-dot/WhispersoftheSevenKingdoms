@@ -6,7 +6,7 @@ import time
 from datetime import datetime, timezone
 from typing import Any
 
-from app.pipeline_runner import start_run
+from app.pipeline_runner import start_run, trigger_upload
 from app.store import AgentSyncDB
 
 _lock = threading.Lock()
@@ -91,6 +91,12 @@ def _queue_worker(db: AgentSyncDB) -> None:
         try:
             # start_run is blocking – it waits for the subprocess to finish
             start_run(run_id, slug, config, db)
+
+            # Auto-upload if configured
+            run_after = db.get_run(run_id)
+            if run_after and run_after.get('status') == 'rendered' and config.get('auto_upload'):
+                db.append_run_log(run_id, 'system', f'Auto-Upload gestartet (public={config.get("public", False)})', _now_iso())
+                trigger_upload(run_id, slug, config, db)
         except Exception as exc:
             db.update_run(run_id, status='failed', error_message=f'Queue worker error: {exc}', finished_at=_now_iso())
             db.append_run_log(run_id, 'system', f'Queue worker error: {exc}', _now_iso())
