@@ -304,12 +304,15 @@ def main():
     _step('THUMBNAIL')
     if thumb_path is None:
         thumb_path = yt_dir / 'thumbnail.jpg'
+        bg_for_thumb = Path(args.bg_image) if args.bg_image else (REPO_ROOT / 'data' / 'assets' / 'backgrounds' / f'{theme}.jpg')
         cmd = [
             sys.executable, 'pipeline/scripts/thumbnails/generate_thumbnail.py',
             '--title', title,
             '--theme', theme,
             '--output', str(thumb_path),
         ]
+        if bg_for_thumb.exists():
+            cmd += ['--bg-image', str(bg_for_thumb)]
         if args.dry_run:
             print('DRY:', ' '.join(cmd))
         else:
