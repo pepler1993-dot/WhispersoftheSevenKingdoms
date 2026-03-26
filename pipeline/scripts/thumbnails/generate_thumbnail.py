@@ -285,8 +285,8 @@ def generate_thumbnail(title, theme_name, subtitle="3 Hours Deep Sleep Music", o
     if bg_image and Path(bg_image).exists():
         img = Image.open(bg_image).convert("RGB")
         img = img.resize((WIDTH, HEIGHT), Image.LANCZOS)
-        # Strong blur for dreamy background effect
-        img = img.filter(ImageFilter.GaussianBlur(radius=18))
+        # Moderate blur for dreamy background effect
+        img = img.filter(ImageFilter.GaussianBlur(radius=10))
         # Darken for text readability, but keep colors visible
         enhancer = ImageEnhance.Brightness(img)
         img = enhancer.enhance(0.55)
