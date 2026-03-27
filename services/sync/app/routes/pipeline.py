@@ -115,6 +115,44 @@ def _detect_background_source(selected_background: str | None, theme: str) -> di
     }
 
 
+def _resolve_background_from_house_variant(house_key: str, variant_key: str) -> str | None:
+    """Match library filename (any common image ext) from preset bg_key."""
+    if not (house_key and variant_key):
+        return None
+    houses = _load_house_templates()
+    h = houses.get(house_key.strip(), {})
+    bp = (h.get('background_prompts') or {}).get(variant_key.strip(), {})
+    bg_key = (bp or {}).get('bg_key')
+    if not bg_key or not isinstance(bg_key, str):
+        return None
+    bg_dir = PIPELINE_DIR / 'data' / 'assets' / 'backgrounds'
+    for ext in ('.jpg', '.jpeg', '.png', '.webp'):
+        fn = f'{bg_key}{ext}'
+        if (bg_dir / fn).is_file():
+            return fn
+    return f'{bg_key}.jpg'
+
+
+def _prompts_from_house_variant(house_key: str, variant_key: str) -> str:
+    """Audio prompts exist only per variant (no house-level prompts)."""
+    houses = _load_house_templates()
+    h = houses.get((house_key or '').strip(), {})
+    variant_key = (variant_key or '').strip()
+    vp = h.get('variant_prompts') or {}
+    if not variant_key or variant_key not in vp:
+        raise HTTPException(
+            status_code=400,
+            detail='Bitte eine Haus-Variante wählen — Audio-Prompts sind nur pro Variante definiert.',
+        )
+    raw = vp[variant_key]
+    if not isinstance(raw, list):
+        raise HTTPException(status_code=400, detail=f'Ungültige Prompt-Liste für Variante „{variant_key}“.')
+    lines = [x for x in raw if isinstance(x, str) and x.strip()]
+    if not lines:
+        raise HTTPException(status_code=400, detail=f'Keine Prompts für Variante „{variant_key}“ hinterlegt.')
+    return '\n'.join(lines)
+
+
 @router.get('/admin/pipeline/logs', response_class=HTMLResponse)
 def admin_pipeline_logs(request: Request):
     runs = shared.db.list_runs(limit=100)
@@ -206,7 +244,6 @@ def admin_pipeline_assets():
 
 @router.post('/admin/pipeline/start')
 def admin_pipeline_start(
-    slug: str = Form(''),
     title: str = Form(...),
     theme: str = Form(...),
     minutes: int = Form(42),
@@ -240,8 +277,8 @@ def admin_pipeline_start(
     gen_prompt: str = Form(''),
 ):
     title = title.strip()
-    slug = slugify(title)
     theme = theme.strip()
+    slug = slugify(title)
     if not slug:
         raise HTTPException(status_code=400, detail='Title must produce a valid slug')
     if not title:
@@ -258,11 +295,7 @@ def admin_pipeline_start(
     if not audio_found and audio_source == 'generate':
         prompt_text = gen_prompt.strip()
         if not prompt_text:
-            # Build prompt from house template
-            houses = _load_house_templates()
-            h = houses.get(house or theme, {})
-            prompts = h.get('prompts', [])
-            prompt_text = '\n'.join(prompts) if prompts else f'{theme} ambient sleep music'
+            prompt_text = _prompts_from_house_variant(house, notes)
 
         audio_job_id = create_audio_job(
             slug=slug,
@@ -290,7 +323,10 @@ def admin_pipeline_start(
         metadata_path.write_text(json.dumps(metadata, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
 
         thumbnail_source = _detect_thumbnail_source(slug, thumbnail_file, metadata)
-        background_source = _detect_background_source(background_file, theme)
+        bg_selected = (background_file or '').strip()
+        if not bg_selected:
+            bg_selected = (_resolve_background_from_house_variant(house, notes) or '').strip()
+        background_source = _detect_background_source(bg_selected or None, theme)
 
         pipeline_config = {
             'minutes': minutes,
@@ -358,7 +394,10 @@ def admin_pipeline_start(
     metadata_path.write_text(json.dumps(metadata, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
 
     thumbnail_source = _detect_thumbnail_source(slug, thumbnail_file, metadata)
-    background_source = _detect_background_source(background_file, theme)
+    bg_selected = (background_file or '').strip()
+    if not bg_selected:
+        bg_selected = (_resolve_background_from_house_variant(house, notes) or '').strip()
+    background_source = _detect_background_source(bg_selected or None, theme)
 
     config = {
         'minutes': minutes,

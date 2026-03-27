@@ -77,14 +77,14 @@
       <input type="hidden" name="mood" id="mood-input" />
     </div>
 
-    <!-- Title -->
+    <!-- Title (interner Dateiname/Slug wird nur aus dem Titel abgeleitet, nicht in der UI sichtbar) -->
     <div class="form-group">
       <label for="title">Video-Titel</label>
       <input type="text" name="title" id="title" class="form-input" required placeholder="Wird automatisch generiert" />
     </div>
 
     <!-- Hidden defaults (filled by JS from house template) -->
-    <input type="hidden" name="slug" id="slug" />
+    <input type="hidden" id="slug" />
     <input type="hidden" name="theme" id="theme" />
     <input type="hidden" name="minutes" id="minutes" value="20" />
     <input type="hidden" name="loop_hours" id="loop_hours" value="3" />
@@ -105,9 +105,9 @@
     <input type="hidden" name="duration_hint" id="duration_hint" value="long-form sleep track" />
     <input type="hidden" name="house" id="house" />
 
-    <!-- Assets Info (hidden) -->
+    <!-- Assets Info (hidden, kein Slug in der Oberfläche) -->
     <div class="assets-mini" id="assets-info" style="display:none">
-      <div class="assets-mini-label">Assets für <span id="assets-slug">—</span>:</div>
+      <div class="assets-mini-label">Audio-Status</div>
       <div id="assets-status">—</div>
     </div>
     </section>
@@ -173,7 +173,7 @@
         </div>
       </div>
 
-    <!-- Thumbnail + Background: automatisch aus Preset, manuell hidden -->
+    <!-- Thumbnail: Library optional hidden; Hintergrund wie zuvor sichtbar, Standard aus Preset -->
     <input type="hidden" name="thumbnail_file" id="library-thumbnail" value="" />
     <div class="form-group library-audio-row">
       <label for="library-background">🎞️ Video-Hintergrund</label>
@@ -576,20 +576,11 @@
 
 <script>
 (function() {
-  window.selectDuration = function selectDuration(hours) {
-    document.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector(`.duration-btn[data-hours="${hours}"]`).classList.add('active');
-    document.getElementById('loop_hours').value = hours;
-    document.getElementById('adv-loop').value = hours;
-    // Update title with new duration
-    const titleInput = document.getElementById('title');
-    if (titleInput.value) {
-      titleInput.value = titleInput.value.replace(/\d+\s*Hours?/i, hours + ' Hours');
-    }
-    // Show config panel
-    const configPanel = document.getElementById('config-panel');
-    configPanel.style.display = 'block';
-    setTimeout(() => configPanel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+  function slugify(text) {
+    return text.toLowerCase()
+      .replace(/['']/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
   }
 
   const houses = {{ houses | tojson }};
@@ -601,6 +592,93 @@
   const librarySelect = document.getElementById('library-audio');
   let selectedHouse = null;
   let selectedMoods = new Set();
+
+  function syncSlugFromTitle() {
+    const el = document.getElementById('slug');
+    if (el) el.value = slugify(titleInput.value || '');
+  }
+
+  window.selectDuration = function selectDuration(hours) {
+    document.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.duration-btn[data-hours="${hours}"]`).classList.add('active');
+    document.getElementById('loop_hours').value = hours;
+    document.getElementById('adv-loop').value = hours;
+    if (titleInput.value) {
+      titleInput.value = titleInput.value.replace(/\d+\s*(?:Hours?|Stunden?)/gi, hours + ' Hours');
+      document.getElementById('thumbnail_text').value = titleInput.value;
+    }
+    syncSlugFromTitle();
+    const cp = document.getElementById('config-panel');
+    cp.style.display = 'block';
+    setTimeout(() => cp.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+  };
+
+  function promptLinesForSelection(house, variantKey) {
+    if (!house) return [];
+    const vKey = (variantKey || '').trim();
+    const vp = house.variant_prompts || {};
+    if (!vKey || !vp[vKey] || !Array.isArray(vp[vKey])) return [];
+    return vp[vKey].filter(function(p) { return typeof p === 'string' && p.trim(); });
+  }
+
+  function buildTitleFromPreset(house, variantDisplayName, durationStr) {
+    const tpl = (house.title_template || '').trim();
+    const d = durationStr || '3 Hours';
+    if (!tpl) {
+      return (variantDisplayName || house.display_name || '') + ' – ' + d;
+    }
+    let body = tpl.replace(/\{duration\}/g, d);
+    if (variantDisplayName) {
+      if (body.indexOf('{variant}') !== -1) {
+        body = body.replace(/\{variant\}/g, variantDisplayName);
+      } else {
+        body = variantDisplayName + ' – ' + body;
+      }
+    } else {
+      body = body.replace(/\{variant\}\s*[–-]\s*/g, '').replace(/\{variant\}/g, '').replace(/^\s*[–-]\s*/, '').trim();
+    }
+    return body;
+  }
+
+  function applyThumbnailBriefToForm(brief) {
+    const scene = (brief && brief.scene) || '';
+    const style = (brief && brief.style) || '';
+    const elements = (brief && brief.elements) || [];
+    document.getElementById('thumbnail_scene').value = scene;
+    document.getElementById('adv-thumb-scene').value = scene;
+    document.getElementById('thumbnail_style').value = style;
+    document.getElementById('thumbnail_elements').value = Array.isArray(elements) ? elements.join(', ') : String(elements || '');
+    updateThumbnailSourcePreview();
+  }
+
+  function mergeVariantThumbnailBrief(house, vKey) {
+    const base = house.thumbnail_brief || {};
+    const bg = (house.background_prompts || {})[vKey];
+    const vDesc = (house.variants || {})[vKey];
+    if (!bg) {
+      return {
+        scene: base.scene || '',
+        elements: [...(base.elements || [])],
+        style: base.style || ''
+      };
+    }
+    const overlay = bg.thumbnail_brief;
+    if (overlay && typeof overlay === 'object') {
+      return {
+        scene: overlay.scene || base.scene || '',
+        elements: (overlay.elements && overlay.elements.length) ? [...overlay.elements] : [...(base.elements || [])],
+        style: overlay.style || base.style || ''
+      };
+    }
+    let sceneFromPrompt = (bg.prompt || '').replace(/,\s*photorealistic.*$/i, '').replace(/,\s*\d{3,4}x\d{3,4}.*$/i, '').trim();
+    if (!sceneFromPrompt) sceneFromPrompt = base.scene || '';
+    const extra = vDesc ? [String(vDesc)] : [];
+    return {
+      scene: sceneFromPrompt,
+      elements: [...(base.elements || []), ...extra],
+      style: base.style || ''
+    };
+  }
 
   function slugMatchesSongFile(slug, songFilename) {
     const base = songFilename.replace(/\.(mp3|wav|ogg)$/i, '');
@@ -654,8 +732,6 @@
         refreshAudioForCurrentSlug();
         return;
       }
-      document.getElementById('slug').value = stem;
-      document.getElementById('assets-slug').textContent = stem;
       setAudioStatusFromLibrary(stem);
     });
   }
@@ -671,12 +747,10 @@
       cards.forEach(c => c.classList.remove('selected'));
       card.classList.add('selected');
       selectedHouse = key;
+      document.getElementById('notes').value = '';
 
-      // fill hidden fields
-      document.getElementById('slug').value = slugify(house.display_name);
       document.getElementById('theme').value = house.display_name;
       document.getElementById('house').value = key;
-      document.getElementById('assets-slug').textContent = slugify(house.display_name);
 
       // defaults
       const d = house.defaults || {};
@@ -712,6 +786,7 @@
       const duration = (d.loop_hours || 3) + ' Hours';
       titleInput.value = (house.title_template || '').replace('{duration}', duration) || house.display_name;
       document.getElementById('thumbnail_text').value = titleInput.value;
+      syncSlugFromTitle();
 
       // moods — set from house preset mood
       const houseMood = house.mood || 'calm';
@@ -741,22 +816,32 @@
             btn.classList.add('selected');
             // Store selected variant key for prompt selection
             document.getElementById('notes').value = vKey;
-            document.getElementById('slug').value = slugify(vName);
             document.getElementById('theme').value = vName;
-            document.getElementById('assets-slug').textContent = slugify(vName);
+            applyThumbnailBriefToForm(mergeVariantThumbnailBrief(house, vKey));
             // Auto-select background image from preset
             const bgPrompts = house.background_prompts || {};
             const bgData = bgPrompts[vKey];
             if (bgData && bgData.bg_key) {
               const bgSelect = document.getElementById('library-background');
-              const bgFile = bgData.bg_key + '.jpg';
-              const opt = [...bgSelect.options].find(o => o.value === bgFile);
-              if (opt) { bgSelect.value = bgFile; updateBackgroundSourcePreview(); }
+              const exts = ['.jpg', '.jpeg', '.png', '.webp'];
+              let matched = '';
+              for (const ext of exts) {
+                const fn = bgData.bg_key + ext;
+                if ([...bgSelect.options].some(o => o.value === fn)) { matched = fn; break; }
+              }
+              if (matched) {
+                bgSelect.value = matched;
+                updateBackgroundSourcePreview();
+              } else {
+                bgSelect.value = '';
+                updateBackgroundSourcePreview();
+              }
             }
-            // Update title with variant
             const duration = (document.getElementById('loop_hours').value || 3) + ' Hours';
-            titleInput.value = vName + ' – ' + duration + ' Sleep Music | Whispers of the Seven Kingdoms';
+            titleInput.value = buildTitleFromPreset(house, vName, duration);
             document.getElementById('thumbnail_text').value = titleInput.value;
+            syncSlugFromTitle();
+            updateGenerateCard(house, vKey);
             // Show duration selection
             document.getElementById('duration-panel').style.display = 'block';
             setTimeout(() => document.getElementById('duration-panel').scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
@@ -778,17 +863,11 @@
         librarySelect.value = opt ? opt.value : '';
       }
       refreshAudioForCurrentSlug();
-      updateGenerateCard(house);
+      const hasVariants = variantKeys.length > 0;
+      updateGenerateCard(house, hasVariants ? null : '');
       updateBackgroundSourcePreview();
     });
   });
-
-  function slugify(text) {
-    return text.toLowerCase()
-      .replace(/['']/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '');
-  }
 
   function buildMoodTags(moods, defaults) {
     selectedMoods = new Set(defaults);
@@ -819,13 +898,10 @@
   document.getElementById('library-thumbnail').addEventListener('change', updateThumbnailSourcePreview);
   document.getElementById('library-background').addEventListener('change', updateBackgroundSourcePreview);
 
-  // title → slug (always auto-generated) + thumbnail text sync
+  // Titel → interner Slug immer ableiten (nicht sichtbar) + Thumbnail-Text
   titleInput.addEventListener('input', function() {
-    const slugField = document.getElementById('slug');
-    if (slugField) {
-      slugField.value = slugify(this.value);
-      document.getElementById('assets-slug').textContent = slugify(this.value);
-    }
+    syncSlugFromTitle();
+    refreshAudioForCurrentSlug();
     document.getElementById('thumbnail_text').value = this.value;
     updateThumbnailSourcePreview();
   });
@@ -893,30 +969,42 @@
     document.getElementById('gen_model_hidden').value = this.value;
   });
 
-  // Update generate card when house is selected
-  function updateGenerateCard(house) {
+  // Update generate card when house / variant is selected
+  function updateGenerateCard(house, variantKey) {
     const icon = document.getElementById('gen-house-icon');
     const name = document.getElementById('gen-house-name');
     const info = document.getElementById('gen-prompts-info');
     const btn = document.getElementById('btn-start-gen');
     if (!house) { btn.disabled = true; return; }
     icon.textContent = house.sigil || '🏰';
-    name.textContent = house.display_name + ' – Audio Track';
-    const pc = (house.prompts || []).length;
-    info.textContent = pc + ' Prompts · ' + (house.defaults?.minutes || 20) + ' Min · Stable Audio Local';
-    // Sync prompt to hidden field for form submission
-    document.getElementById('gen_prompt_hidden').value = (house.prompts || []).join('\n');
-    btn.disabled = false;
+    const lines = promptLinesForSelection(house, variantKey === null ? '' : variantKey);
+    const vLabel = (variantKey && house.variants && house.variants[variantKey])
+      ? variantKey.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+      : null;
+    name.textContent = vLabel ? (house.display_name + ' · ' + vLabel) : (house.display_name + ' – Variante wählen');
+    const pc = lines.length;
+    info.textContent = pc
+      ? (pc + ' Prompts (Variante) · ' + (house.defaults?.minutes || 20) + ' Min · Stable Audio Local')
+      : ('Keine Variante gewählt — Prompts nur pro Variante.');
+    document.getElementById('gen_prompt_hidden').value = lines.join('\n');
+    btn.disabled = !pc;
   }
 
   // Start audio generation
   window.startAudioGen = function() {
     if (!selectedHouse) return alert('Bitte zuerst ein Haus wählen');
     const house = houses[selectedHouse];
-    const slug = document.getElementById('slug').value;
     const minutes = document.getElementById('gen-minutes').value;
     const model = document.getElementById('gen-model').value;
-    const prompts = (house.prompts || []).join('\n');
+    const variantKey = (document.getElementById('notes').value || '').trim();
+    const lines = promptLinesForSelection(house, variantKey);
+    if (!lines.length) {
+      return alert('Bitte zuerst eine Variante wählen — Audio-Prompts gibt es nur pro Variante.');
+    }
+    const prompts = lines.join('\n');
+    syncSlugFromTitle();
+    const slug = document.getElementById('slug').value;
+    const titleForJob = (document.getElementById('title').value || '').trim() || (house.display_name + ' Sleep Music');
     const statusEl = document.getElementById('gen-status');
     const btn = document.getElementById('btn-start-gen');
 
@@ -927,7 +1015,7 @@
 
     const fd = new FormData();
     fd.append('slug', slug);
-    fd.append('title', house.display_name + ' Sleep Music');
+    fd.append('title', titleForJob);
     fd.append('prompt_text', prompts);
     fd.append('preset_name', '');
     fd.append('minutes', minutes);
@@ -1054,6 +1142,13 @@
         })
         .catch(() => {});
     }, 10000);
+  }
+
+  const runForm = document.getElementById('run-form');
+  if (runForm) {
+    runForm.addEventListener('submit', function() {
+      syncSlugFromTitle();
+    });
   }
 
   updateThumbnailSourcePreview();

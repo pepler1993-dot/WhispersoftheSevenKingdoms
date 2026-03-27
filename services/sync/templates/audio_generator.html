@@ -36,7 +36,7 @@
       <input type="hidden" name="slug" id="slug" />
       <div class="form-group">
         <label for="title">Titel</label>
-        <input type="text" name="title" id="title" class="form-input" required placeholder="Whispers of Winterfell" oninput="document.getElementById('slug').value = this.value.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')" />
+        <input type="text" name="title" id="title" class="form-input" required placeholder="Whispers of Winterfell" oninput="document.getElementById('slug').value=document.getElementById('title').value.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')" />
       </div>
       <div class="grid two">
         <div class="form-group">
@@ -61,15 +61,19 @@
       </div>
       <input type="hidden" name="model" id="audio-model" value="stable-audio" />
       <div class="form-group">
-        <label for="house_preset">Prompt-Vorlage (House)</label>
-        <select name="house_preset" id="house_preset" class="form-select" onchange="fillPresetPrompts()">
+        <label for="house_variant_preset">Prompt-Vorlage (Haus · Variante)</label>
+        <select id="house_variant_preset" class="form-select" onchange="fillPresetPrompts()">
           <option value="">— eigener Prompt —</option>
           {% for key, house in house_templates.items() %}
-          <option value="{{ key }}" data-prompts="{{ house.prompts | join('
-') | e }}">{{ house.sigil }} {{ house.display_name }} ({{ house.prompts | length }} Prompts)</option>
+            {% set vp = house.variant_prompts or {} %}
+            {% for vk in (house.variants or {}) %}
+              {% if vk in vp and vp[vk] %}
+              <option value="{{ key }}|{{ vk }}" data-prompts="{{ vp[vk] | join('\n') | e }}">{{ house.sigil }} {{ house.display_name }} — {{ vk | replace('_', ' ') | title }} ({{ vp[vk] | length }} Prompts)</option>
+              {% endif %}
+            {% endfor %}
           {% endfor %}
         </select>
-        <div class="metric-help">Wähle ein House um vorgefertigte Prompts zu laden, oder schreibe eigene.</div>
+        <div class="metric-help">Nur Varianten-Prompts aus den Haus-Presets; optional eigene Zeilen im Feld darunter.</div>
       </div>
       <div class="form-group">
         <label for="prompt_text">Prompt(s)</label>
@@ -77,7 +81,7 @@
       </div>
       <script>
       function fillPresetPrompts() {
-        const select = document.getElementById("house_preset");
+        const select = document.getElementById("house_variant_preset");
         const textarea = document.getElementById("prompt_text");
         const option = select.options[select.selectedIndex];
         const prompts = option.dataset.prompts || "";
