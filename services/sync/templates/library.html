@@ -23,31 +23,15 @@
 {% endif %}
 
 <section class="panel panel-accent-gold" style="margin-bottom:18px;">
-  <h2>Wofür die Library da ist</h2>
-  <div class="page-subtitle" style="max-width: 78ch; margin-top: 10px;">
-    Titel, Stimmung, Musik- und Thumbnail-Vorgaben kommen aus den Haus-Presets. Wähle ein Haus, um Varianten und alle gesetzten Werte übersichtlich zu durchstöbern — ohne Rohdaten.
-  </div>
-  <details style="margin-top:12px;">
-    <summary style="cursor:pointer; font-weight:600;">Asset-Details anzeigen</summary>
-    <ul class="list" style="margin-top: 12px;">
-      <li><strong>Haus-Presets</strong> → Lesbare Übersicht pro Haus und Variante (Quelle für den Create-Tab)</li>
-      <li><strong>Songs</strong> → Audio-Bibliothek im Create-Tab</li>
-      <li><strong>Hintergrundbilder</strong> → Video-Hintergründe im Create-Tab</li>
-    </ul>
-  </details>
-</section>
-
-<section class="panel panel-accent-gold" style="margin-bottom:18px;">
-  <div class="section-header-inline"><h2>Häuser &amp; Presets</h2><span class="section-note">durchstöbern</span></div>
+  <div class="section-header-inline"><h2>Häuser &amp; Presets</h2></div>
   <p class="page-subtitle" style="margin:0 0 1.1rem 0; max-width:78ch;">Klicke auf ein Haus, um alle Schauplatz-Varianten zu sehen. Pro Variante zeigen wir, was für Audio, Thumbnail, Titel und Hintergrund voreingestellt ist.</p>
   <div class="house-grid" role="list">
     {% for h in house_cards %}
-    <a class="house-card" role="listitem" href="/admin/library/houses/{{ h.key }}" aria-label="{{ h.display_name }}, {{ h.house }}, {{ h.variant_count }} Varianten öffnen" style="background: linear-gradient(145deg, {{ h.color }} 0%, {{ h.bg_color }} 100%);">
+    <a class="house-card" role="listitem" href="/admin/library/houses/{{ h.key }}" aria-label="{{ h.display_name }}{% if h.house %}, {{ h.house }}{% endif %}" style="background: linear-gradient(145deg, {{ h.color }} 0%, {{ h.bg_color }} 100%);">
       <div class="house-card-inner">
         <span class="house-card-sigil" aria-hidden="true">{{ h.sigil }}</span>
         <h3 class="house-card-title">{{ h.display_name }}</h3>
         <div class="house-card-sub">{{ h.house }}</div>
-        <span class="house-card-meta">{{ h.variant_count }} Variante{% if h.variant_count != 1 %}n{% endif %} · öffnen</span>
       </div>
     </a>
     {% else %}
