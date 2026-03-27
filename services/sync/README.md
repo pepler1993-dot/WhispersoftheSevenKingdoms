@@ -37,13 +37,13 @@ Audio-Generierung braucht einen erreichbaren **GPU-Worker** (siehe `app/stable_a
 Siehe `deploy/setup.sh` und `deploy/agent-sync.service`.  
 Kein `GITHUB_WEBHOOK_SECRET` mehr — das alte Webhook-Setup ist obsolet.
 
-### CI/CD per GitHub Actions (SSH)
+### CI/CD per GitHub Actions (SSH via Tailscale)
 
 Es gibt jetzt einen Workflow unter `.github/workflows/deploy.yml`.
 
 Trigger:
 - Push auf `main`
-- manueller Start über **Actions → Deploy (SSH) → Run workflow**
+- manueller Start über **Actions → Deploy (SSH via Tailscale) → Run workflow**
 
 Erwartete Defaults auf dem Server:
 - Repo: `/opt/whispers/WhispersoftheSevenKingdoms`
@@ -51,9 +51,16 @@ Erwartete Defaults auf dem Server:
 - systemd-Service: `agent-sync`
 
 Benötigte GitHub Actions Secrets:
-- `SSH_HOST`
+- `SSH_HOST` → am besten die Tailscale-IP oder der MagicDNS-Name des Servers
 - `SSH_USER`
 - `SSH_PRIVATE_KEY`
+- `TS_OAUTH_CLIENT_ID`
+- `TS_OAUTH_SECRET`
+
+Wichtig:
+- Der Zielserver muss bereits im Tailnet sein.
+- Der GitHub-Runner joint im Workflow kurz euer Tailnet und deployt dann per SSH über Tailscale.
+- Das Tailnet muss den im Workflow verwendeten CI-Tag erlauben (`tag:ci`) oder ihr entfernt/ändert das Tag im Workflow.
 
 Optionale Repository Variables:
 - `DEPLOY_PATH` (Default: `/opt/whispers/WhispersoftheSevenKingdoms`)
@@ -61,11 +68,12 @@ Optionale Repository Variables:
 - `GIT_REMOTE` (Default: `origin`)
 
 Ablauf im Workflow:
-1. SSH-Key laden
-2. per SSH auf den Server verbinden
-3. `git fetch` + `git checkout/reset --hard` auf den Event-Branch
-4. optional `.venv/bin/pip install -r services/sync/requirements.txt`
-5. `systemctl restart agent-sync`
+1. GitHub-Runner joint Tailscale
+2. SSH-Key laden
+3. per SSH über Tailscale auf den Server verbinden
+4. `git fetch` + `git checkout/reset --hard` auf den Event-Branch
+5. optional `.venv/bin/pip install -r services/sync/requirements.txt`
+6. `systemctl restart agent-sync`
 
 ---
 

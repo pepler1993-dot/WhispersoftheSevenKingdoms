@@ -1,4 +1,4 @@
-name: Deploy (SSH)
+name: Deploy (SSH via Tailscale)
 
 on:
   push:
@@ -10,6 +10,13 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Join Tailscale
+        uses: tailscale/github-action@v3
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+
       - name: Configure SSH key
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -30,7 +37,7 @@ jobs:
           DEPLOY_REF: ${{ github.ref_name }}
         run: |
           set -euo pipefail
-          ssh -i ~/.ssh/id_ed25519 "$SSH_USER@$SSH_HOST" \
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=yes "$SSH_USER@$SSH_HOST" \
             "DEPLOY_PATH='$DEPLOY_PATH' SYSTEMD_SERVICE='$SYSTEMD_SERVICE' GIT_REMOTE='$GIT_REMOTE' DEPLOY_REF='$DEPLOY_REF' bash -s" <<'REMOTE'
           set -euo pipefail
           cd "$DEPLOY_PATH"
