@@ -324,6 +324,11 @@ fetch('/admin/audio/health')
     <button type="submit" class="btn btn-primary st-btn-save">
       <i data-lucide="save" style="width:16px;height:16px"></i> Preset speichern
     </button>
+    {% if edit_key %}
+    <a href="/admin/settings/presets/{{ edit_key }}/variants" class="btn btn-secondary" style="width:100%; margin-top:8px; text-align:center;">
+      <i data-lucide="layers" style="width:14px;height:14px"></i> Varianten verwalten ({{ (edit_preset.variants or {}) | length }})
+    </a>
+    {% endif %}
     <a href="/admin/settings?tab=presets" class="btn btn-secondary" style="width:100%; margin-top:8px; text-align:center;">Abbrechen</a>
   </form>
 </section>
@@ -355,6 +360,7 @@ fetch('/admin/audio/health')
         </div>
       </div>
       <div class="st-preset-actions">
+        <a href="/admin/settings/presets/{{ key }}/variants" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:0.7rem;" title="Varianten">📋 {{ (house.variants or {}) | length }}</a>
         <a href="/admin/settings?tab=presets&edit={{ key }}" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:0.7rem;">✏️</a>
         <form method="post" action="/admin/settings/presets/delete" style="display:inline;" onsubmit="return confirm('Preset «{{ house.display_name }}» wirklich löschen?')">
           <input type="hidden" name="preset_key" value="{{ key }}" />

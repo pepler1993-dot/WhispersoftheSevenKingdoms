@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% block title %}{{ preset.display_name }} · Varianten{% endblock %}
+{% block head_extra %}
+<link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
+{% endblock %}
+{% block content %}
+<div class="page-header page-header-flex">
+  <div>
+    <nav class="lib-breadcrumb lib-breadcrumb--inline" aria-label="Brotkrumen" style="margin-bottom:6px;">
+      <a href="/admin/settings?tab=presets">Settings · Presets</a>
+      <span style="margin:0 6px; opacity:0.4;">/</span>
+      <a href="/admin/settings?tab=presets&edit={{ preset_key }}">{{ preset.display_name }}</a>
+      <span style="margin:0 6px; opacity:0.4;">/</span>
+      <span>Varianten</span>
+    </nav>
+    <h1>{{ preset.sigil }} {{ preset.display_name }} – Varianten</h1>
+    <div class="page-subtitle">Varianten verwalten: Beschreibung, Audio-Prompts, Hintergrund-Prompts.</div>
+  </div>
+  <div class="header-actions">
+    <a href="/admin/settings?tab=presets&edit={{ preset_key }}" class="btn btn-secondary btn-sm">← Preset</a>
+  </div>
+</div>
+
+{% if request.query_params.get('saved') %}
+<div class="sv-toast" id="save-toast">✅ Variante gespeichert</div>
+{% endif %}
+
+{# ── Variant List ─────────────────────────────────────────────── #}
+<section class="panel" style="margin-bottom:18px;">
+  <div class="section-header-inline">
+    <h2>Varianten</h2>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <span class="section-count">{{ variants | length }}</span>
+      <button type="button" class="btn btn-primary btn-sm" onclick="showEditor()">
+        <i data-lucide="plus" style="width:14px;height:14px"></i> Neue Variante
+      </button>
+    </div>
+  </div>
+
+  {% if variants %}
+  <div class="sv-variant-list">
+    {% for vkey, vdesc in variants.items() %}
+    {% set vp = variant_prompts.get(vkey, []) %}
+    {% set bp = background_prompts.get(vkey, {}) %}
+    <div class="sv-variant-item">
+      <div class="sv-variant-info">
+        <div class="sv-variant-name">{{ vkey | replace('_', ' ') | title }}</div>
+        <div class="sv-variant-desc">{{ vdesc }}</div>
+        <div class="sv-variant-meta">
+          {{ vp | length }} Prompts
+          {% if bp %} · BG: {{ bp.get('bg_key', '—') }}{% endif %}
+        </div>
+      </div>
+      <div class="sv-variant-actions">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="editVariant('{{ vkey }}', {{ vdesc | tojson }}, {{ vp | tojson }}, {{ bp | tojson }})" style="padding:4px 10px; font-size:0.7rem;">✏️</button>
+        <form method="post" action="/admin/settings/presets/{{ preset_key }}/variants/delete" style="display:inline;" onsubmit="return confirm('Variante «{{ vkey }}» löschen?')">
+          <input type="hidden" name="variant_key" value="{{ vkey }}" />
+          <button type="submit" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:0.7rem; color:#f87171;">🗑️</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state-sm">Keine Varianten vorhanden.</div>
+  {% endif %}
+</section>
+
+{# ── Variant Editor (inline, hidden by default) ──────────────── #}
+<section class="panel panel-accent-gold" id="variant-editor" style="display:none;">
+  <h2 id="editor-title">➕ Neue Variante</h2>
+  <form method="post" action="/admin/settings/presets/{{ preset_key }}/variants/save">
+    <input type="hidden" name="original_variant_key" id="original_variant_key" value="" />
+
+    <div class="sv-step-card">
+      <div class="sv-step-header">
+        <span class="sv-step-icon">🏷️</span>
+        <div><h3>Grunddaten</h3></div>
+      </div>
+      <div class="grid two">
+        <div class="form-group">
+          <label for="variant_key">Key (intern)</label>
+          <input type="text" name="variant_key" id="variant_key" class="form-input" required placeholder="winterfell" />
+        </div>
+        <div class="form-group">
+          <label for="description">Beschreibung</label>
+          <input type="text" name="description" id="description" class="form-input" placeholder="The castle at night – snow, hearth, direwolves" />
+        </div>
+      </div>
+    </div>
+
+    <div class="sv-step-card">
+      <div class="sv-step-header">
+        <span class="sv-step-icon">🎵</span>
+        <div>
+          <h3>Audio-Prompts</h3>
+          <p class="sv-step-desc">Eine Zeile pro Prompt – werden bei der Generierung auf Clips verteilt.</p>
+        </div>
+      </div>
+      <div class="form-group">
+        <textarea name="prompts_text" id="prompts_text" class="form-input" rows="8" placeholder="Gentle ambient sleep music inspired by a frozen northern castle..."></textarea>
+      </div>
+    </div>
+
+    <div class="sv-step-card">
+      <div class="sv-step-header">
+        <span class="sv-step-icon">🎞️</span>
+        <div><h3>Hintergrund</h3></div>
+      </div>
+      <div class="form-group">
+        <label for="bg_prompt">Bild-Prompt</label>
+        <input type="text" name="bg_prompt" id="bg_prompt" class="form-input" placeholder="Dark frozen castle at night, snow falling gently..." />
+      </div>
+      <div class="form-group">
+        <label for="bg_key">Background Key</label>
+        <input type="text" name="bg_key" id="bg_key" class="form-input" placeholder="stark_winterfell" />
+        <div class="metric-help">Dateiname ohne Extension – wird automatisch generiert wenn leer.</div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary sv-btn-save">
+      <i data-lucide="save" style="width:16px;height:16px"></i> Variante speichern
+    </button>
+    <button type="button" class="btn btn-secondary" style="width:100%; margin-top:8px;" onclick="hideEditor()">Abbrechen</button>
+  </form>
+</section>
+
+<script>
+function showEditor() {
+  document.getElementById('variant-editor').style.display = 'block';
+  document.getElementById('editor-title').textContent = '➕ Neue Variante';
+  document.getElementById('original_variant_key').value = '';
+  document.getElementById('variant_key').value = '';
+  document.getElementById('description').value = '';
+  document.getElementById('prompts_text').value = '';
+  document.getElementById('bg_prompt').value = '';
+  document.getElementById('bg_key').value = '';
+  document.getElementById('variant-editor').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function hideEditor() {
+  document.getElementById('variant-editor').style.display = 'none';
+}
+
+function editVariant(key, desc, prompts, bg) {
+  document.getElementById('variant-editor').style.display = 'block';
+  document.getElementById('editor-title').textContent = '✏️ Variante bearbeiten';
+  document.getElementById('original_variant_key').value = key;
+  document.getElementById('variant_key').value = key;
+  document.getElementById('description').value = desc || '';
+  document.getElementById('prompts_text').value = (prompts || []).join('\n');
+  document.getElementById('bg_prompt').value = (bg && bg.prompt) || '';
+  document.getElementById('bg_key').value = (bg && bg.bg_key) || '';
+  document.getElementById('variant-editor').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+
+<style>
+/* ── Variant List ─────────────────────────────────────────── */
+.sv-variant-list { display: flex; flex-direction: column; }
+.sv-variant-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.sv-variant-item:last-child { border-bottom: none; }
+.sv-variant-info { flex: 1; min-width: 0; }
+.sv-variant-name { font-size: 0.9rem; font-weight: 700; }
+.sv-variant-desc { font-size: 0.78rem; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sv-variant-meta { font-size: 0.68rem; color: var(--muted); margin-top: 4px; }
+.sv-variant-actions { display: flex; gap: 4px; flex-shrink: 0; }
+
+/* ── Step Cards ───────────────────────────────────────────── */
+.sv-step-card {
+  background: var(--surface, rgba(255,255,255,0.02));
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  transition: border-color 0.2s ease;
+}
+.sv-step-card:hover { border-color: rgba(255,255,255,0.12); }
+.sv-step-header { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 16px; }
+.sv-step-icon { font-size: 1.4rem; flex-shrink: 0; }
+.sv-step-header h3 { font-size: 0.95rem; font-weight: 700; margin: 0; }
+.sv-step-desc { font-size: 0.78rem; color: var(--muted); margin: 2px 0 0; }
+
+.sv-btn-save {
+  width: 100%;
+  font-size: 1rem;
+  padding: 14px 32px;
+  margin-top: 8px;
+  box-shadow: 0 4px 20px rgba(212,168,69,0.25);
+  transition: all 0.2s ease;
+}
+.sv-btn-save:hover { box-shadow: 0 6px 28px rgba(212,168,69,0.4); transform: translateY(-2px); }
+
+.sv-toast {
+  position: fixed; top: 20px; right: 20px;
+  background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.4); color: #4ade80;
+  padding: 12px 20px; border-radius: 10px; font-size: 0.88rem; font-weight: 600; z-index: 999;
+  animation: sv-toast-in 0.3s ease, sv-toast-out 0.3s ease 2.5s forwards;
+}
+@keyframes sv-toast-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes sv-toast-out { from { opacity: 1; } to { opacity: 0; } }
+
+@media (max-width: 768px) {
+  .sv-step-card { padding: 14px; }
+  .sv-variant-item { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .sv-variant-actions { align-self: flex-end; }
+}
+</style>
+{% endblock %}

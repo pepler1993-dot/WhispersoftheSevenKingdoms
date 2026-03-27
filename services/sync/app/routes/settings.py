@@ -196,3 +196,88 @@ def import_presets_from_json():
         raise HTTPException(status_code=404, detail='No house_templates.json found')
     _save_presets(json_presets)
     return RedirectResponse(url='/admin/settings?tab=presets&saved=1', status_code=303)
+
+
+# ── Variant Editor ────────────────────────────────────────────────────────
+
+@router.get('/admin/settings/presets/{preset_key}/variants', response_class=HTMLResponse)
+def admin_preset_variants(request: Request, preset_key: str):
+    presets = _load_presets()
+    preset = presets.get(preset_key)
+    if not preset:
+        raise HTTPException(status_code=404, detail='Preset not found')
+    return shared.templates.TemplateResponse(request, 'settings_variants.html', {
+        'request': request,
+        'page': 'settings',
+        'preset_key': preset_key,
+        'preset': preset,
+        'variants': preset.get('variants', {}),
+        'variant_prompts': preset.get('variant_prompts', {}),
+        'background_prompts': preset.get('background_prompts', {}),
+    })
+
+
+@router.post('/admin/settings/presets/{preset_key}/variants/save')
+def save_variant(
+    request: Request,
+    preset_key: str,
+    variant_key: str = Form(''),
+    original_variant_key: str = Form(''),
+    description: str = Form(''),
+    prompts_text: str = Form(''),
+    bg_prompt: str = Form(''),
+    bg_key: str = Form(''),
+):
+    vkey = variant_key.strip().lower().replace(' ', '_').replace('-', '_')
+    if not vkey:
+        raise HTTPException(status_code=400, detail='Variant key required')
+
+    presets = _load_presets()
+    preset = presets.get(preset_key)
+    if not preset:
+        raise HTTPException(status_code=404, detail='Preset not found')
+
+    variants = preset.setdefault('variants', {})
+    variant_prompts = preset.setdefault('variant_prompts', {})
+    background_prompts = preset.setdefault('background_prompts', {})
+
+    # Remove old key if renaming
+    old_key = original_variant_key.strip()
+    if old_key and old_key != vkey:
+        variants.pop(old_key, None)
+        variant_prompts.pop(old_key, None)
+        background_prompts.pop(old_key, None)
+
+    variants[vkey] = description.strip()
+    prompts = [p.strip() for p in prompts_text.strip().split('\n') if p.strip()]
+    variant_prompts[vkey] = prompts
+
+    if bg_prompt.strip():
+        background_prompts[vkey] = {
+            'prompt': bg_prompt.strip(),
+            'bg_key': bg_key.strip() or f'{preset_key}_{vkey}',
+        }
+
+    presets[preset_key] = preset
+    _save_presets(presets)
+    return RedirectResponse(url=f'/admin/settings/presets/{preset_key}/variants?saved=1', status_code=303)
+
+
+@router.post('/admin/settings/presets/{preset_key}/variants/delete')
+def delete_variant(preset_key: str, variant_key: str = Form('')):
+    vkey = variant_key.strip()
+    if not vkey:
+        raise HTTPException(status_code=400, detail='Variant key required')
+
+    presets = _load_presets()
+    preset = presets.get(preset_key)
+    if not preset:
+        raise HTTPException(status_code=404, detail='Preset not found')
+
+    preset.get('variants', {}).pop(vkey, None)
+    preset.get('variant_prompts', {}).pop(vkey, None)
+    preset.get('background_prompts', {}).pop(vkey, None)
+
+    presets[preset_key] = preset
+    _save_presets(presets)
+    return RedirectResponse(url=f'/admin/settings/presets/{preset_key}/variants?saved=1', status_code=303)
