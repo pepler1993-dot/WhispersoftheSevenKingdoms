@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
-{% block title %}Audio Generator{% endblock %}
+{% block title %}Audio Lab{% endblock %}
 {% block content %}
 <div class="page-header page-header-flex">
   <div>
     <h1>Audio Lab</h1>
-    <div class="page-subtitle">Generierung, Health-Check und Job-History für Audio vor der eigentlichen Video-Pipeline.</div>
+    <div class="page-subtitle">Generierung, Health-Check und Job-History.</div>
   </div>
   <div class="header-actions">
     <a href="/admin/pipeline" class="btn btn-secondary btn-sm">Zur Create-Seite</a>
@@ -12,36 +12,79 @@
   </div>
 </div>
 
-<div class="grid two">
-  <section class="panel panel-accent-blue">
-    <div class="section-header-inline">
-      <h2>Generator Status</h2>
-      <span class="section-note" data-tooltip="Hier sieht man, ob Provider, CLI, Token und Zielpfade grundsätzlich bereit sind. Grün heißt nicht automatisch, dass jeder Run erfolgreich sein wird — nur dass die Startbedingungen stimmen.">Was bedeutet das?</span>
-    </div>
-    <div class="config-grid" id="audio-health-grid">
-      <div class="config-item"><div class="label">Provider</div><div class="value" data-health="provider">prüfe…</div></div>
-      <div class="config-item"><div class="label">GPU</div><div class="value" data-health="gpu">—</div></div>
-      <div class="config-item"><div class="label">Host</div><div class="value" data-health="host">—</div></div>
-      <div class="config-item"><div class="label">Modell</div><div class="value" data-health="model">—</div></div>
-      <div class="config-item"><div class="label">Status</div><div class="value" data-health="status">⏳ Prüfe Status…</div></div>
-    </div>
-    <div id="audio-health-message" style="margin-top:12px;color:var(--text-secondary);font-size:14px">
-      Generator-Status wird geladen …
-    </div>
-  </section>
+{# ── Generator Status ─────────────────────────────────────────── #}
+<section class="panel panel-accent-blue" style="margin-bottom:18px;">
+  <div class="section-header-inline">
+    <h2>Generator Status</h2>
+    <span class="section-note" data-tooltip="Zeigt ob Provider, GPU, Token und Zielpfade bereit sind. Grün = Startbedingungen OK.">Was bedeutet das?</span>
+  </div>
+  <div class="al-health-grid" id="audio-health-grid">
+    <div class="al-health-item"><div class="al-health-label">Provider</div><div class="al-health-value" data-health="provider">prüfe…</div></div>
+    <div class="al-health-item"><div class="al-health-label">GPU</div><div class="al-health-value" data-health="gpu">—</div></div>
+    <div class="al-health-item"><div class="al-health-label">Host</div><div class="al-health-value" data-health="host">—</div></div>
+    <div class="al-health-item"><div class="al-health-label">Modell</div><div class="al-health-value" data-health="model">—</div></div>
+    <div class="al-health-item"><div class="al-health-label">Status</div><div class="al-health-value" data-health="status">⏳ Prüfe…</div></div>
+  </div>
+  <div id="audio-health-message" style="margin-top:12px;color:var(--muted);font-size:0.82rem;">
+    Generator-Status wird geladen …
+  </div>
+</section>
 
-  <section class="panel panel-accent-gold">
-    <h2>Neuen Audio-Job starten</h2>
-    <form method="post" action="/admin/audio/generate">
-      <input type="hidden" name="slug" id="slug" />
+{# ── Neuen Audio-Job starten ──────────────────────────────────── #}
+<section class="panel panel-accent-gold al-create-panel">
+  <h2>🎵 Neuen Audio-Job starten</h2>
+  <form method="post" action="/admin/audio/generate" id="audio-form">
+    <input type="hidden" name="slug" id="slug" />
+    <input type="hidden" name="model" id="audio-model" value="stable-audio" />
+
+    {# Step 1: Preset wählen #}
+    <div class="al-step-card">
+      <div class="al-step-header">
+        <span class="al-step-num">1</span>
+        <div>
+          <h3>Preset wählen</h3>
+          <p class="al-step-desc">Haus & Variante auswählen – füllt Titel, Dauer und Prompts automatisch.</p>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="house_variant_preset">Prompt-Vorlage (Haus · Variante)</label>
+        <select id="house_variant_preset" class="form-select" onchange="fillPresetData()">
+          <option value="" data-prompts="" data-title="" data-minutes="">— eigener Prompt —</option>
+          {% for key, house in house_templates.items() %}
+            {% set vp = house.variant_prompts or {} %}
+            {% for vk in (house.variants or {}) %}
+              {% if vk in vp and vp[vk] %}
+              <option value="{{ key }}|{{ vk }}"
+                data-prompts="{{ vp[vk] | join('\n') | e }}"
+                data-title="{{ house.display_name }} – {{ vk | replace('_', ' ') | title }}"
+                data-minutes="{{ (house.defaults or {}).get('minutes', 20) }}"
+                data-sigil="{{ house.sigil }}">
+                {{ house.sigil }} {{ house.display_name }} — {{ vk | replace('_', ' ') | title }} ({{ vp[vk] | length }} Prompts)
+              </option>
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    {# Step 2: Konfiguration #}
+    <div class="al-step-card">
+      <div class="al-step-header">
+        <span class="al-step-num">2</span>
+        <div>
+          <h3>Konfiguration</h3>
+          <p class="al-step-desc">Titel, Dauer und Qualität festlegen.</p>
+        </div>
+      </div>
       <div class="form-group">
         <label for="title">Titel</label>
-        <input type="text" name="title" id="title" class="form-input" required placeholder="Whispers of Winterfell" oninput="document.getElementById('slug').value=document.getElementById('title').value.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')" />
+        <input type="text" name="title" id="title" class="form-input" required placeholder="Whispers of Winterfell" oninput="document.getElementById('slug').value=this.value.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')" />
       </div>
       <div class="grid two">
         <div class="form-group">
           <label for="minutes">Ziel-Dauer (Minuten)</label>
-          <input type="number" name="minutes" id="minutes" class="form-input" value="42" min="1" max="180" />
+          <input type="number" name="minutes" id="minutes" class="form-input" value="20" min="1" max="180" />
         </div>
         <div class="form-group">
           <label for="clip_seconds">Max. Clip-Länge (Sek.)</label>
@@ -59,59 +102,68 @@
           </select>
         </div>
       </div>
-      <input type="hidden" name="model" id="audio-model" value="stable-audio" />
-      <div class="form-group">
-        <label for="house_variant_preset">Prompt-Vorlage (Haus · Variante)</label>
-        <select id="house_variant_preset" class="form-select" onchange="fillPresetPrompts()">
-          <option value="">— eigener Prompt —</option>
-          {% for key, house in house_templates.items() %}
-            {% set vp = house.variant_prompts or {} %}
-            {% for vk in (house.variants or {}) %}
-              {% if vk in vp and vp[vk] %}
-              <option value="{{ key }}|{{ vk }}" data-prompts="{{ vp[vk] | join('\n') | e }}">{{ house.sigil }} {{ house.display_name }} — {{ vk | replace('_', ' ') | title }} ({{ vp[vk] | length }} Prompts)</option>
-              {% endif %}
-            {% endfor %}
-          {% endfor %}
-        </select>
-        <div class="metric-help">Nur Varianten-Prompts aus den Haus-Presets; optional eigene Zeilen im Feld darunter.</div>
+    </div>
+
+    {# Step 3: Prompts #}
+    <div class="al-step-card">
+      <div class="al-step-header">
+        <span class="al-step-num">3</span>
+        <div>
+          <h3>Prompts</h3>
+          <p class="al-step-desc">Eine Zeile pro Prompt – werden auf die Clips verteilt.</p>
+        </div>
       </div>
       <div class="form-group">
-        <label for="prompt_text">Prompt(s)</label>
         <textarea name="prompt_text" id="prompt_text" class="form-input" rows="8" placeholder="Eine Zeile pro Prompt. Mehrere Prompts werden auf die Clips verteilt."></textarea>
       </div>
-      <script>
-      function fillPresetPrompts() {
-        const select = document.getElementById("house_variant_preset");
-        const textarea = document.getElementById("prompt_text");
-        const option = select.options[select.selectedIndex];
-        const prompts = option.dataset.prompts || "";
-        if (prompts) {
-          textarea.value = prompts;
-        }
-      }
-      </script>
-      <button type="submit" class="btn btn-primary" style="width:100%"><i data-lucide="sparkles" style="width:16px;height:16px"></i> Audio-Job anlegen</button>
-    </form>
-  </section>
-</div>
+    </div>
+
+    <button type="submit" class="btn btn-primary al-btn-launch">
+      <i data-lucide="sparkles" style="width:18px;height:18px"></i> Audio-Job starten
+    </button>
+  </form>
+</section>
+
+{# ── Letzte Audio-Jobs ────────────────────────────────────────── #}
+<section class="panel" style="margin-top:18px;">
+  <div class="section-header-inline">
+    <h2>🎵 Letzte Audio-Jobs</h2>
+    <span class="section-count">{{ jobs | length }}</span>
+  </div>
+  {% if jobs %}
+  <div class="mini-list">
+    {% for job in jobs %}
+    <a href="/admin/audio/jobs/{{ job.job_id }}" class="mini-item">
+      <div class="mini-dot mini-dot-{{ job.status }}"></div>
+      <div class="mini-info">
+        <div class="mini-title">{{ job.slug or job.job_id[:8] }}</div>
+        <div class="mini-sub">{{ job.model or 'stable-audio' }} · {{ job.preset_name or 'custom' }} · {{ job.created_at[:16] if job.created_at else '—' }}</div>
+      </div>
+      <span class="mini-badge mini-badge-{{ job.status }}">{{ job.status }}</span>
+      {% if job.status in ('error', 'cancelled') %}
+      <form method="post" action="/admin/audio/jobs/{{ job.job_id }}/retry" style="display:inline;" onclick="event.stopPropagation();">
+        <button type="submit" class="btn btn-secondary btn-sm" style="padding:2px 8px; font-size:0.7rem;">🔄</button>
+      </form>
+      {% endif %}
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state-sm">Noch keine Audio-Jobs vorhanden</div>
+  {% endif %}
+</section>
 
 <script>
 (function() {
+  // ── Health check ──
   const providerEl = document.querySelector('[data-health="provider"]');
   const gpuEl = document.querySelector('[data-health="gpu"]');
   const hostEl = document.querySelector('[data-health="host"]');
   const modelEl = document.querySelector('[data-health="model"]');
   const statusEl = document.querySelector('[data-health="status"]');
   const messageEl = document.getElementById('audio-health-message');
-  const stableFields = document.getElementById('stable-audio-fields');
   const clipInput = document.getElementById('clip_seconds');
   const modelInput = document.getElementById('audio-model');
-
-  function applyProviderLayout() {
-    stableFields.style.display = 'grid';
-    modelInput.value = 'stable-audio';
-    clipInput.max = '47';
-  }
 
   fetch('/admin/audio/health')
     .then(r => r.json())
@@ -122,59 +174,160 @@
       modelEl.textContent = health.model || '—';
       statusEl.textContent = health.available ? '✅ Online' : '❌ Offline';
       messageEl.textContent = health.available
-        ? 'Stable Audio Local ist grundsätzlich startklar.'
+        ? 'Stable Audio Local ist startklar.'
         : (health.error || 'Stable Audio Local ist aktuell nicht erreichbar.');
-      applyProviderLayout();
     })
     .catch(() => {
       providerEl.textContent = 'unknown';
-      statusEl.textContent = '⚠️ Status konnte nicht geladen werden';
-      messageEl.textContent = 'Die Seite bleibt benutzbar, aber der Generator-Status konnte gerade nicht geprüft werden.';
-      applyProviderLayout();
+      statusEl.textContent = '⚠️ Konnte nicht geladen werden';
+      messageEl.textContent = 'Generator-Status konnte nicht geprüft werden.';
     });
 })();
+
+// ── Preset fills title, duration & prompts ──
+function fillPresetData() {
+  const select = document.getElementById('house_variant_preset');
+  const option = select.options[select.selectedIndex];
+  const prompts = option.dataset.prompts || '';
+  const title = option.dataset.title || '';
+  const minutes = option.dataset.minutes || '';
+
+  if (prompts) document.getElementById('prompt_text').value = prompts;
+  if (title) {
+    document.getElementById('title').value = title;
+    document.getElementById('slug').value = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+  if (minutes) document.getElementById('minutes').value = minutes;
+}
 </script>
 
-<section class="panel" style="margin-top:18px">
-  <div class="status-header">
-    <h2>Letzte Audio-Jobs</h2>
-  </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Job</th>
-        <th>Slug</th>
-        <th>Model</th>
-        <th>Status</th>
-        <th>Preset</th>
-        <th>Erstellt</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for job in jobs %}
-      <tr>
-        <td><a href="/admin/audio/jobs/{{ job.job_id }}">{{ job.job_id }}</a></td>
-        <td>{{ job.slug }}</td>
-        <td>{{ job.model or '—' }}</td>
-        <td>
-          <span class="badge {{ job.status }}">{{ job.status }}</span>
-          {% if job.status in ('error', 'cancelled') %}
-          <form method="post" action="/admin/audio/jobs/{{ job.job_id }}/retry" style="display:inline; margin-left:6px;">
-            <button type="submit" class="btn btn-secondary btn-sm" style="padding:2px 8px; font-size:0.7rem;">🔄</button>
-          </form>
-          {% endif %}
-        </td>
-        <td>{{ job.preset_name or 'custom' }}</td>
-        <td>{{ job.created_at[:19] if job.created_at else '—' }}</td>
-      </tr>
-      {% else %}
-      <tr><td colspan="6">Noch keine Audio-Jobs vorhanden</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</section>
+<style>
+/* ── Step Cards ───────────────────────────────────────────── */
+.al-step-card {
+  background: var(--surface, rgba(255,255,255,0.02));
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  transition: border-color 0.2s ease;
+}
+.al-step-card:hover {
+  border-color: rgba(255,255,255,0.12);
+}
+.al-step-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.al-step-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(201,165,58,0.2), rgba(201,165,58,0.08));
+  border: 1px solid rgba(201,165,58,0.3);
+  color: var(--gold, #c9a53a);
+  font-size: 0.78rem;
+  font-weight: 800;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.al-step-header h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0;
+}
+.al-step-desc {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin: 2px 0 0;
+}
+
+/* ── Create Panel ─────────────────────────────────────────── */
+.al-create-panel {
+  border-top: 3px solid var(--gold, #c9a53a);
+}
+
+/* ── Launch Button ────────────────────────────────────────── */
+.al-btn-launch {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 16px 32px;
+  margin-top: 8px;
+  box-shadow: 0 4px 24px rgba(212,168,69,0.3);
+  transition: all 0.2s ease;
+}
+.al-btn-launch:hover {
+  box-shadow: 0 6px 32px rgba(212,168,69,0.45);
+  transform: translateY(-2px);
+}
+
+/* ── Health Grid ──────────────────────────────────────────── */
+.al-health-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+.al-health-item {
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  transition: border-color 0.2s ease;
+}
+.al-health-item:hover {
+  border-color: rgba(255,255,255,0.12);
+}
+.al-health-label {
+  font-size: 0.68rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+.al-health-value {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ── Job Status Dots (extend mini-dot system) ─────────────── */
+.mini-dot-queued { background: var(--warning, #d97706); }
+.mini-dot-running { background: var(--blue, #3b82f6); animation: al-pulse 1.5s infinite; }
+.mini-dot-complete { background: var(--good, #22c55e); }
+.mini-dot-error { background: #ef4444; }
+.mini-dot-cancelled { background: #6b7280; }
+.mini-dot-pushing { background: var(--blue, #3b82f6); }
+.mini-dot-downloading { background: #8b5cf6; }
+
+@keyframes al-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ── Job Status Badges (extend mini-badge system) ─────────── */
+.mini-badge-queued { background: rgba(217,119,6,0.15); color: #fbbf24; }
+.mini-badge-running { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.mini-badge-complete { background: rgba(34,197,94,0.15); color: #4ade80; }
+.mini-badge-error { background: rgba(239,68,68,0.15); color: #f87171; }
+.mini-badge-cancelled { background: rgba(107,114,128,0.15); color: #9ca3af; }
+.mini-badge-pushing { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.mini-badge-downloading { background: rgba(139,92,246,0.15); color: #a78bfa; }
+
+/* ── Mobile ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .al-health-grid { grid-template-columns: repeat(2, 1fr); }
+  .al-step-card { padding: 14px; }
+  .al-step-header { gap: 10px; }
+  .al-step-num { width: 24px; height: 24px; font-size: 0.72rem; }
+  .al-step-header h3 { font-size: 0.88rem; }
+  .al-btn-launch { padding: 14px 18px; font-size: 0.95rem; }
+}
+@media (max-width: 400px) {
+  .al-health-grid { grid-template-columns: 1fr; }
+}
+</style>
 {% endblock %}
-
-
-
-
