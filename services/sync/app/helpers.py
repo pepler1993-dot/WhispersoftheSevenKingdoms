@@ -55,6 +55,14 @@ def _list_library_dir(dir_path: Path, allowed_suffixes: set[str]) -> list[dict[s
 
 
 def _load_house_templates() -> dict[str, Any]:
+    """Load presets: DB settings first, fallback to JSON file."""
+    try:
+        if shared.db is not None:
+            db_presets = shared.db.get_setting('presets')
+            if db_presets and isinstance(db_presets, dict) and len(db_presets) > 0:
+                return db_presets
+    except Exception:
+        pass
     if not shared.HOUSE_TEMPLATES_PATH.exists():
         return {}
     try:

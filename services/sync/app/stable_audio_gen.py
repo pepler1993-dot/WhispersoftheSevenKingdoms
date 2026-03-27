@@ -27,8 +27,28 @@ from app.audio_jobs import (
 from app.store import AgentSyncDB
 
 # ── Configuration ─────────────────────────────────────────────────────────
+# Reads from DB settings first, falls back to env vars, then defaults.
 
-GPU_WORKER_HOST = os.environ.get('GPU_WORKER_HOST', '192.168.178.152')
+def _setting(key: str) -> Any | None:
+    """Read a setting from DB (lazy import to avoid circular deps at module load)."""
+    try:
+        from app import shared
+        if shared.db is not None:
+            return shared.db.get_setting(key)
+    except Exception:
+        pass
+    return None
+
+
+def _gpu_host() -> str:
+    return _setting('providers.gpu_host') or os.environ.get('GPU_WORKER_HOST', '192.168.178.152')
+
+
+def _gpu_model() -> str:
+    return _setting('providers.stable_audio_model') or 'stable-audio-open-1.0'
+
+
+GPU_WORKER_HOST = os.environ.get('GPU_WORKER_HOST', '192.168.178.152')  # fallback for module-level refs
 GPU_WORKER_USER = os.environ.get('GPU_WORKER_USER', 'root')
 GPU_WORKER_SSH_KEY = os.environ.get('GPU_WORKER_SSH_KEY', '')
 GPU_WORKER_OUTPUT_DIR = os.environ.get('GPU_WORKER_OUTPUT_DIR', '/mnt/data/output')
@@ -51,7 +71,7 @@ class StableAudioGenerator(AudioGenerator):
     """Audio generator using Stable Audio Open via daemon on GPU VM."""
 
     def __init__(self) -> None:
-        self._ssh_base = self._build_ssh_cmd()
+        pass  # SSH commands built dynamically to pick up settings changes
 
     def _job_cancelled(self, job_id: str, db: AgentSyncDB, *, log: bool = False) -> bool:
         cancelled = is_audio_job_cancelled(job_id, db)
@@ -59,7 +79,11 @@ class StableAudioGenerator(AudioGenerator):
             db.append_audio_job_log(job_id, 'system', 'Job execution stopped because cancellation was requested.', now_iso())
         return cancelled
 
+    def _get_host(self) -> str:
+        return _gpu_host()
+
     def _build_ssh_cmd(self) -> list[str]:
+        host = self._get_host()
         cmd = [
             'ssh',
             '-o', 'StrictHostKeyChecking=no',
@@ -68,20 +92,21 @@ class StableAudioGenerator(AudioGenerator):
         ]
         if GPU_WORKER_SSH_KEY:
             cmd.extend(['-i', GPU_WORKER_SSH_KEY])
-        cmd.append(f'{GPU_WORKER_USER}@{GPU_WORKER_HOST}')
+        cmd.append(f'{GPU_WORKER_USER}@{host}')
         return cmd
 
     def _ssh_run(self, command: str, timeout: int = 30) -> subprocess.CompletedProcess:
         return subprocess.run(
-            self._ssh_base + [command],
+            self._build_ssh_cmd() + [command],
             capture_output=True, text=True, timeout=timeout,
         )
 
     def _scp_from(self, remote: str, local: str, timeout: int = 300) -> subprocess.CompletedProcess:
+        host = self._get_host()
         cmd = ['scp', '-o', 'StrictHostKeyChecking=no', '-o', 'BatchMode=yes']
         if GPU_WORKER_SSH_KEY:
             cmd.extend(['-i', GPU_WORKER_SSH_KEY])
-        cmd.extend([f'{GPU_WORKER_USER}@{GPU_WORKER_HOST}:{remote}', local])
+        cmd.extend([f'{GPU_WORKER_USER}@{host}:{remote}', local])
         return subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
 
     def _is_daemon_ready(self) -> bool:
@@ -105,8 +130,8 @@ class StableAudioGenerator(AudioGenerator):
                     'available': True,
                     'daemon': daemon_ready,
                     'gpu': result.stdout.strip(),
-                    'host': GPU_WORKER_HOST,
-                    'model': MODEL_NAME,
+                    'host': self._get_host(),
+                    'model': _gpu_model(),
                 }
         except (subprocess.TimeoutExpired, FileNotFoundError):
             pass
@@ -115,8 +140,8 @@ class StableAudioGenerator(AudioGenerator):
             'available': False,
             'daemon': False,
             'gpu': None,
-            'host': GPU_WORKER_HOST,
-            'model': MODEL_NAME,
+            'host': self._get_host(),
+            'model': _gpu_model(),
             'error': 'GPU worker unreachable or nvidia-smi failed',
         }
 
