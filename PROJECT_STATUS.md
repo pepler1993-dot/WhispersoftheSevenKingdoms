@@ -1,5 +1,5 @@
 # PROJECT STATUS – Whispers of the Seven Kingdoms
-> Letzte Aktualisierung: 2026-03-27T07:00:01Z
+> Letzte Aktualisierung: 2026-03-27T13:00:01Z
 > Aktualisiert von: Smith
 
 **Agents: Lest diese Datei zuerst. Sie enthält alles was ihr wissen müsst.**
@@ -191,23 +191,15 @@ cc1dc9a feat(audio-lab): pass house_templates to audio page (#63)
 
 
 
-## 🕐 Letzte Commits (auto-generated 2026-03-26T19:00:01Z)
+
+## 🕐 Letzte Commits (auto-generated 2026-03-27T13:00:01Z)
 ```
-066e0ae auto: update PROJECT_STATUS.md (2026-03-26T13:00:01Z)
-d8d02bb fix(thumbnail): less blur (5), brighter (0.7)
-656305d fix(thumbnail): reduce blur radius 18→10
-f8a945e feat(thumbnail): use background image as blurred thumbnail base
-3499c7d refine(run-detail): remove asset tags, crossfade to info cards, house variant
-088585f redesign(pipeline): run detail page overhaul
-33e2bf3 release: v3.0.1 – auto-upload fix, mobile improvements
-dbffcf8 fix: auto-upload + public flag now work correctly
-266d43a fix(brand): logo 110px
-6b552f6 fix: force CSS cache bust
-938dfd7 fix(brand): larger logo (80px) centered below Whisper Studio text
-223dc37 fix: add cache-buster to CSS (version query param)
-259953b fix: status badges inline with date on mobile overview
-a2bc6ab fix: mobile overflow for Pipeline Runs + Audio Jobs panels in overview
-36fe7ff fix: mobile responsiveness for Studio, Pipeline, Operations
-62ebd77 release: v3.0.0 – Whisper Studio
+6ae7290 docs: detailliertes Use-Case-Dokument (UC-01–UC-09)
+6190c0d feat(sync): Create-Flow mit Varianten-Presets und konsistentem Serververhalten
+d671b74 docs(repo): align documentation with current stable-audio architecture
+8b83329 feat(studio): streamline dashboard workflows and cleanup runtime scripts
+3f7f2b7 feat(audio): migrate to stable-audio-local only
+3af8e76 refactor(sync): remove legacy GitHub task-sync subsystem
+beee36a auto: update PROJECT_STATUS.md (2026-03-27T07:00:01Z)
 ```
 ---
