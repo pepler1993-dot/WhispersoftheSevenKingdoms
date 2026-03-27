@@ -1,4 +1,4 @@
-"""Settings routes – General, Providers, Presets CRUD."""
+"""Settings routes – General, Providers, Presets CRUD, Content Types."""
 from __future__ import annotations
 
 import json
@@ -21,6 +21,77 @@ def _load_presets() -> dict[str, Any]:
 
 def _save_presets(presets: dict[str, Any]) -> None:
     shared.db.set_setting('presets', presets)
+
+
+# ── Content Types ─────────────────────────────────────────────────────────
+
+DEFAULT_CONTENT_TYPES: dict[str, dict[str, Any]] = {
+    'long_form_video': {
+        'name': 'Long-Form Video',
+        'icon': '🎬',
+        'description': 'YouTube Video mit Audio, Hintergrund, Loop und Upload.',
+        'enabled': True,
+        'steps': [
+            {'id': 'audio', 'label': 'Audio', 'provider': 'stable-audio | library | upload'},
+            {'id': 'background', 'label': 'Hintergrund', 'provider': 'library | stable-diffusion | upload'},
+            {'id': 'render', 'label': 'Render', 'provider': 'ffmpeg'},
+            {'id': 'publish', 'label': 'Upload', 'provider': 'youtube'},
+        ],
+    },
+    'short': {
+        'name': 'Short',
+        'icon': '📱',
+        'description': 'YouTube Short / TikTok Clip aus bestehendem Content.',
+        'enabled': True,
+        'steps': [
+            {'id': 'clip', 'label': 'Clip', 'provider': 'ffmpeg'},
+            {'id': 'overlay', 'label': 'Text Overlay', 'provider': 'ffmpeg'},
+            {'id': 'publish', 'label': 'Upload', 'provider': 'youtube'},
+        ],
+    },
+    'audio_only': {
+        'name': 'Audio Only',
+        'icon': '🎵',
+        'description': 'Standalone Audio-Track generieren und exportieren.',
+        'enabled': True,
+        'steps': [
+            {'id': 'generate', 'label': 'Generieren', 'provider': 'stable-audio'},
+            {'id': 'master', 'label': 'Mastering', 'provider': 'ffmpeg'},
+        ],
+    },
+    'thumbnail_pack': {
+        'name': 'Thumbnail Pack',
+        'icon': '🖼️',
+        'description': 'Thumbnail-Set generieren und exportieren.',
+        'enabled': False,
+        'steps': [
+            {'id': 'generate', 'label': 'Generieren', 'provider': 'stable-diffusion'},
+            {'id': 'variants', 'label': 'Varianten', 'provider': 'stable-diffusion'},
+        ],
+    },
+    'livestream_loop': {
+        'name': 'Livestream Loop',
+        'icon': '📡',
+        'description': 'Endlos-Loop für RTMP Livestream.',
+        'enabled': False,
+        'steps': [
+            {'id': 'audio', 'label': 'Audio', 'provider': 'stable-audio | library'},
+            {'id': 'visual', 'label': 'Visual', 'provider': 'ffmpeg'},
+            {'id': 'stream', 'label': 'Stream', 'provider': 'rtmp'},
+        ],
+    },
+}
+
+
+def _load_content_types() -> dict[str, dict[str, Any]]:
+    db_ct = shared.db.get_setting('content_types')
+    if db_ct and isinstance(db_ct, dict) and len(db_ct) > 0:
+        return db_ct
+    return DEFAULT_CONTENT_TYPES
+
+
+def _save_content_types(ct: dict[str, Any]) -> None:
+    shared.db.set_setting('content_types', ct)
 
 router = APIRouter()
 
@@ -60,6 +131,7 @@ def _get_all_grouped() -> dict[str, dict[str, Any]]:
 def admin_settings(request: Request, tab: str = 'general'):
     grouped = _get_all_grouped()
     presets = _load_presets()
+    content_types = _load_content_types()
     edit_key = request.query_params.get('edit', '')
     return shared.templates.TemplateResponse(request, 'settings.html', {
         'request': request,
@@ -68,6 +140,8 @@ def admin_settings(request: Request, tab: str = 'general'):
         'settings': grouped,
         'presets': presets,
         'preset_count': len(presets),
+        'content_types': content_types,
+        'content_type_count': sum(1 for ct in content_types.values() if ct.get('enabled')),
         'edit_key': edit_key,
         'edit_preset': presets.get(edit_key) if edit_key else None,
     })
@@ -103,6 +177,19 @@ def save_providers(
     shared.db.set_setting('providers.youtube_enabled', youtube_enabled)
     shared.db.set_setting('providers.stable_audio_model', stable_audio_model.strip())
     return RedirectResponse(url='/admin/settings?tab=providers&saved=1', status_code=303)
+
+
+# ── Save Pipelines (Content Types) ────────────────────────────────────────
+
+@router.post('/admin/settings/pipelines')
+async def save_pipelines(request: Request):
+    form = await request.form()
+    content_types = _load_content_types()
+    # Form sends enabled_{key}=true for checked, missing for unchecked
+    for key in content_types:
+        content_types[key]['enabled'] = form.get(f'enabled_{key}') == 'true'
+    _save_content_types(content_types)
+    return RedirectResponse(url='/admin/settings?tab=pipelines&saved=1', status_code=303)
 
 
 # ── Preset CRUD ───────────────────────────────────────────────────────────

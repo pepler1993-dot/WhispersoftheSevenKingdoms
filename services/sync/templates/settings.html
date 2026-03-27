@@ -22,6 +22,11 @@
       <i data-lucide="plug" style="width:17px;height:17px;opacity:0.9"></i>
       Providers
     </a>
+    <a class="library-tab{% if settings_tab == 'pipelines' %} active{% endif %}" href="/admin/settings?tab=pipelines">
+      <i data-lucide="workflow" style="width:17px;height:17px;opacity:0.9"></i>
+      Pipelines
+      <span class="library-tab-count">{{ content_type_count }}</span>
+    </a>
     <a class="library-tab{% if settings_tab == 'presets' %} active{% endif %}" href="/admin/settings?tab=presets">
       <i data-lucide="palette" style="width:17px;height:17px;opacity:0.9"></i>
       Presets
@@ -166,6 +171,47 @@ fetch('/admin/audio/health')
     document.getElementById('st-gpu-text').textContent = '⚠️ Status konnte nicht geprüft werden';
   });
 </script>
+{% endif %}
+
+{# ── Pipelines / Content Types ─────────────────────────────────── #}
+{% if settings_tab == 'pipelines' %}
+<section class="panel panel-accent-blue st-section">
+  <form method="post" action="/admin/settings/pipelines">
+    <div class="section-header-inline" style="margin-bottom:16px;">
+      <h2>🔧 Content Types</h2>
+      <span class="section-note">Aktiviere/deaktiviere Pipeline-Typen für den Create-Flow.</span>
+    </div>
+
+    <div class="st-ct-grid">
+      {% for key, ct in content_types.items() %}
+      <div class="st-ct-card {% if ct.enabled %}st-ct-enabled{% else %}st-ct-disabled{% endif %}">
+        <div class="st-ct-header">
+          <span class="st-ct-icon">{{ ct.icon }}</span>
+          <div class="st-ct-info">
+            <div class="st-ct-name">{{ ct.name }}</div>
+            <div class="st-ct-desc">{{ ct.description }}</div>
+          </div>
+          <label class="st-ct-toggle">
+            <input type="hidden" name="enabled_{{ key }}" value="false" />
+            <input type="checkbox" name="enabled_{{ key }}" value="true" {% if ct.enabled %}checked{% endif %} onchange="this.closest('.st-ct-card').classList.toggle('st-ct-enabled', this.checked); this.closest('.st-ct-card').classList.toggle('st-ct-disabled', !this.checked);" />
+            <span class="st-ct-slider"></span>
+          </label>
+        </div>
+        <div class="st-ct-steps">
+          {% for step in ct.steps %}
+          <span class="st-ct-step-pill">{{ step.label }}</span>
+          {% if not loop.last %}<span class="st-ct-step-arrow">→</span>{% endif %}
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <button type="submit" class="btn btn-primary st-btn-save" style="margin-top:16px;">
+      <i data-lucide="save" style="width:16px;height:16px"></i> Speichern
+    </button>
+  </form>
+</section>
 {% endif %}
 
 {# ── Presets ──────────────────────────────────────────────────── #}
@@ -502,6 +548,68 @@ fetch('/admin/audio/health')
 .st-preset-meta { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
 .st-preset-actions { display: flex; gap: 4px; flex-shrink: 0; }
 
+/* ── Content Type Cards ────────────────────────────────────── */
+.st-ct-grid { display: flex; flex-direction: column; gap: 12px; }
+.st-ct-card {
+  background: var(--surface, rgba(255,255,255,0.02));
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 18px;
+  transition: all 0.2s ease;
+}
+.st-ct-enabled { border-color: rgba(34,197,94,0.3); }
+.st-ct-disabled { opacity: 0.5; }
+.st-ct-header { display: flex; align-items: center; gap: 14px; }
+.st-ct-icon { font-size: 1.6rem; flex-shrink: 0; }
+.st-ct-info { flex: 1; min-width: 0; }
+.st-ct-name { font-size: 0.92rem; font-weight: 700; }
+.st-ct-desc { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+.st-ct-steps {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.st-ct-step-pill {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+.st-ct-enabled .st-ct-step-pill {
+  background: rgba(59,130,246,0.12);
+  border-color: rgba(59,130,246,0.2);
+  color: #93c5fd;
+}
+.st-ct-step-arrow { font-size: 0.72rem; color: var(--muted); opacity: 0.5; }
+
+/* Toggle Switch */
+.st-ct-toggle { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+.st-ct-toggle input { opacity: 0; width: 0; height: 0; }
+.st-ct-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: rgba(255,255,255,0.1);
+  border-radius: 24px;
+  transition: background 0.2s ease;
+}
+.st-ct-slider::before {
+  content: '';
+  position: absolute;
+  width: 18px; height: 18px;
+  left: 3px; bottom: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+.st-ct-toggle input:checked + .st-ct-slider { background: #22c55e; }
+.st-ct-toggle input:checked + .st-ct-slider::before { transform: translateX(20px); }
+
 /* ── Mobile ───────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .st-step-card { padding: 14px; }
@@ -510,6 +618,9 @@ fetch('/admin/audio/health')
   .st-btn-save { padding: 12px 18px; font-size: 0.92rem; }
   .st-preset-grid { grid-template-columns: 1fr; }
   .st-toast { left: 20px; right: 20px; text-align: center; }
+  .st-ct-header { flex-wrap: wrap; gap: 10px; }
+  .st-ct-steps { gap: 4px; }
+  .st-ct-step-pill { font-size: 0.66rem; padding: 3px 8px; }
 }
 </style>
 {% endblock %}
