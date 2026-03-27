@@ -156,6 +156,41 @@
   </section>
 </div>
 
+{# ── Audio Generator Status ────────────────────────────────────── #}
+<section class="server-panel" style="margin-bottom:18px;">
+  <div class="server-panel-header">
+    <div class="server-panel-title">
+      <span class="server-icon">🎵</span>
+      <div>
+        <h2>Audio Generator</h2>
+        <div class="server-panel-sub">Stable Audio Local · Status</div>
+      </div>
+    </div>
+    <div class="server-status" id="audio-gen-status">
+      <span class="server-status-dot" id="audio-gen-dot"></span>
+      <span id="audio-gen-text">Verbinde...</span>
+    </div>
+  </div>
+  <div class="gauge-grid" style="grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));">
+    <div class="gauge-card-sm" style="text-align:center; padding:10px;">
+      <div style="font-size:0.68rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:4px;">Provider</div>
+      <div style="font-size:0.88rem; font-weight:600;" id="ag-provider">—</div>
+    </div>
+    <div class="gauge-card-sm" style="text-align:center; padding:10px;">
+      <div style="font-size:0.68rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:4px;">GPU</div>
+      <div style="font-size:0.88rem; font-weight:600;" id="ag-gpu">—</div>
+    </div>
+    <div class="gauge-card-sm" style="text-align:center; padding:10px;">
+      <div style="font-size:0.68rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:4px;">Host</div>
+      <div style="font-size:0.88rem; font-weight:600;" id="ag-host">—</div>
+    </div>
+    <div class="gauge-card-sm" style="text-align:center; padding:10px;">
+      <div style="font-size:0.68rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:4px;">Modell</div>
+      <div style="font-size:0.88rem; font-weight:600;" id="ag-model">—</div>
+    </div>
+  </div>
+</section>
+
 {# ── Tickets ──────────────────────────────────────────────────── #}
 <section class="ops-panel">
   <div class="section-header-inline">
@@ -243,9 +278,27 @@
       if (stxt) stxt.textContent = 'Nicht erreichbar';
     });
   }
-  refreshLXC(); refreshGPU();
+  function refreshAudioGen() {
+    fetch('/admin/audio/health').then(function(r){return r.json()}).then(function(h){
+      var dot = document.getElementById('audio-gen-dot');
+      var stxt = document.getElementById('audio-gen-text');
+      dot.className = 'server-status-dot ' + (h.available ? 'online' : 'offline');
+      stxt.textContent = h.available ? 'Online' : 'Offline';
+      document.getElementById('ag-provider').textContent = h.provider || '—';
+      document.getElementById('ag-gpu').textContent = h.gpu || '—';
+      document.getElementById('ag-host').textContent = h.host || '—';
+      document.getElementById('ag-model').textContent = h.model || '—';
+    }).catch(function(){
+      var dot = document.getElementById('audio-gen-dot');
+      var stxt = document.getElementById('audio-gen-text');
+      if (dot) dot.className = 'server-status-dot offline';
+      if (stxt) stxt.textContent = 'Nicht erreichbar';
+    });
+  }
+  refreshLXC(); refreshGPU(); refreshAudioGen();
   setInterval(refreshLXC, 5000);
   setInterval(refreshGPU, 10000);
+  setInterval(refreshAudioGen, 15000);
 })();
 </script>
 

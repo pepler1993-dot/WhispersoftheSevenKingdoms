@@ -1,80 +1,54 @@
 {% extends 'base.html' %}
 {% block title %}Audio Lab{% endblock %}
+{% block head_extra %}
+<link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
+{% endblock %}
 {% block content %}
 <div class="page-header page-header-flex">
   <div>
     <h1>Audio Lab</h1>
-    <div class="page-subtitle">Generierung, Health-Check und Job-History.</div>
+    <div class="page-subtitle">Audio-Tracks generieren – standalone oder für die Video-Pipeline.</div>
   </div>
   <div class="header-actions">
-    <a href="/admin/pipeline" class="btn btn-secondary btn-sm">Zur Create-Seite</a>
+    <a href="/admin/pipeline" class="btn btn-secondary btn-sm">Create</a>
     <a href="/admin/ops" class="btn btn-secondary btn-sm">Operations</a>
   </div>
 </div>
 
-{# ── Generator Status ─────────────────────────────────────────── #}
-<section class="panel panel-accent-blue" style="margin-bottom:18px;">
+{# ── Optional: Haus & Variante als Card-Grid ─────────────────── #}
+<section class="panel panel-accent-blue al-preset-section">
   <div class="section-header-inline">
-    <h2>Generator Status</h2>
-    <span class="section-note" data-tooltip="Zeigt ob Provider, GPU, Token und Zielpfade bereit sind. Grün = Startbedingungen OK.">Was bedeutet das?</span>
+    <h2>Schnellauswahl</h2>
+    <span class="section-note">Optional – oder direkt unten eigenen Prompt eingeben</span>
   </div>
-  <div class="al-health-grid" id="audio-health-grid">
-    <div class="al-health-item"><div class="al-health-label">Provider</div><div class="al-health-value" data-health="provider">prüfe…</div></div>
-    <div class="al-health-item"><div class="al-health-label">GPU</div><div class="al-health-value" data-health="gpu">—</div></div>
-    <div class="al-health-item"><div class="al-health-label">Host</div><div class="al-health-value" data-health="host">—</div></div>
-    <div class="al-health-item"><div class="al-health-label">Modell</div><div class="al-health-value" data-health="model">—</div></div>
-    <div class="al-health-item"><div class="al-health-label">Status</div><div class="al-health-value" data-health="status">⏳ Prüfe…</div></div>
+
+  <div class="al-house-grid" id="al-house-grid">
+    {% for key, house in house_templates.items() %}
+    <div class="al-house-card" data-house="{{ key }}" style="--house-color: {{ house.color }}; --house-bg: {{ house.bg_color }}">
+      <div class="al-house-sigil">{{ house.sigil }}</div>
+      <div class="al-house-name">{{ house.display_name }}</div>
+    </div>
+    {% endfor %}
   </div>
-  <div id="audio-health-message" style="margin-top:12px;color:var(--muted);font-size:0.82rem;">
-    Generator-Status wird geladen …
-  </div>
+
+  <div class="al-variant-grid" id="al-variant-grid" style="display:none; margin-top:14px;"></div>
 </section>
 
-{# ── Neuen Audio-Job starten ──────────────────────────────────── #}
+{# ── Job-Formular ─────────────────────────────────────────────── #}
 <section class="panel panel-accent-gold al-create-panel">
   <h2>🎵 Neuen Audio-Job starten</h2>
   <form method="post" action="/admin/audio/generate" id="audio-form">
     <input type="hidden" name="slug" id="slug" />
     <input type="hidden" name="model" id="audio-model" value="stable-audio" />
+    <input type="hidden" name="preset_name" id="preset_name" value="" />
 
-    {# Step 1: Preset wählen #}
+    {# Step 1: Konfiguration #}
     <div class="al-step-card">
       <div class="al-step-header">
         <span class="al-step-num">1</span>
         <div>
-          <h3>Preset wählen</h3>
-          <p class="al-step-desc">Haus & Variante auswählen – füllt Titel, Dauer und Prompts automatisch.</p>
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="house_variant_preset">Prompt-Vorlage (Haus · Variante)</label>
-        <select id="house_variant_preset" class="form-select" onchange="fillPresetData()">
-          <option value="" data-prompts="" data-title="" data-minutes="">— eigener Prompt —</option>
-          {% for key, house in house_templates.items() %}
-            {% set vp = house.variant_prompts or {} %}
-            {% for vk in (house.variants or {}) %}
-              {% if vk in vp and vp[vk] %}
-              <option value="{{ key }}|{{ vk }}"
-                data-prompts="{{ vp[vk] | join('\n') | e }}"
-                data-title="{{ house.display_name }} – {{ vk | replace('_', ' ') | title }}"
-                data-minutes="{{ (house.defaults or {}).get('minutes', 20) }}"
-                data-sigil="{{ house.sigil }}">
-                {{ house.sigil }} {{ house.display_name }} — {{ vk | replace('_', ' ') | title }} ({{ vp[vk] | length }} Prompts)
-              </option>
-              {% endif %}
-            {% endfor %}
-          {% endfor %}
-        </select>
-      </div>
-    </div>
-
-    {# Step 2: Konfiguration #}
-    <div class="al-step-card">
-      <div class="al-step-header">
-        <span class="al-step-num">2</span>
-        <div>
           <h3>Konfiguration</h3>
-          <p class="al-step-desc">Titel, Dauer und Qualität festlegen.</p>
+          <p class="al-step-desc">Titel, Dauer und Qualität.</p>
         </div>
       </div>
       <div class="form-group">
@@ -92,7 +66,7 @@
           <div class="metric-help">Stable Audio Open max: 47s pro Clip</div>
         </div>
       </div>
-      <div class="grid two" id="stable-audio-fields">
+      <div class="grid two">
         <div class="form-group">
           <label for="steps">Inference Steps</label>
           <select name="steps" id="steps" class="form-select">
@@ -104,10 +78,10 @@
       </div>
     </div>
 
-    {# Step 3: Prompts #}
+    {# Step 2: Prompts #}
     <div class="al-step-card">
       <div class="al-step-header">
-        <span class="al-step-num">3</span>
+        <span class="al-step-num">2</span>
         <div>
           <h3>Prompts</h3>
           <p class="al-step-desc">Eine Zeile pro Prompt – werden auf die Clips verteilt.</p>
@@ -155,53 +129,146 @@
 
 <script>
 (function() {
-  // ── Health check ──
-  const providerEl = document.querySelector('[data-health="provider"]');
-  const gpuEl = document.querySelector('[data-health="gpu"]');
-  const hostEl = document.querySelector('[data-health="host"]');
-  const modelEl = document.querySelector('[data-health="model"]');
-  const statusEl = document.querySelector('[data-health="status"]');
-  const messageEl = document.getElementById('audio-health-message');
-  const clipInput = document.getElementById('clip_seconds');
-  const modelInput = document.getElementById('audio-model');
+  const houses = {{ house_templates | tojson }};
+  const houseCards = document.querySelectorAll('.al-house-card');
+  const variantGrid = document.getElementById('al-variant-grid');
+  let selectedHouse = null;
+  let selectedVariant = null;
 
-  fetch('/admin/audio/health')
-    .then(r => r.json())
-    .then(health => {
-      providerEl.textContent = health.provider || 'unknown';
-      gpuEl.textContent = health.gpu || '—';
-      hostEl.textContent = health.host || '—';
-      modelEl.textContent = health.model || '—';
-      statusEl.textContent = health.available ? '✅ Online' : '❌ Offline';
-      messageEl.textContent = health.available
-        ? 'Stable Audio Local ist startklar.'
-        : (health.error || 'Stable Audio Local ist aktuell nicht erreichbar.');
-    })
-    .catch(() => {
-      providerEl.textContent = 'unknown';
-      statusEl.textContent = '⚠️ Konnte nicht geladen werden';
-      messageEl.textContent = 'Generator-Status konnte nicht geprüft werden.';
+  // ── House card click ──
+  houseCards.forEach(card => {
+    card.addEventListener('click', () => {
+      const key = card.dataset.house;
+      const house = houses[key];
+      if (!house) return;
+
+      houseCards.forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedHouse = key;
+      selectedVariant = null;
+
+      // Fill title + minutes from house defaults
+      const d = house.defaults || {};
+      document.getElementById('title').value = house.display_name + ' Sleep Music';
+      document.getElementById('slug').value = house.display_name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      document.getElementById('minutes').value = d.minutes || 20;
+      document.getElementById('preset_name').value = key;
+
+      // Build variant cards
+      const variants = house.variants || {};
+      const vKeys = Object.keys(variants);
+      variantGrid.innerHTML = '';
+
+      if (vKeys.length > 0) {
+        vKeys.forEach(vKey => {
+          const vName = vKey.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+          const vDesc = variants[vKey];
+          const btn = document.createElement('div');
+          btn.className = 'al-variant-card';
+          btn.style.setProperty('--house-color', house.color || 'var(--gold)');
+          btn.innerHTML = '<div class="al-variant-name">' + vName + '</div><div class="al-variant-desc">' + vDesc + '</div>';
+          btn.addEventListener('click', () => {
+            variantGrid.querySelectorAll('.al-variant-card').forEach(c => c.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedVariant = vKey;
+
+            // Fill prompts from variant
+            const vp = house.variant_prompts || {};
+            const prompts = (vp[vKey] || []).filter(p => typeof p === 'string' && p.trim());
+            document.getElementById('prompt_text').value = prompts.join('\n');
+
+            // Update title
+            document.getElementById('title').value = house.display_name + ' – ' + vName;
+            document.getElementById('slug').value = (house.display_name + ' ' + vName).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+            document.getElementById('preset_name').value = key + '|' + vKey;
+
+            // Scroll to form
+            document.querySelector('.al-create-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
+          variantGrid.appendChild(btn);
+        });
+        variantGrid.style.display = 'grid';
+      } else {
+        variantGrid.style.display = 'none';
+      }
     });
+  });
 })();
-
-// ── Preset fills title, duration & prompts ──
-function fillPresetData() {
-  const select = document.getElementById('house_variant_preset');
-  const option = select.options[select.selectedIndex];
-  const prompts = option.dataset.prompts || '';
-  const title = option.dataset.title || '';
-  const minutes = option.dataset.minutes || '';
-
-  if (prompts) document.getElementById('prompt_text').value = prompts;
-  if (title) {
-    document.getElementById('title').value = title;
-    document.getElementById('slug').value = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  }
-  if (minutes) document.getElementById('minutes').value = minutes;
-}
 </script>
 
 <style>
+/* ── House Grid ───────────────────────────────────────────── */
+.al-house-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+}
+.al-house-card {
+  background: var(--house-bg, var(--panel));
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+.al-house-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--house-color, var(--gold));
+  opacity: 0.4;
+  transition: opacity 0.25s ease;
+}
+.al-house-card:hover {
+  border-color: var(--house-color, var(--gold));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+.al-house-card:hover::before { opacity: 1; }
+.al-house-card.selected {
+  border-color: var(--house-color, var(--gold));
+  box-shadow: 0 0 16px color-mix(in srgb, var(--house-color) 25%, transparent);
+}
+.al-house-card.selected::before { opacity: 1; height: 4px; }
+.al-house-sigil { font-size: 1.8rem; margin-bottom: 6px; }
+.al-house-name { font-size: 0.78rem; font-weight: 700; color: var(--text); }
+
+/* ── Variant Grid ─────────────────────────────────────────── */
+.al-variant-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+.al-variant-card {
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.al-variant-card:hover {
+  border-color: var(--house-color, var(--gold));
+  background: rgba(255,255,255,0.06);
+  transform: translateY(-2px);
+}
+.al-variant-card.selected {
+  border-color: var(--house-color, var(--gold));
+  background: color-mix(in srgb, var(--house-color, var(--gold)) 12%, transparent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--house-color, var(--gold)) 15%, transparent);
+}
+.al-variant-name { font-weight: 600; font-size: 0.88rem; margin-bottom: 3px; }
+.al-variant-desc { font-size: 0.75rem; color: var(--muted); line-height: 1.3; }
+
+/* ── Preset Section ───────────────────────────────────────── */
+.al-preset-section {
+  margin-bottom: 18px;
+}
+
 /* ── Step Cards ───────────────────────────────────────────── */
 .al-step-card {
   background: var(--surface, rgba(255,255,255,0.02));
@@ -211,9 +278,7 @@ function fillPresetData() {
   margin-bottom: 16px;
   transition: border-color 0.2s ease;
 }
-.al-step-card:hover {
-  border-color: rgba(255,255,255,0.12);
-}
+.al-step-card:hover { border-color: rgba(255,255,255,0.12); }
 .al-step-header {
   display: flex;
   align-items: flex-start;
@@ -224,8 +289,7 @@ function fillPresetData() {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 28px; height: 28px;
   border-radius: 50%;
   background: linear-gradient(135deg, rgba(201,165,58,0.2), rgba(201,165,58,0.08));
   border: 1px solid rgba(201,165,58,0.3);
@@ -235,21 +299,11 @@ function fillPresetData() {
   flex-shrink: 0;
   margin-top: 2px;
 }
-.al-step-header h3 {
-  font-size: 0.95rem;
-  font-weight: 700;
-  margin: 0;
-}
-.al-step-desc {
-  font-size: 0.78rem;
-  color: var(--muted);
-  margin: 2px 0 0;
-}
+.al-step-header h3 { font-size: 0.95rem; font-weight: 700; margin: 0; }
+.al-step-desc { font-size: 0.78rem; color: var(--muted); margin: 2px 0 0; }
 
 /* ── Create Panel ─────────────────────────────────────────── */
-.al-create-panel {
-  border-top: 3px solid var(--gold, #c9a53a);
-}
+.al-create-panel { border-top: 3px solid var(--gold, #c9a53a); }
 
 /* ── Launch Button ────────────────────────────────────────── */
 .al-btn-launch {
@@ -265,36 +319,7 @@ function fillPresetData() {
   transform: translateY(-2px);
 }
 
-/* ── Health Grid ──────────────────────────────────────────── */
-.al-health-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 10px;
-}
-.al-health-item {
-  padding: 10px 14px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  transition: border-color 0.2s ease;
-}
-.al-health-item:hover {
-  border-color: rgba(255,255,255,0.12);
-}
-.al-health-label {
-  font-size: 0.68rem;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 2px;
-}
-.al-health-value {
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--text);
-}
-
-/* ── Job Status Dots (extend mini-dot system) ─────────────── */
+/* ── Job Status Dots ──────────────────────────────────────── */
 .mini-dot-queued { background: var(--warning, #d97706); }
 .mini-dot-running { background: var(--blue, #3b82f6); animation: al-pulse 1.5s infinite; }
 .mini-dot-complete { background: var(--good, #22c55e); }
@@ -302,13 +327,9 @@ function fillPresetData() {
 .mini-dot-cancelled { background: #6b7280; }
 .mini-dot-pushing { background: var(--blue, #3b82f6); }
 .mini-dot-downloading { background: #8b5cf6; }
+@keyframes al-pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
 
-@keyframes al-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-
-/* ── Job Status Badges (extend mini-badge system) ─────────── */
+/* ── Job Status Badges ────────────────────────────────────── */
 .mini-badge-queued { background: rgba(217,119,6,0.15); color: #fbbf24; }
 .mini-badge-running { background: rgba(59,130,246,0.15); color: #60a5fa; }
 .mini-badge-complete { background: rgba(34,197,94,0.15); color: #4ade80; }
@@ -319,15 +340,16 @@ function fillPresetData() {
 
 /* ── Mobile ───────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .al-health-grid { grid-template-columns: repeat(2, 1fr); }
+  .al-house-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .al-house-card { padding: 12px 8px; }
+  .al-house-sigil { font-size: 1.4rem; }
+  .al-house-name { font-size: 0.7rem; }
+  .al-variant-grid { grid-template-columns: 1fr; }
   .al-step-card { padding: 14px; }
-  .al-step-header { gap: 10px; }
-  .al-step-num { width: 24px; height: 24px; font-size: 0.72rem; }
-  .al-step-header h3 { font-size: 0.88rem; }
   .al-btn-launch { padding: 14px 18px; font-size: 0.95rem; }
 }
 @media (max-width: 400px) {
-  .al-health-grid { grid-template-columns: 1fr; }
+  .al-house-grid { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 {% endblock %}
