@@ -1,0 +1,48 @@
+name: Deploy (SSH)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Deploy on server
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/opt/whispers/WhispersoftheSevenKingdoms' }}
+          SYSTEMD_SERVICE: ${{ vars.SYSTEMD_SERVICE || 'agent-sync' }}
+          GIT_REMOTE: ${{ vars.GIT_REMOTE || 'origin' }}
+          DEPLOY_REF: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/id_ed25519 "$SSH_USER@$SSH_HOST" \
+            "DEPLOY_PATH='$DEPLOY_PATH' SYSTEMD_SERVICE='$SYSTEMD_SERVICE' GIT_REMOTE='$GIT_REMOTE' DEPLOY_REF='$DEPLOY_REF' bash -s" <<'REMOTE'
+          set -euo pipefail
+          cd "$DEPLOY_PATH"
+          git config --global --add safe.directory "$DEPLOY_PATH"
+          git fetch "$GIT_REMOTE" "$DEPLOY_REF" --tags
+          git checkout "$DEPLOY_REF"
+          git reset --hard "$GIT_REMOTE/$DEPLOY_REF"
+
+          if [ -f services/sync/requirements.txt ] && [ -x .venv/bin/pip ]; then
+            .venv/bin/pip install --quiet -r services/sync/requirements.txt
+          fi
+
+          sudo systemctl restart "$SYSTEMD_SERVICE"
+          sudo systemctl is-active "$SYSTEMD_SERVICE"
+          REMOTE

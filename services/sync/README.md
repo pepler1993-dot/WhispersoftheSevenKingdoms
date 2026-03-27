@@ -37,6 +37,36 @@ Audio-Generierung braucht einen erreichbaren **GPU-Worker** (siehe `app/stable_a
 Siehe `deploy/setup.sh` und `deploy/agent-sync.service`.  
 Kein `GITHUB_WEBHOOK_SECRET` mehr — das alte Webhook-Setup ist obsolet.
 
+### CI/CD per GitHub Actions (SSH)
+
+Es gibt jetzt einen Workflow unter `.github/workflows/deploy.yml`.
+
+Trigger:
+- Push auf `main`
+- manueller Start über **Actions → Deploy (SSH) → Run workflow**
+
+Erwartete Defaults auf dem Server:
+- Repo: `/opt/whispers/WhispersoftheSevenKingdoms`
+- Venv: `.venv` im Repo-Root
+- systemd-Service: `agent-sync`
+
+Benötigte GitHub Actions Secrets:
+- `SSH_HOST`
+- `SSH_USER`
+- `SSH_PRIVATE_KEY`
+
+Optionale Repository Variables:
+- `DEPLOY_PATH` (Default: `/opt/whispers/WhispersoftheSevenKingdoms`)
+- `SYSTEMD_SERVICE` (Default: `agent-sync`)
+- `GIT_REMOTE` (Default: `origin`)
+
+Ablauf im Workflow:
+1. SSH-Key laden
+2. per SSH auf den Server verbinden
+3. `git fetch` + `git checkout/reset --hard` auf den Event-Branch
+4. optional `.venv/bin/pip install -r services/sync/requirements.txt`
+5. `systemctl restart agent-sync`
+
 ---
 
 ## Koordination im Team
