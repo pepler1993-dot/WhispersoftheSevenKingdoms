@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +20,28 @@ _LIBRARY_TABS = frozenset({'houses', 'songs', 'backgrounds'})
 
 _SONG_EXT = frozenset({'.mp3', '.wav', '.ogg'})
 _BG_EXT = frozenset({'.jpg', '.jpeg', '.png', '.webp'})
+
+
+def _sanitize_css_class_suffix(key: str) -> str:
+    s = re.sub(r'[^a-zA-Z0-9_-]', '_', (key or '').strip())
+    return s or 'house'
+
+
+def _safe_hex_color(val: Any, fallback: str) -> str:
+    s = str(val or '').strip()
+    if re.fullmatch(r'#[0-9A-Fa-f]{6}', s):
+        return s
+    return fallback
+
+
+def _house_banner_gradient(class_suffix: str, c_raw: Any, bgc_raw: Any) -> tuple[str, str]:
+    """CSS class + complete <style>…</style> for hero gradient (no Jinja inside CSS for linters)."""
+    c = _safe_hex_color(c_raw, '#475569')
+    bgc = _safe_hex_color(bgc_raw, '#0f172a')
+    suf = _sanitize_css_class_suffix(class_suffix)
+    cls = f'house-hero-banner-bg--{suf}'
+    inner = f'.{cls}{{background:linear-gradient(135deg,{c} 0%,{bgc} 100%);}}'
+    return cls, f'<style>{inner}</style>'
 
 
 def _library_tab_counts() -> dict[str, int]:
@@ -218,6 +241,7 @@ def admin_library_house(request: Request, house_key: str):
                 'href': f'/admin/library/houses/{house_key}/variants/{vk}',
             })
 
+    banner_class, banner_style = _house_banner_gradient(house_key, house.get('color'), house.get('bg_color'))
     return shared.templates.TemplateResponse(request, 'library_house.html', {
         'request': request,
         'page': 'library',
@@ -225,6 +249,8 @@ def admin_library_house(request: Request, house_key: str):
         'house_key': house_key,
         'house': house,
         'variants': variant_rows,
+        'house_banner_class': banner_class,
+        'house_banner_style_tag': banner_style,
         **_library_tab_counts(),
     })
 

@@ -1,12 +1,11 @@
 {% extends 'base.html' %}
-{% block title %}{{ house.display_name | default(house_key) }} · Library{% endblock %}
+{% set dname = house.display_name | default(house_key) %}
+{% block title %}{{ dname }} · Library{% endblock %}
 {% block head_extra %}
 <link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
+{{ house_banner_style_tag | safe }}
 {% endblock %}
 {% block content %}
-{% set c = house.color | default('#475569') %}
-{% set bgc = house.bg_color | default('#0f172a') %}
-{% set dname = house.display_name | default(house_key) %}
 
 <div class="library-subpage">
 {% set subpage = true %}
@@ -22,7 +21,7 @@
   {% if house.house %}<p class="lib-house-line">{{ house.house }}</p>{% endif %}
 </header>
 
-<section class="house-hero house-hero--detail-banner" style="background: linear-gradient(135deg, {{ c }} 0%, {{ bgc }} 100%); --house-accent: {{ c }};" aria-label="Kurzinfo zum Haus">
+<section class="house-hero house-hero--detail-banner {{ house_banner_class }}" aria-label="Kurzinfo zum Haus">
   <div class="house-hero-detail-inner">
     <span class="house-hero-sigil-xl" role="img" aria-label="Hauswappen">{{ house.sigil | default('·') }}</span>
     <dl class="house-hero-facts">
