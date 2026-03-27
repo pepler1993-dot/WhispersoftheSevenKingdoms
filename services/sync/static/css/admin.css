@@ -299,7 +299,6 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
 }
 .nav-folder-toggle .lucide:first-child { width: 18px; height: 18px; stroke-width: 2; flex-shrink: 0; }
 .nav-folder-toggle span { flex: 1; }
-/* Active state when a child page is active */
 .nav-folder.has-active .nav-folder-toggle {
   color: var(--gold);
   font-weight: 600;
@@ -315,27 +314,31 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
 .nav-folder-items {
   overflow: hidden;
   max-height: 0;
-  transition: max-height 0.2s ease;
-  padding-left: 0;
+  transition: max-height 0.25s ease;
+  margin: 0 8px 0 16px;
+  border-left: 2px solid rgba(255,255,255,0.06);
+  border-radius: 0;
 }
-.nav-folder.open .nav-folder-items { max-height: 200px; }
+.nav-folder.open .nav-folder-items { max-height: 200px; margin-top: 2px; margin-bottom: 4px; }
 
 /* Sub-links inside folder */
 .nav-link--sub {
-  padding: 8px 14px 8px 46px;
-  font-size: 0.8rem;
-  position: relative;
+  padding: 8px 12px 8px 16px !important;
+  font-size: 0.8rem !important;
+  margin-bottom: 0 !important;
+  border-left: none !important;
+  border-radius: 0 6px 6px 0 !important;
 }
-.nav-link--sub::before {
-  content: '';
-  position: absolute;
-  left: 25px;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: rgba(255,255,255,0.06);
+.nav-link--sub .lucide { width: 15px !important; height: 15px !important; stroke-width: 1.8; }
+.nav-link--sub:hover {
+  background: var(--panel-hover) !important;
+  border-left: none !important;
 }
-.nav-link--sub .lucide { width: 15px; height: 15px; stroke-width: 1.8; }
+.nav-link--sub.active {
+  background: var(--gold-glow) !important;
+  color: var(--gold) !important;
+  border-left: none !important;
+}
 
 /* ── mobile header ── */
 
