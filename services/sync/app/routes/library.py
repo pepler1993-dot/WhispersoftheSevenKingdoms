@@ -1,122 +1,116 @@
-"""Library routes: upload, preview, listing."""
+"""Library routes: upload, preview, listing, house presets."""
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 from fastapi import APIRouter, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 
 from app import shared
-from app.helpers import _build_song_metadata, _list_library_dir, slugify
+from app.helpers import _list_library_dir, _load_house_templates
 from app.pipeline_runner import PIPELINE_DIR
 
 router = APIRouter()
 
 
-def _enrich_metadata_items(items: list[dict[str, str]]) -> list[dict[str, str]]:
-    enriched: list[dict[str, str]] = []
-    meta_dir = PIPELINE_DIR / 'data' / 'upload' / 'metadata'
-    for item in items:
-        extra = {'title': '—', 'slug': Path(item['name']).stem}
-        if item['name'].endswith('.json'):
-            path = meta_dir / item['name']
-            try:
-                data = json.loads(path.read_text(encoding='utf-8'))
-                extra['title'] = (data.get('title') or '—').strip() or '—'
-                extra['slug'] = (data.get('slug') or extra['slug']).strip() or extra['slug']
-            except (json.JSONDecodeError, OSError) as exc:
-                import logging
-                logging.warning('Failed to read metadata %s: %s', path.name, exc)
-        enriched.append({**item, **extra})
-    return enriched
+def _redirect_library(msg: str, *, error: bool = False) -> RedirectResponse:
+    q = 'error' if error else 'success'
+    from urllib.parse import quote
+
+    return RedirectResponse(f'/admin/library?{q}={quote(msg)}', status_code=303)
 
 
 @router.get('/admin/library', response_class=HTMLResponse)
 def admin_library(request: Request, success: str | None = Query(default=None), error: str | None = Query(default=None)):
     songs = _list_library_dir(PIPELINE_DIR / 'data' / 'upload' / 'songs', {'.mp3', '.wav', '.ogg'})
-    thumbnails = _list_library_dir(PIPELINE_DIR / 'data' / 'upload' / 'thumbnails', {'.jpg', '.jpeg', '.png', '.webp'})
     backgrounds = _list_library_dir(PIPELINE_DIR / 'data' / 'assets' / 'backgrounds', {'.jpg', '.jpeg', '.png', '.webp'})
-    metadata = _enrich_metadata_items(_list_library_dir(PIPELINE_DIR / 'data' / 'upload' / 'metadata', {'.json', '.md'}))
+    houses = _load_house_templates()
+    house_pretty = {
+        k: json.dumps(v, indent=2, ensure_ascii=False) + '\n'
+        for k, v in sorted(houses.items(), key=lambda x: x[0])
+    }
     return shared.templates.TemplateResponse(request, 'library.html', {
         'request': request,
         'page': 'library',
         'songs': songs,
-        'thumbnails': thumbnails,
         'backgrounds': backgrounds,
-        'metadata': metadata,
+        'houses': houses,
+        'house_pretty': house_pretty,
         'success_message': success or '',
         'error_message': error or '',
     })
 
 
-@router.post('/admin/library/create-metadata')
-def admin_library_create_metadata(
-    title: str = Form(...),
-    slug: str = Form(''),
-    theme: str = Form(...),
-    mood: str = Form(''),
-    notes: str = Form(''),
-    duration_hint: str = Form('long-form sleep track'),
-    tags: str = Form(''),
-    music_style: str = Form(''),
-    music_influences: str = Form(''),
-    music_tempo: str = Form('slow'),
-    music_energy: str = Form('low'),
-    music_avoid: str = Form(''),
-    thumbnail_scene: str = Form(''),
-    thumbnail_elements: str = Form(''),
-    thumbnail_text: str = Form(''),
-    thumbnail_style: str = Form(''),
-    thumbnail_avoid: str = Form(''),
-    overwrite: str = Form(''),
+@router.post('/admin/library/save-house-template')
+def admin_library_save_house_template(
+    house_key: str = Form(...),
+    template_json: str = Form(...),
 ):
-    clean_title = title.strip()
-    clean_slug = slugify(slug or clean_title)
-    clean_theme = theme.strip()
+    key = (house_key or '').strip()
+    if not key:
+        return _redirect_library('Haus-Schlüssel fehlt', error=True)
 
-    if not clean_title:
-        return RedirectResponse('/admin/library?error=Titel+ist+erforderlich', status_code=303)
-    if not clean_slug:
-        return RedirectResponse('/admin/library?error=Slug+konnte+nicht+gebildet+werden', status_code=303)
-    if not clean_theme:
-        return RedirectResponse('/admin/library?error=Theme+ist+erforderlich', status_code=303)
+    all_houses = _load_house_templates()
+    if key not in all_houses:
+        return _redirect_library(f'Unbekannter Haus-Schlüssel: {key}', error=True)
 
-    metadata = _build_song_metadata(
-        slug=clean_slug,
-        title=clean_title,
-        theme=clean_theme,
-        mood=mood,
-        notes=notes,
-        duration_hint=duration_hint,
-        tags=tags,
-        music_style=music_style,
-        music_influences=music_influences,
-        music_tempo=music_tempo,
-        music_energy=music_energy,
-        music_avoid=music_avoid,
-        thumbnail_scene=thumbnail_scene,
-        thumbnail_elements=thumbnail_elements,
-        thumbnail_text=thumbnail_text,
-        thumbnail_style=thumbnail_style,
-        thumbnail_avoid=thumbnail_avoid,
-    )
+    raw = (template_json or '').strip()
+    if not raw:
+        return _redirect_library('JSON darf nicht leer sein', error=True)
 
-    target = PIPELINE_DIR / 'data' / 'upload' / 'metadata' / f'{clean_slug}.json'
-    target.parent.mkdir(parents=True, exist_ok=True)
-    existed_before = target.exists()
-    if existed_before and overwrite != 'true':
-        return RedirectResponse(f'/admin/library?error=Metadata+{clean_slug}.json+existiert+bereits.+Aktiviere+Overwrite+wenn+du+sie+ersetzen+willst', status_code=303)
-    target.write_text(json.dumps(metadata, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
-    action = 'aktualisiert' if existed_before and overwrite == 'true' else 'erstellt'
-    return RedirectResponse(f'/admin/library?success=Metadata+{clean_slug}.json+{action}', status_code=303)
+    try:
+        parsed = json.loads(raw)
+    except json.JSONDecodeError as e:
+        return _redirect_library(f'Ungültiges JSON: {e}', error=True)
+
+    if not isinstance(parsed, dict):
+        return _redirect_library('Preset muss ein JSON-Objekt sein', error=True)
+
+    path = shared.HOUSE_TEMPLATES_PATH
+    if not path.exists():
+        return _redirect_library('house_templates.json nicht gefunden', error=True)
+
+    try:
+        data = json.loads(path.read_text(encoding='utf-8'))
+    except (json.JSONDecodeError, OSError) as e:
+        return _redirect_library(f'Datei konnte nicht gelesen werden: {e}', error=True)
+
+    if not isinstance(data, dict):
+        return _redirect_library('Ungültige Struktur in house_templates.json', error=True)
+
+    data[key] = parsed
+
+    try:
+        text = json.dumps(data, indent=2, ensure_ascii=False) + '\n'
+        fd, tmp = tempfile.mkstemp(suffix='.json', dir=str(path.parent))
+        try:
+            Path(fd).write_text(text, encoding='utf-8')
+        except TypeError:
+            # Windows: fd is int
+            Path(tmp).write_text(text, encoding='utf-8')
+        else:
+            import os
+
+            os.close(fd)
+            Path(tmp).write_text(text, encoding='utf-8')
+        Path(tmp).replace(path)
+    except OSError as e:
+        try:
+            Path(tmp).unlink(missing_ok=True)  # type: ignore[arg-type]
+        except Exception:
+            pass
+        return _redirect_library(f'Speichern fehlgeschlagen: {e}', error=True)
+
+    return _redirect_library(f'Haus-Preset „{key}“ gespeichert')
 
 
 @router.post('/admin/library/delete')
 def admin_library_delete(asset_type: str = Form(...), filename: str = Form(...)):
     mapping = {
-        'thumbnails': PIPELINE_DIR / 'data' / 'upload' / 'thumbnails',
         'backgrounds': PIPELINE_DIR / 'data' / 'assets' / 'backgrounds',
+        'songs': PIPELINE_DIR / 'data' / 'upload' / 'songs',
     }
     if asset_type not in mapping:
         return RedirectResponse('/admin/library?error=Löschen+ist+für+diesen+Asset-Typ+nicht+erlaubt', status_code=303)
@@ -136,8 +130,8 @@ def admin_library_delete(asset_type: str = Form(...), filename: str = Form(...))
 @router.post('/admin/library/delete-multi')
 def admin_library_delete_multi(asset_type: str = Form(...), filenames: list[str] = Form(default=[])):
     mapping = {
-        'thumbnails': PIPELINE_DIR / 'data' / 'upload' / 'thumbnails',
         'backgrounds': PIPELINE_DIR / 'data' / 'assets' / 'backgrounds',
+        'songs': PIPELINE_DIR / 'data' / 'upload' / 'songs',
     }
     if asset_type not in mapping:
         return RedirectResponse('/admin/library?error=Mehrfach-Löschen+ist+für+diesen+Asset-Typ+nicht+erlaubt', status_code=303)
@@ -161,7 +155,6 @@ def admin_library_delete_multi(asset_type: str = Form(...), filenames: list[str]
 @router.post('/admin/library/rename')
 def admin_library_rename(asset_type: str = Form(...), old_name: str = Form(...), new_name: str = Form(...)):
     mapping = {
-        'thumbnails': PIPELINE_DIR / 'data' / 'upload' / 'thumbnails',
         'backgrounds': PIPELINE_DIR / 'data' / 'assets' / 'backgrounds',
         'songs': PIPELINE_DIR / 'data' / 'upload' / 'songs',
     }
@@ -173,7 +166,6 @@ def admin_library_rename(asset_type: str = Form(...), old_name: str = Form(...),
     if not safe_old or not safe_new:
         return RedirectResponse('/admin/library?error=Ungültiger+Dateiname', status_code=303)
 
-    # Preserve original extension if new name has none
     old_ext = Path(safe_old).suffix.lower()
     new_ext = Path(safe_new).suffix.lower()
     if not new_ext and old_ext:
@@ -198,9 +190,7 @@ def admin_library_rename(asset_type: str = Form(...), old_name: str = Form(...),
 async def admin_library_upload(asset_type: str = Form(...), file: list[UploadFile] = File(...)):
     mapping = {
         'songs': (PIPELINE_DIR / 'data' / 'upload' / 'songs', {'.mp3', '.wav', '.ogg'}),
-        'thumbnails': (PIPELINE_DIR / 'data' / 'upload' / 'thumbnails', {'.jpg', '.jpeg', '.png', '.webp'}),
         'backgrounds': (PIPELINE_DIR / 'data' / 'assets' / 'backgrounds', {'.jpg', '.jpeg', '.png', '.webp'}),
-        'metadata': (PIPELINE_DIR / 'data' / 'upload' / 'metadata', {'.json', '.md'}),
     }
     if asset_type not in mapping:
         return RedirectResponse('/admin/library?error=Ung%C3%BCltiger+Asset-Typ', status_code=303)

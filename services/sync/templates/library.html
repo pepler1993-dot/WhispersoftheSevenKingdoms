@@ -4,7 +4,7 @@
 <div class="page-header page-header-flex">
   <div>
     <h1>Library</h1>
-    <div class="page-subtitle">Zentrale Verwaltung für Assets, die im Create-Tab als Pipeline-Eingaben benutzt werden.</div>
+    <div class="page-subtitle">Zentrale Verwaltung für Pipeline-Eingaben: Songs, Hintergrundbilder und Haus-Presets.</div>
   </div>
 </div>
 
@@ -22,34 +22,93 @@
 <section class="panel panel-accent-gold" style="margin-bottom:18px;">
   <h2>Wofür die Library da ist</h2>
   <div class="page-subtitle" style="max-width: 78ch; margin-top: 10px;">
-    Die Library ist der zentrale Ort für Pipeline-Eingaben. Für den täglichen Ablauf reicht Upload und Auswahl.
+    Metadaten für Videos kommen aus den Haus-Presets (Titel, Stimmung, Musik-Briefs usw.). Hier pflegst du diese Presets und die Dateien für Audio und Hintergrund.
   </div>
   <details style="margin-top:12px;">
     <summary style="cursor:pointer; font-weight:600;">Asset-Details anzeigen</summary>
     <ul class="list" style="margin-top: 12px;">
-      <li><strong>Songs</strong> → erscheinen im Create-Tab als Audio-Bibliothek</li>
-      <li><strong>Thumbnails</strong> → stehen im Create-Tab als vorhandene Thumbnail-Auswahl bereit</li>
-      <li><strong>Backgrounds</strong> → werden als Video-Hintergründe im Create-Tab auswählbar</li>
-      <li><strong>Metadata</strong> → liegen zentral für Referenz, Wiederverwendung und QA</li>
+      <li><strong>Haus-Presets</strong> → bearbeitbare JSON-Konfiguration pro Haus (Create-Tab &amp; Metadaten-Quelle)</li>
+      <li><strong>Songs</strong> → Audio-Bibliothek im Create-Tab</li>
+      <li><strong>Hintergrundbilder</strong> → Video-Hintergründe im Create-Tab</li>
     </ul>
   </details>
 </section>
 
+<section class="panel panel-accent-gold" style="margin-bottom:18px;">
+  <div class="section-header-inline"><h2>Haus-Presets</h2><span class="section-note">aus house_templates.json · gespeichert auf dem Server</span></div>
+  <p class="page-subtitle" style="margin:0 0 16px 0; max-width:78ch;">Änderungen als gültiges JSON einfügen und speichern. Ungültiges JSON wird abgelehnt; andere Häuser bleiben unverändert.</p>
+  <div class="preset-grid">
+    {% for key, house in houses|dictsort %}
+    <article class="preset-card">
+      <header class="preset-card-head">
+        <span class="preset-sigil" aria-hidden="true">{{ house.get('sigil', '·') }}</span>
+        <div>
+          <h3 class="preset-title">{{ house.get('display_name', key) }}</h3>
+          <div class="preset-sub">{{ house.get('house', key) }} · <code>{{ key }}</code></div>
+          {% if house.variants is mapping %}
+          <div class="preset-meta">{{ house.variants|length }} Varianten</div>
+          {% endif %}
+        </div>
+      </header>
+      <details class="preset-details">
+        <summary>JSON-Details (Lesen)</summary>
+        <pre class="preset-json-readonly" tabindex="0">{{ house_pretty[key] }}</pre>
+      </details>
+      <form method="post" action="/admin/library/save-house-template" class="preset-edit-form">
+        <input type="hidden" name="house_key" value="{{ key }}" />
+        <label class="preset-label" for="preset-ta-{{ key }}">Preset bearbeiten</label>
+        <textarea id="preset-ta-{{ key }}" name="template_json" rows="16" class="form-input preset-json-ta" required></textarea>
+        <script>
+        (function () {
+          var t = document.getElementById('preset-ta-{{ key }}');
+          if (t) t.value = {{ house_pretty[key]|tojson }};
+        })();
+        </script>
+        <button type="submit" class="btn btn-primary btn-sm" style="margin-top:10px;">Preset speichern</button>
+      </form>
+    </article>
+    {% else %}
+    <p class="empty-state">Keine Haus-Presets geladen.</p>
+    {% endfor %}
+  </div>
+</section>
+
 <div class="grid two">
   <section class="panel panel-accent-blue">
-    <div class="section-header-inline"><h2>Songs</h2><span class="section-note">für Audio-Auswahl im Create-Tab</span></div>
+    <div class="section-header-inline"><h2>Songs</h2><span class="section-note">Audio-Bibliothek im Create-Tab</span></div>
+    <form id="form-songs-bulk-delete" method="post" action="/admin/library/delete-multi" onsubmit="return confirm('Ausgewählte Songs wirklich löschen?');">
+      <input type="hidden" name="asset_type" value="songs" />
+      <div class="form-actions-inline" style="justify-content:flex-end; margin-bottom:10px;">
+        <button type="submit" class="btn btn-danger btn-sm">Ausgewählte löschen</button>
+      </div>
+    </form>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Datei</th><th>Größe</th><th>Geändert</th></tr></thead>
+        <thead><tr><th class="th-check"></th><th>Datei</th><th>Größe</th><th>Geändert</th><th></th></tr></thead>
         <tbody>
           {% for item in songs %}
           <tr>
+            <td data-label="Auswahl"><input form="form-songs-bulk-delete" type="checkbox" name="filenames" value="{{ item.name }}" aria-label="Auswählen: {{ item.name }}" /></td>
             <td data-label="Datei">{{ item.name }}</td>
             <td data-label="Größe">{{ item.size }}</td>
             <td data-label="Geändert">{{ item.modified }}</td>
+            <td data-label="Aktionen">
+              <div class="row-actions">
+                <button type="button" class="icon-btn" aria-label="Umbenennen" title="Umbenennen" data-rename-asset="songs" data-rename-name="{{ item.name }}">
+                  <i data-lucide="pencil" style="width:16px;height:16px"></i>
+                </button>
+                <form method="post" action="/admin/library/delete" onsubmit="return confirm('Song wirklich löschen?');" style="margin:0;">
+                  <input type="hidden" name="asset_type" value="songs" />
+                  <input type="hidden" name="filename" value="{{ item.name }}" />
+                  <button type="submit" class="icon-btn icon-btn-danger" aria-label="Song löschen" title="Song löschen">
+                    <i data-lucide="trash-2" style="width:16px;height:16px"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
           </tr>
           {% else %}
-          <tr><td colspan="3" class="empty-state">Keine Songs vorhanden</td></tr>
+          <tr><td colspan="5" class="empty-state">Keine Songs vorhanden</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -64,32 +123,33 @@
     </form>
   </section>
 
-  <section class="panel panel-accent-purple">
-    <div class="section-header-inline"><h2>Thumbnails</h2><span class="section-note">für vorhandene Thumbnail-Auswahl</span></div>
-    <form method="post" action="/admin/library/delete-multi" onsubmit="return confirm('Ausgewählte Thumbnails wirklich löschen?');">
-      <input type="hidden" name="asset_type" value="thumbnails" />
+  <section class="panel panel-accent-blue">
+    <div class="section-header-inline"><h2>Hintergrundbilder</h2><span class="section-note">Video-Hintergrund im Create-Tab</span></div>
+    <form id="form-bg-bulk-delete" method="post" action="/admin/library/delete-multi" onsubmit="return confirm('Ausgewählte Hintergründe wirklich löschen?');">
+      <input type="hidden" name="asset_type" value="backgrounds" />
       <div class="form-actions-inline" style="justify-content:flex-end; margin-bottom:10px;">
         <button type="submit" class="btn btn-danger btn-sm">Ausgewählte löschen</button>
       </div>
-      <div class="thumb-grid">
-        {% for item in thumbnails %}
+    </form>
+    <div class="thumb-grid">
+        {% for item in backgrounds %}
         <div class="thumb-card">
           <label class="thumb-select">
-            <input type="checkbox" name="filenames" value="{{ item.name }}" />
+            <input form="form-bg-bulk-delete" type="checkbox" name="filenames" value="{{ item.name }}" />
             <span>Auswählen</span>
           </label>
-          <img src="/admin/library/preview/thumbnails/{{ item.name }}" alt="{{ item.name }}" class="thumb-preview" />
+          <img src="/admin/library/preview/backgrounds/{{ item.name }}" alt="{{ item.name }}" class="thumb-preview" />
           <div class="thumb-meta">
             <div class="thumb-name">{{ item.name }}</div>
             <div class="thumb-sub">{{ item.size }} · {{ item.modified }}</div>
             <div class="thumb-actions" style="margin-top:8px; display:flex; gap:6px; align-items:center;">
-              <button type="button" class="icon-btn" aria-label="Umbenennen" title="Umbenennen" onclick="renameAsset('thumbnails','{{ item.name }}')">
+              <button type="button" class="icon-btn" aria-label="Umbenennen" title="Umbenennen" data-rename-asset="backgrounds" data-rename-name="{{ item.name }}">
                 <i data-lucide="pencil" style="width:16px;height:16px"></i>
               </button>
-              <form method="post" action="/admin/library/delete" onsubmit="return confirm('Thumbnail wirklich löschen?');" style="margin:0;">
-                <input type="hidden" name="asset_type" value="thumbnails" />
+              <form method="post" action="/admin/library/delete" onsubmit="return confirm('Hintergrund wirklich löschen?');" style="margin:0;">
+                <input type="hidden" name="asset_type" value="backgrounds" />
                 <input type="hidden" name="filename" value="{{ item.name }}" />
-                <button type="submit" class="icon-btn icon-btn-danger" aria-label="Thumbnail löschen" title="Thumbnail löschen">
+                <button type="submit" class="icon-btn icon-btn-danger" aria-label="Hintergrund löschen" title="Hintergrund löschen">
                   <i data-lucide="trash-2" style="width:16px;height:16px"></i>
                 </button>
               </form>
@@ -97,200 +157,89 @@
           </div>
         </div>
         {% else %}
-        <div class="empty-state">Keine Thumbnails vorhanden</div>
+        <div class="empty-state">Keine Hintergrundbilder vorhanden</div>
         {% endfor %}
-      </div>
-    </form>
+    </div>
     <form method="post" action="/admin/library/upload" enctype="multipart/form-data" style="margin-top:16px;">
-      <input type="hidden" name="asset_type" value="thumbnails" />
+      <input type="hidden" name="asset_type" value="backgrounds" />
       <div class="form-group">
-        <label for="thumb_file">Thumbnail hochladen</label>
-        <input id="thumb_file" name="file" type="file" class="form-input" accept=".jpg,.jpeg,.png,.webp" multiple required />
+        <label for="bg_file">Hintergrund hochladen</label>
+        <input id="bg_file" name="file" type="file" class="form-input" accept=".jpg,.jpeg,.png,.webp" multiple required />
       </div>
-      <button type="submit" class="btn btn-primary btn-sm">Thumbnails hochladen</button>
+      <button type="submit" class="btn btn-primary btn-sm">Hintergründe hochladen</button>
     </form>
   </section>
 </div>
 
-<section class="panel panel-accent-blue" style="margin-top:18px; margin-bottom:18px;">
-  <div class="section-header-inline"><h2>Video Backgrounds</h2><span class="section-note">für den eigentlichen Video-Hintergrund</span></div>
-  <form method="post" action="/admin/library/delete-multi" onsubmit="return confirm('Ausgewählte Backgrounds wirklich löschen?');">
-    <input type="hidden" name="asset_type" value="backgrounds" />
-    <div class="form-actions-inline" style="justify-content:flex-end; margin-bottom:10px;">
-      <button type="submit" class="btn btn-danger btn-sm">Ausgewählte löschen</button>
-    </div>
-    <div class="thumb-grid">
-      {% for item in backgrounds %}
-      <div class="thumb-card">
-        <label class="thumb-select">
-          <input type="checkbox" name="filenames" value="{{ item.name }}" />
-          <span>Auswählen</span>
-        </label>
-        <img src="/admin/library/preview/backgrounds/{{ item.name }}" alt="{{ item.name }}" class="thumb-preview" />
-        <div class="thumb-meta">
-          <div class="thumb-name">{{ item.name }}</div>
-          <div class="thumb-sub">{{ item.size }} · {{ item.modified }}</div>
-          <div class="thumb-actions" style="margin-top:8px; display:flex; gap:6px; align-items:center;">
-            <button type="button" class="icon-btn" aria-label="Umbenennen" title="Umbenennen" onclick="renameAsset('backgrounds','{{ item.name }}')">
-              <i data-lucide="pencil" style="width:16px;height:16px"></i>
-            </button>
-            <form method="post" action="/admin/library/delete" onsubmit="return confirm('Background wirklich löschen?');" style="margin:0;">
-              <input type="hidden" name="asset_type" value="backgrounds" />
-              <input type="hidden" name="filename" value="{{ item.name }}" />
-              <button type="submit" class="icon-btn icon-btn-danger" aria-label="Background löschen" title="Background löschen">
-                <i data-lucide="trash-2" style="width:16px;height:16px"></i>
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-      {% else %}
-      <div class="empty-state">Keine Backgrounds vorhanden</div>
-      {% endfor %}
-    </div>
-  </form>
-  <form method="post" action="/admin/library/upload" enctype="multipart/form-data" style="margin-top:16px; max-width: 460px;">
-    <input type="hidden" name="asset_type" value="backgrounds" />
-    <div class="form-group">
-      <label for="bg_file">Background hochladen</label>
-      <input id="bg_file" name="file" type="file" class="form-input" accept=".jpg,.jpeg,.png,.webp" multiple required />
-    </div>
-    <button type="submit" class="btn btn-primary btn-sm">Backgrounds hochladen</button>
-  </form>
-</section>
-
-<section class="panel panel-accent-gold">
-  <div class="section-header-inline"><h2>Metadata</h2><span class="section-note">für Referenz und Wiederverwendung</span></div>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Datei</th><th>Titel</th><th>Slug</th><th>Größe</th><th>Geändert</th></tr></thead>
-      <tbody>
-        {% for item in metadata %}
-        <tr>
-          <td><a href="/admin/library/preview/metadata/{{ item.name }}" target="_blank">{{ item.name }}</a></td>
-          <td>{{ item.title }}</td>
-          <td><code>{{ item.slug }}</code></td>
-          <td>{{ item.size }}</td>
-          <td>{{ item.modified }}</td>
-        </tr>
-        {% else %}
-        <tr><td colspan="5" class="empty-state">Keine Metadata-Dateien vorhanden</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  <div class="grid two" style="margin-top:16px; align-items:start;">
-    <form method="post" action="/admin/library/upload" enctype="multipart/form-data" style="max-width: 460px;">
-      <input type="hidden" name="asset_type" value="metadata" />
-      <div class="form-group">
-        <label for="meta_file">Metadata JSON hochladen</label>
-        <input id="meta_file" name="file" type="file" class="form-input" accept=".json,.md" required />
-      </div>
-      <button type="submit" class="btn btn-primary btn-sm">Metadata hochladen</button>
-    </form>
-
-    <details class="metadata-form">
-      <summary style="cursor:pointer; font-weight:600; margin-bottom:10px;">Metadata direkt erstellen (Erweitert)</summary>
-    <form method="post" action="/admin/library/create-metadata">
-      <div class="section-header-inline" style="margin-bottom:10px;"><h3>Metadata direkt erstellen</h3><span class="section-note">ohne JSON-Datei von Hand</span></div>
-      <p class="page-subtitle" style="margin:0 0 14px 0; max-width:70ch;">Erzeugt eine nutzbare Metadata-Datei im bestehenden Pipeline-Format.</p>
-      <div class="form-group">
-        <label for="meta_title">Titel</label>
-        <input id="meta_title" name="title" type="text" class="form-input" required placeholder="Dreams Beyond the Wall" oninput="document.getElementById('meta_slug').value=this.value.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')" />
-      </div>
-      <div class="grid two">
-        <div class="form-group">
-          <label for="meta_slug">Slug</label>
-          <input id="meta_slug" name="slug" type="text" class="form-input" />
-        </div>
-        <div class="form-group">
-          <label for="meta_theme">Theme</label>
-          <input id="meta_theme" name="theme" type="text" class="form-input" required placeholder="winterfell" />
-        </div>
-      </div>
-      <div class="grid two">
-        <div class="form-group">
-          <label for="meta_mood">Mood</label>
-          <input id="meta_mood" name="mood" type="text" class="form-input" placeholder="calm, mystical" />
-          <div class="metric-help">Mehrere Werte per Komma trennen.</div>
-        </div>
-        <div class="form-group">
-          <label for="meta_tags">Tags</label>
-          <input id="meta_tags" name="tags" type="text" class="form-input" placeholder="sleep, ambient, fantasy" />
-          <div class="metric-help">Tags werden automatisch in eine Liste umgewandelt.</div>
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="meta_notes">Notizen</label>
-        <textarea id="meta_notes" name="notes" rows="3" class="form-input"></textarea>
-      </div>
-      <div class="grid two">
-        <div class="form-group">
-          <label for="meta_duration_hint">Duration Hint</label>
-          <input id="meta_duration_hint" name="duration_hint" type="text" class="form-input" value="long-form sleep track" />
-        </div>
-        <div class="form-group">
-          <label for="meta_music_style">Musik-Stil</label>
-          <input id="meta_music_style" name="music_style" type="text" class="form-input" />
-        </div>
-      </div>
-      <div class="grid two">
-        <div class="form-group">
-          <label for="meta_music_influences">Einflüsse</label>
-          <input id="meta_music_influences" name="music_influences" type="text" class="form-input" />
-        </div>
-        <div class="form-group">
-          <label for="meta_music_avoid">Vermeiden</label>
-          <input id="meta_music_avoid" name="music_avoid" type="text" class="form-input" />
-        </div>
-      </div>
-      <div class="grid two">
-        <div class="form-group">
-          <label for="meta_music_tempo">Tempo</label>
-          <input id="meta_music_tempo" name="music_tempo" type="text" class="form-input" value="slow" />
-        </div>
-        <div class="form-group">
-          <label for="meta_music_energy">Energy</label>
-          <input id="meta_music_energy" name="music_energy" type="text" class="form-input" value="low" />
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="meta_thumb_scene">Thumbnail-Szene</label>
-        <input id="meta_thumb_scene" name="thumbnail_scene" type="text" class="form-input" />
-      </div>
-      <div class="grid two">
-        <div class="form-group">
-          <label for="meta_thumb_elements">Thumbnail-Elemente</label>
-          <input id="meta_thumb_elements" name="thumbnail_elements" type="text" class="form-input" />
-        </div>
-        <div class="form-group">
-          <label for="meta_thumb_text">Thumbnail-Text</label>
-          <input id="meta_thumb_text" name="thumbnail_text" type="text" class="form-input" />
-        </div>
-      </div>
-      <div class="grid two">
-        <div class="form-group">
-          <label for="meta_thumb_style">Thumbnail-Stil</label>
-          <input id="meta_thumb_style" name="thumbnail_style" type="text" class="form-input" />
-        </div>
-        <div class="form-group">
-          <label for="meta_thumb_avoid">Thumbnail vermeiden</label>
-          <input id="meta_thumb_avoid" name="thumbnail_avoid" type="text" class="form-input" />
-        </div>
-      </div>
-      <div class="form-check" style="margin: 8px 0 14px 0;">
-        <input type="checkbox" id="meta_overwrite" name="overwrite" value="true" />
-        <label for="meta_overwrite">Bestehende Metadata mit gleichem Slug überschreiben</label>
-      </div>
-      <div class="form-actions-inline">
-        <button type="submit" class="btn btn-primary btn-sm">Metadata erstellen</button>
-      </div>
-    </form>
-    </details>
-  </div>
-</section>
-
 <style>
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: 18px;
+}
+.preset-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  background: var(--surface);
+}
+.preset-card-head {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+.preset-sigil {
+  font-size: 2rem;
+  line-height: 1;
+}
+.preset-title {
+  margin: 0;
+  font-size: 1.1rem;
+}
+.preset-sub {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.preset-meta {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 6px;
+}
+.preset-details summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.88rem;
+  margin-bottom: 8px;
+}
+.preset-json-readonly {
+  margin: 0;
+  max-height: 220px;
+  overflow: auto;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: rgba(0,0,0,0.2);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.preset-label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+}
+.preset-json-ta {
+  width: 100%;
+  font-family: ui-monospace, monospace;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  resize: vertical;
+  min-height: 200px;
+}
 .thumb-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -352,17 +301,18 @@
   border-color: rgba(220, 38, 38, 0.4);
   color: #ff8f8f;
 }
-.metadata-form .form-group {
-  margin-bottom: 12px;
-}
-.metadata-form .form-input {
-  width: 100%;
-}
 .form-actions-inline {
   display: flex;
   gap: 10px;
   align-items: center;
 }
+.row-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.th-check { width: 36px; }
 .modal-overlay {
   position: fixed; inset: 0; z-index: 999;
   background: rgba(0,0,0,0.6); display: flex;
@@ -375,7 +325,6 @@
 }
 </style>
 
-<!-- Rename modal -->
 <div id="renameModal" class="modal-overlay" style="display:none;">
   <div class="modal-box">
     <h3>Datei umbenennen</h3>
@@ -413,8 +362,12 @@ function closeRenameModal() {
 document.getElementById('renameModal').addEventListener('click', function(e) {
   if (e.target === this) closeRenameModal();
 });
+document.querySelectorAll('[data-rename-asset]').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    renameAsset(btn.getAttribute('data-rename-asset'), btn.getAttribute('data-rename-name'));
+  });
+});
 
-/* Async upload – fixes iPhone hanging on multi-file uploads */
 document.querySelectorAll('form[action="/admin/library/upload"]').forEach(function(form) {
   form.addEventListener('submit', function(e) {
     e.preventDefault();

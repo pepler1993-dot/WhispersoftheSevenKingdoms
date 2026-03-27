@@ -202,16 +202,20 @@
     <div id="background-source-preview" style="display:none"></div>
 
     <!-- Video & Publish Options (visible) -->
-    <div style="display:flex; gap:24px; flex-wrap:wrap; margin-bottom:16px;">
+    <div style="display:flex; gap:24px; flex-wrap:wrap; margin-bottom:16px; align-items:flex-start;">
       <div class="form-check" data-tooltip="Video nach dem Rendern automatisch auf YouTube hochladen.">
         <input type="checkbox" name="auto_upload" id="auto_upload" value="true" checked />
         <label for="auto_upload">🚀 Auto YouTube Upload</label>
       </div>
+      <div class="form-check" data-tooltip="Direkt als öffentlich hochladen. Wenn aus, wird als privat hochgeladen.">
+        <input type="checkbox" name="public" id="public" value="true" />
+        <label for="public">🌍 Öffentlich auf YouTube</label>
+      </div>
     </div>
     <input type="hidden" name="animated" value="true" />
     <div class="preview-meta" style="margin: 0 0 16px;">
-      Für den schnellen Standardlauf sind Animation und private Sichtbarkeit voreingestellt.
-      Öffentliche Uploads und Spezialoptionen findest du in den erweiterten Einstellungen.
+      Für den schnellen Standardlauf ist Animation voreingestellt; Sichtbarkeit steuerst du mit „Öffentlich auf YouTube“.
+      Dauer, Preset und Co. findest du unter „Erweiterte Einstellungen“.
     </div>
 
     <!-- Advanced Settings (collapsed, pre-filled from house presets) -->
@@ -219,12 +223,6 @@
       <summary>⚙️ Erweiterte Einstellungen</summary>
       <div class="advanced-content">
         <div class="grid two">
-          <div class="form-group">
-            <div class="form-check" data-tooltip="Direkt als öffentlich hochladen. Wenn aus, wird als privat hochgeladen.">
-              <input type="checkbox" name="public" id="public" value="true" />
-              <label for="public">🌍 Öffentlich auf YouTube</label>
-            </div>
-          </div>
           <div class="form-group">
             <label for="adv-minutes">Dauer (Minuten)</label>
             <input type="number" id="adv-minutes" class="form-input" value="20" min="1" max="720" />
