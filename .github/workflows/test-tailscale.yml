@@ -1,0 +1,46 @@
+name: Test Tailscale Auth
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-tailscale:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate Tailscale secrets
+        env:
+          TS_OAUTH_CLIENT_ID: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          TS_OAUTH_SECRET: ${{ secrets.TS_OAUTH_SECRET }}
+        run: |
+          set -euo pipefail
+          missing=0
+          for name in TS_OAUTH_CLIENT_ID TS_OAUTH_SECRET; do
+            value="${!name:-}"
+            if [ -z "$value" ]; then
+              echo "::error title=Missing secret::$name is empty or not set"
+              missing=1
+            else
+              echo "::notice title=Secret present::$name is set"
+            fi
+          done
+
+          case "$TS_OAUTH_SECRET" in
+            tskey-client-*) echo "::notice title=Tailscale OAuth secret format::TS_OAUTH_SECRET looks plausible" ;;
+            *) echo "::warning title=Tailscale OAuth secret format::TS_OAUTH_SECRET does not start with tskey-client-" ;;
+          esac
+
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Join Tailscale
+        uses: tailscale/github-action@v3
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+
+      - name: Check Tailscale status
+        run: |
+          set -euo pipefail
+          tailscale ip
+          tailscale status || true

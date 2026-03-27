@@ -35,8 +35,13 @@ jobs:
           done
 
           case "$TS_OAUTH_CLIENT_ID" in
-            tskey-client-*) echo "::notice title=Tailscale Client ID format::TS_OAUTH_CLIENT_ID looks plausible" ;;
-            *) echo "::warning title=Tailscale Client ID format::TS_OAUTH_CLIENT_ID does not start with tskey-client-" ;;
+            tskey-client-*) echo "::warning title=Tailscale Client ID format::TS_OAUTH_CLIENT_ID looks like a secret, not a client id" ;;
+            *) echo "::notice title=Tailscale Client ID format::TS_OAUTH_CLIENT_ID does not look like a secret blob" ;;
+          esac
+
+          case "$TS_OAUTH_SECRET" in
+            tskey-client-*) echo "::notice title=Tailscale OAuth secret format::TS_OAUTH_SECRET looks plausible" ;;
+            *) echo "::warning title=Tailscale OAuth secret format::TS_OAUTH_SECRET does not start with tskey-client-" ;;
           esac
 
           case "$SSH_PRIVATE_KEY" in
