@@ -223,6 +223,117 @@
 </script>
 
 <style>
+.al-house-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+}
+.al-house-card {
+  background: var(--house-bg, var(--panel));
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+.al-house-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--house-color, var(--gold));
+  opacity: 0.4;
+  transition: opacity 0.25s ease;
+}
+.al-house-card:hover {
+  border-color: var(--house-color, var(--gold));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+.al-house-card:hover::before { opacity: 1; }
+.al-house-card.selected {
+  border-color: var(--house-color, var(--gold));
+  box-shadow: 0 0 16px color-mix(in srgb, var(--house-color) 25%, transparent);
+}
+.al-house-card.selected::before { opacity: 1; height: 4px; }
+.al-house-sigil { font-size: 1.8rem; margin-bottom: 6px; }
+.al-house-name { font-size: 0.78rem; font-weight: 700; color: var(--text); }
+
+.al-variant-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+.al-variant-card {
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.al-variant-card:hover {
+  border-color: var(--house-color, var(--gold));
+  background: rgba(255,255,255,0.06);
+  transform: translateY(-2px);
+}
+.al-variant-card.selected {
+  border-color: var(--house-color, var(--gold));
+  background: color-mix(in srgb, var(--house-color, var(--gold)) 12%, transparent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--house-color, var(--gold)) 15%, transparent);
+}
+.al-variant-name { font-weight: 600; font-size: 0.88rem; margin-bottom: 3px; }
+.al-variant-desc { font-size: 0.75rem; color: var(--muted); line-height: 1.3; }
+
+.al-preset-section { margin-bottom: 18px; }
+.al-step-card {
+  background: var(--surface, rgba(255,255,255,0.02));
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  transition: border-color 0.2s ease;
+}
+.al-step-card:hover { border-color: rgba(255,255,255,0.12); }
+.al-step-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.al-step-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(201,165,58,0.2), rgba(201,165,58,0.08));
+  border: 1px solid rgba(201,165,58,0.3);
+  color: var(--gold, #c9a53a);
+  font-size: 0.78rem;
+  font-weight: 800;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.al-step-header h3 { font-size: 0.95rem; font-weight: 700; margin: 0; }
+.al-step-desc { font-size: 0.78rem; color: var(--muted); margin: 2px 0 0; }
+.al-create-panel { border-top: 3px solid var(--gold, #c9a53a); }
+.al-btn-launch {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 16px 32px;
+  margin-top: 8px;
+  box-shadow: 0 4px 24px rgba(212,168,69,0.3);
+  transition: all 0.2s ease;
+}
+.al-btn-launch:hover {
+  box-shadow: 0 6px 32px rgba(212,168,69,0.45);
+  transform: translateY(-2px);
+}
+
 .shorts-video-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -249,5 +360,23 @@
 }
 .shorts-video-title { font-weight: 600; font-size: 0.88rem; margin-bottom: 4px; }
 .shorts-video-meta { font-size: 0.75rem; color: var(--muted); }
+
+@media (min-width: 1280px) {
+  .al-house-grid,
+  .al-variant-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+}
+
+@media (max-width: 768px) {
+  .al-house-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .al-house-card { padding: 12px 8px; }
+  .al-house-sigil { font-size: 1.4rem; }
+  .al-house-name { font-size: 0.7rem; }
+  .al-variant-grid { grid-template-columns: 1fr; }
+  .al-step-card { padding: 14px; }
+  .al-btn-launch { padding: 14px 18px; font-size: 0.95rem; }
+}
+@media (max-width: 400px) {
+  .al-house-grid { grid-template-columns: repeat(2, 1fr); }
+}
 </style>
 {% endblock %}
