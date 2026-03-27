@@ -33,7 +33,14 @@
   {% endif %}
 </div>
 
-<div class="grid two">
+<div class="library-tabs-wrap shorts-tabs-wrap">
+  <nav class="library-tabs" aria-label="Short-Details">
+    <button type="button" class="library-tab active" data-short-detail-tab="overview">Überblick</button>
+    <button type="button" class="library-tab" data-short-detail-tab="logs">Logs</button>
+  </nav>
+</div>
+
+<div class="grid two short-detail-grid short-detail-pane is-active" data-short-detail-pane="overview">
   <div class="panel panel-accent-purple">
     <h2>Short-Konfiguration</h2>
     <div class="config-grid">
@@ -60,7 +67,7 @@
 </div>
 
 {% if run.status in ('rendered', 'uploaded') and output_files %}
-<div class="panel panel-accent-gold">
+<div class="panel panel-accent-gold short-detail-pane is-active" data-short-detail-pane="overview">
   <h2>Preview</h2>
   {% for f in output_files %}
     {% if f.name == 'video.mp4' %}
@@ -81,7 +88,7 @@
 </div>
 {% endif %}
 
-<div class="panel">
+<div class="panel short-detail-pane" data-short-detail-pane="logs">
   <h2>Logs</h2>
   <div class="log-viewer" id="log-viewer">
     {% for log in logs %}
@@ -124,6 +131,33 @@
   }
 
   if (polling) setTimeout(pollLogs, 3000);
+
+  var tabButtons = document.querySelectorAll('[data-short-detail-tab]');
+  var panes = document.querySelectorAll('[data-short-detail-pane]');
+  tabButtons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var key = btn.dataset.shortDetailTab;
+      tabButtons.forEach(function(x) { x.classList.toggle('active', x === btn); });
+      panes.forEach(function(p) { p.classList.toggle('is-active', p.dataset.shortDetailPane === key); });
+    });
+  });
 })();
 </script>
+
+<style>
+.short-detail-pane { display: none; }
+.short-detail-pane.is-active { display: block; }
+.short-detail-grid { align-items: start; }
+.short-detail-grid.short-detail-pane.is-active { display: grid; }
+
+@media (min-width: 769px) {
+  .short-detail-grid { grid-template-columns: minmax(0, 1fr) minmax(280px, 0.9fr); }
+  .short-detail-pane { display: block; }
+  .shorts-tabs-wrap { display: none; }
+}
+
+@media (max-width: 768px) {
+  .short-detail-grid { grid-template-columns: 1fr; }
+}
+</style>
 {% endblock %}

@@ -50,8 +50,15 @@
   </div>
 </section>
 
-<div class="grid two">
-  <section class="panel panel-accent-purple">
+<div class="library-tabs-wrap shorts-tabs-wrap">
+  <nav class="library-tabs" aria-label="Shorts-Bereiche">
+    <button type="button" class="library-tab active" data-shorts-tab="create">Neuer Short</button>
+    <button type="button" class="library-tab" data-shorts-tab="drafts">Letzte Shorts <span class="library-tab-count">{{ short_runs|length }}</span></button>
+  </nav>
+</div>
+
+<div class="grid two shorts-grid">
+  <section class="panel panel-accent-purple shorts-pane is-active" data-shorts-pane="create">
     <div class="section-header-inline">
       <h2>Short erstellen</h2>
       <span class="section-note">MVP aktiv</span>
@@ -118,7 +125,7 @@
     </form>
   </section>
 
-  <section class="panel panel-accent-blue">
+  <section class="panel panel-accent-blue shorts-pane" data-shorts-pane="drafts">
     <div class="section-header-inline">
       <h2>Letzte Short-Drafts</h2>
       <span class="section-note">aus den Pipeline-Runs gefiltert</span>
@@ -174,6 +181,37 @@
   slug.addEventListener('input', () => {
     slug.dataset.touched = '1';
   });
+
+  const tabButtons = document.querySelectorAll('[data-shorts-tab]');
+  const panes = document.querySelectorAll('[data-shorts-pane]');
+  tabButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.shortsTab;
+      tabButtons.forEach(x => x.classList.toggle('active', x === btn));
+      panes.forEach(p => p.classList.toggle('is-active', p.dataset.shortsPane === key));
+    });
+  });
 })();
 </script>
+
+<style>
+.shorts-tabs-wrap { margin-bottom: 14px; }
+.shorts-pane { display: none; }
+.shorts-pane.is-active { display: block; }
+.shorts-grid { align-items: start; }
+
+@media (min-width: 769px) {
+  .shorts-grid { grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr); }
+  .shorts-pane { display: block; }
+  .shorts-tabs-wrap { display: none; }
+}
+
+@media (max-width: 768px) {
+  .shorts-grid { grid-template-columns: 1fr; }
+  .shorts-pane { display: none; }
+  .shorts-pane.is-active { display: block; }
+  .timeline-item { align-items: flex-start; }
+  .timeline-meta { width: 100%; }
+}
+</style>
 {% endblock %}
