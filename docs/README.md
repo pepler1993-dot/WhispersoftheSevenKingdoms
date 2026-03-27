@@ -42,6 +42,7 @@ Lookup-Material: technische Fakten, Formate, Konventionen und Diagramme.
 
 - [`reference/README.md`](reference/README.md)
 - [`reference/architecture-diagram.md`](reference/architecture-diagram.md)
+- [`reference/RESPONSIVE_UI_PATTERN_HANDBOOK.md`](reference/RESPONSIVE_UI_PATTERN_HANDBOOK.md)
 - [`technical/repo-structure.md`](technical/repo-structure.md)
 - [`technical/metadata.md`](technical/metadata.md)
 - [`technical/validation.md`](technical/validation.md)
