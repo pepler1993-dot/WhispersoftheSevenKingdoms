@@ -12,7 +12,7 @@ from fastapi.templating import Jinja2Templates
 from app import shared
 from app.config import get_settings
 from app.helpers import _detect_version
-from app.kaggle_gen import recover_interrupted_jobs
+from app.audio_jobs import recover_interrupted_jobs
 from app.pipeline_runner import PIPELINE_DIR
 from app.store import AgentSyncDB
 
@@ -68,8 +68,6 @@ if _bg_dir.exists():
 # ── Router includes ──────────────────────────────────────────────────────
 
 from app.routes.health import router as health_router          # noqa: E402
-from app.routes.tasks_api import router as tasks_router        # noqa: E402
-from app.routes.github_api import router as github_router      # noqa: E402
 from app.routes.dashboard import router as dashboard_router    # noqa: E402
 from app.routes.ops import router as ops_router                # noqa: E402
 from app.routes.audio import router as audio_router            # noqa: E402
@@ -82,8 +80,6 @@ from app.routes.workflows import router as workflows_router    # noqa: E402
 from app.routes.gpu import router as gpu_router                # noqa: E402
 
 app.include_router(health_router)
-app.include_router(tasks_router)
-app.include_router(github_router)
 app.include_router(dashboard_router)
 app.include_router(ops_router)
 app.include_router(audio_router)

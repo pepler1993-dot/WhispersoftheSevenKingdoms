@@ -116,7 +116,7 @@
     <div class="ticket-meta" style="margin-top: 20px;">
       <div class="meta-row"><span class="label">Erstellt</span><span>{{ ticket.created_at[:16] }}</span></div>
       <div class="meta-row"><span class="label">Aktualisiert</span><span>{{ ticket.updated_at[:16] }}</span></div>
-      {% if ticket.task_id %}<div class="meta-row"><span class="label">Task</span><a href="/admin/tasks/{{ ticket.task_id }}">{{ ticket.task_id }}</a></div>{% endif %}
+      {% if ticket.task_id %}<div class="meta-row"><span class="label">Referenz</span><span>{{ ticket.task_id }}</span></div>{% endif %}
     </div>
   </section>
 </div>

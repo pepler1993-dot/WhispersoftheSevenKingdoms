@@ -6,7 +6,6 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=/opt/whispers/WhispersoftheSevenKingdoms/services/sync
-Environment=GITHUB_WEBHOOK_SECRET=CHANGE_ME
 Environment=PYTHONUNBUFFERED=1
 ExecStart=/opt/whispers/WhispersoftheSevenKingdoms/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
 Restart=on-failure
