@@ -3,6 +3,11 @@
 Alle relevanten Änderungen am Projekt werden hier dokumentiert.
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [v3.1.1] – 2026-03-27
+
+### Changed
+- **CI/CD Test-Release**: Versionsbump zur Verifikation des neuen GitHub-Actions-Deployments über Tailscale + PVE-Hop.
+
 ## [v3.1.0] – 2026-03-27
 
 ### Added
