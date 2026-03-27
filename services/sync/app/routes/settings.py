@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from fastapi import APIRouter, Form, HTTPException, Request
+from fastapi import APIRouter, Form, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app import shared
@@ -95,6 +95,8 @@ def _save_content_types(ct: dict[str, Any]) -> None:
 
 router = APIRouter()
 
+_SETTINGS_SECTIONS = frozenset({'general', 'providers', 'presets'})
+
 # ── Default settings ──────────────────────────────────────────────────────
 
 DEFAULTS: dict[str, Any] = {
@@ -128,7 +130,11 @@ def _get_all_grouped() -> dict[str, dict[str, Any]]:
 # ── Pages ─────────────────────────────────────────────────────────────────
 
 @router.get('/admin/settings', response_class=HTMLResponse)
-def admin_settings(request: Request, tab: str = 'general'):
+def admin_settings(
+    request: Request,
+    tab: str = Query(default='general', description='Active settings section'),
+):
+    settings_tab = tab if tab in _SETTINGS_SECTIONS else 'general'
     grouped = _get_all_grouped()
     presets = _load_presets()
     content_types = _load_content_types()
@@ -137,7 +143,7 @@ def admin_settings(request: Request, tab: str = 'general'):
     return shared.templates.TemplateResponse(request, 'settings.html', {
         'request': request,
         'page': 'settings',
-        'settings_tab': tab,
+        'settings_tab': settings_tab,
         'settings': grouped,
         'presets': presets,
         'preset_count': len(presets),
