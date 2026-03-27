@@ -203,12 +203,17 @@ def add_team_member(
     if role not in ('admin', 'editor', 'viewer'):
         role = 'editor'
 
+    try:
+        pw_hash = hash_password(password)
+    except RuntimeError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
     shared.db.create_user({
         'user_id': str(uuid.uuid4()),
         'username': username,
         'display_name': display_name.strip() or username,
         'email': '',
-        'password_hash': hash_password(password),
+        'password_hash': pw_hash,
         'role': role,
         'space_id': 'default',
         'created_at': datetime.now(timezone.utc).isoformat(),

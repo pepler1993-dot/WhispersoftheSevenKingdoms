@@ -24,14 +24,20 @@ COOKIE_NAME = 'ws_session'
 
 
 def hash_password(password: str) -> str:
+    if bcrypt is None:
+        raise RuntimeError('bcrypt not installed – run: pip install bcrypt')
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 
 def verify_password(password: str, hashed: str) -> bool:
+    if bcrypt is None:
+        return False
     return bcrypt.checkpw(password.encode(), hashed.encode())
 
 
 def create_token(user_id: str, username: str, role: str) -> str:
+    if jwt is None:
+        raise RuntimeError('PyJWT not installed – run: pip install PyJWT')
     payload = {
         'sub': user_id,
         'username': username,
@@ -43,6 +49,8 @@ def create_token(user_id: str, username: str, role: str) -> str:
 
 
 def decode_token(token: str) -> dict[str, Any] | None:
+    if jwt is None:
+        return None
     try:
         return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
