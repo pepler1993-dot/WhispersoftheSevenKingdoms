@@ -21,7 +21,16 @@
   <a href="/admin/shorts" class="btn btn-secondary btn-sm">
     <i data-lucide="arrow-left" style="width:14px;height:14px"></i> Alle Shorts
   </a>
-  <span class="badge badge-queued">Coming Soon: Rendering & Upload</span>
+  {% if run.status in ('created', 'failed') %}
+  <form method="post" action="/admin/shorts/{{ run.run_id }}/render" style="display:inline;">
+    <button type="submit" class="btn btn-primary btn-sm">Rendern</button>
+  </form>
+  {% endif %}
+  {% if run.status == 'rendered' %}
+  <form method="post" action="/admin/shorts/{{ run.run_id }}/upload" style="display:inline;">
+    <button type="submit" class="btn btn-primary btn-sm">Upload</button>
+  </form>
+  {% endif %}
 </div>
 
 <div class="grid two">
@@ -45,7 +54,7 @@
     <h2>Status</h2>
     <div class="preview-meta">
       <strong>Aktueller Stand:</strong><br/>
-      Der Short-Draft ist angelegt. Rendering und Upload sind als Coming-Soon-Feature geplant.
+      {% if run.status == 'created' %}Draft angelegt. Bereit zum Rendern.{% elif run.status == 'running' %}Rendering läuft.{% elif run.status == 'rendered' %}Render fertig. Bereit zum Upload.{% elif run.status == 'uploading' %}Upload läuft.{% elif run.status == 'uploaded' %}Short wurde hochgeladen.{% else %}Render oder Upload fehlgeschlagen. Log prüfen und neu starten.{% endif %}
     </div>
   </div>
 </div>

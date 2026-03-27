@@ -25,18 +25,17 @@
 
 <section class="docs-hero" style="margin-bottom: 18px;">
   <div class="panel panel-accent-crimson">
-    <div class="docs-kicker">Coming Soon</div>
+    <div class="docs-kicker">MVP</div>
     <h2>Shorts aus bestehendem Audio anlegen</h2>
     <p class="page-subtitle" style="max-width: 70ch; margin-top: 10px;">
-      Der erste nutzbare Flow nimmt einen vorhandenen Track aus der Bibliothek, definiert einen kurzen Ausschnitt
-      und legt daraus einen Short-Entwurf an. Rendering und Upload sind als nächster Schritt geplant.
+      Vorhandenen Track wählen, Ausschnitt definieren, rendern und bei Bedarf direkt hochladen.
     </p>
   </div>
   <div class="docs-hero-side">
     <div class="docs-stat-card">
       <div class="label">Aktueller Stand</div>
       <div class="value">15–60s</div>
-      <div class="metric-help">9:16, bestehendes Audio, Short-spezifischer Draft im System</div>
+      <div class="metric-help">9:16, bestehendes Audio, Render + Upload im selben Flow</div>
       <div style="margin-top: 16px; display: grid; gap: 10px;">
         <div>
           <div class="label">Quelle</div>
@@ -44,7 +43,7 @@
         </div>
         <div>
           <div class="label">Status</div>
-          <div class="system-value">Draft verfügbar · Render/Upload Coming Soon</div>
+          <div class="system-value">Draft, Render und Upload aktiv</div>
         </div>
       </div>
     </div>
@@ -55,7 +54,7 @@
   <section class="panel panel-accent-purple">
     <div class="section-header-inline">
       <h2>Short erstellen</h2>
-      <span class="section-note">Draft-Erstellung aktiv · Rendering folgt</span>
+      <span class="section-note">MVP aktiv</span>
     </div>
 
     <form method="post" action="/admin/shorts/create" id="shorts-form">
@@ -112,8 +111,7 @@
 
       <div class="preview-meta" style="margin: 8px 0 18px;">
         <strong>Was beim Speichern passiert:</strong><br/>
-        Es wird ein Short-Draft angelegt, Metadaten unter <code>data/upload/shorts/metadata/</code> gespeichert
-        und ein eigener Run mit <code>content_type=short</code> in der DB registriert.
+        Es wird ein Short-Draft angelegt. Danach kannst du im Detailscreen rendern und hochladen.
       </div>
 
       <button type="submit" class="btn btn-primary">Short-Entwurf anlegen</button>
