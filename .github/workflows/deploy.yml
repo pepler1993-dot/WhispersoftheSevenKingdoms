@@ -15,7 +15,6 @@ jobs:
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
-          tags: tag:ci
 
       - name: Configure SSH key
         env:
@@ -27,10 +26,11 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
 
-      - name: Deploy on server
+      - name: Deploy on PVE via pct exec
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
+          LXC_ID: ${{ vars.LXC_ID || '103' }}
           DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/opt/whispers/WhispersoftheSevenKingdoms' }}
           SYSTEMD_SERVICE: ${{ vars.SYSTEMD_SERVICE || 'agent-sync' }}
           GIT_REMOTE: ${{ vars.GIT_REMOTE || 'origin' }}
@@ -38,18 +38,21 @@ jobs:
         run: |
           set -euo pipefail
           ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=yes "$SSH_USER@$SSH_HOST" \
-            "DEPLOY_PATH='$DEPLOY_PATH' SYSTEMD_SERVICE='$SYSTEMD_SERVICE' GIT_REMOTE='$GIT_REMOTE' DEPLOY_REF='$DEPLOY_REF' bash -s" <<'REMOTE'
+            "LXC_ID='$LXC_ID' DEPLOY_PATH='$DEPLOY_PATH' SYSTEMD_SERVICE='$SYSTEMD_SERVICE' GIT_REMOTE='$GIT_REMOTE' DEPLOY_REF='$DEPLOY_REF' bash -s" <<'REMOTE'
           set -euo pipefail
-          cd "$DEPLOY_PATH"
-          git config --global --add safe.directory "$DEPLOY_PATH"
-          git fetch "$GIT_REMOTE" "$DEPLOY_REF" --tags
-          git checkout "$DEPLOY_REF"
-          git reset --hard "$GIT_REMOTE/$DEPLOY_REF"
+          pct exec "$LXC_ID" -- bash -lc '
+            set -euo pipefail
+            cd "'$DEPLOY_PATH'"
+            git config --global --add safe.directory "'$DEPLOY_PATH'"
+            git fetch "'$GIT_REMOTE'" "'$DEPLOY_REF'" --tags
+            git checkout "'$DEPLOY_REF'"
+            git reset --hard "'$GIT_REMOTE'/'$DEPLOY_REF'"
 
-          if [ -f services/sync/requirements.txt ] && [ -x .venv/bin/pip ]; then
-            .venv/bin/pip install --quiet -r services/sync/requirements.txt
-          fi
+            if [ -f services/sync/requirements.txt ] && [ -x .venv/bin/pip ]; then
+              .venv/bin/pip install --quiet -r services/sync/requirements.txt
+            fi
 
-          sudo systemctl restart "$SYSTEMD_SERVICE"
-          sudo systemctl is-active "$SYSTEMD_SERVICE"
+            systemctl restart "'$SYSTEMD_SERVICE'"
+            systemctl is-active "'$SYSTEMD_SERVICE'"
+          '
           REMOTE
