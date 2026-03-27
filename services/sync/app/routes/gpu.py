@@ -1,17 +1,14 @@
 """GPU worker metrics routes."""
 from __future__ import annotations
 
-import os
 import subprocess
 from typing import Any
 
 from fastapi import APIRouter
 
-router = APIRouter()
+from app.stable_audio_gen import GPU_WORKER_HOST, GPU_WORKER_SSH_KEY, GPU_WORKER_USER
 
-GPU_WORKER_HOST = os.environ.get('GPU_WORKER_HOST', '192.168.178.152')
-GPU_WORKER_USER = os.environ.get('GPU_WORKER_USER', 'root')
-GPU_WORKER_SSH_KEY = os.environ.get('GPU_WORKER_SSH_KEY', '')
+router = APIRouter()
 
 
 def _ssh_cmd() -> list[str]:

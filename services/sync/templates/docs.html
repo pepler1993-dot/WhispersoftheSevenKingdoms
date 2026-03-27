@@ -31,6 +31,11 @@
     </a>
     {% endfor %}
   </div>
+  {% if query %}
+  <div class="page-subtitle" style="margin-top:10px;">
+    {{ total_results | default(0, true) }} Treffer für <strong>{{ query }}</strong>
+  </div>
+  {% endif %}
 </section>
 
 {% if query and not sections %}
@@ -55,6 +60,9 @@
     <a href="/admin/docs/{{ item.slug }}" class="docs-card">
       <div class="docs-card-top">
         <span class="badge docs-kind">{{ item.kind }}</span>
+        {% if query and item.matched_terms %}
+        <span class="badge docs-kind" title="Suchtreffer">Match: {{ item.matched_terms | join(', ') }}</span>
+        {% endif %}
       </div>
       <h3>{{ item.title }}</h3>
       <p>{{ item.summary or 'Öffnen, lesen, loslegen.' }}</p>

@@ -63,11 +63,8 @@ def admin_ticket_detail(request: Request, ticket_id: str):
 # ── API ──────────────────────────────────────────────────────────────────
 
 @router.post('/admin/tickets/create')
-def admin_ticket_create(request: Request):
-    import asyncio
-    loop = asyncio.new_event_loop()
-    form = loop.run_until_complete(request.form())
-    loop.close()
+async def admin_ticket_create(request: Request):
+    form = await request.form()
 
     title = form.get('title', '').strip()
     if not title:
@@ -91,11 +88,8 @@ def admin_ticket_create(request: Request):
 
 
 @router.post('/admin/tickets/{ticket_id}/update')
-def admin_ticket_update(request: Request, ticket_id: str):
-    import asyncio
-    loop = asyncio.new_event_loop()
-    form = loop.run_until_complete(request.form())
-    loop.close()
+async def admin_ticket_update(request: Request, ticket_id: str):
+    form = await request.form()
 
     existing = get_ticket(shared.db, ticket_id)
     if not existing:

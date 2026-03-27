@@ -22,15 +22,17 @@
 <section class="panel panel-accent-gold" style="margin-bottom:18px;">
   <h2>Wofür die Library da ist</h2>
   <div class="page-subtitle" style="max-width: 78ch; margin-top: 10px;">
-    Die Library ist der zentrale Ort für Pipeline-Eingaben. Im <strong>Create</strong>-Tab wählt ihr nur noch aus,
-    welche Assets benutzt werden sollen. Hochladen und Überblick passieren hier.
+    Die Library ist der zentrale Ort für Pipeline-Eingaben. Für den täglichen Ablauf reicht Upload und Auswahl.
   </div>
-  <ul class="list" style="margin-top: 12px;">
-    <li><strong>Songs</strong> → erscheinen im Create-Tab als Audio-Bibliothek</li>
-    <li><strong>Thumbnails</strong> → stehen im Create-Tab als vorhandene Thumbnail-Auswahl bereit</li>
-    <li><strong>Backgrounds</strong> → werden als Video-Hintergründe im Create-Tab auswählbar</li>
-    <li><strong>Metadata</strong> → liegen zentral für Referenz, Wiederverwendung und QA</li>
-  </ul>
+  <details style="margin-top:12px;">
+    <summary style="cursor:pointer; font-weight:600;">Asset-Details anzeigen</summary>
+    <ul class="list" style="margin-top: 12px;">
+      <li><strong>Songs</strong> → erscheinen im Create-Tab als Audio-Bibliothek</li>
+      <li><strong>Thumbnails</strong> → stehen im Create-Tab als vorhandene Thumbnail-Auswahl bereit</li>
+      <li><strong>Backgrounds</strong> → werden als Video-Hintergründe im Create-Tab auswählbar</li>
+      <li><strong>Metadata</strong> → liegen zentral für Referenz, Wiederverwendung und QA</li>
+    </ul>
+  </details>
 </section>
 
 <div class="grid two">
@@ -187,9 +189,11 @@
       <button type="submit" class="btn btn-primary btn-sm">Metadata hochladen</button>
     </form>
 
-    <form method="post" action="/admin/library/create-metadata" class="metadata-form">
+    <details class="metadata-form">
+      <summary style="cursor:pointer; font-weight:600; margin-bottom:10px;">Metadata direkt erstellen (Erweitert)</summary>
+    <form method="post" action="/admin/library/create-metadata">
       <div class="section-header-inline" style="margin-bottom:10px;"><h3>Metadata direkt erstellen</h3><span class="section-note">ohne JSON-Datei von Hand</span></div>
-      <p class="page-subtitle" style="margin:0 0 14px 0; max-width:70ch;">Erzeugt eine sofort nutzbare Metadata-Datei im bestehenden Pipeline-Format. Ideal für neue Songs, QA und spätere Wiederverwendung im Create-Flow.</p>
+      <p class="page-subtitle" style="margin:0 0 14px 0; max-width:70ch;">Erzeugt eine nutzbare Metadata-Datei im bestehenden Pipeline-Format.</p>
       <div class="form-group">
         <label for="meta_title">Titel</label>
         <input id="meta_title" name="title" type="text" class="form-input" required placeholder="Dreams Beyond the Wall" oninput="document.getElementById('meta_slug').value=this.value.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')" />
@@ -282,6 +286,7 @@
         <button type="submit" class="btn btn-primary btn-sm">Metadata erstellen</button>
       </div>
     </form>
+    </details>
   </div>
 </section>
 

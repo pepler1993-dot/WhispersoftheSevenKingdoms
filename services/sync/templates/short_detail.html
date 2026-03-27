@@ -21,25 +21,7 @@
   <a href="/admin/shorts" class="btn btn-secondary btn-sm">
     <i data-lucide="arrow-left" style="width:14px;height:14px"></i> Alle Shorts
   </a>
-  {% if run.status in ('created', 'failed') %}
-  <form method="post" action="/admin/shorts/{{ run.run_id }}/render" style="margin:0">
-    <button type="submit" class="btn btn-primary">
-      <i data-lucide="clapperboard" style="width:16px;height:16px"></i> Render starten
-    </button>
-  </form>
-  {% endif %}
-  {% if run.status == 'rendered' %}
-  <form method="post" action="/admin/shorts/{{ run.run_id }}/upload" style="margin:0">
-    <button type="submit" class="btn btn-success">
-      <i data-lucide="upload" style="width:16px;height:16px"></i> Zu YouTube hochladen
-    </button>
-  </form>
-  {% endif %}
-  {% if run.status == 'uploaded' %}
-  <span class="success-banner">
-    <i data-lucide="check-circle" style="width:18px;height:18px"></i> Upload abgeschlossen
-  </span>
-  {% endif %}
+  <span class="badge badge-queued">Coming Soon: Rendering & Upload</span>
 </div>
 
 <div class="grid two">
@@ -63,17 +45,7 @@
     <h2>Status</h2>
     <div class="preview-meta">
       <strong>Aktueller Stand:</strong><br/>
-      {% if run.status == 'created' %}
-      Der Short-Draft ist angelegt. Als Nächstes kann der Render gestartet werden.
-      {% elif run.status == 'queued' %}
-      Der Render wurde angefordert. Das Backend für echte Shorts-Render-Jobs wird als nächster Schritt verdrahtet.
-      {% elif run.status == 'running' %}
-      Der Short-Render läuft gerade.
-      {% elif run.status == 'failed' %}
-      Der Short ist fehlgeschlagen und kann erneut angestoßen werden.
-      {% else %}
-      Status: {{ run.status }}
-      {% endif %}
+      Der Short-Draft ist angelegt. Rendering und Upload sind als Coming-Soon-Feature geplant.
     </div>
   </div>
 </div>

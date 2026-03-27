@@ -14,6 +14,26 @@
   </div>
 </div>
 
+{% if alerts %}
+<section class="panel panel-accent-crimson" style="margin-bottom:18px;">
+  <div class="section-header-inline">
+    <h2>Priorisierte Hinweise</h2>
+    <span class="section-note">Was jetzt zu tun ist</span>
+  </div>
+  <div class="mini-list">
+    {% for a in alerts %}
+    <div class="mini-item" style="cursor:default;">
+      <div class="mini-dot {% if a.level == 'critical' %}mini-dot-failed{% elif a.level == 'warning' %}mini-dot-queued{% else %}mini-dot-uploaded{% endif %}"></div>
+      <div class="mini-info">
+        <div class="mini-title">{{ a.title }}</div>
+        <div class="mini-sub">Nächster Schritt: {{ a.action }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
 {# ── Quick Stats ──────────────────────────────────────────────── #}
 <div class="ops-stats">
   <div class="ops-stat">
@@ -45,10 +65,10 @@
     </div>
   </div>
   <div class="ops-stat">
-    <div class="ops-stat-icon">📡</div>
+    <div class="ops-stat-icon">🎵</div>
     <div class="ops-stat-body">
-      <div class="ops-stat-value">{{ system.counts.github_events if system.counts else '0' }}</div>
-      <div class="ops-stat-label">GitHub Events</div>
+      <div class="ops-stat-value">{{ system.counts.pipeline_runs if system.counts else '0' }}</div>
+      <div class="ops-stat-label">Pipeline Runs</div>
     </div>
   </div>
 </div>
@@ -160,29 +180,6 @@
   <div class="empty-state-sm">Keine Tickets vorhanden — <a href="/admin/tickets/new">Ticket erstellen</a></div>
   {% endif %}
 </section>
-
-{# ── GitHub Events (collapsible) ──────────────────────────────── #}
-<details class="ops-panel ops-details">
-  <summary class="ops-details-summary">
-    <h2>📡 GitHub Events</h2>
-    <span class="section-count">{{ events|length }}</span>
-  </summary>
-  {% if events %}
-  <div class="mini-list" style="margin-top:12px;">
-    {% for event in events[:10] %}
-    <div class="mini-item" style="cursor:default;">
-      <div class="mini-dot" style="background:var(--blue,#3b82f6);"></div>
-      <div class="mini-info">
-        <div class="mini-title">{{ event.summary }}</div>
-        <div class="mini-sub">{{ event.sender or '—' }} · {{ event.received_at_display }}</div>
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-  {% else %}
-  <div class="empty-state-sm" style="margin-top:12px;">Keine GitHub Events</div>
-  {% endif %}
-</details>
 
 <script>
 (function(){

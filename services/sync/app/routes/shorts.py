@@ -142,20 +142,17 @@ def admin_shorts_render(run_id: str):
     run = shared.db.get_run(run_id)
     if not run or (run.get('config') or {}).get('content_type') != 'short':
         raise HTTPException(status_code=404, detail='Short run not found')
-    if run['status'] not in {'created', 'failed'}:
-        raise HTTPException(status_code=409, detail=f'Cannot render short from status {run["status"]}')
-
     now = datetime.now(shared.CET).isoformat()
-    config = run.get('config', {})
-    shared.db.update_run(run_id, status='running', started_at=now, error_message=None)
-    shared.db.append_run_log(run_id, 'system', 'Short render requested from dashboard', now)
-    shared.db.append_run_log(run_id, 'system', f"Source audio: {config.get('source_audio')}", now)
-    shared.db.append_run_log(run_id, 'system', f"Clip window: {config.get('clip_start_seconds', 0)}s \u2192 +{config.get('clip_duration_seconds', 30)}s", now)
-    shared.db.append_run_log(run_id, 'system', f"Visual mode: {config.get('visual_mode', 'static-artwork')}", now)
-    shared.db.append_run_log(run_id, 'system', 'Render backend for Shorts is not wired yet \u2014 this draft is now queued for implementation.', now)
-    shared.db.update_run(run_id, status='queued')
-
-    return RedirectResponse(url=f'/admin/shorts/{run_id}?success=Short-Render+wurde+angesto\u00dfen', status_code=303)
+    shared.db.append_run_log(
+        run_id,
+        'system',
+        'Shorts-Rendering ist ein geplantes Feature und derzeit als Coming Soon markiert.',
+        now,
+    )
+    return RedirectResponse(
+        url=f'/admin/shorts/{run_id}?error=Coming+Soon:+Shorts-Rendering+wird+in+einem+kommenden+Release+aktiviert',
+        status_code=303,
+    )
 
 
 @router.get('/admin/shorts/{run_id}/logs')
@@ -172,6 +169,8 @@ def admin_shorts_upload(run_id: str):
     run = shared.db.get_run(run_id)
     if not run or (run.get('config') or {}).get('content_type') != 'short':
         raise HTTPException(status_code=404, detail='Short run not found')
+    if run.get('status') in {'created', 'failed', 'queued', 'running'}:
+        raise HTTPException(status_code=409, detail='Coming Soon: Shorts-Upload ist erst nach aktiviertem Rendering verfügbar')
     if run['status'] != 'rendered':
         raise HTTPException(status_code=409, detail=f'Cannot upload short from status {run["status"]}')
 
@@ -203,7 +202,11 @@ def admin_shorts_upload(run_id: str):
             shared.db.update_run(run_id, status='rendered', error_message=f'Upload start failed: {exc}')
             shared.db.append_run_log(run_id, 'system', f'Upload start failed: {exc}', datetime.now(shared.CET).isoformat())
             return
-        t_out, t_err = _append_process_logs(run_id, proc)
+        from app.pipeline_runner import _stream_reader
+        t_out = threading.Thread(target=_stream_reader, args=(proc.stdout, run_id, 'stdout', shared.db), daemon=True)
+        t_err = threading.Thread(target=_stream_reader, args=(proc.stderr, run_id, 'stderr', shared.db), daemon=True)
+        t_out.start()
+        t_err.start()
         code = proc.wait()
         t_out.join(timeout=5)
         t_err.join(timeout=5)
@@ -221,7 +224,10 @@ def admin_shorts_upload(run_id: str):
 
 @router.get('/admin/shorts/preview/{slug}/{filename}')
 def admin_shorts_preview_file(slug: str, filename: str):
-    path = PIPELINE_DIR / 'data' / 'output' / 'shorts' / slug / filename
+    base = PIPELINE_DIR / 'data' / 'output' / 'shorts'
+    path = (base / slug / filename).resolve()
+    if not path.is_relative_to(base.resolve()):
+        raise HTTPException(status_code=400, detail='Invalid path')
     if not path.exists() or not path.is_file():
         raise HTTPException(status_code=404, detail='File not found')
     return FileResponse(path)

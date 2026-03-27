@@ -25,8 +25,9 @@ def _enrich_metadata_items(items: list[dict[str, str]]) -> list[dict[str, str]]:
                 data = json.loads(path.read_text(encoding='utf-8'))
                 extra['title'] = (data.get('title') or '—').strip() or '—'
                 extra['slug'] = (data.get('slug') or extra['slug']).strip() or extra['slug']
-            except Exception:
-                pass
+            except (json.JSONDecodeError, OSError) as exc:
+                import logging
+                logging.warning('Failed to read metadata %s: %s', path.name, exc)
         enriched.append({**item, **extra})
     return enriched
 
@@ -212,8 +213,14 @@ async def admin_library_upload(asset_type: str = Form(...), file: list[UploadFil
             continue
         if Path(filename).suffix.lower() not in allowed:
             return RedirectResponse(f'/admin/library?error=Dateityp+für+{filename}+nicht+erlaubt', status_code=303)
-        content = await uploaded_file.read()
-        (target_dir / filename).write_bytes(content)
+        target_path = target_dir / filename
+        with target_path.open('wb') as out:
+            while True:
+                chunk = await uploaded_file.read(1024 * 1024)
+                if not chunk:
+                    break
+                out.write(chunk)
+        await uploaded_file.close()
         uploaded += 1
     if uploaded == 0:
         return RedirectResponse('/admin/library?error=Keine+gültigen+Dateien+hochgeladen', status_code=303)

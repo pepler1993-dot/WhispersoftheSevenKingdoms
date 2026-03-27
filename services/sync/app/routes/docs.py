@@ -14,7 +14,9 @@ router = APIRouter()
 def admin_docs(request: Request, q: str | None = Query(default=None)):
     nav = _build_docs_nav()
     query = (q or '').strip().lower()
+    query_terms = [t for t in query.split() if t]
     sections = []
+    total_results = 0
     for key, section in nav.items():
         items = []
         for item in section['items']:
@@ -26,13 +28,34 @@ def admin_docs(request: Request, q: str | None = Query(default=None)):
                     if s and not s.startswith('#') and not s.startswith('```'):
                         summary = s[:180]
                         break
-            except Exception:
+            except OSError:
                 pass
-            haystack = ' '.join([item['title'], item['kind'], summary, section['title'], section['subtitle']]).lower()
-            if query and query not in haystack:
-                continue
-            items.append({**item, 'summary': summary})
+            title_l = item['title'].lower()
+            kind_l = item['kind'].lower()
+            summary_l = summary.lower()
+            section_l = f"{section['title']} {section['subtitle']}".lower()
+            haystack = ' '.join([title_l, kind_l, summary_l, section_l])
+
+            score = 0
+            matched_terms: list[str] = []
+            if query_terms:
+                for term in query_terms:
+                    if term in title_l:
+                        score += 3
+                        matched_terms.append(term)
+                    elif term in summary_l:
+                        score += 2
+                        matched_terms.append(term)
+                    elif term in haystack:
+                        score += 1
+                        matched_terms.append(term)
+                if score == 0:
+                    continue
+            items.append({**item, 'summary': summary, 'score': score, 'matched_terms': sorted(set(matched_terms))})
+        if query_terms:
+            items.sort(key=lambda i: i.get('score', 0), reverse=True)
         if items:
+            total_results += len(items)
             sections.append({'key': key, 'title': section['title'], 'subtitle': section['subtitle'], 'items': items})
     quicklinks = [
         {'title': 'Quickstart', 'href': '/admin/docs/quickstart', 'icon': 'rocket'},
@@ -40,7 +63,17 @@ def admin_docs(request: Request, q: str | None = Query(default=None)):
         {'title': 'Dashboard lokal starten', 'href': '/admin/docs/dashboard-local-start', 'icon': 'monitor-play'},
         {'title': 'Architecture Diagram', 'href': '/admin/docs/architecture-diagram', 'icon': 'network'},
     ]
-    return shared.templates.TemplateResponse(request, 'docs.html', {'page': 'docs', 'sections': sections, 'query': q or '', 'quicklinks': quicklinks})
+    return shared.templates.TemplateResponse(
+        request,
+        'docs.html',
+        {
+            'page': 'docs',
+            'sections': sections,
+            'query': q or '',
+            'quicklinks': quicklinks,
+            'total_results': total_results,
+        },
+    )
 
 
 @router.get('/admin/docs/{slug}', response_class=HTMLResponse)

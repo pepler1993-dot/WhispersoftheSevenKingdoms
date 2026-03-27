@@ -10,7 +10,7 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app import shared
-from app.helpers import _build_protocol_health, _get_release_notes
+from app.helpers import _get_release_notes
 
 router = APIRouter()
 

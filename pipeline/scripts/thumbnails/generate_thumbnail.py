@@ -20,7 +20,7 @@ import unicodedata
 from pathlib import Path
 
 try:
-    from PIL import Image, ImageColor, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
+    from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
     HAS_PILLOW = True
 except ImportError:
     HAS_PILLOW = False
@@ -420,24 +420,24 @@ def save_image(img: Image.Image, output_path: Path) -> None:
 
 
 def build_background(bg_image: str | None, theme: dict) -> Image.Image:
-    """Erzeugt den Hintergrund aus Bild oder Gradient."""
-    if bg_image:
-        bg_path = Path(bg_image)
-        if bg_path.exists():
-            img = Image.open(bg_path).convert("RGB")
-            img = ImageOps.fit(img, (WIDTH, HEIGHT), method=Image.LANCZOS, centering=(0.5, 0.5))
-            img = img.filter(ImageFilter.GaussianBlur(radius=5))
+    """Erzeugt den Hintergrund ausschließlich aus einem echten Bild."""
+    if not bg_image:
+        raise ValueError("Kein Hintergrundbild angegeben. --bg-image ist erforderlich.")
 
-            enhancer = ImageEnhance.Brightness(img)
-            img = enhancer.enhance(0.7)
+    bg_path = Path(bg_image)
+    if not bg_path.exists() or not bg_path.is_file():
+        raise FileNotFoundError(f"Hintergrundbild nicht gefunden: {bg_path}")
 
-            enhancer = ImageEnhance.Color(img)
-            img = enhancer.enhance(1.3)
-            return img
+    img = Image.open(bg_path).convert("RGB")
+    img = ImageOps.fit(img, (WIDTH, HEIGHT), method=Image.LANCZOS, centering=(0.5, 0.5))
+    img = img.filter(ImageFilter.GaussianBlur(radius=5))
 
-        print(f"⚠️ Hintergrundbild nicht gefunden: {bg_path}. Verwende Theme-Gradient.")
+    enhancer = ImageEnhance.Brightness(img)
+    img = enhancer.enhance(0.7)
 
-    return create_gradient(WIDTH, HEIGHT, theme["bg_color"], theme["gradient_color"])
+    enhancer = ImageEnhance.Color(img)
+    img = enhancer.enhance(1.3)
+    return img
 
 
 def compute_line_heights(draw: ImageDraw.ImageDraw, lines: list[str], font) -> tuple[list[int], int]:
@@ -571,7 +571,7 @@ def main():
     parser.add_argument("--theme", type=str, default="default", help="Theme/Location (winterfell, targaryen, etc.)")
     parser.add_argument("--subtitle", type=str, default="3 Hours Deep Sleep Music", help="Untertitel")
     parser.add_argument("--output", type=str, help="Output-Pfad (default: output/thumbnails/) ")
-    parser.add_argument("--bg-image", type=str, help="Optionales Hintergrundbild")
+    parser.add_argument("--bg-image", type=str, help="Pflicht: Hintergrundbild")
     parser.add_argument("--list-themes", action="store_true", help="Alle Themes anzeigen")
 
     args = parser.parse_args()
@@ -588,7 +588,11 @@ def main():
         print("❌ Pillow fehlt. Installiere mit: pip install Pillow")
         sys.exit(1)
 
-    generate_thumbnail(args.title, args.theme, args.subtitle, args.output, args.bg_image)
+    try:
+        generate_thumbnail(args.title, args.theme, args.subtitle, args.output, args.bg_image)
+    except (ValueError, FileNotFoundError) as exc:
+        print(f"❌ {exc}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
