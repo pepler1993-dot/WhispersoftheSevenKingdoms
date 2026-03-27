@@ -103,25 +103,30 @@ def _handle_audio_phase(wf: dict[str, Any], db: AgentSyncDB) -> None:
     status = job.get('status', '')
 
     if status == 'complete':
-        # Audio done → start pipeline
-        run_id = uuid.uuid4().hex[:12]
+        # Audio done → enqueue existing pipeline run
+        run_id = wf.get('pipeline_run_id')
         now = _now_iso()
         config = wf.get('config', {})
 
-        db.create_run({
-            'run_id': run_id,
-            'slug': wf['slug'],
-            'title': wf['title'],
-            'status': 'created',
-            'config': config,
-            'created_at': now,
-        })
+        if not run_id:
+            update_workflow(db, wf['workflow_id'],
+                            status='error', error_message='No pipeline run ID',
+                            updated_at=now)
+            return
 
+        run = db.get_run(run_id)
+        if not run:
+            update_workflow(db, wf['workflow_id'],
+                            status='error', error_message='Pipeline run not found',
+                            updated_at=now)
+            return
+
+        db.update_run(run_id, status='created')
+        db.append_run_log(run_id, 'system', 'Audio abgeschlossen – Render wird in die Warteschlange gestellt.', now)
         enqueue_run(run_id, wf['slug'], config, db)
 
         update_workflow(db, wf['workflow_id'],
-                        phase='render', pipeline_run_id=run_id,
-                        updated_at=now)
+                        phase='render', updated_at=now)
 
     elif status in ('error', 'cancelled'):
         update_workflow(db, wf['workflow_id'],

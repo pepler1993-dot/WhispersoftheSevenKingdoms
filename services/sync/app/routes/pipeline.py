@@ -28,7 +28,7 @@ from app.pipeline_runner import (
 )
 from app.pipeline_queue import enqueue_run, get_queue_status
 from app.audio_jobs import create_audio_job
-from app.stores.workflows import create_workflow, get_workflow
+from app.stores.workflows import create_workflow, get_workflow, get_workflow_by_run_id
 from app.pipeline_workflow import start_workflow
 
 router = APIRouter()
@@ -273,6 +273,7 @@ def admin_pipeline_start(
     background_file: str = Form(''),
     audio_source: str = Form('library'),
     gen_minutes: int = Form(42),
+    gen_steps: int = Form(50),
     gen_model: str = Form('medium'),
     gen_prompt: str = Form(''),
 ):
@@ -306,6 +307,7 @@ def admin_pipeline_start(
             model=gen_model,
             clip_seconds=30,
             db=shared.db,
+            steps=gen_steps,
         )
 
         metadata = _build_song_metadata(
@@ -346,6 +348,17 @@ def admin_pipeline_start(
 
         now = datetime.now(shared.CET).isoformat()
         workflow_id = uuid.uuid4().hex[:12]
+        run_id = uuid.uuid4().hex[:12]
+
+        shared.db.create_run({
+            'run_id': run_id,
+            'slug': slug,
+            'title': title,
+            'status': 'waiting_for_audio',
+            'config': pipeline_config,
+            'created_at': now,
+        })
+        shared.db.append_run_log(run_id, 'system', 'Generate-Workflow gestartet. Warte auf Audio-Job.', now)
 
         create_workflow(shared.db, {
             'workflow_id': workflow_id,
@@ -354,6 +367,7 @@ def admin_pipeline_start(
             'phase': 'audio',
             'status': 'running',
             'audio_job_id': audio_job_id,
+            'pipeline_run_id': run_id,
             'config': pipeline_config,
             'auto_upload': auto_upload,
             'created_at': now,
@@ -361,7 +375,7 @@ def admin_pipeline_start(
         })
 
         start_workflow(workflow_id, audio_job_id, slug, title, pipeline_config, auto_upload, shared.db)
-        return RedirectResponse(url=f'/admin/workflow/{workflow_id}', status_code=303)
+        return RedirectResponse(url=f'/admin/pipeline/run/{run_id}', status_code=303)
 
     if not audio_found:
         return RedirectResponse(
@@ -438,6 +452,11 @@ def admin_pipeline_run_detail(request: Request, run_id: str):
         raise HTTPException(status_code=404, detail='Run not found')
     logs = shared.db.get_run_logs(run_id, limit=1000)
 
+    workflow = get_workflow_by_run_id(shared.db, run_id)
+    audio_job = None
+    if workflow and workflow.get('audio_job_id'):
+        audio_job = shared.db.get_audio_job(workflow['audio_job_id'])
+
     output_files: list[dict[str, str]] = []
     output_dir = PIPELINE_DIR / 'data' / 'output' / 'youtube' / run['slug']
     if output_dir.exists():
@@ -449,6 +468,8 @@ def admin_pipeline_run_detail(request: Request, run_id: str):
         'request': request,
         'page': 'pipeline',
         'run': run,
+        'workflow': workflow,
+        'audio_job': audio_job,
         'logs': logs,
         'output_files': output_files,
     })

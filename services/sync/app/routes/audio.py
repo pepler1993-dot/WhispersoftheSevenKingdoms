@@ -130,7 +130,7 @@ def admin_audio_job_retry(job_id: str):
         title=job.get('title', job['slug']),
         prompt_text=job.get('prompt_text', ''),
         preset_name=None,
-        minutes=job.get('minutes') or 42,
+        minutes=job.get('minutes') or 20,
         model=job.get('model', 'medium'),
         clip_seconds=job.get('clip_seconds') or 30,
         db=shared.db,

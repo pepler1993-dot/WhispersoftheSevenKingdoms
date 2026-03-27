@@ -149,9 +149,15 @@
             </div>
           </div>
           <div class="generate-settings">
-            <div class="form-group">
-              <label for="gen-minutes">Dauer (Min)</label>
-              <input type="number" id="gen-minutes" class="form-input" value="20" min="1" max="120" />
+            <div class="grid two">
+              <div class="form-group">
+                <label for="gen-minutes">Dauer (Min)</label>
+                <input type="number" id="gen-minutes" class="form-input" value="20" min="1" max="120" />
+              </div>
+              <div class="form-group">
+                <label for="gen-steps">Steps</label>
+                <input type="number" id="gen-steps" class="form-input" value="50" min="10" max="250" step="1" />
+              </div>
             </div>
             <input type="hidden" id="gen-model" value="stable-audio" />
           </div>
@@ -172,6 +178,7 @@
       <input type="hidden" name="audio_job_id" id="audio_job_id" />
       <input type="hidden" name="audio_source" id="audio_source" value="generate" />
       <input type="hidden" name="gen_minutes" id="gen_minutes_hidden" value="20" />
+      <input type="hidden" name="gen_steps" id="gen_steps_hidden" value="50" />
       <input type="hidden" name="gen_model" id="gen_model_hidden" value="medium" />
       <input type="hidden" name="gen_prompt" id="gen_prompt_hidden" value="" />
     </div>
@@ -979,8 +986,11 @@
   };
 
   // Sync generate settings to hidden fields
-  document.getElementById('gen-minutes').addEventListener('change', function() {
+  document.getElementById('gen-minutes').addEventListener('input', function() {
     document.getElementById('gen_minutes_hidden').value = this.value;
+  });
+  document.getElementById('gen-steps').addEventListener('input', function() {
+    document.getElementById('gen_steps_hidden').value = this.value;
   });
   document.getElementById('gen-model').addEventListener('change', function() {
     document.getElementById('gen_model_hidden').value = this.value;
@@ -1012,6 +1022,7 @@
     if (!selectedHouse) return alert('Bitte zuerst ein Haus wählen');
     const house = houses[selectedHouse];
     const minutes = document.getElementById('gen-minutes').value;
+    const steps = document.getElementById('gen-steps').value;
     const model = document.getElementById('gen-model').value;
     const variantKey = (document.getElementById('notes').value || '').trim();
     const lines = promptLinesForSelection(house, variantKey);
@@ -1037,6 +1048,7 @@
     fd.append('prompt_text', prompts);
     fd.append('preset_name', '');
     fd.append('minutes', minutes);
+    fd.append('steps', steps);
     fd.append('model', model);
     fd.append('clip_seconds', '30');
 

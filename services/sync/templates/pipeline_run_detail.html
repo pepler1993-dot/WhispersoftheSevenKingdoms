@@ -54,6 +54,47 @@
 </div>
 {% endif %}
 
+{% if workflow %}
+<section class="run-panel workflow-panel">
+  <div class="workflow-panel-head">
+    <div>
+      <h2>⚡ Generate-Workflow</h2>
+      <div class="page-subtitle">Audio → Render → {% if workflow.auto_upload %}Upload{% else %}manueller Upload{% endif %}</div>
+    </div>
+    <span class="run-status-pill run-status-{{ workflow.status if workflow.status in ('running', 'failed', 'cancelled') else 'created' }}">{{ workflow.status }}</span>
+  </div>
+  {% set phases = ['audio', 'render', 'upload', 'done'] %}
+  {% set phase_icons = {'audio': '🎵', 'render': '🎬', 'upload': '📤', 'done': '✅'} %}
+  {% set phase_labels = {'audio': 'Audio', 'render': 'Render', 'upload': 'Upload', 'done': 'Fertig'} %}
+  <div class="workflow-phase-track">
+    {% for p in phases %}
+    <div class="workflow-phase-step {% if p == workflow.phase %}active{% elif phases.index(p) < phases.index(workflow.phase) %}done{% endif %} {% if workflow.status == 'error' and p == workflow.phase %}error{% endif %}">
+      <div class="workflow-phase-icon">{{ phase_icons[p] }}</div>
+      <div class="workflow-phase-label">{{ phase_labels[p] }}</div>
+    </div>
+    {% if not loop.last %}<div class="workflow-phase-connector {% if phases.index(p) < phases.index(workflow.phase) %}done{% endif %}"></div>{% endif %}
+    {% endfor %}
+  </div>
+  <div class="workflow-meta-grid">
+    <div class="workflow-meta-card">
+      <div class="info-label">Workflow ID</div>
+      <div class="info-value"><code>{{ workflow.workflow_id }}</code></div>
+    </div>
+    <div class="workflow-meta-card">
+      <div class="info-label">Audio-Job</div>
+      <div class="info-value">{% if audio_job %}<a href="/admin/audio/jobs/{{ audio_job.job_id }}"><code>{{ audio_job.job_id[:12] }}</code></a>{% else %}—{% endif %}</div>
+    </div>
+    <div class="workflow-meta-card">
+      <div class="info-label">Audio-Status</div>
+      <div class="info-value">{{ audio_job.status if audio_job else '—' }}</div>
+    </div>
+  </div>
+  {% if run.status == 'waiting_for_audio' %}
+  <div class="workflow-waiting-note">Warte auf erfolgreichen Abschluss des Audio-Jobs. Danach geht dieser Run automatisch in die Render-Warteschlange.</div>
+  {% endif %}
+</section>
+{% endif %}
+
 {# ── Info Cards ───────────────────────────────────────────────── #}
 {% if run.config %}
 {% set cfg = run.config %}
@@ -205,7 +246,7 @@
   var slug = '{{ run.slug }}';
   var viewer = document.getElementById('log-viewer');
   var lastId = {{ logs[-1].id if logs else 0 }};
-  var polling = (status === 'running' || status === 'created' || status === 'uploading' || status === 'queued');
+  var polling = (status === 'running' || status === 'created' || status === 'uploading' || status === 'queued' || status === 'waiting_for_audio');
 
   function pollLogs() {
     if (!polling) return;
@@ -222,7 +263,7 @@
           });
           viewer.scrollTop = viewer.scrollHeight;
         }
-        if (data.status !== 'running' && data.status !== 'created' && data.status !== 'uploading' && data.status !== 'queued') {
+        if (data.status !== 'running' && data.status !== 'created' && data.status !== 'uploading' && data.status !== 'queued' && data.status !== 'waiting_for_audio') {
           polling = false;
           if (data.status === 'rendered' || data.status === 'uploaded' || data.status === 'failed') {
             setTimeout(function() { location.reload(); }, 1000);
@@ -295,6 +336,7 @@
 .run-status-cancelled { background: rgba(107,114,128,0.15); color: #9ca3af; }
 .run-status-created { background: rgba(107,114,128,0.15); color: #9ca3af; }
 .run-status-uploading { background: rgba(139,92,246,0.15); color: #c084fc; }
+.run-status-waiting_for_audio { background: rgba(245,158,11,0.15); color: #fbbf24; }
 .status-dot-pulse {
   width: 7px; height: 7px; border-radius: 50%;
   background: #22c55e;
@@ -348,6 +390,22 @@
   font-size: 0.84rem;
   color: #fca5a5;
 }
+
+/* ── Workflow Panel ───────────────────────────────────────── */
+.workflow-panel { margin-bottom: 16px; }
+.workflow-panel-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
+.workflow-phase-track { display:flex; align-items:center; gap:0; margin-bottom:16px; }
+.workflow-phase-step { text-align:center; min-width:72px; opacity:0.45; }
+.workflow-phase-step.active { opacity:1; }
+.workflow-phase-step.done { opacity:0.85; }
+.workflow-phase-step.error .workflow-phase-icon { filter: grayscale(1); }
+.workflow-phase-icon { font-size:1.4rem; margin-bottom:4px; }
+.workflow-phase-label { font-size:0.72rem; color:var(--muted); font-weight:600; }
+.workflow-phase-connector { width:42px; height:3px; background:var(--line); margin:0 8px 20px; border-radius:2px; }
+.workflow-phase-connector.done { background: var(--gold, #c9a53a); }
+.workflow-meta-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:10px; }
+.workflow-meta-card { padding:12px; background: var(--surface); border:1px solid var(--line); border-radius:10px; }
+.workflow-waiting-note { margin-top:12px; color: var(--muted); font-size:0.82rem; }
 
 /* ── Info Cards ───────────────────────────────────────────── */
 .run-info-grid {

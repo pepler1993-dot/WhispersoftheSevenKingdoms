@@ -8,10 +8,10 @@
 
 ## ⚠️ PFLICHT: Ticket-System im Sync Service nutzen!
 - **Jede Aufgabe** läuft über das **Ticket-System** im Sync Service Dashboard (NICHT über GitHub Issues/Tasks)
-- **Tickets holen:** `GET https://unsuitable-amina-tyrannizingly.ngrok-free.dev/api/tickets`
-- **Ticket claimen:** `POST https://unsuitable-amina-tyrannizingly.ngrok-free.dev/admin/tickets/{ID}/update` mit `status=in_progress&assigned_to=Name`
+- **Tickets holen:** `GET https://discretion-plan-dairy-puzzle.trycloudflare.com/api/tickets`
+- **Ticket claimen:** `POST https://discretion-plan-dairy-puzzle.trycloudflare.com/admin/tickets/{ID}/update` mit `status=in_progress&assigned_to=Name`
 - **Kein stilles Arbeiten** – alles läuft über Tickets nach Protokoll
-- **Dashboard URL:** `https://unsuitable-amina-tyrannizingly.ngrok-free.dev` (wird bald `dashboard.ka189.de` via Cloudflare Tunnel)
+- **Dashboard URL:** `https://discretion-plan-dairy-puzzle.trycloudflare.com` (wird bald `dashboard.ka189.de` via Cloudflare Tunnel)
 - **Workflow:** Ticket holen → claimen → Branch erstellen → arbeiten → im Chat melden → Review + Merge → Ticket auf done
 - **Wenn ein Ticket fertig ist → immer auf `done` setzen!**
 - GitHub Issues und Tasks sind **veraltet** — Tickets im Dashboard sind die Single Source of Truth

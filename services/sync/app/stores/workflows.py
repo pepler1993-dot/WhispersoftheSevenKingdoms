@@ -59,6 +59,13 @@ def get_workflow(db, workflow_id: str) -> dict[str, Any] | None:
         return row
 
 
+def get_workflow_by_run_id(db, run_id: str) -> dict[str, Any] | None:
+    with db._connect() as conn:
+        conn.row_factory = _wf_row_factory
+        row = conn.execute('SELECT * FROM workflows WHERE pipeline_run_id = ?', (run_id,)).fetchone()
+        return row
+
+
 def update_workflow(db, workflow_id: str, **fields: Any) -> None:
     allowed = {'phase', 'status', 'audio_job_id', 'pipeline_run_id',
                'error_message', 'updated_at', 'auto_upload'}
