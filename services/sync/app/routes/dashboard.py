@@ -16,7 +16,7 @@ router = APIRouter()
 
 
 @router.get('/')
-def root_redirect():
+def root_redirect(request: Request):
     return RedirectResponse(url='/admin', status_code=302)
 
 

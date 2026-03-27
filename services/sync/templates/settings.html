@@ -32,6 +32,11 @@
       Presets
       <span class="library-tab-count">{{ preset_count }}</span>
     </a>
+    <a class="library-tab{% if settings_tab == 'team' %} active{% endif %}" href="/admin/settings?tab=team">
+      <i data-lucide="users" style="width:17px;height:17px;opacity:0.9"></i>
+      Team
+      <span class="library-tab-count">{{ team_count | default(0) }}</span>
+    </a>
   </nav>
 </div>
 
@@ -434,6 +439,76 @@ fetch('/admin/audio/health')
 </section>
 {% endif %}
 
+{% endif %}
+
+{# ── Team ─────────────────────────────────────────────────────── #}
+{% if settings_tab == 'team' %}
+<section class="panel st-section">
+  <div class="section-header-inline">
+    <h2>👥 Team</h2>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <span class="section-count">{{ team_count | default(0) }}</span>
+      <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('new-user-form').style.display='block'; this.style.display='none';">
+        <i data-lucide="plus" style="width:14px;height:14px"></i> Einladen
+      </button>
+    </div>
+  </div>
+
+  {# New user form (hidden) #}
+  <div id="new-user-form" class="st-step-card" style="display:none; margin-bottom:16px;">
+    <form method="post" action="/admin/settings/team/add">
+      <h3 style="margin-bottom:12px;">Neuen User anlegen</h3>
+      <div class="grid two">
+        <div class="form-group">
+          <label for="new_username">Benutzername</label>
+          <input type="text" name="username" id="new_username" class="form-input" required placeholder="eddi" />
+        </div>
+        <div class="form-group">
+          <label for="new_display_name">Anzeigename</label>
+          <input type="text" name="display_name" id="new_display_name" class="form-input" placeholder="Eddi" />
+        </div>
+      </div>
+      <div class="grid two">
+        <div class="form-group">
+          <label for="new_password">Passwort</label>
+          <input type="password" name="password" id="new_password" class="form-input" required />
+        </div>
+        <div class="form-group">
+          <label for="new_role">Rolle</label>
+          <select name="role" id="new_role" class="form-select">
+            <option value="admin">Admin</option>
+            <option value="editor" selected>Editor</option>
+            <option value="viewer">Viewer</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">User anlegen</button>
+    </form>
+  </div>
+
+  {% if team_users %}
+  <div class="mini-list">
+    {% for u in team_users %}
+    <div class="mini-item" style="cursor:default;">
+      <div class="mini-dot" style="background: {% if u.role == 'admin' %}#c9a53a{% elif u.role == 'editor' %}#3b82f6{% else %}#6b7280{% endif %};"></div>
+      <div class="mini-info">
+        <div class="mini-title">{{ u.display_name or u.username }}</div>
+        <div class="mini-sub">@{{ u.username }} · {{ u.role }} · Erstellt {{ u.created_at[:10] if u.created_at else '—' }}{% if u.last_login %} · Letzter Login {{ u.last_login[:10] }}{% endif %}</div>
+      </div>
+      <span class="mini-badge" style="background: {% if u.role == 'admin' %}rgba(201,165,58,0.15); color:#fbbf24{% elif u.role == 'editor' %}rgba(59,130,246,0.15); color:#60a5fa{% else %}rgba(107,114,128,0.15); color:#9ca3af{% endif %};">{{ u.role }}</span>
+      {% if u.username != 'admin' %}
+      <form method="post" action="/admin/settings/team/delete" style="display:inline;" onsubmit="return confirm('User «{{ u.username }}» wirklich löschen?')">
+        <input type="hidden" name="user_id" value="{{ u.user_id }}" />
+        <button type="submit" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:0.7rem; color:#f87171;">🗑️</button>
+      </form>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state-sm">Noch keine User angelegt.</div>
+  {% endif %}
+</section>
 {% endif %}
 
 <style>

@@ -90,6 +90,15 @@
       </nav>
 
       <div class="sidebar-footer">
+        {% if request.state.user is defined and request.state.user %}
+        <div class="sidebar-user">
+          <div class="sidebar-user-name">{{ request.state.user.display_name or request.state.user.username }}</div>
+          <div class="sidebar-user-role">{{ request.state.user.role }}</div>
+        </div>
+        <a href="/logout" class="sidebar-logout" title="Abmelden">
+          <i data-lucide="log-out" style="width:14px;height:14px"></i>
+        </a>
+        {% endif %}
         <a href="/admin/releases" class="build-badge" style="text-decoration:none; cursor:pointer;" data-tooltip="Klick für Release Notes">
           <span class="build-badge-label">Build</span>
           <span class="build-badge-value">{{ app_version | default('dev') }}</span>

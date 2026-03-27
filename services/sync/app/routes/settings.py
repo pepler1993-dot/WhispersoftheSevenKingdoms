@@ -133,6 +133,7 @@ def admin_settings(request: Request, tab: str = 'general'):
     presets = _load_presets()
     content_types = _load_content_types()
     edit_key = request.query_params.get('edit', '')
+    team_users = shared.db.list_users() if tab == 'team' else []
     return shared.templates.TemplateResponse(request, 'settings.html', {
         'request': request,
         'page': 'settings',
@@ -144,6 +145,8 @@ def admin_settings(request: Request, tab: str = 'general'):
         'content_type_count': sum(1 for ct in content_types.values() if ct.get('enabled')),
         'edit_key': edit_key,
         'edit_preset': presets.get(edit_key) if edit_key else None,
+        'team_users': team_users,
+        'team_count': shared.db.user_count(),
     })
 
 
@@ -177,6 +180,51 @@ def save_providers(
     shared.db.set_setting('providers.youtube_enabled', youtube_enabled)
     shared.db.set_setting('providers.stable_audio_model', stable_audio_model.strip())
     return RedirectResponse(url='/admin/settings?tab=providers&saved=1', status_code=303)
+
+
+# ── Team Management ───────────────────────────────────────────────────────
+
+@router.post('/admin/settings/team/add')
+def add_team_member(
+    username: str = Form(''),
+    display_name: str = Form(''),
+    password: str = Form(''),
+    role: str = Form('editor'),
+):
+    import uuid
+    from datetime import datetime, timezone
+    from app.auth import hash_password
+
+    username = username.strip().lower()
+    if not username or not password:
+        raise HTTPException(status_code=400, detail='Username and password required')
+    if shared.db.get_user_by_username(username):
+        raise HTTPException(status_code=409, detail='Username already exists')
+    if role not in ('admin', 'editor', 'viewer'):
+        role = 'editor'
+
+    shared.db.create_user({
+        'user_id': str(uuid.uuid4()),
+        'username': username,
+        'display_name': display_name.strip() or username,
+        'email': '',
+        'password_hash': hash_password(password),
+        'role': role,
+        'space_id': 'default',
+        'created_at': datetime.now(timezone.utc).isoformat(),
+    })
+    return RedirectResponse(url='/admin/settings?tab=team&saved=1', status_code=303)
+
+
+@router.post('/admin/settings/team/delete')
+def delete_team_member(user_id: str = Form('')):
+    if not user_id:
+        raise HTTPException(status_code=400, detail='User ID required')
+    user = shared.db.get_user(user_id)
+    if user and user.get('username') == 'admin':
+        raise HTTPException(status_code=403, detail='Cannot delete admin user')
+    shared.db.delete_user(user_id)
+    return RedirectResponse(url='/admin/settings?tab=team&saved=1', status_code=303)
 
 
 # ── Save Pipelines (Content Types) ────────────────────────────────────────

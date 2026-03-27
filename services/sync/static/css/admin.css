@@ -455,6 +455,20 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
   border-top: 1px solid var(--line);
   margin-top: auto;
 }
+.sidebar-user {
+  margin-bottom: 10px;
+  display: inline-block;
+}
+.sidebar-user-name { font-size: 0.78rem; font-weight: 600; color: var(--text); }
+.sidebar-user-role { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.sidebar-logout {
+  float: right;
+  color: var(--muted);
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.2s ease;
+}
+.sidebar-logout:hover { color: #f87171; }
 
 .build-badge {
   display: inline-flex;

@@ -136,6 +136,27 @@ class AgentSyncDB:
                     value_json TEXT NOT NULL,
                     updated_at TEXT NOT NULL
                 );
+
+                CREATE TABLE IF NOT EXISTS users (
+                    user_id TEXT PRIMARY KEY,
+                    username TEXT UNIQUE NOT NULL,
+                    display_name TEXT,
+                    email TEXT,
+                    password_hash TEXT NOT NULL,
+                    role TEXT NOT NULL DEFAULT 'editor',
+                    space_id TEXT DEFAULT 'default',
+                    created_at TEXT NOT NULL,
+                    last_login TEXT
+                );
+                CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+                CREATE INDEX IF NOT EXISTS idx_users_space ON users(space_id);
+
+                CREATE TABLE IF NOT EXISTS spaces (
+                    space_id TEXT PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    tagline TEXT,
+                    created_at TEXT NOT NULL
+                );
                 '''
             )
             try:
@@ -390,3 +411,81 @@ class AgentSyncDB:
             with self._connect() as conn:
                 conn.execute('DELETE FROM settings WHERE key = ?', (key,))
                 conn.commit()
+
+    # ── users ──
+
+    def create_user(self, user: dict[str, Any]) -> None:
+        with self._lock:
+            with self._connect() as conn:
+                conn.execute(
+                    '''INSERT INTO users (user_id, username, display_name, email, password_hash, role, space_id, created_at)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
+                    (user['user_id'], user['username'], user.get('display_name'), user.get('email'),
+                     user['password_hash'], user.get('role', 'editor'), user.get('space_id', 'default'), user['created_at']),
+                )
+                conn.commit()
+
+    def get_user_by_username(self, username: str) -> dict[str, Any] | None:
+        with self._connect() as conn:
+            row = conn.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
+        return dict(row) if row else None
+
+    def get_user(self, user_id: str) -> dict[str, Any] | None:
+        with self._connect() as conn:
+            row = conn.execute('SELECT * FROM users WHERE user_id = ?', (user_id,)).fetchone()
+        return dict(row) if row else None
+
+    def list_users(self, space_id: str | None = None) -> list[dict[str, Any]]:
+        with self._connect() as conn:
+            if space_id:
+                rows = conn.execute('SELECT * FROM users WHERE space_id = ? ORDER BY created_at', (space_id,)).fetchall()
+            else:
+                rows = conn.execute('SELECT * FROM users ORDER BY created_at').fetchall()
+        return [dict(r) for r in rows]
+
+    def update_user(self, user_id: str, **fields: Any) -> None:
+        allowed = {'display_name', 'email', 'password_hash', 'role', 'space_id', 'last_login'}
+        set_clauses, params = [], []
+        for k, v in fields.items():
+            if k in allowed:
+                set_clauses.append(f'{k} = ?')
+                params.append(v)
+        if not set_clauses:
+            return
+        params.append(user_id)
+        with self._lock:
+            with self._connect() as conn:
+                conn.execute(f"UPDATE users SET {', '.join(set_clauses)} WHERE user_id = ?", params)
+                conn.commit()
+
+    def delete_user(self, user_id: str) -> None:
+        with self._lock:
+            with self._connect() as conn:
+                conn.execute('DELETE FROM users WHERE user_id = ?', (user_id,))
+                conn.commit()
+
+    def user_count(self) -> int:
+        with self._connect() as conn:
+            row = conn.execute('SELECT COUNT(*) AS c FROM users').fetchone()
+        return int(row['c'] or 0)
+
+    # ── spaces ──
+
+    def create_space(self, space: dict[str, Any]) -> None:
+        with self._lock:
+            with self._connect() as conn:
+                conn.execute(
+                    'INSERT INTO spaces (space_id, name, tagline, created_at) VALUES (?, ?, ?, ?)',
+                    (space['space_id'], space['name'], space.get('tagline', ''), space['created_at']),
+                )
+                conn.commit()
+
+    def get_space(self, space_id: str) -> dict[str, Any] | None:
+        with self._connect() as conn:
+            row = conn.execute('SELECT * FROM spaces WHERE space_id = ?', (space_id,)).fetchone()
+        return dict(row) if row else None
+
+    def list_spaces(self) -> list[dict[str, Any]]:
+        with self._connect() as conn:
+            rows = conn.execute('SELECT * FROM spaces ORDER BY created_at').fetchall()
+        return [dict(r) for r in rows]
