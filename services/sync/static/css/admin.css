@@ -401,7 +401,7 @@ h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; }
   padding: 32px 40px;
   flex: 1;
   min-width: 0;
-  max-width: 1680px;
+  max-width: none;
   width: 100%;
 }
 
