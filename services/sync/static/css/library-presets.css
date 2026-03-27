@@ -306,34 +306,15 @@
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) minmax(72px, 120px);
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 1.25rem 1.75rem;
-  align-items: stretch;
-}
-.house-hero-sigil-block {
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.65rem 0.85rem;
-  min-width: 5.5rem;
-  border-radius: 14px;
-  background: rgba(0, 0, 0, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
 }
 .house-hero-sigil-xl {
   font-size: clamp(2.75rem, 6vw, 4.25rem);
   line-height: 1;
   filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.4));
-}
-.house-hero-sigil-caption {
-  font-size: 0.68rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.55);
+  flex-shrink: 0;
 }
 .house-hero-facts {
   margin: 0;
@@ -367,13 +348,6 @@
   letter-spacing: 0.07em;
   color: rgba(255, 255, 255, 0.58);
 }
-.house-hero-fact-hint {
-  font-weight: 500;
-  text-transform: none;
-  letter-spacing: 0;
-  font-size: 0.65rem;
-  color: rgba(255, 255, 255, 0.45);
-}
 .house-hero-fact dd {
   margin: 0;
   font-size: clamp(0.98rem, 1.8vw, 1.12rem);
@@ -381,31 +355,6 @@
   line-height: 1.4;
   color: rgba(255, 255, 255, 0.95);
 }
-.house-hero-fact-sub {
-  display: block;
-  margin-top: 0.3rem;
-  font-size: 0.78rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.62);
-}
-.house-hero-glow {
-  width: 100%;
-  aspect-ratio: 1;
-  max-width: 112px;
-  justify-self: end;
-  align-self: center;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.22), transparent 52%),
-    radial-gradient(circle at 62% 62%, var(--house-accent, #64748b) 0%, transparent 62%);
-  opacity: 0.75;
-  filter: blur(16px);
-  transform: scale(1.12);
-}
-.house-hero-glow--banner {
-  max-width: 120px;
-}
-
 .variant-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
@@ -621,21 +570,11 @@
     grid-template-columns: 1fr;
     justify-items: stretch;
   }
-  .house-hero-sigil-block {
-    flex-direction: row;
-    justify-content: flex-start;
-    gap: 1rem;
-    min-width: 0;
-    width: 100%;
-  }
-  .house-hero-sigil-caption {
-    text-align: left;
+  .house-hero-sigil-xl {
+    justify-self: start;
   }
   .house-hero-facts {
     grid-template-columns: 1fr;
-  }
-  .house-hero-glow--banner {
-    display: none;
   }
   .library-tabs-wrap--subpage {
     position: static;

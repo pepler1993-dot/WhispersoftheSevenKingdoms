@@ -24,14 +24,11 @@
 
 <section class="house-hero house-hero--detail-banner" style="background: linear-gradient(135deg, {{ c }} 0%, {{ bgc }} 100%); --house-accent: {{ c }};" aria-label="Kurzinfo zum Haus">
   <div class="house-hero-detail-inner">
-    <div class="house-hero-sigil-block">
-      <span class="house-hero-sigil-xl" aria-hidden="true">{{ house.sigil | default('·') }}</span>
-      <span class="house-hero-sigil-caption">Wappenzeichen</span>
-    </div>
+    <span class="house-hero-sigil-xl" role="img" aria-label="Hauswappen">{{ house.sigil | default('·') }}</span>
     <dl class="house-hero-facts">
       {% if house.motto %}
       <div class="house-hero-fact house-hero-fact--motto">
-        <dt>Wahlspruch</dt>
+        <dt>Slogan</dt>
         <dd>„{{ house.motto }}“</dd>
       </div>
       {% endif %}
@@ -43,16 +40,15 @@
       {% endif %}
       {% if house.mood %}
       <div class="house-hero-fact">
-        <dt>Stimmung <span class="house-hero-fact-hint">(Preset)</span></dt>
+        <dt>Stimmung</dt>
         <dd>{{ house.mood }}</dd>
       </div>
       {% endif %}
       <div class="house-hero-fact house-hero-fact--highlight">
         <dt>Schauplätze</dt>
-        <dd>{{ variants | length }} Variante{% if variants | length != 1 %}n{% endif %} <span class="house-hero-fact-sub">im Create-Tab wählbar</span></dd>
+        <dd>{{ variants | length }} Variante{% if variants | length != 1 %}n{% endif %}</dd>
       </div>
     </dl>
-    <div class="house-hero-glow house-hero-glow--banner" aria-hidden="true"></div>
   </div>
 </section>
 
