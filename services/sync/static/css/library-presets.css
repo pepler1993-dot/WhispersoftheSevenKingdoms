@@ -294,48 +294,116 @@
   background: rgba(0, 0, 0, 0.2);
 }
 
-.house-hero--compact {
-  padding: 1rem 1.15rem 1.05rem;
-  margin-bottom: 1.25rem;
+/* Haus-Detail: farbiger Info-Banner unter dem Titel */
+.house-hero--detail-banner {
+  padding: 1.35rem 1.35rem 1.4rem;
+  margin-bottom: 1.35rem;
 }
-.house-hero--compact::after {
-  background: linear-gradient(135deg, transparent 55%, rgba(0, 0, 0, 0.42) 100%);
+.house-hero--detail-banner::after {
+  background: linear-gradient(125deg, transparent 35%, rgba(0, 0, 0, 0.38) 100%);
 }
-.house-hero-compact-inner {
+.house-hero-detail-inner {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(64px, 108px);
-  gap: 0.85rem 1.25rem;
-  align-items: center;
+  grid-template-columns: auto minmax(0, 1fr) minmax(72px, 120px);
+  gap: 1.25rem 1.75rem;
+  align-items: stretch;
 }
-.house-hero-main {
+.house-hero-sigil-block {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
-  gap: 0.65rem 1rem;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  min-width: 5.5rem;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
 }
-.house-hero-main .house-chips {
-  margin-top: 0;
-  flex: 1;
-  min-width: 160px;
+.house-hero-sigil-xl {
+  font-size: clamp(2.75rem, 6vw, 4.25rem);
+  line-height: 1;
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.4));
 }
-.house-hero-sigil--sm {
-  font-size: 2.35rem;
-  flex-shrink: 0;
+.house-hero-sigil-caption {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.55);
+}
+.house-hero-facts {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+  gap: 1rem 1.25rem;
+  align-content: center;
+}
+@media (min-width: 640px) {
+  .house-hero-fact--motto {
+    grid-column: 1 / -1;
+    max-width: 48rem;
+  }
+}
+.house-hero-fact {
+  margin: 0;
+  padding: 0.65rem 0.85rem;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.house-hero-fact--highlight {
+  background: rgba(0, 0, 0, 0.26);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+.house-hero-fact dt {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: rgba(255, 255, 255, 0.58);
+}
+.house-hero-fact-hint {
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+.house-hero-fact dd {
+  margin: 0;
+  font-size: clamp(0.98rem, 1.8vw, 1.12rem);
+  font-weight: 600;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.95);
+}
+.house-hero-fact-sub {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.62);
 }
 .house-hero-glow {
   width: 100%;
   aspect-ratio: 1;
-  max-width: 96px;
+  max-width: 112px;
   justify-self: end;
+  align-self: center;
   border-radius: 50%;
   background:
     radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.22), transparent 52%),
     radial-gradient(circle at 62% 62%, var(--house-accent, #64748b) 0%, transparent 62%);
-  opacity: 0.72;
-  filter: blur(14px);
-  transform: scale(1.08);
+  opacity: 0.75;
+  filter: blur(16px);
+  transform: scale(1.12);
+}
+.house-hero-glow--banner {
+  max-width: 120px;
 }
 
 .variant-grid {
@@ -549,10 +617,24 @@
   .house-hero-text h1 {
     font-size: 1.35rem;
   }
-  .house-hero-compact-inner {
+  .house-hero-detail-inner {
+    grid-template-columns: 1fr;
+    justify-items: stretch;
+  }
+  .house-hero-sigil-block {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 1rem;
+    min-width: 0;
+    width: 100%;
+  }
+  .house-hero-sigil-caption {
+    text-align: left;
+  }
+  .house-hero-facts {
     grid-template-columns: 1fr;
   }
-  .house-hero-glow {
+  .house-hero-glow--banner {
     display: none;
   }
   .library-tabs-wrap--subpage {
