@@ -1,5 +1,5 @@
 # PROJECT STATUS – Whispers of the Seven Kingdoms
-> Letzte Aktualisierung: 2026-03-27T13:00:01Z
+> Letzte Aktualisierung: 2026-03-27T19:00:01Z
 > Aktualisiert von: Smith
 
 **Agents: Lest diese Datei zuerst. Sie enthält alles was ihr wissen müsst.**
@@ -192,14 +192,35 @@ cc1dc9a feat(audio-lab): pass house_templates to audio page (#63)
 
 
 
-## 🕐 Letzte Commits (auto-generated 2026-03-27T13:00:01Z)
+
+## 🕐 Letzte Commits (auto-generated 2026-03-27T19:00:01Z)
 ```
+cde365c fix(pipeline): load library tab styles on create pages
+9d7cae7 chore(release): v3.2.2 – pipeline create tabs
+b22257d refactor(sync): fold workflow flow into pipeline UI
+4170cc4 fix(library): Haus-Banner-Gradient serverseitig, kein Jinja im CSS
+9abf096 fix(library): Haus-Banner – nur Sigill, Slogan-Label, kein Glow-Fleck
+7cd5dba fix(library): Haus-Banner mit klaren Labels und größerem Sigill
+a1de4f3 chore(release): v3.2.1 – Library Tabs und Preset-Unterseiten-UX
+756367d feat(library): Tabs für Häuser, Songs und Hintergrundbilder
+7fa1430 fix(library): Infoblöcke und Haus-Karten vereinfacht
+c7d032d chore(release): v3.2.0 – Library Haus-Presets UX
+9e25613 chore: Hintergrundbilder aus Repo entfernen (Server bleibt Quelle)
+c9df811 fix(sync): Varianten-Flow — Längenwahl und Generate-UI (v3.1.2)
+a56b85e docs: v3.1.1 test release
+95c5875 ci: restore tailscale ci tag after policy update
+7f80a6d ci: remove tailscale ci tag requirement
+3999cae ci: add explicit tailscale identity hints
+26b4f3e ci: add isolated tailscale auth test
+bd4e3c9 ci: validate deploy secrets before tailscale
+fd735fd Merge branch 'main' of https://github.com/pepler1993-dot/WhispersoftheSevenKingdoms
+fd2adb1 Update Use Cases
+f9caa19 ci: deploy to lxc via pve tailscale hop
+a36d865 ci: deploy via tailscale ssh
+a45af5b ci: add SSH deploy workflow
+593c224 docs: v2.10.0 release notes
+4e54480 auto: update PROJECT_STATUS.md (2026-03-27T13:00:01Z)
 6ae7290 docs: detailliertes Use-Case-Dokument (UC-01–UC-09)
 6190c0d feat(sync): Create-Flow mit Varianten-Presets und konsistentem Serververhalten
-d671b74 docs(repo): align documentation with current stable-audio architecture
-8b83329 feat(studio): streamline dashboard workflows and cleanup runtime scripts
-3f7f2b7 feat(audio): migrate to stable-audio-local only
-3af8e76 refactor(sync): remove legacy GitHub task-sync subsystem
-beee36a auto: update PROJECT_STATUS.md (2026-03-27T07:00:01Z)
 ```
 ---
