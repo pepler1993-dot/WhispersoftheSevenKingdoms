@@ -1,5 +1,8 @@
 {% extends 'base.html' %}
 {% block title %}Neues Video{% endblock %}
+{% block head_extra %}
+<link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
+{% endblock %}
 {% block content %}
 <div class="page-header">
   <h1>Neues Video erstellen</h1>
