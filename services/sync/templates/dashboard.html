@@ -111,11 +111,8 @@
         </div>
         <div class="overview-card-title">{{ run.title or run.slug }}</div>
         <div class="overview-card-facts">
-          <span>{{ run.started_at[:16] if run.started_at else (run.created_at[:16] if run.created_at else '—') }}{% if run.finished_at %} → {{ run.finished_at[:16] }}{% endif %}</span>
-          <span>{{ (run.config.loop_hours ~ 'h Video') if run.config and run.config.get('loop_hours') else '—' }}</span>
-          <span>{{ (run.config.minutes ~ ' Min Audio') if run.config and run.config.get('minutes') else '—' }}</span>
-          <span>{% if run.config and run.config.get('animated') %}Animiert{% else %}Statisch{% endif %}</span>
-          <span>{% if run.config and run.config.get('auto_upload') %}Auto-Upload{% else %}Kein Auto-Upload{% endif %}</span>
+          <span>{{ (run.started_at or run.created_at or '—')|replace('T', ' ')[:16] }}{% if run.finished_at %} → {{ run.finished_at|replace('T', ' ')[:16] }}{% endif %}</span>
+          <span>{{ (run.config.loop_hours ~ ' Stunden Video') if run.config and run.config.get('loop_hours') else '—' }}</span>
         </div>
       </a>
       {% endfor %}
@@ -140,11 +137,8 @@
         </div>
         <div class="overview-card-title">{{ job.title or job.slug }}</div>
         <div class="overview-card-facts">
-          <span>{{ job.started_at[:16] if job.started_at else (job.created_at[:16] if job.created_at else '—') }}{% if job.finished_at %} → {{ job.finished_at[:16] }}{% endif %}</span>
-          <span>{{ (job.minutes ~ ' Min') if job.minutes else '—' }}</span>
-          <span>{{ (job.steps ~ ' Steps') if job.steps else '—' }}</span>
-          <span>{{ job.model or '—' }}</span>
-          <span>{{ (job.prompts|length ~ ' Prompts') if job.prompts else '—' }}</span>
+          <span>{{ (job.started_at or job.created_at or '—')|replace('T', ' ')[:16] }}{% if job.finished_at %} → {{ job.finished_at|replace('T', ' ')[:16] }}{% endif %}</span>
+          <span>{{ (job.minutes ~ ' Minuten Song') if job.minutes else '—' }}</span>
         </div>
       </a>
       {% endfor %}
