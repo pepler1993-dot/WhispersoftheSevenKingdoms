@@ -10,6 +10,44 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Validate required secrets and variables
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          TS_OAUTH_CLIENT_ID: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          TS_OAUTH_SECRET: ${{ secrets.TS_OAUTH_SECRET }}
+          LXC_ID: ${{ vars.LXC_ID || '103' }}
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/opt/whispers/WhispersoftheSevenKingdoms' }}
+          SYSTEMD_SERVICE: ${{ vars.SYSTEMD_SERVICE || 'agent-sync' }}
+          GIT_REMOTE: ${{ vars.GIT_REMOTE || 'origin' }}
+        run: |
+          set -euo pipefail
+          missing=0
+          for name in SSH_HOST SSH_USER SSH_PRIVATE_KEY TS_OAUTH_CLIENT_ID TS_OAUTH_SECRET LXC_ID DEPLOY_PATH SYSTEMD_SERVICE GIT_REMOTE; do
+            value="${!name:-}"
+            if [ -z "$value" ]; then
+              echo "::error title=Missing config::$name is empty or not set"
+              missing=1
+            else
+              echo "::notice title=Config present::$name is set"
+            fi
+          done
+
+          case "$TS_OAUTH_CLIENT_ID" in
+            tskey-client-*) echo "::notice title=Tailscale Client ID format::TS_OAUTH_CLIENT_ID looks plausible" ;;
+            *) echo "::warning title=Tailscale Client ID format::TS_OAUTH_CLIENT_ID does not start with tskey-client-" ;;
+          esac
+
+          case "$SSH_PRIVATE_KEY" in
+            *"BEGIN OPENSSH PRIVATE KEY"*|*"BEGIN RSA PRIVATE KEY"*) echo "::notice title=SSH key format::SSH_PRIVATE_KEY looks like a private key" ;;
+            *) echo "::warning title=SSH key format::SSH_PRIVATE_KEY does not look like a private key block" ;;
+          esac
+
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+
       - name: Join Tailscale
         uses: tailscale/github-action@v3
         with:
