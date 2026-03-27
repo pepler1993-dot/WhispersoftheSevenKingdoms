@@ -46,6 +46,14 @@
 <section class="panel panel-accent-purple shorts-create-panel" id="shorts-create-panel" style="display:none;">
   <div class="section-header-inline"><h2>Short konfigurieren</h2><span class="section-note">Video gewählt → Draft anlegen</span></div>
   <form method="post" action="/admin/shorts/create" id="shorts-form">
+    <div class="al-step-card">
+      <div class="al-step-header">
+        <span class="al-step-num">1</span>
+        <div>
+          <h3>Quelle</h3>
+          <p class="al-step-desc">Preset, Variante und gewähltes Video als Basis.</p>
+        </div>
+      </div>
     <input type="hidden" name="source_run_id" id="source_run_id" />
     <input type="hidden" name="source_audio" id="source_audio" />
     <input type="hidden" name="house_key" id="house_key" />
@@ -56,44 +64,60 @@
       <div class="config-item"><div class="value" id="selected-video-label">—</div></div>
     </div>
 
-    <div class="grid two">
-      <div class="form-group">
-        <label for="title">Titel</label>
-        <input id="title" name="title" class="form-input" required />
-      </div>
-      <div class="form-group">
-        <label for="slug">Slug</label>
-        <input id="slug" name="slug" class="form-input" />
-      </div>
+    <div class="shorts-selection-summary" id="shorts-selection-summary">
+      <div class="config-item"><div class="label">Preset</div><div class="value" id="selected-house-label">—</div></div>
+      <div class="config-item"><div class="label">Variante</div><div class="value" id="selected-variant-label">—</div></div>
+    </div>
     </div>
 
-    <div class="grid two">
-      <div class="form-group">
-        <label for="clip_start_seconds">Start</label>
-        <input id="clip_start_seconds" name="clip_start_seconds" type="number" min="0" value="0" class="form-input" required />
+    <div class="al-step-card">
+      <div class="al-step-header">
+        <span class="al-step-num">2</span>
+        <div>
+          <h3>Short Setup</h3>
+          <p class="al-step-desc">Titel, Ausschnitt und Visuals festlegen.</p>
+        </div>
       </div>
-      <div class="form-group">
-        <label for="clip_duration_seconds">Länge</label>
-        <input id="clip_duration_seconds" name="clip_duration_seconds" type="number" min="15" max="60" value="30" class="form-input" required />
-      </div>
-    </div>
 
-    <div class="grid two">
-      <div class="form-group">
-        <label for="visual_mode">Visual Mode</label>
-        <select id="visual_mode" name="visual_mode" class="form-select">
-          <option value="static-artwork">Static Artwork</option>
-          <option value="blurred-background">Blurred Background</option>
-          <option value="cinematic-gradient">Cinematic Gradient</option>
-        </select>
+      <div class="grid two">
+        <div class="form-group">
+          <label for="title">Titel</label>
+          <input id="title" name="title" class="form-input" required />
+        </div>
+        <div class="form-group">
+          <label for="slug">Slug</label>
+          <input id="slug" name="slug" class="form-input" />
+        </div>
       </div>
-      <div class="form-group">
-        <label for="visibility">Visibility</label>
-        <select id="visibility" name="visibility" class="form-select">
-          <option value="private">Private</option>
-          <option value="unlisted">Unlisted</option>
-          <option value="public">Public</option>
-        </select>
+
+      <div class="grid two">
+        <div class="form-group">
+          <label for="clip_start_seconds">Start</label>
+          <input id="clip_start_seconds" name="clip_start_seconds" type="number" min="0" value="0" class="form-input" required />
+        </div>
+        <div class="form-group">
+          <label for="clip_duration_seconds">Länge</label>
+          <input id="clip_duration_seconds" name="clip_duration_seconds" type="number" min="15" max="60" value="30" class="form-input" required />
+        </div>
+      </div>
+
+      <div class="grid two">
+        <div class="form-group">
+          <label for="visual_mode">Visual Mode</label>
+          <select id="visual_mode" name="visual_mode" class="form-select">
+            <option value="static-artwork">Static Artwork</option>
+            <option value="blurred-background">Blurred Background</option>
+            <option value="cinematic-gradient">Cinematic Gradient</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="visibility">Visibility</label>
+          <select id="visibility" name="visibility" class="form-select">
+            <option value="private">Private</option>
+            <option value="unlisted">Unlisted</option>
+            <option value="public">Public</option>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -130,6 +154,8 @@
   const sourceAudio = document.getElementById('source_audio');
   const houseInput = document.getElementById('house_key');
   const variantInput = document.getElementById('variant_key');
+  const selectedHouseLabel = document.getElementById('selected-house-label');
+  const selectedVariantLabel = document.getElementById('selected-variant-label');
 
   function slugify(text) { return (text || '').toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
   function titleCase(text) { return (text || '').replace(/_/g, ' ').replace(/\b\w/g, m => m.toUpperCase()); }
@@ -148,6 +174,8 @@
         btn.classList.add('selected');
         houseInput.value = houseKey;
         variantInput.value = key;
+        if (selectedHouseLabel) selectedHouseLabel.textContent = house?.display_name || houseKey;
+        if (selectedVariantLabel) selectedVariantLabel.textContent = titleCase(key);
         renderVideos(houseKey, key);
       });
       variantGrid.appendChild(btn);
@@ -162,7 +190,7 @@
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'shorts-video-card';
-      btn.innerHTML = '<strong>' + (v.title || v.slug) + '</strong><span>' + (v.created_at || '').slice(0,16) + '</span>';
+      btn.innerHTML = '<div class="shorts-video-card-top"><strong>' + (v.title || v.slug) + '</strong><span class="shorts-video-badge">Uploaded</span></div><div class="shorts-video-meta"><span>' + (v.created_at || '').slice(0,16) + '</span><span>' + (v.variant_key ? titleCase(v.variant_key) : '—') + '</span></div>';
       btn.addEventListener('click', () => {
         videoList.querySelectorAll('.shorts-video-card').forEach(x => x.classList.remove('active'));
         btn.classList.add('active');
@@ -198,9 +226,12 @@
 #shorts-variant-grid { margin-top: 14px; }
 .shorts-video-list { display:grid; gap:12px; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); }
 .shorts-video-card {
-  border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.03); color:var(--text); border-radius:12px; padding:14px; text-align:left; display:grid; gap:6px; transition:all .18s var(--ease);
+  border:1px solid rgba(255,255,255,.08); background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.025)); color:var(--text); border-radius:14px; padding:16px; text-align:left; display:grid; gap:10px; transition:all .18s var(--ease);
 }
-.shorts-video-card span { color:var(--muted); font-size:.78rem; }
+.shorts-video-card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+.shorts-video-meta { display:flex; flex-wrap:wrap; gap:8px; color:var(--muted); font-size:.78rem; }
+.shorts-video-badge { display:inline-flex; align-items:center; padding:4px 8px; border-radius:999px; background:rgba(46, 204, 113, .12); color:#7ee2a8; font-size:.72rem; font-weight:700; }
 .shorts-video-card:hover,.shorts-video-card.active { border-color:var(--gold); transform:translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,.22); }
+.shorts-selection-summary { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px; margin-top:8px; }
 </style>
 {% endblock %}
