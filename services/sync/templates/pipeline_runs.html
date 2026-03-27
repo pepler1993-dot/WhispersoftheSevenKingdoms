@@ -24,10 +24,9 @@
     <h1>Meine Videos</h1>
     <div class="page-subtitle">Übersicht aller Pipeline-Runs</div>
   </div>
-  <a href="/admin/pipeline/new" class="btn btn-primary">
-    <i data-lucide="plus" style="width:18px;height:18px"></i> Neues Video
-  </a>
 </div>
+
+{% include 'partials/pipeline_tabs.html' %}
 
 {# ── Stats bar ────────────────────────────────────────────────── #}
 <div class="run-stats">

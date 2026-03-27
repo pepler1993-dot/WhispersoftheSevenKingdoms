@@ -1,0 +1,14 @@
+{# Pipeline-Bereichs-Tabs; Kontext: pipeline_tab, pipeline_run_count #}
+<div class="library-tabs-wrap">
+  <nav class="library-tabs" aria-label="Pipeline-Bereiche">
+    <a class="library-tab{% if pipeline_tab == 'new' %} active{% endif %}" href="/admin/pipeline/new" {% if pipeline_tab == 'new' %}aria-current="page"{% endif %}>
+      <i data-lucide="plus-square" style="width:17px;height:17px;opacity:0.9"></i>
+      Neues Video
+    </a>
+    <a class="library-tab{% if pipeline_tab == 'overview' %} active{% endif %}" href="/admin/pipeline/logs" {% if pipeline_tab == 'overview' %}aria-current="page"{% endif %}>
+      <i data-lucide="layout-list" style="width:17px;height:17px;opacity:0.9"></i>
+      Übersicht
+      <span class="library-tab-count">{{ pipeline_run_count or 0 }}</span>
+    </a>
+  </nav>
+</div>

@@ -3,6 +3,19 @@
 Alle relevanten Änderungen am Projekt werden hier dokumentiert.
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [v3.2.2] – 2026-03-27
+
+### Added
+- **Pipeline-Bereichs-Tabs** analog zur Library: **Neues Video** und **Übersicht** als gemeinsame Navigation auf Create- und Übersichtsseite.
+
+### Changed
+- **Create-Seite**: oberes Tab-Menü statt separatem `Pipeline Logs`-Button.
+- **Übersichtsseite**: Aktion **Neues Video** in dieselbe Tab-Navigation integriert.
+- **Create-Header** sprachlich gestrafft.
+
+### Removed
+- **Schritt-Leiste** `1. Stil wählen / 2. Audio bestimmen / 3. Rendern` auf der Video-erstellen-Seite entfernt.
+
 ## [v3.2.1] – 2026-03-27
 
 ### Added

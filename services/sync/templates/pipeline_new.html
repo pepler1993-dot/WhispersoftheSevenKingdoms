@@ -3,23 +3,16 @@
 {% block content %}
 <div class="page-header">
   <h1>Neues Video erstellen</h1>
-  <div class="page-subtitle">Kernfluss: Haus wählen, Audio-Quelle wählen, Video starten.</div>
+  <div class="page-subtitle">Haus wählen, Audio festlegen, Render starten.</div>
 </div>
+
+{% include 'partials/pipeline_tabs.html' %}
 
 {% if error_message %}
 <div class="alert alert-error">⚠️ {{ error_message }}</div>
 {% endif %}
 
-<section class="workflow-steps panel panel-accent-blue">
-  <div class="workflow-step-pill active">1. Stil wählen</div>
-  <div class="workflow-step-pill">2. Audio bestimmen</div>
-  <div class="workflow-step-pill">3. Rendern</div>
-</section>
-
 <!-- House Selection -->
-<div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
-  <a href="/admin/pipeline/logs" class="btn btn-secondary btn-sm">📋 Pipeline Logs</a>
-</div>
 
 <section class="panel panel-accent-blue">
   <div class="section-header-inline">

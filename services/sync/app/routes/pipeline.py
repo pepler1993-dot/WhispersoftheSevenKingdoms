@@ -161,6 +161,8 @@ def admin_pipeline_logs(request: Request):
     return shared.templates.TemplateResponse(request, 'pipeline_runs.html', {
         'request': request,
         'page': 'pipeline',
+        'pipeline_tab': 'overview',
+        'pipeline_run_count': len(runs),
         'runs': runs,
         'houses': houses,
         'queue': queue,
@@ -173,6 +175,7 @@ def admin_pipeline_new(request: Request, slug: str | None = Query(default=None),
     assets = list_available_assets()
     themes = list_available_themes()
     houses = _load_house_templates()
+    runs = shared.db.list_runs(limit=100)
     library_tracks = list_library_tracks_for_pipeline(shared.db)
     thumb_dir = Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'output' / 'thumbnails'
     library_thumbnails = sorted(f.name for f in thumb_dir.iterdir() if f.is_file() and f.suffix in {'.jpg', '.jpeg', '.png', '.webp'}) if thumb_dir.exists() else []
@@ -183,6 +186,8 @@ def admin_pipeline_new(request: Request, slug: str | None = Query(default=None),
     return shared.templates.TemplateResponse(request, 'pipeline_new.html', {
         'request': request,
         'page': 'pipeline',
+        'pipeline_tab': 'new',
+        'pipeline_run_count': len(runs),
         'assets': assets,
         'themes': themes,
         'houses': houses,
