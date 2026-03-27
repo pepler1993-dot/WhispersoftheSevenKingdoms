@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
 {% endblock %}
 {% block content %}
+<div class="pipeline-runs-page">
 
 {# ── Group runs by status ─────────────────────────────────────── #}
 {% set running = [] %}
@@ -22,10 +23,13 @@
   {% endif %}
 {% endfor %}
 
-<div class="status-header">
+<div class="page-header page-header-flex">
   <div>
     <h1>Meine Videos</h1>
-    <div class="page-subtitle">Übersicht aller Pipeline-Runs</div>
+    <div class="page-subtitle">Alle Pipeline-Runs — filtern nach Status, Details öffnen.</div>
+  </div>
+  <div class="header-actions">
+    <a href="/admin/pipeline/new" class="btn btn-primary btn-sm">Neues Video</a>
   </div>
 </div>
 
@@ -268,7 +272,7 @@
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
-  margin-bottom: 24px;
+  margin-bottom: clamp(16px, 2vw, 24px);
 }
 .run-stats {
   display: flex;
@@ -707,10 +711,17 @@
 .empty-state-text { color: var(--muted); font-size: 1rem; }
 
 /* ── Mobile ────────────────────────────────────────────────── */
+@media (min-width: 900px) {
+  .stat-pill {
+    min-height: 40px;
+    align-items: center;
+    padding: 8px 16px;
+  }
+  .run-stats { gap: 10px 12px; }
+}
 @media (max-width: 768px) {
-  .status-header { flex-direction: column; align-items: flex-start; gap: 12px; }
   .run-stats { gap: 4px; }
-  .stat-pill { padding: 4px 8px; font-size: 0.68rem; }
+  .stat-pill { padding: 4px 8px; font-size: 0.68rem; min-height: 36px; }
   .stat-dot { width: 6px; height: 6px; }
   .run-section { margin-bottom: 20px; }
   .section-head h2 { font-size: 0.9rem; }
@@ -804,4 +815,6 @@
   render();
 })();
 </script>
+
+</div>
 {% endblock %}

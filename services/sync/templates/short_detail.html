@@ -1,9 +1,18 @@
 {% extends 'base.html' %}
 {% block title %}Short {{ run.run_id }}{% endblock %}
+{% block head_extra %}
+<link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
+{% endblock %}
 {% block content %}
-<div class="status-header">
-  <h1>{{ run.title or run.slug }}</h1>
-  <span class="badge {{ run.status }}">{{ run.status }}</span>
+<div class="page-header page-header-flex">
+  <div>
+    <h1>{{ run.title or run.slug }}</h1>
+    <div class="page-subtitle short-detail-kicker">
+      {% if run.created_at %}<span>{{ run.created_at[:16] }}</span>{% else %}<span>–</span>{% endif %}
+      <span class="short-detail-kicker-sep" aria-hidden="true">·</span>
+      <span class="badge {{ run.status }}">{{ run.status }}</span>
+    </div>
+  </div>
 </div>
 
 {% if success_message %}
@@ -19,7 +28,7 @@
 
 <div class="action-bar">
   <a href="/admin/shorts" class="btn btn-secondary btn-sm">
-    <i data-lucide="arrow-left" style="width:14px;height:14px"></i> Alle Shorts
+    <i data-lucide="arrow-left" class="icon-sm"></i> Alle Shorts
   </a>
   {% if run.status in ('created', 'failed') %}
   <form method="post" action="/admin/shorts/{{ run.run_id }}/render" style="display:inline;">
@@ -35,59 +44,60 @@
 
 <div class="library-tabs-wrap shorts-tabs-wrap">
   <nav class="library-tabs short-detail-tabs" aria-label="Short-Details">
-    <button type="button" class="library-tab active" data-short-detail-tab="overview">Overview</button>
-    <button type="button" class="library-tab" data-short-detail-tab="preview">Preview</button>
+    <button type="button" class="library-tab active" data-short-detail-tab="overview">Übersicht</button>
+    <button type="button" class="library-tab" data-short-detail-tab="preview">Video</button>
     <button type="button" class="library-tab" data-short-detail-tab="logs">Logs</button>
   </nav>
 </div>
 
 <div class="grid two short-detail-grid short-detail-pane is-active" data-short-detail-pane="overview">
   <div class="panel panel-accent-purple">
-    <h2>Short-Konfiguration</h2>
+    <h2>Konfiguration</h2>
     <div class="config-grid">
-      <div class="config-item"><div class="label">Slug</div><div class="value">{{ run.slug }}</div></div>
+      <div class="config-item"><div class="label">Kurzname</div><div class="value">{{ run.slug }}</div></div>
       <div class="config-item"><div class="label">Format</div><div class="value">{{ run.config.get('format', 'youtube_short') }}</div></div>
-      <div class="config-item"><div class="label">Aspect Ratio</div><div class="value">{{ run.config.get('aspect_ratio', '9:16') }}</div></div>
-      <div class="config-item"><div class="label">Source Audio</div><div class="value" style="font-size:0.8rem">{{ run.config.get('source_audio', '—') }}</div></div>
-      <div class="config-item"><div class="label">Clip Start</div><div class="value">{{ run.config.get('clip_start_seconds', 0) }}s</div></div>
-      <div class="config-item"><div class="label">Clip Dauer</div><div class="value">{{ run.config.get('clip_duration_seconds', 30) }}s</div></div>
+      <div class="config-item"><div class="label">Seitenverhältnis</div><div class="value">{{ run.config.get('aspect_ratio', '9:16') }}</div></div>
+      <div class="config-item"><div class="label">Audio-Quelle</div><div class="value" style="font-size:0.85rem;word-break:break-word;">{{ run.config.get('source_audio', '—') }}</div></div>
+      <div class="config-item"><div class="label">Clip-Start</div><div class="value">{{ run.config.get('clip_start_seconds', 0) }}s</div></div>
+      <div class="config-item"><div class="label">Clip-Länge</div><div class="value">{{ run.config.get('clip_duration_seconds', 30) }}s</div></div>
       <div class="config-item"><div class="label">Visual</div><div class="value">{{ run.config.get('visual_mode', 'static-artwork') }}</div></div>
-      <div class="config-item"><div class="label">Visibility</div><div class="value">{{ run.config.get('visibility', 'private') }}</div></div>
-      <div class="config-item"><div class="label">Erstellt</div><div class="value" style="font-size:0.75rem">{{ run.created_at[:19] if run.created_at else '—' }}</div></div>
-      <div class="config-item"><div class="label">Gestartet</div><div class="value" style="font-size:0.75rem">{{ run.started_at[:19] if run.started_at else '—' }}</div></div>
+      <div class="config-item"><div class="label">Sichtbarkeit</div><div class="value">{{ run.config.get('visibility', 'private') }}</div></div>
     </div>
   </div>
 
   <div class="panel panel-accent-blue">
     <h2>Status</h2>
     <div class="preview-meta">
-      <strong>Aktueller Stand:</strong><br/>
-      {% if run.status == 'created' %}Draft angelegt. Bereit zum Rendern.{% elif run.status == 'running' %}Rendering läuft.{% elif run.status == 'rendered' %}Render fertig. Bereit zum Upload.{% elif run.status == 'uploading' %}Upload läuft.{% elif run.status == 'uploaded' %}Short wurde hochgeladen.{% else %}Render oder Upload fehlgeschlagen. Log prüfen und neu starten.{% endif %}
+      {% if run.status == 'created' %}Entwurf bereit — als Nächstes renden.{% elif run.status == 'running' %}Rendering läuft.{% elif run.status == 'rendered' %}Video fertig — Upload möglich.{% elif run.status == 'uploading' %}Upload läuft.{% elif run.status == 'uploaded' %}Short wurde veröffentlicht.{% else %}Fehler — Log prüfen und erneut versuchen.{% endif %}
     </div>
   </div>
 </div>
 
-{% if run.status in ('rendered', 'uploaded') and output_files %}
 <div class="panel panel-accent-gold short-detail-pane" data-short-detail-pane="preview">
-  <h2>Preview</h2>
-  {% for f in output_files %}
-    {% if f.name == 'video.mp4' %}
-    <div style="margin-bottom:18px; max-width: 420px;">
-      <video class="preview-video" controls preload="metadata" style="max-width:420px; aspect-ratio: 9 / 16; object-fit: cover;">
-        <source src="/admin/shorts/preview/{{ run.slug }}/video.mp4" type="video/mp4" />
-      </video>
-    </div>
-    {% endif %}
-  {% endfor %}
-
-  <div class="output-files">
-    <strong>Output-Dateien:</strong>
+  <h2>Video</h2>
+  {% if run.status in ('rendered', 'uploaded') and output_files %}
     {% for f in output_files %}
-      {{ f.name }} ({{ f.size }}){% if not loop.last %}, {% endif %}
+      {% if f.name == 'video.mp4' %}
+      <div class="short-video-frame">
+        <video class="preview-video" controls preload="metadata">
+          <source src="/admin/shorts/preview/{{ run.slug }}/video.mp4" type="video/mp4" />
+        </video>
+      </div>
+      {% endif %}
     {% endfor %}
+    <div class="output-files" style="margin-top:12px;">
+      {% for f in output_files %}
+        {% if f.name == 'video.mp4' %}
+        <span class="output-file-tag">Datei · {{ f.name }} ({{ f.size }})</span>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% else %}
+  <div class="short-preview-placeholder">
+    Nach erfolgreichem Render erscheint hier die Vorschau.
   </div>
+  {% endif %}
 </div>
-{% endif %}
 
 <div class="panel short-detail-pane" data-short-detail-pane="logs">
   <h2>Logs</h2>
@@ -137,15 +147,27 @@
   var panes = document.querySelectorAll('[data-short-detail-pane]');
   tabButtons.forEach(function(btn) {
     btn.addEventListener('click', function() {
-      var key = btn.dataset.shortDetailTab;
+      var key = btn.getAttribute('data-short-detail-tab');
       tabButtons.forEach(function(x) { x.classList.toggle('active', x === btn); });
-      panes.forEach(function(p) { p.classList.toggle('is-active', p.dataset.shortDetailPane === key); });
+      panes.forEach(function(p) {
+        p.classList.toggle('is-active', p.getAttribute('data-short-detail-pane') === key);
+      });
     });
   });
 })();
 </script>
 
 <style>
+.short-detail-kicker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+.short-detail-kicker-sep {
+  opacity: 0.45;
+  user-select: none;
+}
 .short-detail-tabs .library-tab {
   appearance: none;
   -webkit-appearance: none;
@@ -168,6 +190,31 @@
 
 @media (max-width: 768px) {
   .short-detail-grid { grid-template-columns: 1fr; }
+}
+
+.short-video-frame {
+  max-width: min(100%, 420px);
+  margin: 0 auto;
+}
+.short-video-frame .preview-video {
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background: #000;
+}
+.output-files {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.output-file-tag {
+  padding: 4px 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 0.72rem;
+  color: var(--muted);
 }
 </style>
 {% endblock %}

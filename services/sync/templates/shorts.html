@@ -7,10 +7,10 @@
 <div class="page-header page-header-flex">
   <div>
     <h1>Shorts</h1>
-    <div class="page-subtitle">Shorts aus bestehenden Uploads erstellen – im selben Flow-Muster wie Audio Lab.</div>
+    <div class="page-subtitle">Shorts aus bestehenden Pipeline-Uploads — Haus, Variante, Video wählen, dann Clip konfigurieren (wie im Audio Lab).</div>
   </div>
   <div class="header-actions">
-    <a href="/admin/pipeline" class="btn btn-secondary btn-sm">Create</a>
+    <a href="/admin/pipeline/new" class="btn btn-secondary btn-sm">Neues Video</a>
     <a href="/admin/audio" class="btn btn-secondary btn-sm">Audio Lab</a>
   </div>
 </div>
@@ -107,18 +107,18 @@
           </select>
         </div>
         <div class="form-group">
-          <label for="visibility">Visibility</label>
+          <label for="visibility">Sichtbarkeit</label>
           <select id="visibility" name="visibility" class="form-select">
-            <option value="private">Private</option>
-            <option value="unlisted">Unlisted</option>
-            <option value="public">Public</option>
+            <option value="private">Privat</option>
+            <option value="unlisted">Nicht gelistet</option>
+            <option value="public">Öffentlich</option>
           </select>
         </div>
       </div>
     </div>
 
     <button type="submit" class="btn btn-primary al-btn-launch">
-      <i data-lucide="clapperboard" style="width:18px;height:18px"></i> Short-Entwurf anlegen
+      <i data-lucide="clapperboard" class="icon-sm"></i> Short-Entwurf anlegen
     </button>
   </form>
 </section>
@@ -126,12 +126,27 @@
 
 {% if shorts_tab == 'drafts' %}
 <section class="panel panel-accent-blue">
-  <div class="section-header-inline"><h2>Letzte Short-Drafts</h2><span class="section-note">aus den Pipeline-Runs gefiltert</span></div>
-  <ul class="list">
+  <div class="section-header-inline">
+    <h2>Entwürfe</h2>
+    <span class="section-note">Zuletzt angelegte Short-Runs</span>
+  </div>
+  {% if short_runs %}
+  <div class="shorts-draft-grid">
     {% for run in short_runs %}
-    <li class="timeline-item"><div><strong>{{ run.title or run.slug }}</strong><br/><span class="timeline-time">{{ run.status }}</span></div><div class="timeline-meta"><a href="/admin/shorts/{{ run.run_id }}" class="btn btn-secondary btn-sm">Details</a><span class="timeline-time">{{ run.created_at[:16] if run.created_at else '–' }}</span></div></li>
-    {% else %}<li class="empty-state">Noch keine Short-Drafts vorhanden</li>{% endfor %}
-  </ul>
+    <a href="/admin/shorts/{{ run.run_id }}" class="shorts-draft-card">
+      <div class="shorts-draft-card-top">
+        <div class="shorts-draft-title">{{ run.title or 'Ohne Titel' }}</div>
+        <span class="badge {{ run.status }}">{{ run.status }}</span>
+      </div>
+      <div class="shorts-draft-meta">
+        {% if run.created_at %}{{ run.created_at[:16] }}{% else %}–{% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">Noch keine Short-Entwürfe — wechsle zu „Neuer Short“ und lege einen an.</div>
+  {% endif %}
 </section>
 {% endif %}
 
@@ -154,10 +169,6 @@
 
   function slugify(text) {
     return (text || '').toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  }
-
-  function titleCase(text) {
-    return (text || '').replace(/_/g, ' ').replace(/\b\w/g, m => m.toUpperCase());
   }
 
   function renderVideos(houseKey, variantKey) {
