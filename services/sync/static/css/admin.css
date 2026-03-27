@@ -290,41 +290,52 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
   border-left: 3px solid transparent;
   text-align: left;
   text-decoration: none;
+  position: relative;
 }
 .nav-folder-toggle:hover {
   background: var(--panel-hover);
   color: var(--text);
   border-left-color: var(--line-light);
 }
-.nav-folder-toggle .lucide { width: 18px; height: 18px; stroke-width: 2; flex-shrink: 0; }
+.nav-folder-toggle .lucide:first-child { width: 18px; height: 18px; stroke-width: 2; flex-shrink: 0; }
 .nav-folder-toggle span { flex: 1; }
 /* Active state when a child page is active */
 .nav-folder.has-active .nav-folder-toggle {
-  background: var(--gold-glow);
   color: var(--gold);
   font-weight: 600;
-  border-left-color: var(--gold);
 }
 .nav-folder-arrow {
-  width: 14px !important;
-  height: 14px !important;
-  opacity: 0.4;
-  transition: transform 0.25s var(--ease);
+  width: 12px !important;
+  height: 12px !important;
+  opacity: 0.3;
+  transition: transform 0.2s var(--ease), opacity 0.2s var(--ease);
 }
-.nav-folder.open .nav-folder-arrow { transform: rotate(90deg); }
+.nav-folder:hover .nav-folder-arrow { opacity: 0.6; }
+.nav-folder.open .nav-folder-arrow { transform: rotate(90deg); opacity: 0.5; }
 .nav-folder-items {
   overflow: hidden;
   max-height: 0;
-  transition: max-height 0.25s ease;
+  transition: max-height 0.2s ease;
+  padding-left: 0;
 }
 .nav-folder.open .nav-folder-items { max-height: 200px; }
 
 /* Sub-links inside folder */
 .nav-link--sub {
-  padding-left: 42px;
-  font-size: 0.82rem;
+  padding: 8px 14px 8px 46px;
+  font-size: 0.8rem;
+  position: relative;
 }
-.nav-link--sub .lucide { width: 15px; height: 15px; }
+.nav-link--sub::before {
+  content: '';
+  position: absolute;
+  left: 25px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(255,255,255,0.06);
+}
+.nav-link--sub .lucide { width: 15px; height: 15px; stroke-width: 1.8; }
 
 /* ── mobile header ── */
 
