@@ -1,0 +1,14 @@
+{# Audio-Lab-Tabs; Kontext: audio_tab, audio_job_count #}
+<div class="library-tabs-wrap">
+  <nav class="library-tabs" aria-label="Audio-Lab-Bereiche">
+    <a class="library-tab{% if audio_tab == 'new' %} active{% endif %}" href="/admin/audio" {% if audio_tab == 'new' %}aria-current="page"{% endif %}>
+      <i data-lucide="audio-lines" style="width:17px;height:17px;opacity:0.9"></i>
+      Neuer Job
+    </a>
+    <a class="library-tab{% if audio_tab == 'jobs' %} active{% endif %}" href="/admin/audio/jobs" {% if audio_tab == 'jobs' %}aria-current="page"{% endif %}>
+      <i data-lucide="layout-list" style="width:17px;height:17px;opacity:0.9"></i>
+      Jobs
+      <span class="library-tab-count">{{ audio_job_count or 0 }}</span>
+    </a>
+  </nav>
+</div>

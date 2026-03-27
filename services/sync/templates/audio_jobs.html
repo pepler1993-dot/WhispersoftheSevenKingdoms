@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Audio Jobs{% endblock %}
+{% block content %}
+<div class="page-header page-header-flex">
+  <div>
+    <h1>Audio Lab</h1>
+    <div class="page-subtitle">Alle Audio-Jobs und deren Status.</div>
+  </div>
+  <div class="header-actions">
+    <a href="/admin/pipeline" class="btn btn-secondary btn-sm">Create</a>
+    <a href="/admin/ops" class="btn btn-secondary btn-sm">Operations</a>
+  </div>
+</div>
+
+{% include 'partials/audio_tabs.html' %}
+
+<section class="panel" style="margin-top:18px;">
+  <div class="section-header-inline">
+    <h2>🎵 Audio-Jobs</h2>
+    <span class="section-count">{{ jobs | length }}</span>
+  </div>
+  {% if jobs %}
+  <div class="mini-list">
+    {% for job in jobs %}
+    <a href="/admin/audio/jobs/{{ job.job_id }}" class="mini-item">
+      <div class="mini-dot mini-dot-{{ job.status }}"></div>
+      <div class="mini-info">
+        <div class="mini-title">{{ job.slug or job.job_id[:8] }}</div>
+        <div class="mini-sub">{{ job.model or 'stable-audio' }} · {{ job.preset_name or 'custom' }} · {{ job.created_at[:16] if job.created_at else '—' }}</div>
+      </div>
+      <span class="mini-badge mini-badge-{{ job.status }}">{{ job.status }}</span>
+      {% if job.status in ('error', 'cancelled') %}
+      <form method="post" action="/admin/audio/jobs/{{ job.job_id }}/retry" style="display:inline;" onclick="event.stopPropagation();">
+        <button type="submit" class="btn btn-secondary btn-sm" style="padding:2px 8px; font-size:0.7rem;">🔄</button>
+      </form>
+      {% endif %}
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state-sm">Noch keine Audio-Jobs vorhanden — <a href="/admin/audio">Neuen Job starten</a></div>
+  {% endif %}
+</section>
+
+<style>
+.mini-dot-queued { background: var(--warning, #d97706); }
+.mini-dot-running { background: var(--blue, #3b82f6); animation: al-pulse 1.5s infinite; }
+.mini-dot-complete { background: var(--good, #22c55e); }
+.mini-dot-error { background: #ef4444; }
+.mini-dot-cancelled { background: #6b7280; }
+.mini-dot-pushing { background: var(--blue, #3b82f6); }
+.mini-dot-downloading { background: #8b5cf6; }
+@keyframes al-pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+.mini-badge-queued { background: rgba(217,119,6,0.15); color: #fbbf24; }
+.mini-badge-running { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.mini-badge-complete { background: rgba(34,197,94,0.15); color: #4ade80; }
+.mini-badge-error { background: rgba(239,68,68,0.15); color: #f87171; }
+.mini-badge-cancelled { background: rgba(107,114,128,0.15); color: #9ca3af; }
+.mini-badge-pushing { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.mini-badge-downloading { background: rgba(139,92,246,0.15); color: #a78bfa; }
+</style>
+{% endblock %}

@@ -15,6 +15,8 @@
   </div>
 </div>
 
+{% include 'partials/audio_tabs.html' %}
+
 {# ── Optional: Haus & Variante als Card-Grid ─────────────────── #}
 <section class="panel panel-accent-blue al-preset-section">
   <div class="section-header-inline">
@@ -98,34 +100,7 @@
   </form>
 </section>
 
-{# ── Letzte Audio-Jobs ────────────────────────────────────────── #}
-<section class="panel" style="margin-top:18px;">
-  <div class="section-header-inline">
-    <h2>🎵 Letzte Audio-Jobs</h2>
-    <span class="section-count">{{ jobs | length }}</span>
-  </div>
-  {% if jobs %}
-  <div class="mini-list">
-    {% for job in jobs %}
-    <a href="/admin/audio/jobs/{{ job.job_id }}" class="mini-item">
-      <div class="mini-dot mini-dot-{{ job.status }}"></div>
-      <div class="mini-info">
-        <div class="mini-title">{{ job.slug or job.job_id[:8] }}</div>
-        <div class="mini-sub">{{ job.model or 'stable-audio' }} · {{ job.preset_name or 'custom' }} · {{ job.created_at[:16] if job.created_at else '—' }}</div>
-      </div>
-      <span class="mini-badge mini-badge-{{ job.status }}">{{ job.status }}</span>
-      {% if job.status in ('error', 'cancelled') %}
-      <form method="post" action="/admin/audio/jobs/{{ job.job_id }}/retry" style="display:inline;" onclick="event.stopPropagation();">
-        <button type="submit" class="btn btn-secondary btn-sm" style="padding:2px 8px; font-size:0.7rem;">🔄</button>
-      </form>
-      {% endif %}
-    </a>
-    {% endfor %}
-  </div>
-  {% else %}
-  <div class="empty-state-sm">Noch keine Audio-Jobs vorhanden</div>
-  {% endif %}
-</section>
+
 
 <script>
 (function() {
