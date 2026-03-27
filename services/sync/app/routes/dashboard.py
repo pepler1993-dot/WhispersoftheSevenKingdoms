@@ -40,8 +40,8 @@ def admin_dashboard(request: Request):
     return shared.templates.TemplateResponse(request, 'dashboard.html', {
         'request': request,
         'page': 'dashboard',
-        'recent_runs': all_runs[:8],
-        'recent_audio': recent_audio[:8],
+        'recent_runs': all_runs[:5],
+        'recent_audio': recent_audio[:5],
         'recent_shorts': recent_shorts,
         'active_runs': active_runs,
         'active_audio': active_audio,
