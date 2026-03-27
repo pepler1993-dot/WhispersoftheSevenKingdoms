@@ -1,27 +1,24 @@
 {% extends 'base.html' %}
-{% block title %}{{ preset.house_display }} · {{ preset.variant_key | replace('_', ' ') }} · Library{% endblock %}
+{% block title %}{{ preset.variant_title }} · {{ preset.house_display }} · Library{% endblock %}
 {% block head_extra %}
 <link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
 {% endblock %}
 {% block content %}
-<nav class="lib-breadcrumb" aria-label="Brotkrumen">
-  <a href="/admin/library?tab=houses">Library</a>
-  <span class="lib-breadcrumb-sep" aria-hidden="true">/</span>
-  <a href="/admin/library/houses/{{ preset.house_key }}">{{ preset.house_display }}</a>
-  <span class="lib-breadcrumb-sep" aria-hidden="true">/</span>
-  <span aria-current="page">{{ preset.variant_key | replace('_', ' ') }}</span>
-</nav>
+<div class="library-subpage">
+{% set subpage = true %}
+{% include 'partials/library_tabs.html' %}
 
-<div class="back-link-row">
-  <a href="/admin/library/houses/{{ preset.house_key }}"><i data-lucide="arrow-left" style="width:16px;height:16px"></i> Alle Varianten dieses Hauses</a>
-</div>
-
-<header class="page-header page-header-flex" style="margin-bottom:1.25rem;">
-  <div>
-    <h1 style="margin-bottom:0.35rem;">{{ preset.house_display }}</h1>
-    <div class="page-subtitle" style="font-size:1rem; font-weight:600; color: rgba(255,255,255,0.9);">{{ preset.variant_key | replace('_', ' ') }}</div>
-    <p class="page-subtitle" style="margin-top:0.65rem; max-width:72ch;">{{ preset.variant_description }}</p>
-  </div>
+<header class="lib-house-header lib-house-header--variant">
+  <nav class="lib-breadcrumb lib-breadcrumb--inline" aria-label="Brotkrumen">
+    <a href="/admin/library?tab=houses">Library</a>
+    <span class="lib-breadcrumb-sep" aria-hidden="true">/</span>
+    <a href="/admin/library/houses/{{ preset.house_key }}">{{ preset.house_display }}</a>
+    <span class="lib-breadcrumb-sep" aria-hidden="true">/</span>
+    <span aria-current="page">{{ preset.variant_title }}</span>
+  </nav>
+  <h1 class="lib-house-title">{{ preset.variant_title }}</h1>
+  <p class="lib-house-line">{{ preset.house_display }}</p>
+  <p class="lib-variant-lead">{{ preset.variant_description }}</p>
 </header>
 
 <div class="color-swatch-row preset-section" aria-label="Hausfarben">
@@ -136,4 +133,5 @@
   <p class="empty-state" style="margin:0;">Kein Hintergrund-Prompt für diese Variante hinterlegt.</p>
   {% endif %}
 </section>
+</div>
 {% endblock %}

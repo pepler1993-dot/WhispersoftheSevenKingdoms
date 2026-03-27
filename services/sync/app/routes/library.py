@@ -17,6 +17,22 @@ router = APIRouter()
 
 _LIBRARY_TABS = frozenset({'houses', 'songs', 'backgrounds'})
 
+_SONG_EXT = frozenset({'.mp3', '.wav', '.ogg'})
+_BG_EXT = frozenset({'.jpg', '.jpeg', '.png', '.webp'})
+
+
+def _library_tab_counts() -> dict[str, int]:
+    """Counts for tab badges on Library and subpages (avoids duplicating full lists on presets views)."""
+    songs = _list_library_dir(PIPELINE_DIR / 'data' / 'upload' / 'songs', _SONG_EXT)
+    backgrounds = _list_library_dir(PIPELINE_DIR / 'data' / 'assets' / 'backgrounds', _BG_EXT)
+    houses = _load_house_templates()
+    n_houses = sum(1 for h in houses.values() if isinstance(h, dict))
+    return {
+        'library_house_count': n_houses,
+        'library_song_count': len(songs),
+        'library_background_count': len(backgrounds),
+    }
+
 
 def _normalize_library_tab(raw: str | None) -> str:
     if raw in _LIBRARY_TABS:
@@ -117,6 +133,7 @@ def _build_variant_page_context(house_key: str, variant_key: str, house: dict[st
     return {
         'house_key': house_key,
         'variant_key': variant_key,
+        'variant_title': str(variant_key).replace('_', ' ').strip().title(),
         'house_display': str(house.get('display_name') or house_key),
         'house_line': str(house.get('house') or ''),
         'variant_description': variant_description,
@@ -146,8 +163,8 @@ def admin_library(
     success: str | None = Query(default=None),
     error: str | None = Query(default=None),
 ):
-    songs = _list_library_dir(PIPELINE_DIR / 'data' / 'upload' / 'songs', {'.mp3', '.wav', '.ogg'})
-    backgrounds = _list_library_dir(PIPELINE_DIR / 'data' / 'assets' / 'backgrounds', {'.jpg', '.jpeg', '.png', '.webp'})
+    songs = _list_library_dir(PIPELINE_DIR / 'data' / 'upload' / 'songs', _SONG_EXT)
+    backgrounds = _list_library_dir(PIPELINE_DIR / 'data' / 'assets' / 'backgrounds', _BG_EXT)
     houses = _load_house_templates()
     house_cards: list[dict[str, Any]] = []
     for key, h in sorted(houses.items(), key=lambda x: x[0]):
@@ -174,6 +191,9 @@ def admin_library(
         'songs': songs,
         'backgrounds': backgrounds,
         'house_cards': house_cards,
+        'library_house_count': len(house_cards),
+        'library_song_count': len(songs),
+        'library_background_count': len(backgrounds),
         'success_message': success or '',
         'error_message': error or '',
     })
@@ -190,8 +210,10 @@ def admin_library_house(request: Request, house_key: str):
     vmap = house.get('variants')
     if isinstance(vmap, dict):
         for vk, desc in sorted(vmap.items(), key=lambda x: x[0]):
+            title = str(vk).replace('_', ' ').strip().title()
             variant_rows.append({
                 'key': vk,
+                'title': title,
                 'description': str(desc) if desc is not None else vk,
                 'href': f'/admin/library/houses/{house_key}/variants/{vk}',
             })
@@ -199,9 +221,11 @@ def admin_library_house(request: Request, house_key: str):
     return shared.templates.TemplateResponse(request, 'library_house.html', {
         'request': request,
         'page': 'library',
+        'library_tab': 'houses',
         'house_key': house_key,
         'house': house,
         'variants': variant_rows,
+        **_library_tab_counts(),
     })
 
 
@@ -216,7 +240,9 @@ def admin_library_variant(request: Request, house_key: str, variant_key: str):
     return shared.templates.TemplateResponse(request, 'library_variant.html', {
         'request': request,
         'page': 'library',
+        'library_tab': 'houses',
         'preset': ctx,
+        **_library_tab_counts(),
     })
 
 
@@ -342,8 +368,8 @@ def admin_library_rename(asset_type: str = Form(...), old_name: str = Form(...),
 @router.post('/admin/library/upload')
 async def admin_library_upload(asset_type: str = Form(...), file: list[UploadFile] = File(...)):
     mapping = {
-        'songs': (PIPELINE_DIR / 'data' / 'upload' / 'songs', {'.mp3', '.wav', '.ogg'}),
-        'backgrounds': (PIPELINE_DIR / 'data' / 'assets' / 'backgrounds', {'.jpg', '.jpeg', '.png', '.webp'}),
+        'songs': (PIPELINE_DIR / 'data' / 'upload' / 'songs', _SONG_EXT),
+        'backgrounds': (PIPELINE_DIR / 'data' / 'assets' / 'backgrounds', _BG_EXT),
     }
     if asset_type not in mapping:
         return RedirectResponse(_library_list_url(error='Ungültiger Asset-Typ'), status_code=303)

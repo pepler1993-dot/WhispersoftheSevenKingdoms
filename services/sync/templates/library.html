@@ -31,25 +31,7 @@
 </div>
 {% endif %}
 
-<div class="library-tabs-wrap">
-  <nav class="library-tabs" aria-label="Library-Bereiche">
-    <a class="library-tab{% if library_tab == 'houses' %} active{% endif %}" href="/admin/library" {% if library_tab == 'houses' %}aria-current="page"{% endif %}>
-      <i data-lucide="layers" style="width:17px;height:17px;opacity:0.9"></i>
-      Häuser &amp; Presets
-      <span class="library-tab-count">{{ house_cards | length }}</span>
-    </a>
-    <a class="library-tab{% if library_tab == 'songs' %} active{% endif %}" href="/admin/library?tab=songs" {% if library_tab == 'songs' %}aria-current="page"{% endif %}>
-      <i data-lucide="music-2" style="width:17px;height:17px;opacity:0.9"></i>
-      Songs
-      <span class="library-tab-count">{{ songs | length }}</span>
-    </a>
-    <a class="library-tab{% if library_tab == 'backgrounds' %} active{% endif %}" href="/admin/library?tab=backgrounds" {% if library_tab == 'backgrounds' %}aria-current="page"{% endif %}>
-      <i data-lucide="image" style="width:17px;height:17px;opacity:0.9"></i>
-      Hintergrundbilder
-      <span class="library-tab-count">{{ backgrounds | length }}</span>
-    </a>
-  </nav>
-</div>
+{% include 'partials/library_tabs.html' %}
 
 <section id="library-panel-houses" class="panel panel-accent-gold library-tab-panel" aria-label="Häuser und Presets" {% if library_tab != 'houses' %}hidden{% endif %}>
   <p class="library-tab-hint">Klicke auf ein Haus, um alle Schauplatz-Varianten zu sehen. Pro Variante zeigen wir, was für Audio, Thumbnail, Titel und Hintergrund voreingestellt ist.</p>

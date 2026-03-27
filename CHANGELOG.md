@@ -3,6 +3,19 @@
 Alle relevanten Änderungen am Projekt werden hier dokumentiert.
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [v3.2.1] – 2026-03-27
+
+### Added
+- **Library · Tabs** auf der Hauptseite: Umschalten zwischen **Häuser & Presets**, **Songs** und **Hintergrundbildern** per `?tab=` — weniger Scrollen, Zähler-Badges pro Bereich.
+- **Gleiche Tab-Leiste** auf **Haus-** und **Varianten-Detail** (sticky auf Desktop); Schnellwechsel zu Songs/Hintergründen ohne Umweg.
+- **Partial** `services/sync/templates/partials/library_tabs.html` für einheitliche Tab-Navigation.
+
+### Changed
+- **Redirects** (Upload, Löschen, Umbenennen) setzen **`tab=songs`** bzw. **`tab=backgrounds`**, damit der aktive Bereich erhalten bleibt.
+- **Haus-Detail**: kompakter Kopf (Brotkrumen + Titel), **Hero** nur Sigil & Chips mit dekorativer Akzentfläche; **Varianten-Karten** mit lesbarem Titel (Title Case), technischem Slug und CTA **„Details ansehen“**; bessere Textkontraste.
+- **Varianten-Detail**: kompakte Brotkrumen, **H1 = Varianten-Titel** (`variant_title`), Tabs oben.
+- **Library-Infoblöcke** zuvor entfernt bzw. vereinfacht (separater Commit-Historie).
+
 ## [v3.2.0] – 2026-03-27
 
 ### Added
