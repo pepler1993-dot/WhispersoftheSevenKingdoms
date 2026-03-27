@@ -130,6 +130,12 @@ class AgentSyncDB:
                 );
                 CREATE INDEX IF NOT EXISTS idx_tickets_status ON tickets(status);
                 CREATE INDEX IF NOT EXISTS idx_tickets_type ON tickets(type);
+
+                CREATE TABLE IF NOT EXISTS settings (
+                    key TEXT PRIMARY KEY,
+                    value_json TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                );
                 '''
             )
             try:
@@ -352,3 +358,35 @@ class AgentSyncDB:
             'error_message': row['error_message'],
             'created_at': row['created_at'],
         }
+
+    # ── settings (key-value) ──
+
+    def get_setting(self, key: str) -> Any | None:
+        with self._connect() as conn:
+            row = conn.execute('SELECT value_json FROM settings WHERE key = ?', (key,)).fetchone()
+        if row is None:
+            return None
+        return json.loads(row['value_json'])
+
+    def set_setting(self, key: str, value: Any) -> None:
+        from datetime import datetime, timezone
+        now = datetime.now(timezone.utc).isoformat()
+        with self._lock:
+            with self._connect() as conn:
+                conn.execute(
+                    '''INSERT INTO settings (key, value_json, updated_at) VALUES (?, ?, ?)
+                       ON CONFLICT(key) DO UPDATE SET value_json = excluded.value_json, updated_at = excluded.updated_at''',
+                    (key, json.dumps(value, ensure_ascii=False), now),
+                )
+                conn.commit()
+
+    def get_all_settings(self) -> dict[str, Any]:
+        with self._connect() as conn:
+            rows = conn.execute('SELECT key, value_json FROM settings ORDER BY key').fetchall()
+        return {r['key']: json.loads(r['value_json']) for r in rows}
+
+    def delete_setting(self, key: str) -> None:
+        with self._lock:
+            with self._connect() as conn:
+                conn.execute('DELETE FROM settings WHERE key = ?', (key,))
+                conn.commit()

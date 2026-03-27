@@ -1,0 +1,321 @@
+{% extends 'base.html' %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+<div class="page-header page-header-flex">
+  <div>
+    <h1>Settings</h1>
+    <div class="page-subtitle">Space-Konfiguration, Provider und Presets.</div>
+  </div>
+</div>
+
+{# ── Tabs ─────────────────────────────────────────────────────── #}
+<div class="library-tabs-wrap">
+  <nav class="library-tabs" aria-label="Settings-Bereiche">
+    <a class="library-tab{% if settings_tab == 'general' %} active{% endif %}" href="/admin/settings?tab=general">
+      <i data-lucide="sliders-horizontal" style="width:17px;height:17px;opacity:0.9"></i>
+      General
+    </a>
+    <a class="library-tab{% if settings_tab == 'providers' %} active{% endif %}" href="/admin/settings?tab=providers">
+      <i data-lucide="plug" style="width:17px;height:17px;opacity:0.9"></i>
+      Providers
+    </a>
+    <a class="library-tab{% if settings_tab == 'presets' %} active{% endif %}" href="/admin/settings?tab=presets">
+      <i data-lucide="palette" style="width:17px;height:17px;opacity:0.9"></i>
+      Presets
+      <span class="library-tab-count">{{ preset_count }}</span>
+    </a>
+  </nav>
+</div>
+
+{% if request.query_params.get('saved') %}
+<div class="st-toast" id="save-toast">✅ Einstellungen gespeichert</div>
+{% endif %}
+
+{# ── General ──────────────────────────────────────────────────── #}
+{% if settings_tab == 'general' %}
+<section class="panel panel-accent-blue st-section">
+  <form method="post" action="/admin/settings/general">
+    <div class="st-step-card">
+      <div class="st-step-header">
+        <span class="st-step-icon">🏠</span>
+        <div>
+          <h3>Space</h3>
+          <p class="st-step-desc">Name und Branding deines Studios.</p>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="space_name">Space-Name</label>
+        <input type="text" name="space_name" id="space_name" class="form-input" value="{{ (settings.general or {}).get('space_name', 'Whisper Studio') }}" />
+      </div>
+      <div class="form-group">
+        <label for="tagline">Tagline</label>
+        <input type="text" name="tagline" id="tagline" class="form-input" value="{{ (settings.general or {}).get('tagline', '') }}" placeholder="Seven Kingdoms · Content Production" />
+      </div>
+    </div>
+
+    <div class="st-step-card">
+      <div class="st-step-header">
+        <span class="st-step-icon">🌍</span>
+        <div>
+          <h3>Lokalisierung</h3>
+          <p class="st-step-desc">Zeitzone und Sprache für Timestamps und UI.</p>
+        </div>
+      </div>
+      <div class="grid two">
+        <div class="form-group">
+          <label for="timezone_val">Zeitzone</label>
+          <select name="timezone_val" id="timezone_val" class="form-select">
+            {% set tz = (settings.general or {}).get('timezone', 'Europe/Berlin') %}
+            <option value="Europe/Berlin" {% if tz == 'Europe/Berlin' %}selected{% endif %}>Europe/Berlin</option>
+            <option value="Europe/London" {% if tz == 'Europe/London' %}selected{% endif %}>Europe/London</option>
+            <option value="America/New_York" {% if tz == 'America/New_York' %}selected{% endif %}>America/New_York</option>
+            <option value="America/Los_Angeles" {% if tz == 'America/Los_Angeles' %}selected{% endif %}>America/Los_Angeles</option>
+            <option value="Asia/Tokyo" {% if tz == 'Asia/Tokyo' %}selected{% endif %}>Asia/Tokyo</option>
+            <option value="UTC" {% if tz == 'UTC' %}selected{% endif %}>UTC</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="language">Sprache</label>
+          <select name="language" id="language" class="form-select">
+            {% set lang = (settings.general or {}).get('language', 'de') %}
+            <option value="de" {% if lang == 'de' %}selected{% endif %}>Deutsch</option>
+            <option value="en" {% if lang == 'en' %}selected{% endif %}>English</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary st-btn-save">
+      <i data-lucide="save" style="width:16px;height:16px"></i> Speichern
+    </button>
+  </form>
+</section>
+{% endif %}
+
+{# ── Providers ────────────────────────────────────────────────── #}
+{% if settings_tab == 'providers' %}
+<section class="panel panel-accent-gold st-section">
+  <form method="post" action="/admin/settings/providers">
+    <div class="st-step-card">
+      <div class="st-step-header">
+        <span class="st-step-icon">🎮</span>
+        <div>
+          <h3>GPU Worker</h3>
+          <p class="st-step-desc">Verbindung zum Stable Audio Rendering Server.</p>
+        </div>
+      </div>
+      <div class="grid two">
+        <div class="form-group">
+          <label for="gpu_host">GPU Host URL</label>
+          <input type="text" name="gpu_host" id="gpu_host" class="form-input" value="{{ (settings.providers or {}).get('gpu_host', '') }}" placeholder="http://gpu-worker:7860" />
+        </div>
+        <div class="form-group">
+          <label for="gpu_api_key">GPU API Key</label>
+          <input type="password" name="gpu_api_key" id="gpu_api_key" class="form-input" value="{{ (settings.providers or {}).get('gpu_api_key', '') }}" placeholder="Optional" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="stable_audio_model">Audio-Modell</label>
+        <select name="stable_audio_model" id="stable_audio_model" class="form-select">
+          {% set model = (settings.providers or {}).get('stable_audio_model', 'stable-audio-open-1.0') %}
+          <option value="stable-audio-open-1.0" {% if model == 'stable-audio-open-1.0' %}selected{% endif %}>Stable Audio Open 1.0</option>
+          <option value="stable-audio-2.0" {% if model == 'stable-audio-2.0' %}selected{% endif %}>Stable Audio 2.0</option>
+        </select>
+      </div>
+      <div id="gpu-health-inline" class="st-health-inline">
+        <span class="st-health-dot" id="st-gpu-dot"></span>
+        <span id="st-gpu-text">Status wird geprüft...</span>
+      </div>
+    </div>
+
+    <div class="st-step-card">
+      <div class="st-step-header">
+        <span class="st-step-icon">🚀</span>
+        <div>
+          <h3>YouTube</h3>
+          <p class="st-step-desc">Auto-Upload Konfiguration.</p>
+        </div>
+      </div>
+      <div class="form-check">
+        <input type="hidden" name="youtube_enabled" value="false" />
+        <input type="checkbox" name="youtube_enabled" id="youtube_enabled" value="true" {% if (settings.providers or {}).get('youtube_enabled', True) %}checked{% endif %} />
+        <label for="youtube_enabled">YouTube Auto-Upload aktiviert</label>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary st-btn-save">
+      <i data-lucide="save" style="width:16px;height:16px"></i> Speichern
+    </button>
+  </form>
+</section>
+
+<script>
+fetch('/admin/audio/health')
+  .then(r => r.json())
+  .then(h => {
+    document.getElementById('st-gpu-dot').className = 'st-health-dot ' + (h.available ? 'online' : 'offline');
+    document.getElementById('st-gpu-text').textContent = h.available
+      ? ('✅ ' + (h.provider || 'GPU') + ' · ' + (h.model || '') + ' · ' + (h.host || ''))
+      : ('❌ ' + (h.error || 'Nicht erreichbar'));
+  })
+  .catch(() => {
+    document.getElementById('st-gpu-dot').className = 'st-health-dot offline';
+    document.getElementById('st-gpu-text').textContent = '⚠️ Status konnte nicht geprüft werden';
+  });
+</script>
+{% endif %}
+
+{# ── Presets ──────────────────────────────────────────────────── #}
+{% if settings_tab == 'presets' %}
+<section class="panel st-section">
+  <div class="section-header-inline">
+    <h2>🎨 House Presets</h2>
+    <span class="section-count">{{ preset_count }}</span>
+  </div>
+  <p class="st-step-desc" style="margin-bottom:16px;">
+    Presets werden aktuell aus <code>data/house_templates.json</code> geladen.
+    CRUD-Verwaltung im UI kommt in Phase 2.
+  </p>
+  {% if presets %}
+  <div class="st-preset-grid">
+    {% for key, house in presets.items() %}
+    <div class="st-preset-card" style="--house-color: {{ house.color }}; --house-bg: {{ house.bg_color }}">
+      <div class="st-preset-sigil">{{ house.sigil }}</div>
+      <div class="st-preset-info">
+        <div class="st-preset-name">{{ house.display_name }}</div>
+        <div class="st-preset-meta">
+          {{ (house.variants or {}) | length }} Varianten ·
+          {{ house.mood or '—' }} ·
+          {{ (house.defaults or {}).get('minutes', '?') }} Min
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state-sm">Keine Presets geladen — <code>data/house_templates.json</code> fehlt?</div>
+  {% endif %}
+</section>
+{% endif %}
+
+<style>
+/* ── Settings Step Cards ──────────────────────────────────── */
+.st-section { margin-top: 18px; }
+.st-step-card {
+  background: var(--surface, rgba(255,255,255,0.02));
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  transition: border-color 0.2s ease;
+}
+.st-step-card:hover { border-color: rgba(255,255,255,0.12); }
+.st-step-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.st-step-icon { font-size: 1.6rem; flex-shrink: 0; margin-top: 2px; }
+.st-step-header h3 { font-size: 0.95rem; font-weight: 700; margin: 0; }
+.st-step-desc { font-size: 0.78rem; color: var(--muted); margin: 2px 0 0; }
+
+/* ── Save Button ──────────────────────────────────────────── */
+.st-btn-save {
+  width: 100%;
+  font-size: 1rem;
+  padding: 14px 32px;
+  margin-top: 8px;
+  box-shadow: 0 4px 20px rgba(59,130,246,0.25);
+  transition: all 0.2s ease;
+}
+.st-btn-save:hover {
+  box-shadow: 0 6px 28px rgba(59,130,246,0.4);
+  transform: translateY(-2px);
+}
+
+/* ── Health Inline ────────────────────────────────────────── */
+.st-health-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-top: 12px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.st-health-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #6b7280;
+  flex-shrink: 0;
+}
+.st-health-dot.online { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.4); }
+.st-health-dot.offline { background: #ef4444; }
+
+/* ── Toast ────────────────────────────────────────────────── */
+.st-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(34,197,94,0.15);
+  border: 1px solid rgba(34,197,94,0.4);
+  color: #4ade80;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  z-index: 999;
+  animation: st-toast-in 0.3s ease, st-toast-out 0.3s ease 2.5s forwards;
+}
+@keyframes st-toast-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes st-toast-out { from { opacity: 1; } to { opacity: 0; } }
+
+/* ── Preset Grid ──────────────────────────────────────────── */
+.st-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+.st-preset-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: var(--house-bg, var(--panel));
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+.st-preset-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--house-color, var(--gold));
+  opacity: 0.5;
+}
+.st-preset-card:hover {
+  border-color: var(--house-color, var(--gold));
+  transform: translateY(-2px);
+}
+.st-preset-sigil { font-size: 1.8rem; flex-shrink: 0; }
+.st-preset-name { font-size: 0.88rem; font-weight: 700; }
+.st-preset-meta { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+
+/* ── Mobile ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .st-step-card { padding: 14px; }
+  .st-step-header { gap: 10px; }
+  .st-step-icon { font-size: 1.3rem; }
+  .st-btn-save { padding: 12px 18px; font-size: 0.92rem; }
+  .st-preset-grid { grid-template-columns: 1fr; }
+  .st-toast { left: 20px; right: 20px; text-align: center; }
+}
+</style>
+{% endblock %}
