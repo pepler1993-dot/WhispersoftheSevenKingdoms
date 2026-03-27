@@ -66,6 +66,7 @@
   <div class="section-head">
     <h2>🔥 Gerade aktiv</h2>
   </div>
+  <div class="active-grid">
   {% for run in active_runs %}
   <a href="/admin/pipeline/run/{{ run.run_id }}" class="active-card {% if run.status == 'queued' %}active-card-queued{% endif %}">
     <div class="active-glow {% if run.status == 'queued' %}queued-glow{% endif %}"></div>
@@ -91,11 +92,12 @@
     </div>
   </a>
   {% endfor %}
+  </div>
 </section>
 {% endif %}
 
-{# ── Recent Pipeline Runs + Audio Jobs side by side ───────────── #}
-<div class="grid two">
+{# ── Recent panels ────────────────────────────────────────────── #}
+<div class="dashboard-main-grid">
   <section class="studio-panel">
     <div class="section-header-inline">
       <h2>🎬 Pipeline Runs</h2>
@@ -155,10 +157,9 @@
     <div class="empty-state-sm">Noch keine Audio Jobs — <a href="/admin/audio">starte einen</a>!</div>
     {% endif %}
   </section>
-</div>
 
 {# ── Shorts ───────────────────────────────────────────────────── #}
-<section class="studio-panel" style="margin-top: 4px;">
+<section class="studio-panel" style="margin-top: 0;">
   <div class="section-header-inline">
     <h2>📱 Shorts</h2>
     <a href="/admin/shorts" class="section-link">Alle anzeigen →</a>
@@ -179,6 +180,7 @@
   <div class="empty-state-sm">Noch keine Shorts — <a href="/admin/shorts">erstelle einen</a>!</div>
   {% endif %}
 </section>
+</div>
 
 <style>
 /* ── Studio Stats ────────────────────────────────────────── */
@@ -203,6 +205,11 @@
 
 /* ── Active cards ────────────────────────────────────────── */
 .studio-section { margin-bottom: 28px; }
+.active-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 12px;
+}
 .active-card {
   display: block;
   position: relative;
@@ -313,6 +320,12 @@
 }
 
 /* ── Studio panels ───────────────────────────────────────── */
+.dashboard-main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.2fr) minmax(300px, 0.9fr);
+  gap: 16px;
+  align-items: start;
+}
 .studio-panel {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -498,6 +511,8 @@
   .studio-panel { padding: 14px; }
   .section-header-inline { flex-wrap: wrap; gap: 8px; }
   .section-header-inline h2 { font-size: 0.88rem; }
+  .dashboard-main-grid { grid-template-columns: 1fr; gap: 12px; }
+  .active-grid { grid-template-columns: 1fr; }
 
   .mini-item { gap: 8px; padding: 8px 0; }
   .mini-title { font-size: 0.78rem; }
