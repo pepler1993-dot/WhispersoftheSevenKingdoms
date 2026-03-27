@@ -9,13 +9,13 @@
 {% set dname = house.display_name | default(house_key) %}
 
 <nav class="lib-breadcrumb" aria-label="Brotkrumen">
-  <a href="/admin/library">Library</a>
+  <a href="/admin/library?tab=houses">Library</a>
   <span class="lib-breadcrumb-sep" aria-hidden="true">/</span>
   <span aria-current="page">{{ dname }}</span>
 </nav>
 
 <div class="back-link-row">
-  <a href="/admin/library"><i data-lucide="arrow-left" style="width:16px;height:16px"></i> Zurück zur Library</a>
+  <a href="/admin/library?tab=houses"><i data-lucide="arrow-left" style="width:16px;height:16px"></i> Zurück zur Library</a>
 </div>
 
 <div class="page-header page-header-flex" style="margin-bottom:1rem;">

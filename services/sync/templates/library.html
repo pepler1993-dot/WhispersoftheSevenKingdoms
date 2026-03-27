@@ -4,10 +4,19 @@
 <link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
 {% endblock %}
 {% block content %}
+<div class="library-page" id="library-page" data-active-tab="{{ library_tab }}">
 <div class="page-header page-header-flex">
   <div>
     <h1>Library</h1>
-    <div class="page-subtitle">Zentrale Verwaltung für Pipeline-Eingaben: Songs, Hintergrundbilder und Haus-Presets.</div>
+    <div class="page-subtitle">
+      {% if library_tab == 'songs' %}
+      Audio-Dateien für die Bibliothek im Create-Tab — hochladen, umbenennen, löschen.
+      {% elif library_tab == 'backgrounds' %}
+      Bilder für Video-Hintergründe im Create-Tab — Vorschau, Massenaktionen, Upload.
+      {% else %}
+      Häuser und Schauplatz-Presets — Kurzbeschreibung und Detailseiten ohne Rohkonfiguration.
+      {% endif %}
+    </div>
   </div>
 </div>
 
@@ -22,9 +31,28 @@
 </div>
 {% endif %}
 
-<section class="panel panel-accent-gold" style="margin-bottom:18px;">
-  <div class="section-header-inline"><h2>Häuser &amp; Presets</h2></div>
-  <p class="page-subtitle" style="margin:0 0 1.1rem 0; max-width:78ch;">Klicke auf ein Haus, um alle Schauplatz-Varianten zu sehen. Pro Variante zeigen wir, was für Audio, Thumbnail, Titel und Hintergrund voreingestellt ist.</p>
+<div class="library-tabs-wrap">
+  <nav class="library-tabs" aria-label="Library-Bereiche">
+    <a class="library-tab{% if library_tab == 'houses' %} active{% endif %}" href="/admin/library" {% if library_tab == 'houses' %}aria-current="page"{% endif %}>
+      <i data-lucide="layers" style="width:17px;height:17px;opacity:0.9"></i>
+      Häuser &amp; Presets
+      <span class="library-tab-count">{{ house_cards | length }}</span>
+    </a>
+    <a class="library-tab{% if library_tab == 'songs' %} active{% endif %}" href="/admin/library?tab=songs" {% if library_tab == 'songs' %}aria-current="page"{% endif %}>
+      <i data-lucide="music-2" style="width:17px;height:17px;opacity:0.9"></i>
+      Songs
+      <span class="library-tab-count">{{ songs | length }}</span>
+    </a>
+    <a class="library-tab{% if library_tab == 'backgrounds' %} active{% endif %}" href="/admin/library?tab=backgrounds" {% if library_tab == 'backgrounds' %}aria-current="page"{% endif %}>
+      <i data-lucide="image" style="width:17px;height:17px;opacity:0.9"></i>
+      Hintergrundbilder
+      <span class="library-tab-count">{{ backgrounds | length }}</span>
+    </a>
+  </nav>
+</div>
+
+<section id="library-panel-houses" class="panel panel-accent-gold library-tab-panel" aria-label="Häuser und Presets" {% if library_tab != 'houses' %}hidden{% endif %}>
+  <p class="library-tab-hint">Klicke auf ein Haus, um alle Schauplatz-Varianten zu sehen. Pro Variante zeigen wir, was für Audio, Thumbnail, Titel und Hintergrund voreingestellt ist.</p>
   <div class="house-grid" role="list">
     {% for h in house_cards %}
     <a class="house-card" role="listitem" href="/admin/library/houses/{{ h.key }}" aria-label="{{ h.display_name }}{% if h.house %}, {{ h.house }}{% endif %}" style="background: linear-gradient(145deg, {{ h.color }} 0%, {{ h.bg_color }} 100%);">
@@ -40,15 +68,15 @@
   </div>
 </section>
 
-<div class="grid two">
-  <section class="panel panel-accent-blue">
-    <div class="section-header-inline"><h2>Songs</h2><span class="section-note">Audio-Bibliothek im Create-Tab</span></div>
+<section id="library-panel-songs" class="panel panel-accent-blue library-tab-panel" aria-label="Songs" {% if library_tab != 'songs' %}hidden{% endif %}>
+  <p class="library-tab-hint">Diese Dateien erscheinen im Create-Tab unter der Audio-Bibliothek. Unterstützt: MP3, WAV, OGG.</p>
+  <div class="library-asset-toolbar">
+    <span class="section-note" style="margin:0;">Massenaktionen</span>
     <form id="form-songs-bulk-delete" method="post" action="/admin/library/delete-multi" onsubmit="return confirm('Ausgewählte Songs wirklich löschen?');">
       <input type="hidden" name="asset_type" value="songs" />
-      <div class="form-actions-inline" style="justify-content:flex-end; margin-bottom:10px;">
-        <button type="submit" class="btn btn-danger btn-sm">Ausgewählte löschen</button>
-      </div>
+      <button type="submit" class="btn btn-danger btn-sm">Ausgewählte löschen</button>
     </form>
+  </div>
     <div class="table-wrap">
       <table>
         <thead><tr><th class="th-check"></th><th>Datei</th><th>Größe</th><th>Geändert</th><th></th></tr></thead>
@@ -88,16 +116,17 @@
       </div>
       <button type="submit" class="btn btn-primary btn-sm">Song hochladen</button>
     </form>
-  </section>
+</section>
 
-  <section class="panel panel-accent-blue">
-    <div class="section-header-inline"><h2>Hintergrundbilder</h2><span class="section-note">Video-Hintergrund im Create-Tab</span></div>
+<section id="library-panel-backgrounds" class="panel panel-accent-blue library-tab-panel" aria-label="Hintergrundbilder" {% if library_tab != 'backgrounds' %}hidden{% endif %}>
+  <p class="library-tab-hint">JPG, PNG oder WebP. Auswahl im Create-Tab unter Video-Hintergrund.</p>
+  <div class="library-asset-toolbar">
+    <span class="section-note" style="margin:0;">Massenaktionen</span>
     <form id="form-bg-bulk-delete" method="post" action="/admin/library/delete-multi" onsubmit="return confirm('Ausgewählte Hintergründe wirklich löschen?');">
       <input type="hidden" name="asset_type" value="backgrounds" />
-      <div class="form-actions-inline" style="justify-content:flex-end; margin-bottom:10px;">
-        <button type="submit" class="btn btn-danger btn-sm">Ausgewählte löschen</button>
-      </div>
+      <button type="submit" class="btn btn-danger btn-sm">Ausgewählte löschen</button>
     </form>
+  </div>
     <div class="thumb-grid">
         {% for item in backgrounds %}
         <div class="thumb-card">
@@ -284,7 +313,10 @@ document.querySelectorAll('form[action="/admin/library/upload"]').forEach(functi
       if (resp.redirected) {
         window.location.href = resp.url;
       } else {
-        window.location.href = '/admin/library?success=Upload+abgeschlossen';
+        var root = document.getElementById('library-page');
+        var t = (root && root.dataset.activeTab) ? root.dataset.activeTab : 'houses';
+        var q = new URLSearchParams({ tab: t, success: 'Upload abgeschlossen' });
+        window.location.href = '/admin/library?' + q.toString();
       }
     }).catch(function(err) {
       btn.disabled = false;

@@ -7,6 +7,7 @@ from typing import Any
 
 from fastapi import APIRouter, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
+from urllib.parse import urlencode
 
 from app import shared
 from app.helpers import _list_library_dir, _load_house_templates
@@ -14,12 +15,33 @@ from app.pipeline_runner import PIPELINE_DIR
 
 router = APIRouter()
 
+_LIBRARY_TABS = frozenset({'houses', 'songs', 'backgrounds'})
 
-def _redirect_library(msg: str, *, error: bool = False) -> RedirectResponse:
-    q = 'error' if error else 'success'
-    from urllib.parse import quote
 
-    return RedirectResponse(f'/admin/library?{q}={quote(msg)}', status_code=303)
+def _normalize_library_tab(raw: str | None) -> str:
+    if raw in _LIBRARY_TABS:
+        return raw  # type: ignore[return-value]
+    return 'houses'
+
+
+def _tab_for_asset_type(asset_type: str) -> str:
+    if asset_type == 'songs':
+        return 'songs'
+    if asset_type == 'backgrounds':
+        return 'backgrounds'
+    return 'houses'
+
+
+def _library_list_url(*, tab: str | None = None, success: str | None = None, error: str | None = None) -> str:
+    q: dict[str, str] = {}
+    t = _normalize_library_tab(tab)
+    if t != 'houses':
+        q['tab'] = t
+    if success:
+        q['success'] = success
+    if error:
+        q['error'] = error
+    return f'/admin/library?{urlencode(q)}' if q else '/admin/library'
 
 
 def _as_list(val: Any) -> list[Any]:
@@ -118,7 +140,12 @@ def _build_variant_page_context(house_key: str, variant_key: str, house: dict[st
 
 
 @router.get('/admin/library', response_class=HTMLResponse)
-def admin_library(request: Request, success: str | None = Query(default=None), error: str | None = Query(default=None)):
+def admin_library(
+    request: Request,
+    tab: str | None = Query(default=None),
+    success: str | None = Query(default=None),
+    error: str | None = Query(default=None),
+):
     songs = _list_library_dir(PIPELINE_DIR / 'data' / 'upload' / 'songs', {'.mp3', '.wav', '.ogg'})
     backgrounds = _list_library_dir(PIPELINE_DIR / 'data' / 'assets' / 'backgrounds', {'.jpg', '.jpeg', '.png', '.webp'})
     houses = _load_house_templates()
@@ -139,9 +166,11 @@ def admin_library(request: Request, success: str | None = Query(default=None), e
             'bg_color': str(h.get('bg_color') or '#0f172a'),
             'variant_count': n_var,
         })
+    library_tab = _normalize_library_tab(tab)
     return shared.templates.TemplateResponse(request, 'library.html', {
         'request': request,
         'page': 'library',
+        'library_tab': library_tab,
         'songs': songs,
         'backgrounds': backgrounds,
         'house_cards': house_cards,
@@ -198,18 +227,27 @@ def admin_library_delete(asset_type: str = Form(...), filename: str = Form(...))
         'songs': PIPELINE_DIR / 'data' / 'upload' / 'songs',
     }
     if asset_type not in mapping:
-        return RedirectResponse('/admin/library?error=Löschen+ist+für+diesen+Asset-Typ+nicht+erlaubt', status_code=303)
+        return RedirectResponse(
+            _library_list_url(error='Löschen ist für diesen Asset-Typ nicht erlaubt'),
+            status_code=303,
+        )
 
     safe_name = Path(filename).name
     if not safe_name:
-        return RedirectResponse('/admin/library?error=Ungültiger+Dateiname', status_code=303)
+        return RedirectResponse(_library_list_url(tab=_tab_for_asset_type(asset_type), error='Ungültiger Dateiname'), status_code=303)
 
     path = mapping[asset_type] / safe_name
     if not path.exists() or not path.is_file():
-        return RedirectResponse('/admin/library?error=Datei+nicht+gefunden', status_code=303)
+        return RedirectResponse(_library_list_url(tab=_tab_for_asset_type(asset_type), error='Datei nicht gefunden'), status_code=303)
 
     path.unlink()
-    return RedirectResponse(f'/admin/library?success={asset_type}+Datei+{safe_name}+gelöscht', status_code=303)
+    return RedirectResponse(
+        _library_list_url(
+            tab=_tab_for_asset_type(asset_type),
+            success=f'{asset_type} Datei {safe_name} gelöscht',
+        ),
+        status_code=303,
+    )
 
 
 @router.post('/admin/library/delete-multi')
@@ -219,9 +257,15 @@ def admin_library_delete_multi(asset_type: str = Form(...), filenames: list[str]
         'songs': PIPELINE_DIR / 'data' / 'upload' / 'songs',
     }
     if asset_type not in mapping:
-        return RedirectResponse('/admin/library?error=Mehrfach-Löschen+ist+für+diesen+Asset-Typ+nicht+erlaubt', status_code=303)
+        return RedirectResponse(
+            _library_list_url(error='Mehrfach-Löschen ist für diesen Asset-Typ nicht erlaubt'),
+            status_code=303,
+        )
     if not filenames:
-        return RedirectResponse('/admin/library?error=Keine+Dateien+ausgewählt', status_code=303)
+        return RedirectResponse(
+            _library_list_url(tab=_tab_for_asset_type(asset_type), error='Keine Dateien ausgewählt'),
+            status_code=303,
+        )
 
     base = mapping[asset_type]
     deleted = 0
@@ -234,7 +278,13 @@ def admin_library_delete_multi(asset_type: str = Form(...), filenames: list[str]
             path.unlink()
             deleted += 1
 
-    return RedirectResponse(f'/admin/library?success={deleted}+{asset_type}+Datei(en)+gelöscht', status_code=303)
+    return RedirectResponse(
+        _library_list_url(
+            tab=_tab_for_asset_type(asset_type),
+            success=f'{deleted} {asset_type} Datei(en) gelöscht',
+        ),
+        status_code=303,
+    )
 
 
 @router.post('/admin/library/rename')
@@ -244,12 +294,18 @@ def admin_library_rename(asset_type: str = Form(...), old_name: str = Form(...),
         'songs': PIPELINE_DIR / 'data' / 'upload' / 'songs',
     }
     if asset_type not in mapping:
-        return RedirectResponse('/admin/library?error=Umbenennen+ist+für+diesen+Asset-Typ+nicht+erlaubt', status_code=303)
+        return RedirectResponse(
+            _library_list_url(error='Umbenennen ist für diesen Asset-Typ nicht erlaubt'),
+            status_code=303,
+        )
 
     safe_old = Path(old_name).name
     safe_new = Path(new_name).name
     if not safe_old or not safe_new:
-        return RedirectResponse('/admin/library?error=Ungültiger+Dateiname', status_code=303)
+        return RedirectResponse(
+            _library_list_url(tab=_tab_for_asset_type(asset_type), error='Ungültiger Dateiname'),
+            status_code=303,
+        )
 
     old_ext = Path(safe_old).suffix.lower()
     new_ext = Path(safe_new).suffix.lower()
@@ -263,12 +319,24 @@ def admin_library_rename(asset_type: str = Form(...), old_name: str = Form(...),
     dst = base / safe_new
 
     if not src.exists() or not src.is_file():
-        return RedirectResponse('/admin/library?error=Quelldatei+nicht+gefunden', status_code=303)
+        return RedirectResponse(
+            _library_list_url(tab=_tab_for_asset_type(asset_type), error='Quelldatei nicht gefunden'),
+            status_code=303,
+        )
     if dst.exists():
-        return RedirectResponse(f'/admin/library?error=Datei+{safe_new}+existiert+bereits', status_code=303)
+        return RedirectResponse(
+            _library_list_url(tab=_tab_for_asset_type(asset_type), error=f'Datei {safe_new} existiert bereits'),
+            status_code=303,
+        )
 
     src.rename(dst)
-    return RedirectResponse(f'/admin/library?success={safe_old}+umbenannt+zu+{safe_new}', status_code=303)
+    return RedirectResponse(
+        _library_list_url(
+            tab=_tab_for_asset_type(asset_type),
+            success=f'{safe_old} umbenannt zu {safe_new}',
+        ),
+        status_code=303,
+    )
 
 
 @router.post('/admin/library/upload')
@@ -278,7 +346,7 @@ async def admin_library_upload(asset_type: str = Form(...), file: list[UploadFil
         'backgrounds': (PIPELINE_DIR / 'data' / 'assets' / 'backgrounds', {'.jpg', '.jpeg', '.png', '.webp'}),
     }
     if asset_type not in mapping:
-        return RedirectResponse('/admin/library?error=Ung%C3%BCltiger+Asset-Typ', status_code=303)
+        return RedirectResponse(_library_list_url(error='Ungültiger Asset-Typ'), status_code=303)
     target_dir, allowed = mapping[asset_type]
     target_dir.mkdir(parents=True, exist_ok=True)
     uploaded = 0
@@ -287,7 +355,10 @@ async def admin_library_upload(asset_type: str = Form(...), file: list[UploadFil
         if not filename:
             continue
         if Path(filename).suffix.lower() not in allowed:
-            return RedirectResponse(f'/admin/library?error=Dateityp+für+{filename}+nicht+erlaubt', status_code=303)
+            return RedirectResponse(
+                _library_list_url(tab=_tab_for_asset_type(asset_type), error=f'Dateityp für {filename} nicht erlaubt'),
+                status_code=303,
+            )
         target_path = target_dir / filename
         with target_path.open('wb') as out:
             while True:
@@ -298,8 +369,17 @@ async def admin_library_upload(asset_type: str = Form(...), file: list[UploadFil
         await uploaded_file.close()
         uploaded += 1
     if uploaded == 0:
-        return RedirectResponse('/admin/library?error=Keine+gültigen+Dateien+hochgeladen', status_code=303)
-    return RedirectResponse(f'/admin/library?success={uploaded}+{asset_type}+Datei(en)+hochgeladen', status_code=303)
+        return RedirectResponse(
+            _library_list_url(tab=_tab_for_asset_type(asset_type), error='Keine gültigen Dateien hochgeladen'),
+            status_code=303,
+        )
+    return RedirectResponse(
+        _library_list_url(
+            tab=_tab_for_asset_type(asset_type),
+            success=f'{uploaded} {asset_type} Datei(en) hochgeladen',
+        ),
+        status_code=303,
+    )
 
 
 @router.get('/admin/library/preview/{asset_type}/{filename}')
