@@ -31,31 +31,37 @@
 
 {% include 'partials/pipeline_tabs.html' %}
 
-{# ── Stats bar ────────────────────────────────────────────────── #}
-<div class="run-stats">
-  <div class="stat-pill stat-running">
-    <span class="stat-dot running"></span>
-    <span class="stat-count">{{ running|length }}</span> Laufend
+{# ── Stats bar / filters ─────────────────────────────────────── #}
+<div class="run-filter-bar">
+  <div class="run-stats" id="run-stats-filters">
+    <button type="button" class="stat-pill stat-running active" data-filter-status="running" aria-pressed="true">
+      <span class="stat-dot running"></span>
+      <span class="stat-count">{{ running|length }}</span> Laufend
+    </button>
+    <button type="button" class="stat-pill stat-queued active" data-filter-status="queued" aria-pressed="true">
+      <span class="stat-dot queued"></span>
+      <span class="stat-count">{{ queued|length }}</span> Warteschlange
+    </button>
+    <button type="button" class="stat-pill stat-rendered active" data-filter-status="rendered" aria-pressed="true">
+      <span class="stat-dot rendered"></span>
+      <span class="stat-count">{{ rendered|length }}</span> Gerendert
+    </button>
+    <button type="button" class="stat-pill stat-uploaded active" data-filter-status="uploaded" aria-pressed="true">
+      <span class="stat-dot uploaded"></span>
+      <span class="stat-count">{{ uploaded|length }}</span> Hochgeladen
+    </button>
+    <button type="button" class="stat-pill stat-failed active" data-filter-status="failed" aria-pressed="true">
+      <span class="stat-dot failed"></span>
+      <span class="stat-count">{{ failed|length }}</span> Fehlgeschlagen
+    </button>
+    <button type="button" class="stat-pill stat-cancelled active" data-filter-status="cancelled" aria-pressed="true">
+      <span class="stat-dot cancelled"></span>
+      <span class="stat-count">{{ cancelled|length }}</span> Abgebrochen
+    </button>
   </div>
-  <div class="stat-pill stat-queued">
-    <span class="stat-dot queued"></span>
-    <span class="stat-count">{{ queued|length }}</span> Warteschlange
-  </div>
-  <div class="stat-pill stat-rendered">
-    <span class="stat-dot rendered"></span>
-    <span class="stat-count">{{ rendered|length }}</span> Gerendert
-  </div>
-  <div class="stat-pill stat-uploaded">
-    <span class="stat-dot uploaded"></span>
-    <span class="stat-count">{{ uploaded|length }}</span> Hochgeladen
-  </div>
-  <div class="stat-pill stat-failed">
-    <span class="stat-dot failed"></span>
-    <span class="stat-count">{{ failed|length }}</span> Fehlgeschlagen
-  </div>
-  <div class="stat-pill stat-cancelled">
-    <span class="stat-dot cancelled"></span>
-    <span class="stat-count">{{ cancelled|length }}</span> Abgebrochen
+  <div class="run-filter-actions">
+    <button type="button" class="btn btn-secondary btn-sm" id="run-filter-all-on">Alle auswählen</button>
+    <button type="button" class="btn btn-secondary btn-sm" id="run-filter-all-off">Alle abwählen</button>
   </div>
 </div>
 
@@ -71,7 +77,7 @@
 
 {# ── Running — Hero live cards ────────────────────────────────── #}
 {% if running %}
-<section class="run-section">
+<section class="run-section" data-run-section="running">
   <div class="section-head">
     <h2>🔥 Laufend</h2>
     <span class="section-count">{{ running|length }}</span>
@@ -103,7 +109,7 @@
 
 {# ── Queued — Numbered queue ──────────────────────────────────── #}
 {% if queued %}
-<section class="run-section">
+<section class="run-section" data-run-section="queued">
   <div class="section-head">
     <h2>⏳ Warteschlange</h2>
     <span class="section-count">{{ queued|length }}</span>
@@ -133,7 +139,7 @@
 
 {# ── Uploaded (YouTube-style) ──────────────────────────────────── #}
 {% if uploaded %}
-<section class="run-section">
+<section class="run-section" data-run-section="uploaded">
   <div class="section-head">
     <h2>🚀 Hochgeladen</h2>
     <span class="section-count">{{ uploaded|length }}</span>
@@ -170,7 +176,7 @@
 
 {# ── Rendered (YouTube-style) ─────────────────────────────────── #}
 {% if rendered %}
-<section class="run-section">
+<section class="run-section" data-run-section="rendered">
   <div class="section-head">
     <h2>✅ Gerendert</h2>
     <span class="section-count">{{ rendered|length }}</span>
@@ -208,7 +214,7 @@
 
 {# ── Failed ───────────────────────────────────────────────────── #}
 {% if failed %}
-<section class="run-section">
+<section class="run-section" data-run-section="failed">
   <div class="section-head">
     <h2>❌ Fehlgeschlagen</h2>
     <span class="section-count">{{ failed|length }}</span>
@@ -232,7 +238,7 @@
 
 {# ── Cancelled ────────────────────────────────────────────────── #}
 {% if cancelled %}
-<section class="run-section">
+<section class="run-section" data-run-section="cancelled">
   <div class="section-head">
     <h2>🚫 Abgebrochen</h2>
     <span class="section-count">{{ cancelled|length }}</span>
@@ -255,15 +261,27 @@
 {% endif %}
 
 <style>
-/* ── Stats bar ─────────────────────────────────────────────── */
+/* ── Stats bar / filters ───────────────────────────────────── */
+.run-filter-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
 .run-stats {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
-  margin-bottom: 24px;
+}
+.run-filter-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 .stat-pill {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 6px 14px;
@@ -273,8 +291,22 @@
   background: var(--surface);
   border: 1px solid var(--line);
   color: var(--muted);
+  cursor: pointer;
+  transition: all 0.18s ease;
 }
-.stat-count { color: var(--text); }
+.stat-pill:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,0.2);
+}
+.stat-pill.active {
+  color: var(--text);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.05) inset;
+}
+.stat-pill:not(.active) {
+  opacity: 0.45;
+  filter: grayscale(0.2);
+}
+.stat-count { color: inherit; }
 .stat-dot {
   width: 8px;
   height: 8px;
@@ -721,5 +753,55 @@
   .stat-pill { padding: 3px 6px; font-size: 0.62rem; }
   .run-stats { flex-wrap: wrap; }
 }
+.run-section[hidden] { display: none !important; }
 </style>
+
+<script>
+(function() {
+  const buttons = Array.from(document.querySelectorAll('[data-filter-status]'));
+  const sections = Array.from(document.querySelectorAll('[data-run-section]'));
+  const btnAllOn = document.getElementById('run-filter-all-on');
+  const btnAllOff = document.getElementById('run-filter-all-off');
+  if (!buttons.length || !sections.length) return;
+
+  const active = new Set(buttons.map((btn) => btn.dataset.filterStatus));
+
+  function render() {
+    buttons.forEach((btn) => {
+      const on = active.has(btn.dataset.filterStatus);
+      btn.classList.toggle('active', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    sections.forEach((section) => {
+      const on = active.has(section.dataset.runSection);
+      section.hidden = !on;
+    });
+  }
+
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.filterStatus;
+      if (active.has(key)) active.delete(key);
+      else active.add(key);
+      render();
+    });
+  });
+
+  if (btnAllOn) {
+    btnAllOn.addEventListener('click', () => {
+      buttons.forEach((btn) => active.add(btn.dataset.filterStatus));
+      render();
+    });
+  }
+
+  if (btnAllOff) {
+    btnAllOff.addEventListener('click', () => {
+      active.clear();
+      render();
+    });
+  }
+
+  render();
+})();
+</script>
 {% endblock %}
