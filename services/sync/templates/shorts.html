@@ -7,11 +7,11 @@
 <div class="page-header page-header-flex">
   <div>
     <h1>Shorts</h1>
-    <div class="page-subtitle">Haus-Preset → Variante → hochgeladenes Video → Short.</div>
+    <div class="page-subtitle">Shorts aus bestehenden Uploads erstellen – im selben Flow-Muster wie Audio Lab.</div>
   </div>
   <div class="header-actions">
     <a href="/admin/pipeline" class="btn btn-secondary btn-sm">Create</a>
-    <a href="/admin/library" class="btn btn-secondary btn-sm">Library</a>
+    <a href="/admin/audio" class="btn btn-secondary btn-sm">Audio Lab</a>
   </div>
 </div>
 
@@ -21,9 +21,13 @@
 {% if error_message %}<div class="panel error-panel" style="margin-bottom:18px;"><strong>Fehler:</strong> {{ error_message }}</div>{% endif %}
 
 {% if shorts_tab == 'new' %}
-<section class="panel panel-accent-blue shorts-preset-panel">
-  <div class="section-header-inline"><h2>Haus-Preset wählen</h2><span class="section-note">wie bei Create</span></div>
-  <div class="al-house-grid" id="shorts-house-grid">
+<section class="panel panel-accent-blue al-preset-section">
+  <div class="section-header-inline">
+    <h2>Schnellauswahl</h2>
+    <span class="section-note">Haus → Variante → passendes hochgeladenes Video</span>
+  </div>
+
+  <div class="al-house-grid" id="al-house-grid">
     {% for key, house in houses.items() if house is mapping %}
     <div class="al-house-card" data-house="{{ key }}" style="--house-color: {{ house.color }}; --house-bg: {{ house.bg_color }}">
       <div class="al-house-sigil">{{ house.sigil }}</div>
@@ -31,52 +35,44 @@
     </div>
     {% endfor %}
   </div>
+
+  <div class="al-variant-grid" id="al-variant-grid" style="display:none; margin-top:14px;"></div>
 </section>
 
-<section class="panel panel-accent-gold" id="shorts-variant-panel" style="display:none;">
-  <div class="section-header-inline"><h2 id="shorts-variant-title">Variante wählen</h2><span class="section-note">filtert hochgeladene Videos</span></div>
-  <div class="al-variant-grid" id="shorts-variant-grid"></div>
-</section>
-
-<section class="panel panel-accent-purple" id="shorts-video-panel" style="display:none;">
-  <div class="section-header-inline"><h2>Passendes Video wählen</h2><span class="section-note">nur bereits hochgeladene Longform-Videos</span></div>
-  <div class="shorts-video-list" id="shorts-video-list"></div>
-</section>
-
-<section class="panel panel-accent-purple shorts-create-panel" id="shorts-create-panel" style="display:none;">
-  <div class="section-header-inline"><h2>Short konfigurieren</h2><span class="section-note">Video gewählt → Draft anlegen</span></div>
-  <form method="post" action="/admin/shorts/create" id="shorts-form">
-    <div class="al-step-card">
-      <div class="al-step-header">
-        <span class="al-step-num">1</span>
-        <div>
-          <h3>Quelle</h3>
-          <p class="al-step-desc">Preset, Variante und gewähltes Video als Basis.</p>
-        </div>
+<section class="panel panel-accent-gold al-create-panel" id="shorts-video-panel" style="display:none;">
+  <h2>🎬 Video auswählen</h2>
+  <div class="al-step-card">
+    <div class="al-step-header">
+      <span class="al-step-num">1</span>
+      <div>
+        <h3>Passender Upload</h3>
+        <p class="al-step-desc">Wähle ein bereits hochgeladenes Video für das gewählte Preset.</p>
       </div>
+    </div>
+    <div class="shorts-video-list" id="shorts-video-list"></div>
+  </div>
+</section>
+
+<section class="panel panel-accent-gold al-create-panel" id="shorts-create-panel" style="display:none;">
+  <h2>🎞️ Neuen Short-Draft starten</h2>
+  <form method="post" action="/admin/shorts/create" id="shorts-form">
     <input type="hidden" name="source_run_id" id="source_run_id" />
     <input type="hidden" name="source_audio" id="source_audio" />
     <input type="hidden" name="house_key" id="house_key" />
     <input type="hidden" name="variant_key" id="variant_key" />
 
-    <div class="form-group">
-      <label>Gewähltes Video</label>
-      <div class="config-item"><div class="value" id="selected-video-label">—</div></div>
-    </div>
-
-    <div class="shorts-selection-summary" id="shorts-selection-summary">
-      <div class="config-item"><div class="label">Preset</div><div class="value" id="selected-house-label">—</div></div>
-      <div class="config-item"><div class="label">Variante</div><div class="value" id="selected-variant-label">—</div></div>
-    </div>
-    </div>
-
     <div class="al-step-card">
       <div class="al-step-header">
         <span class="al-step-num">2</span>
         <div>
-          <h3>Short Setup</h3>
-          <p class="al-step-desc">Titel, Ausschnitt und Visuals festlegen.</p>
+          <h3>Konfiguration</h3>
+          <p class="al-step-desc">Titel, Länge und Visuals für den Short.</p>
         </div>
+      </div>
+
+      <div class="form-group">
+        <label>Gewähltes Video</label>
+        <div class="config-item"><div class="value" id="selected-video-label">—</div></div>
       </div>
 
       <div class="grid two">
@@ -92,11 +88,11 @@
 
       <div class="grid two">
         <div class="form-group">
-          <label for="clip_start_seconds">Start</label>
+          <label for="clip_start_seconds">Clip-Start (Sekunden)</label>
           <input id="clip_start_seconds" name="clip_start_seconds" type="number" min="0" value="0" class="form-input" required />
         </div>
         <div class="form-group">
-          <label for="clip_duration_seconds">Länge</label>
+          <label for="clip_duration_seconds">Clip-Länge (15–60s)</label>
           <input id="clip_duration_seconds" name="clip_duration_seconds" type="number" min="15" max="60" value="30" class="form-input" required />
         </div>
       </div>
@@ -121,14 +117,16 @@
       </div>
     </div>
 
-    <button type="submit" class="btn btn-primary">Short-Entwurf anlegen</button>
+    <button type="submit" class="btn btn-primary al-btn-launch">
+      <i data-lucide="clapperboard" style="width:18px;height:18px"></i> Short-Entwurf anlegen
+    </button>
   </form>
 </section>
 {% endif %}
 
 {% if shorts_tab == 'drafts' %}
 <section class="panel panel-accent-blue">
-  <div class="section-header-inline"><h2>Letzte Short-Drafts</h2><span class="section-note">separat vom Create-Flow</span></div>
+  <div class="section-header-inline"><h2>Letzte Short-Drafts</h2><span class="section-note">aus den Pipeline-Runs gefiltert</span></div>
   <ul class="list">
     {% for run in short_runs %}
     <li class="timeline-item"><div><strong>{{ run.title or run.slug }}</strong><br/><span class="timeline-time">{{ run.status }}</span></div><div class="timeline-meta"><a href="/admin/shorts/{{ run.run_id }}" class="btn btn-secondary btn-sm">Details</a><span class="timeline-time">{{ run.created_at[:16] if run.created_at else '–' }}</span></div></li>
@@ -141,9 +139,8 @@
 (function() {
   const houses = {{ houses | tojson }};
   const uploadedVideos = {{ uploaded_videos | tojson }};
-  const houseGrid = document.getElementById('shorts-house-grid');
-  const variantPanel = document.getElementById('shorts-variant-panel');
-  const variantGrid = document.getElementById('shorts-variant-grid');
+  const houseCards = document.querySelectorAll('.al-house-card');
+  const variantGrid = document.getElementById('al-variant-grid');
   const videoPanel = document.getElementById('shorts-video-panel');
   const videoList = document.getElementById('shorts-video-list');
   const createPanel = document.getElementById('shorts-create-panel');
@@ -154,48 +151,36 @@
   const sourceAudio = document.getElementById('source_audio');
   const houseInput = document.getElementById('house_key');
   const variantInput = document.getElementById('variant_key');
-  const selectedHouseLabel = document.getElementById('selected-house-label');
-  const selectedVariantLabel = document.getElementById('selected-variant-label');
 
-  function slugify(text) { return (text || '').toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
-  function titleCase(text) { return (text || '').replace(/_/g, ' ').replace(/\b\w/g, m => m.toUpperCase()); }
+  function slugify(text) {
+    return (text || '').toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
 
-  function renderVariants(houseKey) {
-    const house = houses[houseKey];
-    const variants = house?.variants || {};
-    variantGrid.innerHTML = '';
-    document.getElementById('shorts-variant-title').textContent = (house?.display_name || houseKey) + ' – Variante wählen';
-    Object.entries(variants).forEach(([key, desc]) => {
-      const btn = document.createElement('div');
-      btn.className = 'al-variant-card';
-      btn.innerHTML = '<div class="al-variant-name">' + titleCase(key) + '</div><div class="al-variant-desc">' + desc + '</div>';
-      btn.addEventListener('click', () => {
-        variantGrid.querySelectorAll('.al-variant-card').forEach(x => x.classList.remove('selected'));
-        btn.classList.add('selected');
-        houseInput.value = houseKey;
-        variantInput.value = key;
-        if (selectedHouseLabel) selectedHouseLabel.textContent = house?.display_name || houseKey;
-        if (selectedVariantLabel) selectedVariantLabel.textContent = titleCase(key);
-        renderVideos(houseKey, key);
-      });
-      variantGrid.appendChild(btn);
-    });
-    variantPanel.style.display = 'block';
+  function titleCase(text) {
+    return (text || '').replace(/_/g, ' ').replace(/\b\w/g, m => m.toUpperCase());
   }
 
   function renderVideos(houseKey, variantKey) {
     const rows = uploadedVideos.filter(v => v.house_key === houseKey && (!variantKey || v.variant_key === variantKey));
     videoList.innerHTML = '';
+    if (!rows.length) {
+      videoList.innerHTML = '<div class="empty-state">Keine hochgeladenen Videos für dieses Preset / diese Variante gefunden.</div>';
+      videoPanel.style.display = 'block';
+      createPanel.style.display = 'none';
+      return;
+    }
     rows.forEach(v => {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'shorts-video-card';
-      btn.innerHTML = '<div class="shorts-video-card-top"><strong>' + (v.title || v.slug) + '</strong><span class="shorts-video-badge">Uploaded</span></div><div class="shorts-video-meta"><span>' + (v.created_at || '').slice(0,16) + '</span><span>' + (v.variant_key ? titleCase(v.variant_key) : '—') + '</span></div>';
+      btn.innerHTML = '<div class="shorts-video-title">' + (v.title || v.slug) + '</div><div class="shorts-video-meta">' + (v.created_at || '').slice(0,16) + '</div>';
       btn.addEventListener('click', () => {
-        videoList.querySelectorAll('.shorts-video-card').forEach(x => x.classList.remove('active'));
-        btn.classList.add('active');
+        videoList.querySelectorAll('.shorts-video-card').forEach(x => x.classList.remove('selected'));
+        btn.classList.add('selected');
         sourceRunId.value = v.run_id || '';
         sourceAudio.value = v.audio_filename || '';
+        houseInput.value = houseKey;
+        variantInput.value = variantKey;
         selectedVideoLabel.textContent = v.title || v.slug;
         title.value = (v.title || v.slug) + ' | Short';
         slug.value = slugify((v.slug || 'short') + '-short');
@@ -203,35 +188,66 @@
       });
       videoList.appendChild(btn);
     });
-    if (!rows.length) {
-      videoList.innerHTML = '<div class="empty-state">Keine hochgeladenen Videos für dieses Preset / diese Variante gefunden.</div>';
-    }
     videoPanel.style.display = 'block';
   }
 
-  houseGrid?.querySelectorAll('.al-house-card').forEach(card => {
+  houseCards.forEach(card => {
     card.addEventListener('click', () => {
-      houseGrid.querySelectorAll('.al-house-card').forEach(x => x.classList.remove('selected'));
+      const key = card.dataset.house;
+      const house = houses[key];
+      if (!house) return;
+      houseCards.forEach(c => c.classList.remove('selected'));
       card.classList.add('selected');
-      videoPanel.style.display = 'none';
       createPanel.style.display = 'none';
-      renderVariants(card.dataset.house);
+      videoPanel.style.display = 'none';
+      variantGrid.innerHTML = '';
+      const variants = house.variants || {};
+      Object.keys(variants).forEach(vKey => {
+        const vName = vKey.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        const vDesc = variants[vKey];
+        const btn = document.createElement('div');
+        btn.className = 'al-variant-card';
+        btn.style.setProperty('--house-color', house.color || 'var(--gold)');
+        btn.innerHTML = '<div class="al-variant-name">' + vName + '</div><div class="al-variant-desc">' + vDesc + '</div>';
+        btn.addEventListener('click', () => {
+          variantGrid.querySelectorAll('.al-variant-card').forEach(x => x.classList.remove('selected'));
+          btn.classList.add('selected');
+          renderVideos(key, vKey);
+        });
+        variantGrid.appendChild(btn);
+      });
+      variantGrid.style.display = 'grid';
     });
   });
 })();
 </script>
 
 <style>
-#shorts-house-grid { margin-top: 4px; }
-#shorts-variant-grid { margin-top: 14px; }
-.shorts-video-list { display:grid; gap:12px; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); }
-.shorts-video-card {
-  border:1px solid rgba(255,255,255,.08); background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.025)); color:var(--text); border-radius:14px; padding:16px; text-align:left; display:grid; gap:10px; transition:all .18s var(--ease);
+.shorts-video-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
 }
-.shorts-video-card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
-.shorts-video-meta { display:flex; flex-wrap:wrap; gap:8px; color:var(--muted); font-size:.78rem; }
-.shorts-video-badge { display:inline-flex; align-items:center; padding:4px 8px; border-radius:999px; background:rgba(46, 204, 113, .12); color:#7ee2a8; font-size:.72rem; font-weight:700; }
-.shorts-video-card:hover,.shorts-video-card.active { border-color:var(--gold); transform:translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,.22); }
-.shorts-selection-summary { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px; margin-top:8px; }
+.shorts-video-card {
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+.shorts-video-card:hover {
+  border-color: var(--gold);
+  background: rgba(255,255,255,0.06);
+  transform: translateY(-2px);
+}
+.shorts-video-card.selected {
+  border-color: var(--gold);
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--gold) 15%, transparent);
+}
+.shorts-video-title { font-weight: 600; font-size: 0.88rem; margin-bottom: 4px; }
+.shorts-video-meta { font-size: 0.75rem; color: var(--muted); }
 </style>
 {% endblock %}
