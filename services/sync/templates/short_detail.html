@@ -35,7 +35,8 @@
 
 <div class="library-tabs-wrap shorts-tabs-wrap">
   <nav class="library-tabs" aria-label="Short-Details">
-    <button type="button" class="library-tab active" data-short-detail-tab="overview">Überblick</button>
+    <button type="button" class="library-tab active" data-short-detail-tab="overview">Overview</button>
+    <button type="button" class="library-tab" data-short-detail-tab="preview">Preview</button>
     <button type="button" class="library-tab" data-short-detail-tab="logs">Logs</button>
   </nav>
 </div>
@@ -67,7 +68,7 @@
 </div>
 
 {% if run.status in ('rendered', 'uploaded') and output_files %}
-<div class="panel panel-accent-gold short-detail-pane is-active" data-short-detail-pane="overview">
+<div class="panel panel-accent-gold short-detail-pane" data-short-detail-pane="preview">
   <h2>Preview</h2>
   {% for f in output_files %}
     {% if f.name == 'video.mp4' %}

@@ -1,0 +1,6 @@
+<div class="library-tabs-wrap">
+  <nav class="library-tabs" aria-label="Shorts-Bereiche">
+    <a class="library-tab{% if shorts_tab == 'new' %} active{% endif %}" href="/admin/shorts" {% if shorts_tab == 'new' %}aria-current="page"{% endif %}>Neuer Short</a>
+    <a class="library-tab{% if shorts_tab == 'drafts' %} active{% endif %}" href="/admin/shorts?tab=drafts" {% if shorts_tab == 'drafts' %}aria-current="page"{% endif %}>Drafts <span class="library-tab-count">{{ short_runs|length if short_runs is defined else 0 }}</span></a>
+  </nav>
+</div>

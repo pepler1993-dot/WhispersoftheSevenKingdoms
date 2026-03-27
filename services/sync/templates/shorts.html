@@ -4,13 +4,15 @@
 <div class="page-header page-header-flex">
   <div>
     <h1>Shorts</h1>
-    <div class="page-subtitle">Vertikale Kurzform für YouTube Shorts — sauber getrennt von der Longform-Pipeline.</div>
+    <div class="page-subtitle">Vertikale Kurzform mit Presets, Drafts und separatem Render-Flow.</div>
   </div>
   <div class="header-actions">
-    <a href="/admin/pipeline" class="btn btn-secondary btn-sm">Zur Longform-Pipeline</a>
-    <a href="/admin/audio" class="btn btn-secondary btn-sm">Audio prüfen</a>
+    <a href="/admin/pipeline" class="btn btn-secondary btn-sm">Create</a>
+    <a href="/admin/audio" class="btn btn-secondary btn-sm">Audio Lab</a>
   </div>
 </div>
+
+{% include 'partials/shorts_tabs.html' %}
 
 {% if success_message %}
 <div class="panel panel-accent-teal" style="margin-bottom:18px;">
@@ -23,50 +25,37 @@
 </div>
 {% endif %}
 
-<section class="docs-hero" style="margin-bottom: 18px;">
-  <div class="panel panel-accent-crimson">
-    <div class="docs-kicker">MVP</div>
-    <h2>Shorts aus bestehendem Audio anlegen</h2>
-    <p class="page-subtitle" style="max-width: 70ch; margin-top: 10px;">
-      Vorhandenen Track wählen, Ausschnitt definieren, rendern und bei Bedarf direkt hochladen.
-    </p>
+{% if shorts_tab == 'new' %}
+<section class="panel panel-accent-blue shorts-preset-panel">
+  <div class="section-header-inline">
+    <h2>Preset wählen</h2>
+    <span class="section-note">Voreinstellungen für schnelle Shorts</span>
   </div>
-  <div class="docs-hero-side">
-    <div class="docs-stat-card">
-      <div class="label">Aktueller Stand</div>
-      <div class="value">15–60s</div>
-      <div class="metric-help">9:16, bestehendes Audio, Render + Upload im selben Flow</div>
-      <div style="margin-top: 16px; display: grid; gap: 10px;">
-        <div>
-          <div class="label">Quelle</div>
-          <div class="system-value">Bibliothek</div>
-        </div>
-        <div>
-          <div class="label">Status</div>
-          <div class="system-value">Draft, Render und Upload aktiv</div>
-        </div>
-      </div>
-    </div>
+  <div class="shorts-preset-grid" id="shorts-preset-grid">
+    {% for preset in short_presets %}
+    <button type="button" class="shorts-preset-card{% if loop.first %} active{% endif %}"
+            data-preset="{{ preset.key }}"
+            data-duration="{{ preset.duration }}"
+            data-visual="{{ preset.visual_mode }}"
+            data-start="{{ preset.start }}"
+            data-title-suffix="{{ preset.title_suffix }}">
+      <strong>{{ preset.name }}</strong>
+      <span>{{ preset.duration }}s · {{ preset.visual_mode }}</span>
+    </button>
+    {% endfor %}
   </div>
 </section>
 
-<div class="library-tabs-wrap shorts-tabs-wrap">
-  <nav class="library-tabs" aria-label="Shorts-Bereiche">
-    <button type="button" class="library-tab active" data-shorts-tab="create">Neuer Short</button>
-    <button type="button" class="library-tab" data-shorts-tab="drafts">Letzte Shorts <span class="library-tab-count">{{ short_runs|length }}</span></button>
-  </nav>
-</div>
+<section class="panel panel-accent-purple shorts-create-panel">
+  <div class="section-header-inline">
+    <h2>Short konfigurieren</h2>
+    <span class="section-note">Preset → Audio → Ausschnitt → Draft</span>
+  </div>
 
-<div class="grid two shorts-grid">
-  <section class="panel panel-accent-purple shorts-pane is-active" data-shorts-pane="create">
-    <div class="section-header-inline">
-      <h2>Short erstellen</h2>
-      <span class="section-note">MVP aktiv</span>
-    </div>
-
-    <form method="post" action="/admin/shorts/create" id="shorts-form">
+  <form method="post" action="/admin/shorts/create" id="shorts-form">
+    <div class="grid two">
       <div class="form-group">
-        <label for="source_audio">Quelle: Audio-Track</label>
+        <label for="source_audio">Quelle</label>
         <select id="source_audio" name="source_audio" class="form-select" required>
           <option value="">— Audio aus Bibliothek wählen —</option>
           {% for t in library_tracks %}
@@ -74,144 +63,158 @@
           {% endfor %}
         </select>
       </div>
-
-      <div class="grid two">
-        <div class="form-group">
-          <label for="title">Short-Titel</label>
-          <input id="title" name="title" class="form-input" placeholder="z. B. Winterfell at Night | Ambient Short" required />
-        </div>
-        <div class="form-group">
-          <label for="slug">Slug</label>
-          <input id="slug" name="slug" class="form-input" placeholder="auto-aus-Titel-oder-Track" />
-        </div>
+      <div class="form-group">
+        <label for="visual_mode">Visual Mode</label>
+        <select id="visual_mode" name="visual_mode" class="form-select">
+          <option value="static-artwork">Static Artwork</option>
+          <option value="blurred-background">Blurred Background</option>
+          <option value="cinematic-gradient">Cinematic Gradient</option>
+        </select>
       </div>
-
-      <div class="grid two">
-        <div class="form-group">
-          <label for="clip_start_seconds">Clip-Start (Sekunden)</label>
-          <input id="clip_start_seconds" name="clip_start_seconds" type="number" min="0" value="0" class="form-input" required />
-        </div>
-        <div class="form-group">
-          <label for="clip_duration_seconds">Clip-Länge (15–60s)</label>
-          <input id="clip_duration_seconds" name="clip_duration_seconds" type="number" min="15" max="60" value="30" class="form-input" required />
-        </div>
-      </div>
-
-      <div class="grid two">
-        <div class="form-group">
-          <label for="visual_mode">Visual Mode</label>
-          <select id="visual_mode" name="visual_mode" class="form-select">
-            <option value="static-artwork">Static Artwork</option>
-            <option value="blurred-background">Blurred Background</option>
-            <option value="cinematic-gradient">Cinematic Gradient</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="visibility">Visibility</label>
-          <select id="visibility" name="visibility" class="form-select">
-            <option value="private">Private</option>
-            <option value="unlisted">Unlisted</option>
-            <option value="public">Public</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="preview-meta" style="margin: 8px 0 18px;">
-        <strong>Was beim Speichern passiert:</strong><br/>
-        Es wird ein Short-Draft angelegt. Danach kannst du im Detailscreen rendern und hochladen.
-      </div>
-
-      <button type="submit" class="btn btn-primary">Short-Entwurf anlegen</button>
-    </form>
-  </section>
-
-  <section class="panel panel-accent-blue shorts-pane" data-shorts-pane="drafts">
-    <div class="section-header-inline">
-      <h2>Letzte Short-Drafts</h2>
-      <span class="section-note">aus den Pipeline-Runs gefiltert</span>
     </div>
-    <ul class="list">
-      {% for run in short_runs %}
-      <li class="timeline-item">
-        <div>
-          <strong>{{ run.title or run.slug }}</strong><br/>
-          <span class="timeline-time">{{ run.slug }}</span>
-        </div>
-        <div class="timeline-meta">
-          <a href="/admin/shorts/{{ run.run_id }}" class="btn btn-secondary btn-sm">Details</a>
-          <span class="badge badge-{{ run.status }}">{{ run.status }}</span>
-          <span class="timeline-time">{{ run.created_at[:16] if run.created_at else '–' }}</span>
-        </div>
-      </li>
-      {% else %}
-      <li class="empty-state">Noch keine Short-Drafts vorhanden</li>
-      {% endfor %}
-    </ul>
-  </section>
-</div>
+
+    <div class="grid two">
+      <div class="form-group">
+        <label for="title">Titel</label>
+        <input id="title" name="title" class="form-input" required placeholder="Auto aus Preset + Track" />
+      </div>
+      <div class="form-group">
+        <label for="slug">Slug</label>
+        <input id="slug" name="slug" class="form-input" placeholder="auto-aus-titel" />
+      </div>
+    </div>
+
+    <div class="grid two">
+      <div class="form-group">
+        <label for="clip_start_seconds">Start (Sekunden)</label>
+        <input id="clip_start_seconds" name="clip_start_seconds" type="number" min="0" value="0" class="form-input" required />
+      </div>
+      <div class="form-group">
+        <label for="clip_duration_seconds">Länge</label>
+        <input id="clip_duration_seconds" name="clip_duration_seconds" type="number" min="15" max="60" value="30" class="form-input" required />
+      </div>
+    </div>
+
+    <div class="grid two">
+      <div class="form-group">
+        <label for="visibility">Visibility</label>
+        <select id="visibility" name="visibility" class="form-select">
+          <option value="private">Private</option>
+          <option value="unlisted">Unlisted</option>
+          <option value="public">Public</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Aktives Preset</label>
+        <div class="config-item"><div class="value" id="shorts-active-preset">{{ short_presets[0].name }}</div></div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Short-Entwurf anlegen</button>
+  </form>
+</section>
+{% endif %}
+
+{% if shorts_tab == 'drafts' %}
+<section class="panel panel-accent-blue">
+  <div class="section-header-inline">
+    <h2>Letzte Short-Drafts</h2>
+    <span class="section-note">separat vom Create-Flow</span>
+  </div>
+  <ul class="list">
+    {% for run in short_runs %}
+    <li class="timeline-item">
+      <div>
+        <strong>{{ run.title or run.slug }}</strong><br/>
+        <span class="timeline-time">{{ run.status }}</span>
+      </div>
+      <div class="timeline-meta">
+        <a href="/admin/shorts/{{ run.run_id }}" class="btn btn-secondary btn-sm">Details</a>
+        <span class="timeline-time">{{ run.created_at[:16] if run.created_at else '–' }}</span>
+      </div>
+    </li>
+    {% else %}
+    <li class="empty-state">Noch keine Short-Drafts vorhanden</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
 
 <script>
 (function() {
   const source = document.getElementById('source_audio');
   const title = document.getElementById('title');
   const slug = document.getElementById('slug');
+  const duration = document.getElementById('clip_duration_seconds');
+  const start = document.getElementById('clip_start_seconds');
+  const visual = document.getElementById('visual_mode');
+  const activePreset = document.getElementById('shorts-active-preset');
+  const presetCards = document.querySelectorAll('.shorts-preset-card');
+  let currentSuffix = ' | Short';
 
   function slugify(text) {
-    return (text || '')
-      .toLowerCase()
-      .replace(/['’]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '');
+    return (text || '').toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   }
 
-  source.addEventListener('change', () => {
-    const opt = source.options[source.selectedIndex];
+  function syncTitleFromSource() {
+    const opt = source?.options[source.selectedIndex];
     const stem = opt?.dataset?.stem || '';
-    if (!title.value && stem) {
-      title.value = stem.replace(/-/g, ' ').replace(/\b\w/g, m => m.toUpperCase()) + ' | Ambient Short';
+    if (!stem) return;
+    const base = stem.replace(/-/g, ' ').replace(/\b\w/g, m => m.toUpperCase());
+    if (!title.value || title.dataset.auto === '1') {
+      title.value = base + currentSuffix;
+      title.dataset.auto = '1';
+      if (!slug.dataset.touched) slug.value = slugify(title.value);
     }
-    if (!slug.value && stem) {
-      slug.value = stem + '-short';
-    }
-  });
+  }
 
-  title.addEventListener('input', () => {
-    if (!slug.dataset.touched) slug.value = slugify(title.value);
-  });
-  slug.addEventListener('input', () => {
-    slug.dataset.touched = '1';
-  });
-
-  const tabButtons = document.querySelectorAll('[data-shorts-tab]');
-  const panes = document.querySelectorAll('[data-shorts-pane]');
-  tabButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const key = btn.dataset.shortsTab;
-      tabButtons.forEach(x => x.classList.toggle('active', x === btn));
-      panes.forEach(p => p.classList.toggle('is-active', p.dataset.shortsPane === key));
+  presetCards.forEach(card => {
+    card.addEventListener('click', () => {
+      presetCards.forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      duration.value = card.dataset.duration;
+      start.value = card.dataset.start;
+      visual.value = card.dataset.visual;
+      currentSuffix = card.dataset.titleSuffix || ' | Short';
+      if (activePreset) activePreset.textContent = card.querySelector('strong').textContent;
+      syncTitleFromSource();
     });
   });
+
+  source?.addEventListener('change', syncTitleFromSource);
+  title?.addEventListener('input', () => {
+    title.dataset.auto = '0';
+    if (!slug.dataset.touched) slug.value = slugify(title.value);
+  });
+  slug?.addEventListener('input', () => { slug.dataset.touched = '1'; });
 })();
 </script>
 
 <style>
-.shorts-tabs-wrap { margin-bottom: 14px; }
-.shorts-pane { display: none; }
-.shorts-pane.is-active { display: block; }
-.shorts-grid { align-items: start; }
-
-@media (min-width: 769px) {
-  .shorts-grid { grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr); }
-  .shorts-pane { display: block; }
-  .shorts-tabs-wrap { display: none; }
+.shorts-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
 }
-
-@media (max-width: 768px) {
-  .shorts-grid { grid-template-columns: 1fr; }
-  .shorts-pane { display: none; }
-  .shorts-pane.is-active { display: block; }
-  .timeline-item { align-items: flex-start; }
-  .timeline-meta { width: 100%; }
+.shorts-preset-card {
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 14px;
+  display: grid;
+  gap: 6px;
+  text-align: left;
+  transition: all .18s var(--ease);
 }
+.shorts-preset-card span { color: var(--muted); font-size: .78rem; }
+.shorts-preset-card:hover,
+.shorts-preset-card.active {
+  border-color: var(--gold);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.22);
+}
+.shorts-preset-panel,
+.shorts-create-panel { margin-bottom: 18px; }
 </style>
 {% endblock %}

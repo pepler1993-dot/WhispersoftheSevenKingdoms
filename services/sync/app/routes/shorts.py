@@ -84,14 +84,22 @@ def _build_short_output_metadata(run: dict[str, Any]) -> dict[str, Any]:
 
 
 @router.get('/admin/shorts', response_class=HTMLResponse)
-def admin_shorts(request: Request, success: str | None = Query(default=None), error: str | None = Query(default=None)):
+def admin_shorts(request: Request, success: str | None = Query(default=None), error: str | None = Query(default=None), tab: str | None = Query(default='new')):
     library_tracks = list_library_tracks_for_pipeline(shared.db)
     short_runs = [run for run in shared.db.list_runs(limit=100) if (run.get('config') or {}).get('content_type') == 'short']
+    presets = [
+        {'key': 'hook-teaser', 'name': 'Hook Teaser', 'duration': 20, 'visual_mode': 'blurred-background', 'start': 0, 'title_suffix': ' | Short'},
+        {'key': 'ambient-loop', 'name': 'Ambient Loop', 'duration': 30, 'visual_mode': 'cinematic-gradient', 'start': 15, 'title_suffix': ' | Ambient Short'},
+        {'key': 'highlight-cut', 'name': 'Highlight Cut', 'duration': 45, 'visual_mode': 'static-artwork', 'start': 30, 'title_suffix': ' | Highlight'},
+    ]
+    active_tab = tab if tab in {'new', 'drafts'} else 'new'
     return shared.templates.TemplateResponse(request, 'shorts.html', {
         'request': request,
         'page': 'shorts',
+        'shorts_tab': active_tab,
         'library_tracks': library_tracks,
         'short_runs': short_runs[:20],
+        'short_presets': presets,
         'success_message': success or '',
         'error_message': error or '',
     })
