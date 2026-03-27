@@ -20,6 +20,14 @@ def root_redirect():
     return RedirectResponse(url='/admin', status_code=302)
 
 
+@router.get('/admin/songs', response_class=HTMLResponse)
+def admin_songs(request: Request):
+    return shared.templates.TemplateResponse(request, 'songs.html', {
+        'request': request,
+        'page': 'songs',
+    })
+
+
 @router.get('/admin', response_class=HTMLResponse)
 def admin_dashboard(request: Request):
     all_runs = shared.db.list_runs(limit=100)

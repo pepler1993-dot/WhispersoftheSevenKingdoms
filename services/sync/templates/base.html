@@ -44,14 +44,21 @@
         <a href="/admin" class="nav-link {% if page == 'dashboard' %}active{% endif %}">
           <i data-lucide="sparkles"></i> Overview
         </a>
-        <a href="/admin/pipeline" class="nav-link {% if page == 'pipeline' %}active{% endif %}">
-          <i data-lucide="wand-sparkles"></i> Create
+
+        <div class="nav-group-label nav-group-label--sub">Create</div>
+        <a href="/admin/pipeline" class="nav-link nav-link--sub {% if page == 'pipeline' %}active{% endif %}">
+          <i data-lucide="film"></i> Video
         </a>
+        <a href="/admin/shorts" class="nav-link nav-link--sub {% if page == 'shorts' %}active{% endif %}">
+          <i data-lucide="clapperboard"></i> Shorts
+        </a>
+        <a href="/admin/songs" class="nav-link nav-link--sub {% if page == 'songs' %}active{% endif %}">
+          <i data-lucide="music"></i> Songs
+        </a>
+
+        <div class="nav-group-label nav-group-label--sub" style="margin-top:6px;"></div>
         <a href="/admin/audio" class="nav-link {% if page == 'audio' %}active{% endif %}">
           <i data-lucide="audio-lines"></i> Audio Lab
-        </a>
-        <a href="/admin/shorts" class="nav-link {% if page == 'shorts' %}active{% endif %}">
-          <i data-lucide="clapperboard"></i> Shorts
         </a>
         <a href="/admin/library" class="nav-link {% if page == 'library' %}active{% endif %}">
           <i data-lucide="folder-open"></i> Library
@@ -95,8 +102,12 @@
         <span>Overview</span>
       </a>
       <a href="/admin/pipeline" class="bottom-nav-link {% if page == 'pipeline' %}active{% endif %}">
-        <i data-lucide="wand-sparkles"></i>
-        <span>Create</span>
+        <i data-lucide="film"></i>
+        <span>Video</span>
+      </a>
+      <a href="/admin/shorts" class="bottom-nav-link {% if page == 'shorts' %}active{% endif %}">
+        <i data-lucide="clapperboard"></i>
+        <span>Shorts</span>
       </a>
       <a href="/admin/audio" class="bottom-nav-link {% if page == 'audio' %}active{% endif %}">
         <i data-lucide="audio-lines"></i>
@@ -105,10 +116,6 @@
       <a href="/admin/library" class="bottom-nav-link {% if page == 'library' %}active{% endif %}">
         <i data-lucide="folder-open"></i>
         <span>Library</span>
-      </a>
-      <a href="/admin/tickets" class="bottom-nav-link {% if page == 'tickets' %}active{% endif %}">
-        <i data-lucide="ticket"></i>
-        <span>Tickets</span>
       </a>
       <a href="/admin/ops" class="bottom-nav-link {% if page == 'ops' %}active{% endif %}">
         <i data-lucide="activity"></i>

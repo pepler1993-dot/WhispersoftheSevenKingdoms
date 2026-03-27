@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Songs{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Songs</h1>
+  <div class="page-subtitle">Standalone Tracks für Spotify, Apple Music & Co.</div>
+</div>
+
+<section class="panel" style="margin-top:24px;">
+  <div class="songs-coming-soon">
+    <div class="songs-cs-icon">🎵</div>
+    <h2 class="songs-cs-title">Coming Soon</h2>
+    <p class="songs-cs-desc">
+      Hier werden bald eigenständige Songs erstellt – unabhängig von Videos.<br>
+      Distribution auf Spotify, Apple Music, YouTube Music und mehr.
+    </p>
+    <div class="songs-cs-features">
+      <div class="songs-cs-feature">
+        <span>🎹</span>
+        <div>Generieren</div>
+        <div class="songs-cs-feature-sub">Stable Audio / Suno</div>
+      </div>
+      <div class="songs-cs-feature-arrow">→</div>
+      <div class="songs-cs-feature">
+        <span>🎛️</span>
+        <div>Mastering</div>
+        <div class="songs-cs-feature-sub">EQ, Loudness, Export</div>
+      </div>
+      <div class="songs-cs-feature-arrow">→</div>
+      <div class="songs-cs-feature">
+        <span>🚀</span>
+        <div>Distribute</div>
+        <div class="songs-cs-feature-sub">Spotify, Apple Music</div>
+      </div>
+    </div>
+    <a href="/admin/audio" class="btn btn-secondary" style="margin-top:20px;">
+      <i data-lucide="audio-lines" style="width:16px;height:16px"></i> Zum Audio Lab
+    </a>
+  </div>
+</section>
+
+<style>
+.songs-coming-soon {
+  text-align: center;
+  padding: 48px 24px;
+}
+.songs-cs-icon { font-size: 3.5rem; margin-bottom: 16px; }
+.songs-cs-title { font-size: 1.4rem; font-weight: 800; margin: 0 0 8px; }
+.songs-cs-desc { font-size: 0.88rem; color: var(--muted); max-width: 480px; margin: 0 auto 28px; line-height: 1.5; }
+.songs-cs-features {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.songs-cs-feature {
+  padding: 16px 20px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  min-width: 120px;
+}
+.songs-cs-feature span { font-size: 1.4rem; display: block; margin-bottom: 6px; }
+.songs-cs-feature div:nth-child(2) { font-size: 0.85rem; font-weight: 700; }
+.songs-cs-feature-sub { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
+.songs-cs-feature-arrow { font-size: 1rem; color: var(--muted); opacity: 0.4; }
+
+@media (max-width: 768px) {
+  .songs-coming-soon { padding: 32px 16px; }
+  .songs-cs-features { flex-direction: column; gap: 10px; }
+  .songs-cs-feature-arrow { transform: rotate(90deg); }
+}
+</style>
+{% endblock %}

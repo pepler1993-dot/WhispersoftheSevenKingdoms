@@ -271,6 +271,18 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
 
 .nav-link .lucide { width: 18px; height: 18px; stroke-width: 2; flex-shrink: 0; }
 
+/* Sub-navigation for Create group */
+.nav-group-label--sub {
+  padding: 8px 14px 4px 14px;
+  font-size: 0.58rem;
+  margin-top: 2px;
+}
+.nav-link--sub {
+  padding-left: 28px;
+  font-size: 0.82rem;
+}
+.nav-link--sub .lucide { width: 16px; height: 16px; }
+
 /* ── mobile header ── */
 
 .mobile-header {
