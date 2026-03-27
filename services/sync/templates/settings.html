@@ -1,5 +1,8 @@
 {% extends 'base.html' %}
 {% block title %}Settings{% endblock %}
+{% block head_extra %}
+<link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
+{% endblock %}
 {% block content %}
 <div class="page-header page-header-flex">
   <div>
@@ -167,15 +170,177 @@ fetch('/admin/audio/health')
 
 {# ── Presets ──────────────────────────────────────────────────── #}
 {% if settings_tab == 'presets' %}
+
+{# Preset Editor (shown when editing or creating) #}
+{% if edit_preset or request.query_params.get('new') %}
+{% set p = edit_preset or {} %}
+{% set d = p.get('defaults', {}) if p else {} %}
+{% set mb = p.get('music_brief', {}) if p else {} %}
+<section class="panel panel-accent-gold st-section">
+  <h2>{{ '✏️ Preset bearbeiten' if edit_key else '➕ Neues Preset' }}</h2>
+  <form method="post" action="/admin/settings/presets/save">
+    <input type="hidden" name="original_key" value="{{ edit_key or '' }}" />
+
+    <div class="st-step-card">
+      <div class="st-step-header">
+        <span class="st-step-icon">🏠</span>
+        <div><h3>Grunddaten</h3></div>
+      </div>
+      <div class="grid two">
+        <div class="form-group">
+          <label for="preset_key">Key (intern)</label>
+          <input type="text" name="preset_key" id="preset_key" class="form-input" value="{{ edit_key or '' }}" required placeholder="stark" />
+        </div>
+        <div class="form-group">
+          <label for="display_name">Anzeigename</label>
+          <input type="text" name="display_name" id="display_name" class="form-input" value="{{ p.get('display_name', '') }}" required placeholder="Winterfell" />
+        </div>
+      </div>
+      <div class="grid two">
+        <div class="form-group">
+          <label for="house">Haus</label>
+          <input type="text" name="house" id="house" class="form-input" value="{{ p.get('house', '') }}" placeholder="House Stark" />
+        </div>
+        <div class="form-group">
+          <label for="sigil">Sigil (Emoji)</label>
+          <input type="text" name="sigil" id="sigil" class="form-input" value="{{ p.get('sigil', '') }}" placeholder="🐺" />
+        </div>
+      </div>
+      <div class="grid two">
+        <div class="form-group">
+          <label for="color">Akzentfarbe</label>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <input type="color" name="color" id="color" value="{{ p.get('color', '#c9a53a') }}" style="width:40px; height:36px; border:none; background:none; cursor:pointer;" />
+            <input type="text" class="form-input" value="{{ p.get('color', '#c9a53a') }}" style="flex:1;" oninput="document.getElementById('color').value=this.value" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="bg_color">Hintergrundfarbe</label>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <input type="color" name="bg_color" id="bg_color" value="{{ p.get('bg_color', '#1a1a2e') }}" style="width:40px; height:36px; border:none; background:none; cursor:pointer;" />
+            <input type="text" class="form-input" value="{{ p.get('bg_color', '#1a1a2e') }}" style="flex:1;" oninput="document.getElementById('bg_color').value=this.value" />
+          </div>
+        </div>
+      </div>
+      <div class="grid two">
+        <div class="form-group">
+          <label for="motto">Motto</label>
+          <input type="text" name="motto" id="motto" class="form-input" value="{{ p.get('motto', '') }}" placeholder="Winter is Coming" />
+        </div>
+        <div class="form-group">
+          <label for="seat">Seat</label>
+          <input type="text" name="seat" id="seat" class="form-input" value="{{ p.get('seat', '') }}" placeholder="Winterfell" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="mood">Mood</label>
+        <input type="text" name="mood" id="mood" class="form-input" value="{{ p.get('mood', 'calm') }}" placeholder="cold, calm, dark..." />
+      </div>
+    </div>
+
+    <div class="st-step-card">
+      <div class="st-step-header">
+        <span class="st-step-icon">⚙️</span>
+        <div><h3>Defaults</h3></div>
+      </div>
+      <div class="grid two">
+        <div class="form-group">
+          <label for="minutes">Dauer (Min)</label>
+          <input type="number" name="minutes" class="form-input" value="{{ d.get('minutes', 20) }}" min="1" max="180" />
+        </div>
+        <div class="form-group">
+          <label for="loop_hours">Loop (Stunden)</label>
+          <input type="number" name="loop_hours" class="form-input" value="{{ d.get('loop_hours', 3) }}" min="1" max="12" />
+        </div>
+      </div>
+      <div class="grid two">
+        <div class="form-group">
+          <label for="crossfade">Crossfade (Sek)</label>
+          <input type="number" name="crossfade" class="form-input" value="{{ d.get('crossfade', 8) }}" min="0" max="30" />
+        </div>
+        <div class="form-group">
+          <label for="audio_preset">Audio-Preset</label>
+          <select name="audio_preset" class="form-select">
+            {% set ap = d.get('audio_preset', 'ambient') %}
+            <option value="ambient" {% if ap == 'ambient' %}selected{% endif %}>Ambient</option>
+            <option value="dark" {% if ap == 'dark' %}selected{% endif %}>Dark</option>
+            <option value="gentle" {% if ap == 'gentle' %}selected{% endif %}>Gentle</option>
+            <option value="raw" {% if ap == 'raw' %}selected{% endif %}>Raw</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid two">
+        <div class="form-group">
+          <label for="music_tempo">Tempo</label>
+          <select name="music_tempo" class="form-select">
+            {% set mt = d.get('music_tempo', 'slow') %}
+            <option value="slow" {% if mt == 'slow' %}selected{% endif %}>Slow</option>
+            <option value="medium" {% if mt == 'medium' %}selected{% endif %}>Medium</option>
+            <option value="fast" {% if mt == 'fast' %}selected{% endif %}>Fast</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="music_energy">Energy</label>
+          <select name="music_energy" class="form-select">
+            {% set me = d.get('music_energy', 'low') %}
+            <option value="low" {% if me == 'low' %}selected{% endif %}>Low</option>
+            <option value="medium" {% if me == 'medium' %}selected{% endif %}>Medium</option>
+            <option value="high" {% if me == 'high' %}selected{% endif %}>High</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="st-step-card">
+      <div class="st-step-header">
+        <span class="st-step-icon">🎵</span>
+        <div><h3>Music Brief</h3></div>
+      </div>
+      <div class="form-group">
+        <label for="music_style">Stil</label>
+        <input type="text" name="music_style" class="form-input" value="{{ mb.get('style', '') }}" placeholder="Frozen ambient, soft piano..." />
+      </div>
+      <div class="form-group">
+        <label for="music_influences">Einflüsse (kommagetrennt)</label>
+        <input type="text" name="music_influences" class="form-input" value="{{ (mb.get('influences', []) or []) | join(', ') }}" placeholder="Sigur Rós, Ólafur Arnalds..." />
+      </div>
+      <div class="form-group">
+        <label for="music_avoid">Vermeiden (kommagetrennt)</label>
+        <input type="text" name="music_avoid" class="form-input" value="{{ (mb.get('avoid', []) or []) | join(', ') }}" placeholder="drums, vocals, fast tempo..." />
+      </div>
+    </div>
+
+    <div class="st-step-card">
+      <div class="st-step-header">
+        <span class="st-step-icon">📝</span>
+        <div><h3>Titel-Template</h3></div>
+      </div>
+      <div class="form-group">
+        <input type="text" name="title_template" class="form-input" value="{{ p.get('title_template', '') }}" placeholder="Winterfell Sleep Music – {duration} | Game of Thrones" />
+        <div class="metric-help">Platzhalter: <code>{duration}</code>, <code>{variant}</code></div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary st-btn-save">
+      <i data-lucide="save" style="width:16px;height:16px"></i> Preset speichern
+    </button>
+    <a href="/admin/settings?tab=presets" class="btn btn-secondary" style="width:100%; margin-top:8px; text-align:center;">Abbrechen</a>
+  </form>
+</section>
+
+{% else %}
+{# Preset List View #}
 <section class="panel st-section">
   <div class="section-header-inline">
-    <h2>🎨 House Presets</h2>
-    <span class="section-count">{{ preset_count }}</span>
+    <h2>🎨 Presets</h2>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <span class="section-count">{{ preset_count }}</span>
+      <a href="/admin/settings?tab=presets&new=1" class="btn btn-primary btn-sm">
+        <i data-lucide="plus" style="width:14px;height:14px"></i> Neu
+      </a>
+    </div>
   </div>
-  <p class="st-step-desc" style="margin-bottom:16px;">
-    Presets werden aktuell aus <code>data/house_templates.json</code> geladen.
-    CRUD-Verwaltung im UI kommt in Phase 2.
-  </p>
+
   {% if presets %}
   <div class="st-preset-grid">
     {% for key, house in presets.items() %}
@@ -189,13 +354,34 @@ fetch('/admin/audio/health')
           {{ (house.defaults or {}).get('minutes', '?') }} Min
         </div>
       </div>
+      <div class="st-preset-actions">
+        <a href="/admin/settings?tab=presets&edit={{ key }}" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:0.7rem;">✏️</a>
+        <form method="post" action="/admin/settings/presets/delete" style="display:inline;" onsubmit="return confirm('Preset «{{ house.display_name }}» wirklich löschen?')">
+          <input type="hidden" name="preset_key" value="{{ key }}" />
+          <button type="submit" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:0.7rem; color:#f87171;">🗑️</button>
+        </form>
+      </div>
     </div>
     {% endfor %}
   </div>
+
+  <form method="post" action="/admin/settings/presets/import-json" style="margin-top:16px;">
+    <button type="submit" class="btn btn-secondary btn-sm" onclick="return confirm('Presets aus house_templates.json neu importieren? Überschreibt alle DB-Presets.')">
+      📥 Aus JSON reimportieren
+    </button>
+  </form>
   {% else %}
-  <div class="empty-state-sm">Keine Presets geladen — <code>data/house_templates.json</code> fehlt?</div>
+  <div class="empty-state-sm">
+    Keine Presets vorhanden.
+    <a href="/admin/settings?tab=presets&new=1">Neues Preset erstellen</a> oder
+    <form method="post" action="/admin/settings/presets/import-json" style="display:inline;">
+      <button type="submit" class="btn btn-secondary btn-sm">📥 Aus JSON importieren</button>
+    </form>
+  </div>
   {% endif %}
 </section>
+{% endif %}
+
 {% endif %}
 
 <style>
@@ -305,8 +491,10 @@ fetch('/admin/audio/health')
   transform: translateY(-2px);
 }
 .st-preset-sigil { font-size: 1.8rem; flex-shrink: 0; }
+.st-preset-info { flex: 1; min-width: 0; }
 .st-preset-name { font-size: 0.88rem; font-weight: 700; }
 .st-preset-meta { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+.st-preset-actions { display: flex; gap: 4px; flex-shrink: 0; }
 
 /* ── Mobile ───────────────────────────────────────────────── */
 @media (max-width: 768px) {
