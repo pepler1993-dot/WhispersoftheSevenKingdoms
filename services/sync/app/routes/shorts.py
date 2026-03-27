@@ -143,8 +143,7 @@ def admin_shorts(request: Request, success: str | None = Query(default=None), er
     active_tab = tab if tab in {'new', 'drafts'} else 'new'
     return shared.templates.TemplateResponse(request, 'shorts.html', {
         'request': request,
-        'page': 'pipeline',
-        'pipeline_tab': 'shorts',
+        'page': 'shorts',
         'shorts_tab': active_tab,
         'library_tracks': library_tracks,
         'houses': houses,

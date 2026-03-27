@@ -1,17 +1,9 @@
-{# Create-Bereichs-Tabs; Kontext: pipeline_tab, pipeline_run_count #}
+{# Pipeline-Bereichs-Tabs; Kontext: pipeline_tab, pipeline_run_count #}
 <div class="library-tabs-wrap">
-  <nav class="library-tabs" aria-label="Create-Bereiche">
+  <nav class="library-tabs" aria-label="Pipeline-Bereiche">
     <a class="library-tab{% if pipeline_tab == 'new' %} active{% endif %}" href="/admin/pipeline/new" {% if pipeline_tab == 'new' %}aria-current="page"{% endif %}>
-      <i data-lucide="video" style="width:17px;height:17px;opacity:0.9"></i>
-      Videos
-    </a>
-    <a class="library-tab{% if pipeline_tab == 'shorts' %} active{% endif %}" href="/admin/shorts" {% if pipeline_tab == 'shorts' %}aria-current="page"{% endif %}>
-      <i data-lucide="clapperboard" style="width:17px;height:17px;opacity:0.9"></i>
-      Shorts
-    </a>
-    <a class="library-tab{% if pipeline_tab == 'songs' %} active{% endif %}" href="/admin/pipeline/songs" {% if pipeline_tab == 'songs' %}aria-current="page"{% endif %}>
-      <i data-lucide="disc-3" style="width:17px;height:17px;opacity:0.9"></i>
-      Songs
+      <i data-lucide="plus-square" style="width:17px;height:17px;opacity:0.9"></i>
+      Neues Video
     </a>
     <a class="library-tab{% if pipeline_tab == 'overview' %} active{% endif %}" href="/admin/pipeline/logs" {% if pipeline_tab == 'overview' %}aria-current="page"{% endif %}>
       <i data-lucide="layout-list" style="width:17px;height:17px;opacity:0.9"></i>
