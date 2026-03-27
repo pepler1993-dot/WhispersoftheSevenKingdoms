@@ -169,6 +169,17 @@ def admin_pipeline_logs(request: Request):
     })
 
 
+@router.get('/admin/pipeline/songs', response_class=HTMLResponse)
+def admin_pipeline_songs(request: Request):
+    runs = shared.db.list_runs(limit=100)
+    return shared.templates.TemplateResponse(request, 'pipeline_songs.html', {
+        'request': request,
+        'page': 'pipeline',
+        'pipeline_tab': 'songs',
+        'pipeline_run_count': len(runs),
+    })
+
+
 @router.get('/admin/pipeline', response_class=HTMLResponse)
 @router.get('/admin/pipeline/new', response_class=HTMLResponse)
 def admin_pipeline_new(request: Request, slug: str | None = Query(default=None), error: str | None = Query(default=None)):
