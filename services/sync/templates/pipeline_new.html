@@ -535,6 +535,11 @@
 .step-desc { color: var(--text-secondary); font-size: 0.85rem; }
 .library-audio-row code { font-size: 0.78em; color: var(--muted); }
 
+@media (min-width: 1280px) {
+  .house-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .variant-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+}
+
 @media (max-width: 768px) {
   .workflow-steps {
     flex-direction: column;

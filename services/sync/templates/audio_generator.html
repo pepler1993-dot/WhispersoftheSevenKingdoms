@@ -313,6 +313,11 @@
 .mini-badge-pushing { background: rgba(59,130,246,0.15); color: #60a5fa; }
 .mini-badge-downloading { background: rgba(139,92,246,0.15); color: #a78bfa; }
 
+@media (min-width: 1280px) {
+  .al-house-grid,
+  .al-variant-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+}
+
 /* ── Mobile ───────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .al-house-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }

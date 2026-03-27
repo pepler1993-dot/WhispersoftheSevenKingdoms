@@ -306,8 +306,8 @@
 /* ── Stats ────────────────────────────────────────────────── */
 .ops-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: clamp(10px, 1vw, 16px);
   margin-bottom: 24px;
 }
 .ops-stat {
@@ -328,7 +328,7 @@
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 14px;
-  padding: 20px;
+  padding: clamp(16px, 1.2vw, 22px);
   position: relative;
   overflow: hidden;
 }

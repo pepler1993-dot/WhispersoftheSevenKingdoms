@@ -186,8 +186,8 @@
 /* ── Studio Stats ────────────────────────────────────────── */
 .studio-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: clamp(10px, 1vw, 16px);
   margin-bottom: 28px;
 }
 .studio-stat {
@@ -322,8 +322,8 @@
 /* ── Studio panels ───────────────────────────────────────── */
 .dashboard-main-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.2fr) minmax(300px, 0.9fr);
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: clamp(12px, 1vw, 18px);
   align-items: start;
 }
 .studio-panel {
@@ -367,8 +367,8 @@
 .mini-item:hover { opacity: 0.85; }
 .overview-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: clamp(10px, 0.9vw, 14px);
 }
 .overview-card {
   display: block;
