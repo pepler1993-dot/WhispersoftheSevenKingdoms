@@ -326,6 +326,10 @@
   gap: clamp(12px, 1vw, 18px);
   align-items: start;
 }
+/* Shorts unter Pipeline + Audio, nicht als dritte schmale Spalte neben Audio */
+.dashboard-main-grid > .studio-panel:nth-child(3) {
+  grid-column: 1 / -1;
+}
 .studio-panel {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -534,36 +538,36 @@
 
 @media (min-width: 1600px) {
   .studio-stats {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
   }
   .studio-stat-value { font-size: clamp(1.35rem, 1rem + 0.9vw, 1.9rem); }
   .active-grid {
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   }
   .dashboard-main-grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
   }
   .overview-card-grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
   }
 }
 @media (min-width: 1920px) {
   .active-grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   }
   .overview-card-grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   }
 }
 @media (min-width: 2560px) {
   .studio-stats {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 128px), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
   }
   .dashboard-main-grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
   }
   .overview-card-grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
   }
 }
 </style>

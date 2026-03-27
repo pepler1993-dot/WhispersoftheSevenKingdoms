@@ -580,6 +580,38 @@ button.library-tab {
   color: var(--accent-teal, #5eead4);
 }
 
+/* Schmale Viewports: Tab-Leiste kompakter (Library-Labels sind länger als z. B. Pipeline) */
+@media (max-width: 768px) {
+  .library-tabs-wrap {
+    margin-bottom: 0.75rem;
+  }
+
+  .library-tabs {
+    padding: 4px;
+    gap: 4px;
+    border-radius: 12px;
+  }
+
+  .library-tab {
+    padding: 7px 10px;
+    gap: 5px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    border-radius: 8px;
+  }
+
+  .library-tab .icon-md,
+  .library-tab svg.lucide {
+    width: var(--icon-size-sm);
+    height: var(--icon-size-sm);
+  }
+
+  .library-tab-count {
+    font-size: 0.62rem;
+    padding: 0.06rem 0.32rem;
+  }
+}
+
 @media (max-width: 520px) {
   .house-hero-sigil {
     font-size: 2.5rem;
@@ -604,14 +636,14 @@ button.library-tab {
   }
 }
 
-/* Ultra-wide: mehr Karten pro Zeile, Fließtext bleibt über max-width/ch begrenzt */
+/* Ultra-wide: Karten sollen mitwachsen, nicht nur dichter werden (Mindestbreite steigt) */
 @media (min-width: 1600px) {
   .house-grid {
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
     gap: 1.25rem;
   }
   .variant-grid {
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
   }
   .house-hero-facts {
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
@@ -627,18 +659,18 @@ button.library-tab {
 
 @media (min-width: 1920px) {
   .house-grid {
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
   }
   .preset-dl {
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
   }
 }
 
 @media (min-width: 2560px) {
   .house-grid {
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
   }
   .variant-grid {
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
   }
 }

@@ -535,21 +535,22 @@
 .step-desc { color: var(--text-secondary); font-size: 0.85rem; }
 .library-audio-row code { font-size: 0.78em; color: var(--muted); }
 
+/* Große Desktops: Mindestbreite nach oben — sonst werden alle Haus-Karten in eine Zeile gequetscht */
 @media (min-width: 1280px) {
-  .house-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
-  .variant-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+  .house-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); }
+  .variant-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); }
 }
 @media (min-width: 1600px) {
-  .house-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
-  .variant-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+  .house-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); }
+  .variant-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); }
 }
 @media (min-width: 1920px) {
-  .house-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); }
-  .variant-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+  .house-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); }
+  .variant-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
 }
 @media (min-width: 2560px) {
-  .house-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr)); }
-  .variant-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
+  .house-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+  .variant-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
 }
 
 @media (max-width: 768px) {
