@@ -102,13 +102,18 @@
       <a href="/admin/pipeline/logs" class="section-link">Alle anzeigen →</a>
     </div>
     {% if recent_runs %}
-    <div class="mini-list">
+    <div class="overview-card-grid">
       {% for run in recent_runs %}
-      <a href="/admin/pipeline/run/{{ run.run_id }}" class="mini-item">
-        <div class="mini-dot mini-dot-{{ run.status }}"></div>
-        <div class="mini-info">
-          <div class="mini-title">{{ run.title or run.slug }}</div>
-          <div class="mini-sub">{{ run.created_at[:10] if run.created_at else '—' }} <span class="mini-badge mini-badge-{{ run.status }}">{{ run.status }}</span></div>
+      <a href="/admin/pipeline/run/{{ run.run_id }}" class="overview-card overview-card-run overview-card-{{ run.status }}">
+        <div class="overview-card-top">
+          <span class="overview-status-dot mini-dot-{{ run.status }}"></span>
+          <span class="mini-badge mini-badge-{{ run.status }}">{{ run.status }}</span>
+        </div>
+        <div class="overview-card-title">{{ run.title or run.slug }}</div>
+        <div class="overview-card-sub">{{ run.slug }}</div>
+        <div class="overview-card-meta">
+          <span>{{ run.created_at[:10] if run.created_at else '—' }}</span>
+          <span>{{ run.run_id[:8] }}</span>
         </div>
       </a>
       {% endfor %}
@@ -124,13 +129,18 @@
       <a href="/admin/audio" class="section-link">Alle anzeigen →</a>
     </div>
     {% if recent_audio %}
-    <div class="mini-list">
+    <div class="overview-card-grid">
       {% for job in recent_audio %}
-      <a href="/admin/audio/jobs/{{ job.job_id }}" class="mini-item">
-        <div class="mini-dot mini-dot-{{ job.status }}"></div>
-        <div class="mini-info">
-          <div class="mini-title">{{ job.title or job.slug }}</div>
-          <div class="mini-sub">{{ job.created_at[:10] if job.created_at else '—' }} <span class="mini-badge mini-badge-{{ job.status }}">{{ job.status }}</span></div>
+      <a href="/admin/audio/jobs/{{ job.job_id }}" class="overview-card overview-card-audio-item overview-card-{{ job.status }}">
+        <div class="overview-card-top">
+          <span class="overview-status-dot mini-dot-{{ job.status }}"></span>
+          <span class="mini-badge mini-badge-{{ job.status }}">{{ job.status }}</span>
+        </div>
+        <div class="overview-card-title">{{ job.title or job.slug }}</div>
+        <div class="overview-card-sub">{{ job.slug }}</div>
+        <div class="overview-card-meta">
+          <span>{{ job.created_at[:10] if job.created_at else '—' }}</span>
+          <span>{{ job.job_id[:8] }}</span>
         </div>
       </a>
       {% endfor %}
@@ -321,7 +331,7 @@
 }
 .section-link:hover { color: var(--text); }
 
-/* ── Mini list (runs, jobs, shorts) ──────────────────────── */
+/* ── Mini list / overview cards ──────────────────────────── */
 .mini-list { display: flex; flex-direction: column; overflow: hidden; }
 .mini-item {
   display: flex;
@@ -336,6 +346,70 @@
 }
 .mini-item:last-child { border-bottom: none; }
 .mini-item:hover { opacity: 0.85; }
+.overview-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+.overview-card {
+  display: block;
+  text-decoration: none;
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.overview-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,0.18);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.22);
+}
+.overview-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.overview-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.overview-card-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.35;
+  margin-bottom: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.overview-card-sub {
+  font-size: 0.73rem;
+  color: var(--muted);
+  margin-bottom: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.overview-card-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+.overview-card-running { border-color: rgba(34,197,94,0.22); background: linear-gradient(135deg, rgba(34,197,94,0.07), rgba(16,185,129,0.02)); }
+.overview-card-queued, .overview-card-pushing, .overview-card-downloading { border-color: rgba(217,119,6,0.22); background: linear-gradient(135deg, rgba(217,119,6,0.07), rgba(245,158,11,0.02)); }
+.overview-card-rendered { border-color: rgba(201,165,58,0.22); background: linear-gradient(135deg, rgba(201,165,58,0.07), rgba(201,165,58,0.02)); }
+.overview-card-uploaded, .overview-card-complete { border-color: rgba(59,130,246,0.22); background: linear-gradient(135deg, rgba(59,130,246,0.07), rgba(59,130,246,0.02)); }
+.overview-card-failed, .overview-card-error { border-color: rgba(239,68,68,0.22); background: linear-gradient(135deg, rgba(239,68,68,0.07), rgba(239,68,68,0.02)); }
+.overview-card-cancelled { border-color: rgba(107,114,128,0.22); background: linear-gradient(135deg, rgba(107,114,128,0.08), rgba(107,114,128,0.02)); opacity: 0.82; }
 .mini-dot {
   width: 8px;
   height: 8px;
@@ -427,6 +501,10 @@
   .mini-title { font-size: 0.78rem; }
   .mini-sub { font-size: 0.65rem; display: flex; align-items: center; gap: 6px; }
   .mini-badge { font-size: 0.58rem; padding: 2px 5px; }
+  .overview-card-grid { grid-template-columns: 1fr; gap: 10px; }
+  .overview-card { padding: 12px; }
+  .overview-card-title { font-size: 0.84rem; }
+  .overview-card-meta { font-size: 0.68rem; }
 
   .studio-panel { padding: 12px; }
   .section-link { font-size: 0.68rem; }
