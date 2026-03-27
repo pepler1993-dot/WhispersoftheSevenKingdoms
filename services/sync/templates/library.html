@@ -37,13 +37,18 @@
   <p class="library-tab-hint">Klicke auf ein Haus, um alle Schauplatz-Varianten zu sehen. Pro Variante zeigen wir, was für Audio, Thumbnail, Titel und Hintergrund voreingestellt ist.</p>
   <div class="house-grid" role="list">
     {% for h in house_cards %}
-    <a class="house-card" role="listitem" href="/admin/library/houses/{{ h.key }}" aria-label="{{ h.display_name }}{% if h.house %}, {{ h.house }}{% endif %}" style="background: linear-gradient(145deg, {{ h.color }} 0%, {{ h.bg_color }} 100%);">
-      <div class="house-card-inner">
-        <span class="house-card-sigil" aria-hidden="true">{{ h.sigil }}</span>
-        <h3 class="house-card-title">{{ h.display_name }}</h3>
-        <div class="house-card-sub">{{ h.house }}</div>
-      </div>
-    </a>
+    <div class="house-card-wrap" style="position:relative;">
+      <a class="house-card" role="listitem" href="/admin/library/houses/{{ h.key }}" aria-label="{{ h.display_name }}{% if h.house %}, {{ h.house }}{% endif %}" style="background: linear-gradient(145deg, {{ h.color }} 0%, {{ h.bg_color }} 100%);">
+        <div class="house-card-inner">
+          <span class="house-card-sigil" aria-hidden="true">{{ h.sigil }}</span>
+          <h3 class="house-card-title">{{ h.display_name }}</h3>
+          <div class="house-card-sub">{{ h.house }}</div>
+        </div>
+      </a>
+      <a href="/admin/settings?tab=presets&edit={{ h.key }}" class="lib-edit-btn" title="Preset bearbeiten">
+        <i data-lucide="pencil" style="width:14px;height:14px"></i>
+      </a>
+    </div>
     {% else %}
     <p class="empty-state">Keine Haus-Presets geladen.</p>
     {% endfor %}
@@ -308,4 +313,31 @@ document.querySelectorAll('form[action="/admin/library/upload"]').forEach(functi
   });
 });
 </script>
+<style>
+.house-card-wrap { position: relative; }
+.lib-edit-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.7);
+  text-decoration: none;
+  opacity: 0;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+.house-card-wrap:hover .lib-edit-btn { opacity: 1; }
+.lib-edit-btn:hover {
+  background: rgba(0,0,0,0.7);
+  color: var(--gold, #c9a53a);
+  border-color: var(--gold, #c9a53a);
+}
+</style>
 {% endblock %}
