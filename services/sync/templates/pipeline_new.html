@@ -155,7 +155,18 @@
             </div>
             <input type="hidden" id="gen-model" value="stable-audio" />
           </div>
-
+          <button type="button" class="btn btn-secondary" id="btn-start-gen" onclick="startAudioGen()" style="width:100%; margin-top:12px;">🎵 Track separat generieren</button>
+          <div id="gen-status" class="gen-status" style="display:none;"></div>
+          <div id="gen-progress" class="gen-progress" style="display:none;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:0.85rem;">
+              <span id="progress-phase">—</span>
+              <span id="progress-time">0:00</span>
+            </div>
+            <div class="progress-bar-outer">
+              <div id="progress-bar" class="progress-bar-inner"></div>
+            </div>
+            <div id="progress-logs" class="progress-logs"></div>
+          </div>
         </div>
       </div>
       <input type="hidden" name="audio_job_id" id="audio_job_id" />
@@ -687,7 +698,7 @@
 
   function setAudioStatusFromLibrary(stem) {
     const status = document.getElementById('status-audio');
-    if (!stem) return;
+    if (!stem || !status) return;
     status.textContent = '✅ Bibliothek';
     status.className = 'upload-status success';
     document.getElementById('assets-status').textContent = 'Audio: ' + stem + ' (Bibliothek)';
@@ -697,6 +708,7 @@
     const slug = document.getElementById('slug').value;
     const status = document.getElementById('status-audio');
     const assetsLine = document.getElementById('assets-status');
+    if (!assetsLine) return;
     if (!slug) {
       assetsLine.textContent = '—';
       return;
@@ -711,11 +723,13 @@
             const opt = [...librarySelect.options].find(o => o.value === slug);
             if (opt) librarySelect.value = slug;
           }
-          status.textContent = '✅';
-          status.className = 'upload-status success';
+          if (status) {
+            status.textContent = '✅';
+            status.className = 'upload-status success';
+          }
           assetsLine.textContent = 'Audio: ' + hit;
         } else {
-          if (!librarySelect || librarySelect.value !== slug) {
+          if (status && (!librarySelect || librarySelect.value !== slug)) {
             status.textContent = '';
             status.className = 'upload-status';
           }
@@ -797,6 +811,8 @@
       document.getElementById('config-house-info').textContent = 'House ' + house.house + ' – alle Einstellungen vorausgefüllt';
 
       // show variant panel first
+      const durationPanelReset = document.getElementById('duration-panel');
+      if (durationPanelReset) durationPanelReset.style.display = 'none';
       const variantPanel = document.getElementById('variant-panel');
       const variantGrid = document.getElementById('variant-grid');
       document.getElementById('variant-house-name').innerHTML = house.sigil + ' ' + house.display_name + ' — Variante';
@@ -814,6 +830,11 @@
           btn.addEventListener('click', () => {
             variantGrid.querySelectorAll('.variant-card').forEach(c => c.classList.remove('selected'));
             btn.classList.add('selected');
+            const durationPanel = document.getElementById('duration-panel');
+            if (durationPanel) {
+              durationPanel.style.display = 'block';
+              setTimeout(() => durationPanel.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+            }
             // Store selected variant key for prompt selection
             document.getElementById('notes').value = vKey;
             document.getElementById('theme').value = vName;
@@ -842,9 +863,6 @@
             document.getElementById('thumbnail_text').value = titleInput.value;
             syncSlugFromTitle();
             updateGenerateCard(house, vKey);
-            // Show duration selection
-            document.getElementById('duration-panel').style.display = 'block';
-            setTimeout(() => document.getElementById('duration-panel').scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
           });
           variantGrid.appendChild(btn);
         });
@@ -908,6 +926,7 @@
 
   function updateThumbnailSourcePreview() {
     const preview = document.getElementById('thumbnail-source-preview');
+    if (!preview) return;
     const selected = document.getElementById('library-thumbnail').value;
     const slug = document.getElementById('slug').value;
     const scene = document.getElementById('thumbnail_scene').value;
@@ -975,7 +994,7 @@
     const name = document.getElementById('gen-house-name');
     const info = document.getElementById('gen-prompts-info');
     const btn = document.getElementById('btn-start-gen');
-    if (!house) { btn.disabled = true; return; }
+    if (!house) { if (btn) btn.disabled = true; return; }
     icon.textContent = house.sigil || '🏰';
     const lines = promptLinesForSelection(house, variantKey === null ? '' : variantKey);
     const vLabel = (variantKey && house.variants && house.variants[variantKey])
@@ -987,7 +1006,7 @@
       ? (pc + ' Prompts (Variante) · ' + (house.defaults?.minutes || 20) + ' Min · Stable Audio Local')
       : ('Keine Variante gewählt — Prompts nur pro Variante.');
     document.getElementById('gen_prompt_hidden').value = lines.join('\n');
-    btn.disabled = !pc;
+    if (btn) btn.disabled = !pc;
   }
 
   // Start audio generation
@@ -1007,6 +1026,7 @@
     const titleForJob = (document.getElementById('title').value || '').trim() || (house.display_name + ' Sleep Music');
     const statusEl = document.getElementById('gen-status');
     const btn = document.getElementById('btn-start-gen');
+    if (!btn || !statusEl) return alert('Audio-UI nicht vollständig geladen.');
 
     btn.disabled = true;
     btn.textContent = '⏳ Wird gestartet...';
@@ -1038,7 +1058,7 @@
       .catch(err => {
         statusEl.innerHTML = '❌ ' + err.message;
         btn.disabled = false;
-        btn.textContent = '🎵 Track generieren';
+        btn.textContent = '🎵 Track separat generieren';
       });
   };
 
@@ -1052,7 +1072,8 @@
     const timeEl = document.getElementById('progress-time');
     const barEl = document.getElementById('progress-bar');
     const logsEl = document.getElementById('progress-logs');
-    
+    if (!statusEl || !progressEl || !phaseEl || !timeEl || !barEl || !logsEl) return;
+
     progressEl.style.display = 'block';
     _genStartTime = Date.now();
     _lastLogId = 0;
@@ -1118,7 +1139,8 @@
             clearInterval(iv);
             clearInterval(timerIv);
             statusEl.innerHTML = '✅ Track fertig! Du kannst jetzt das Video erstellen.';
-            document.getElementById('btn-start-gen').textContent = '✅ Track generiert!';
+            const gbtnDone = document.getElementById('btn-start-gen');
+            if (gbtnDone) gbtnDone.textContent = '✅ Track generiert!';
             // Auto-select the generated track in library dropdown
             const libSelect = document.getElementById('library-audio');
             if (libSelect) {
@@ -1136,8 +1158,11 @@
             clearInterval(iv);
             clearInterval(timerIv);
             statusEl.innerHTML = '❌ ' + (d.error_message || 'Fehler aufgetreten');
-            document.getElementById('btn-start-gen').disabled = false;
-            document.getElementById('btn-start-gen').textContent = '🎵 Track generieren';
+            const gbtnErr = document.getElementById('btn-start-gen');
+            if (gbtnErr) {
+              gbtnErr.disabled = false;
+              gbtnErr.textContent = '🎵 Track separat generieren';
+            }
           }
         })
         .catch(() => {});

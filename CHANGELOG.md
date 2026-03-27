@@ -3,6 +3,12 @@
 Alle relevanten Änderungen am Projekt werden hier dokumentiert.
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [v3.1.2] – 2026-03-27
+
+### Fixed
+- **Create-Seite / Varianten-Flow**: Nach Haus-Variante erschien die Längenwahl nicht — fehlendes Audio-Generate-UI (`#btn-start-gen` u. a.) löste einen JS-Fehler in `updateGenerateCard` aus.
+- **Robustheit**: Null-Checks für Generate-Button, Status-Elemente, Thumbnail-Preview und Audio-Asset-Zeile; Längen-Panel wird direkt nach Varianten-Klick eingeblendet.
+
 ## [v3.1.1] – 2026-03-27
 
 ### Changed
