@@ -11,7 +11,6 @@ Nicht jede historische Schicht, sondern das, woran man sich beim Arbeiten orient
 ```text
 services/sync/                 Dashboard / FastAPI / Operations
 pipeline/                      End-to-end Pipeline + Produktionsskripte
-musicgen/                      Audio-Generator-bezogene Tools / Notebooks
 
 data/
   upload/                      Eingangsdateien für Pipeline-Läufe
@@ -40,7 +39,7 @@ Der Dashboard-/Control-Panel-Bereich.
 Wichtig:
 - `app/main.py` → FastAPI-Einstieg
 - `app/store.py` → SQLite / Persistenz
-- `app/kaggle_gen.py` → Kaggle-Audio-Integration
+- `app/audio_jobs.py` → Audio-Job-Erstellung (stable-audio-local only)
 - `app/stable_audio_gen.py` → lokaler/alternativer Audio-Pfad
 - `templates/` → UI-Templates
 - `deploy/` → systemd / Setup / Update
@@ -65,20 +64,6 @@ Wichtig:
 - `scripts/metadata/` → Metadata-Generierung / Validierung
 - `scripts/qa/` → Preflight / Checks
 - `scripts/publish/` → YouTube-Upload
-
----
-
-## `musicgen/`
-
-Audio-Erzeugungsnahe Tools und Artefakte.
-
-Beispiele:
-- `generate.py`
-- `merge.py`
-- `prompts.json`
-- `MusicGen_Colab.ipynb`
-
-Dieser Bereich ist strategisch wichtig, aber die endgültige Produktionswahrheit liegt aktuell nicht allein hier.
 
 ---
 
@@ -135,7 +120,7 @@ Die Projektdokumentation wird schrittweise nach Diátaxis organisiert:
 
 Siehe:
 - `docs/README.md`
-- `docs/DOCS_AUDIT.md`
+- `docs/DOCS_AUDIT.md` (falls noch vorhanden; sonst ignorieren)
 
 ---
 
@@ -147,7 +132,7 @@ Siehe:
 - `work/`
 - `templates/`
 - `scripts/` direkt im Root
-- `publishing/musicgen/`
+- `musicgen/` (früher; im aktuellen Repo entfernt)
 - `agent-sync-service/`
 
 Das kann als historischer Kontext relevant sein, ist aber **nicht** die beste Orientierung für den aktuellen Stand.

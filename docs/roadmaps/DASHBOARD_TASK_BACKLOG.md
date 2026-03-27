@@ -1,13 +1,11 @@
 # Dashboard Task Backlog
 
-Stand: 25.03.2026
+Stand: 27.03.2026 (angepasst an aktuellen Code: Tickets, kein GitHub-Task-Sync, Stable Audio Local only)
 
 ## Erledigte Aufgaben
 
-- ~~#1 Claims expire unexpectedly~~ → Protocol Health System implementiert (Stale-Sweep, Warnings, API, Ops-Panel, Task-Detail Flags)
-- ~~#3 Old Kaggle logic still visible~~ → Kaggle-UI entfernt, Default auf GPU-Worker, Kaggle als Fallback
-- ~~#6 Task summaries not meaningful~~ → Issue-Titel als Kurzbeschreibung, detaillierte Beschreibung aus Issue-Body
-- ~~#7 Task filters need to be more usable~~ → Dropdown-Filter für Status/Assignee, Live-Filtering, API-Endpoint für Filterwerte
+- ~~#1 Claims / GitHub-Task-Sync~~ → altes Task-/Webhook-System entfernt; Koordination über **Tickets** im Dashboard
+- ~~#3 Legacy Audio (Kaggle/MusicGen)~~ → nur noch **stable-audio-local** (`audio_jobs.py` / `stable_audio_gen.py`)
 - ~~#17 Slug auto-generate from title~~ → Backend + Frontend, Slug-Feld versteckt
 
 ## Offene Aufgaben
@@ -15,7 +13,7 @@ Stand: 25.03.2026
 ### Priority A — critical / blocking
 
 **#2. Ticket-System im Dashboard**
-Bugs, Features, Änderungen direkt im Dashboard anlegen → GitHub Issue → Sync Task.
+Bugs, Features, Änderungen direkt im Dashboard anlegen und bis **done/closed** führen (kein GitHub-Sync-Pflicht).
 
 **#3a. Audio-to-Pipeline Workflow zu fragmentiert**
 Ein-Klick-Flow: Audio generieren + Pipeline starten + optional Auto-Upload. Overnight-Modus.

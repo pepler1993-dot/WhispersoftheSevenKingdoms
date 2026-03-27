@@ -17,7 +17,7 @@ Ein Song → mehrere Assets → mehrere Plattformen → mehrere Universen.
 
 | Task | Wer | Status |
 |------|-----|--------|
-| Song in Kaggle/Colab generieren (3h Winterfell) | Eddi/Team | 🔄 In Progress |
+| Song per Stable Audio Local (GPU-Worker) erzeugen | Eddi/Team | 🔄 In Progress |
 | `pipeline.py --slug whispers-of-winterfell` ausführen | Pako/Smith | ⏳ Wartet auf Audio |
 | Thumbnail + Video + Metadaten → YouTube Upload | Smith | ⏳ |
 | GPU-Passthrough auf Kevins Proxmox (GTX 1070) | Kevin | ⏳ |

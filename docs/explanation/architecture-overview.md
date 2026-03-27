@@ -49,16 +49,15 @@ Aufgaben:
 
 ## 3. Audio-Erzeugung
 Pfade:
-- `musicgen/`
-- Teile von `services/sync/app/`
+- `services/sync/app/audio_jobs.py` — Audio-Jobs anlegen und orchestrieren
+- `services/sync/app/stable_audio_gen.py` — Stable Audio Open auf dem GPU-Worker (**stable-audio-local**)
 
 Rolle:
-- vorgelagerter Generator-Bereich
-- liefert das Rohmaterial für den eigentlichen Pipeline-Lauf
+- erzeugt Tracks und legt sie unter `data/upload/songs/` ab
+- wird vom Dashboard (Audio Lab, Create-Flow, Workflows) angestoßen
 
 Wichtig:
-- strategisch zentral
-- operativ noch der wackligste Bereich
+- Produktionspfad ist nur noch dieser eine Stack; Feintuning und Betrieb am Worker können trotzdem Baustelle sein
 
 ---
 
@@ -118,8 +117,8 @@ Die Pipeline soll nicht davon abhängen, *wie* Audio entstanden ist — nur *das
 ### 3. Dashboard ist Control Plane, nicht die ganze Wahrheit
 Die UI ist wichtig, aber die eigentliche Wahrheit entsteht aus Code, Dateien, Jobs und Status.
 
-### 4. Audio ist der kritischste Engpass
-Nicht mehr die Grundpipeline, sondern die belastbare Erzeugung von Audio ist derzeit die größte technische Unsicherheit.
+### 4. Audio-Worker und Betrieb
+Die Architektur ist festgelegt (Stable Audio Local). Offen können sein: GPU-/SSH-Betrieb, Qualität, Laufzeiten — nicht mehr die Wahl des Modells im Repo.
 
 ---
 
@@ -127,13 +126,13 @@ Nicht mehr die Grundpipeline, sondern die belastbare Erzeugung von Audio ist der
 
 - Dashboard + Pipeline + grundlegende Publish-Schicht sind bereits brauchbar
 - Monorepo-Struktur ist klarer als früher
-- Provider-Wechsel auf der Audio-Seite ist architektonisch vorbereitet
+- Audio-Erzeugung und Pipeline sind klar getrennt (Slug + Dateien)
 
 ---
 
 ## Aktuelle Schwäche
 
-- Audio-Infrastruktur ist noch nicht endgültig stabil
+- GPU-Worker-Betrieb kann noch Reibung haben (Netzwerk, Ressourcen)
 - ältere Dokumente enthalten historische Schichten und frühere Pfade
 - nicht jede strategische Entscheidung ist bereits vollständig verdichtet
 

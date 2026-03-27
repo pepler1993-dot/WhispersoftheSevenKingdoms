@@ -31,15 +31,13 @@ The core workflow is: **House selection → Audio generation → Thumbnail creat
   - YouTube upload via OAuth
   - File organization and cleanup
 
-### 2.3 Audio Generation (`musicgen/` and `services/sync/app/stable_audio_gen.py`)
+### 2.3 Audio Generation (`services/sync/app/audio_jobs.py` and `services/sync/app/stable_audio_gen.py`)
 - **Purpose**: AI-powered music generation
-- **Current approach**: Stable Audio Open 1.0 via local GPU worker
-- **Legacy approach**: Kaggle integration (being phased out)
+- **Approach**: Stable Audio Open 1.0 via local GPU worker only (**stable-audio-local**)
 - **Features**:
   - House-specific prompts and parameters
   - Short clip generation with stitching
   - Daemon mode for efficient processing
-  - Provider abstraction for flexibility
 
 ### 2.4 Data Management (`data/`)
 - **Purpose**: Storage for assets, metadata, and generated content
@@ -132,7 +130,7 @@ User → Dashboard → Audio Job Layer → GPU Worker
 - ✅ YouTube upload via OAuth integration
 
 ### 5.2 Active Development Areas
-- **Audio Generation**: Transitioning from Kaggle to local GPU workers
+- **Audio Generation**: Operating and tuning Stable Audio Local on the GPU worker
 - **Infrastructure**: Improving GPU worker reliability and performance
 - **UI/UX**: Refining dashboard based on actual usage patterns
 - **Documentation**: Implementing Diátaxis framework for comprehensive docs
@@ -144,10 +142,9 @@ User → Dashboard → Audio Job Layer → GPU Worker
 - Resolve SSH connectivity issues between services
 - Establish reliable audio generation pipeline
 
-#### P1 - Audio Strategy Finalization
-- Decide definitively on audio generation approach
-- Document provider strategy for `AudioGenerator`
-- Establish standard for short-track + looping approach
+#### P1 - Audio operations documentation
+- Document worker env vars, defaults, and runbook for short-track + looping
+- Keep dashboard and pipeline docs aligned with stable-audio-local only
 
 #### P2 - UI Enhancement
 - Improve mobile responsiveness

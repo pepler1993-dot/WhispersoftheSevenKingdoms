@@ -66,25 +66,19 @@ Danach:
 
 ---
 
-## Playbook 3 – Task über Sync-Service übernehmen und sauber abschließen
+## Playbook 3 – Ticket im Dashboard übernehmen und abschließen
 
 ### Ablauf
-1. zuerst GitHub-Issue für die Aufgabe anlegen
-2. Task im Sync-Service lesen
-3. claimen
-4. arbeiten
-5. Heartbeats senden, wenn die Arbeit länger dauert
-6. regelmäßig Events/Status nachziehen
-7. vor jedem GitHub-Write resyncen
-8. commit/push/PR nur mit gültigem Claim
-9. am Ende `complete` oder `release`
-
-### Entscheidungshilfe
-- **complete** → Aufgabe fachlich erledigt
-- **release** → ich höre auf, aber die Aufgabe bleibt offen
+1. Ticket im Dashboard öffnen oder neu anlegen
+2. Status auf **in_progress**, Owner setzen wenn vorgesehen
+3. `git fetch --all --prune` und auf aktuellem `main`/Branch arbeiten
+4. kleine Commits, klare Messages
+5. vor Push: Rebase/Merge mit `origin/main`
+6. PR oder direkter Push nach Teamregel
+7. Ticket auf **done** oder **closed**, Kurznotiz wenn nötig
 
 ### Faustregel
-Wenn du nicht sicher sagen kannst, dass das Arbeitspaket wirklich fertig ist, dann eher `release` statt falsches `complete`.
+Wenn die Aufgabe doch nicht fertig wird: Ticket wieder **open** oder jemanden zuweisen — nicht einfach verschwinden lassen.
 
 ---
 
@@ -146,9 +140,8 @@ Wenn ein Bereich noch nicht stabil ist:
 - zwischen "existiert", "wird evaluiert" und "ist Standardpfad" unterscheiden
 
 Gerade hier wichtig für:
-- Audio-Worker
-- lokale GPU-Pfade
-- Übergangsstrategien rund um Kaggle / andere Provider
+- Audio-Worker (Stable Audio Local)
+- lokale GPU-Pfade und SSH/Betrieb
 
 ---
 
@@ -160,6 +153,6 @@ Vor jedem Push kurz prüfen:
 - [ ] keine Secrets im Diff?
 - [ ] keine versehentlichen Rollbacks?
 - [ ] Doku beschreibt Realität statt Wunschbild?
-- [ ] bei Task-Arbeit: Claim noch gültig?
+- [ ] bei Ticket-Arbeit: Status im Dashboard noch korrekt?
 
 Wenn eine Antwort "nein" oder "unklar" ist, erst fixen, dann pushen.

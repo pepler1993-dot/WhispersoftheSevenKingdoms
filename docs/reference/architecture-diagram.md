@@ -9,7 +9,7 @@ Es ist bewusst simpel gehalten: verständlich > beeindruckend.
 ```mermaid
 flowchart TD
     U[User / Team] --> D[Dashboard / Control Plane\nservices/sync]
-    D --> A[Audio Generator Paths\nKaggle / Colab / Local Worker]
+    D --> A[Audio: Stable Audio Local\nGPU-Worker via services/sync]
     A --> IN[data/upload/songs]
     D --> M[data/upload/metadata]
     D --> T[data/upload/thumbnails]
@@ -38,10 +38,9 @@ flowchart TD
 - `services/sync/` ist die **Control Plane**
 - `pipeline/` ist der **Produktionspfad**
 - `data/` ist die operative Datei- und Statusschicht
-- Audio-Generatoren sind austauschbare vorgelagerte Quellen
+- Audio-Erzeugung: **stable-audio-local** (GPU-Worker); die Pipeline braucht nur gültige Dateien unter `data/upload/songs/`
 - Upload ist bewusst nur ein späterer Schritt, nicht die einzige Wahrheit des Systems
 
 ## Wichtige Architekturidee
 
-Die Pipeline soll möglichst **nicht hart an einen einzelnen Audio-Provider gekoppelt** sein.
-Wichtig ist am Ende, dass gültiges Audio + Metadaten + optional Thumbnail vorliegen.
+Die Pipeline ist **nicht** an die Erzeugung gekoppelt: wichtig ist, dass gültiges Audio + Metadaten + optional Thumbnail vorliegen. Im Dashboard ist die Erzeugung fest **Stable Audio Local**.

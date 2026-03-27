@@ -14,13 +14,13 @@ Der alte Stand war zu optimistisch und teilweise veraltet. Das hier bildet den a
 - Video-Renderer (statisch + optional animiert)
 - Metadata-Generator
 - YouTube-Upload via OAuth
-- Kaggle-basierter Audio-Flow im Dashboard
-- vorbereitete lokale Audio-/Worker-Pfade
+- Stable-Audio-Local-Flow im Dashboard
+- lokaler GPU-Worker für Audio-Generierung
 
 **Gerade kritisch:**
 - lokaler GPU-Worker / VM sauber ans Laufen bekommen
 - Audio-Strategie finalisieren
-- Kaggle nicht mehr als einzige tragende Säule betrachten
+- Stable-Audio-Local als einzige Audio-Quelle konsistent betreiben
 
 Kurz: **UI und Pipeline sind weit**, aber **Audio-Infrastruktur ist noch der wacklige Teil**.
 
@@ -31,7 +31,6 @@ Kurz: **UI und Pipeline sind weit**, aber **Audio-Infrastruktur ist noch der wac
 ```text
 services/sync/             FastAPI-Dashboard + Job-/Sync-Logik
 pipeline/                  End-to-end Render-/Publish-Pipeline
-musicgen/                  MusicGen/Kaggle/Notebook-bezogene Generator-Skripte
 data/
   upload/                  Eingangsordner für Songs / Thumbnails / Metadata
   output/youtube/          Fertige YouTube-Artefakte pro Slug
@@ -78,12 +77,11 @@ Die Pipeline kann aktuell:
 - Quellen nach `data/upload/done/` verschieben
 
 ### 3) Audio-Generierung
-Pfad: `musicgen/` und Teile in `services/sync/app/`
+Pfad: Teile in `services/sync/app/`
 
 Aktuell relevant:
-- Kaggle-Flow ist integriert
-- lokaler Worker ist strategisch wichtiger, aber noch Baustelle
-- Stable Audio / lokale Modelle werden evaluiert bzw. vorbereitet
+- Stable Audio Local ist der aktive Generierungspfad
+- lokaler Worker ist die einzige vorgesehene Laufzeit für Audio
 
 Nicht schönreden: **Audio ist noch nicht der endgültig stabile Produktionspfad**.
 
@@ -105,10 +103,9 @@ Output landet typischerweise hier:
 data/output/youtube/whispers-of-winterfell/
 ```
 
-Status / Job-Dateien:
+Status-Dateien:
 ```text
 data/work/jobs/whispers-of-winterfell/status.json
-musicgen/jobs/whispers-of-winterfell.job.json
 ```
 
 ---
@@ -244,18 +241,10 @@ Dann den Upload-Flow initialisieren bzw. nutzen. Token liegt lokal typischerweis
 ### Dashboard / Sync
 - `services/sync/app/main.py` → FastAPI-Einstieg
 - `services/sync/app/store.py` → SQLite / Datenhaltung
-- `services/sync/app/kaggle_gen.py` → Kaggle-Audio-Jobs
+- `services/sync/app/audio_jobs.py` → Audio-Job-Erstellung (stable-audio-local only)
 - `services/sync/app/stable_audio_gen.py` → lokaler/alternativer Audiopfad
 - `services/sync/templates/` → UI
 - `services/sync/deploy/` → Deployment / systemd / Update-Skripte
-
-### Audio / Generator
-- `musicgen/generate.py`
-- `musicgen/merge.py`
-- `musicgen/prompts.json`
-- `musicgen/MusicGen_Colab.ipynb`
-
----
 
 ## Typischer Arbeitsablauf
 
@@ -282,10 +271,8 @@ Wenn du neu ins Projekt kommst: nicht am falschen Ende optimieren.
 - `nvidia-smi`, Treiber, Python-Stack, erster brauchbarer Audio-Test
 
 ### P1
-- Audio-Strategie festzurren
-- Kaggle nur Fallback oder Übergang?
-- lokaler Stack ja/nein?
-- kurze Tracks + Looping als Standard?
+- Audio-Qualität und Laufzeit am GPU-Worker weiter optimieren
+- kurze Tracks + Looping als Standard festigen
 
 ### P2
 - Doku sauber nachziehen
@@ -298,7 +285,6 @@ Wenn du neu ins Projekt kommst: nicht am falschen Ende optimieren.
 
 - README war veraltet → deshalb dieses Update
 - Teile der älteren Doku referenzieren alte Pfade oder alte Struktur
-- Kaggle-Flow ist integriert, aber nicht die endgültige Antwort
 - lokaler GPU-Worker ist noch nicht als „fertig“ zu betrachten
 - im Repo liegen sensible lokale Dateien wie OAuth-/Token-Artefakte potenziell herum; sauberer Umgang ist Pflicht
 
@@ -334,9 +320,7 @@ Bekannter Projektkontext zuletzt:
 - `PROJECT_STATUS.md`
 - `ROADMAP.md`
 - `services/sync/README.md`
-- `musicgen/README.md`
 - `docs/AUDIO_GENERATION_ALTERNATIVES_EVALUATION.md`
-- `docs/AUDIO_GENERATION_FEEDBACK_SMITH.md`
 
 ---
 

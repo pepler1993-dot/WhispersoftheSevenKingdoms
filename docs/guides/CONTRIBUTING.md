@@ -70,20 +70,18 @@ Beispiele:
 
 ---
 
-## Sync-Service in der Zusammenarbeit
+## Tickets im Dashboard
 
-Bei echter paralleler Task-Arbeit gilt:
-1. Task lesen
-2. claimen
-3. arbeiten
-4. Heartbeats senden
-5. vor GitHub-Write resyncen
-6. `release` oder `complete`
+Für abgestimmte Arbeit im Team gilt:
+1. Ticket im Dashboard anlegen oder übernehmen
+2. Status auf **in progress** setzen und ggf. Owner setzen
+3. arbeiten, Status und Beschreibung aktuell halten
+4. bei Abschluss auf **done** oder **closed** setzen
 
 Mehr Details:
 - [`AGENT_SYNC.md`](AGENT_SYNC.md)
-- [`../agents/SYNC_SERVICE.md`](../agents/SYNC_SERVICE.md)
 - [`../agents/PLAYBOOKS.md`](../agents/PLAYBOOKS.md)
+- [`../../PROJECT_STATUS.md`](../../PROJECT_STATUS.md)
 
 ---
 
@@ -95,10 +93,9 @@ Mehr Details:
 - Commits
 - Reviews
 
-### Sync-Service
-- Ownership
-- Lease-Zustand
-- Aktivitätslage
+### Dashboard (Tickets)
+- offene / laufende Aufgaben
+- Priorität und Owner
 
 ### `PROJECT_STATUS.md`
 - aktueller Projektstand
@@ -122,5 +119,4 @@ Agenten sollten außerdem lesen:
 - [`../agents/README.md`](../agents/README.md)
 - [`../agents/WORKING_IN_THIS_PROJECT.md`](../agents/WORKING_IN_THIS_PROJECT.md)
 - [`../agents/GITHUB_AND_PAT.md`](../agents/GITHUB_AND_PAT.md)
-- [`../agents/SYNC_SERVICE.md`](../agents/SYNC_SERVICE.md)
 - [`../agents/PLAYBOOKS.md`](../agents/PLAYBOOKS.md)

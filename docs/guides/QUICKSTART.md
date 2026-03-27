@@ -25,7 +25,7 @@ Minimum:
 
 Optional, aber oft relevant:
 - Google OAuth Credentials für echten YouTube-Upload
-- GPU / Kaggle / lokaler Worker für Audio-Erzeugung
+- erreichbarer **GPU-Worker** (SSH), wenn du Audio über das Dashboard erzeugen willst
 
 ---
 
@@ -75,9 +75,8 @@ Wenn das nicht geht, brauchst du mit Video-Rendering gar nicht erst weiterzumach
 Die aktuell relevanten Pfade sind:
 
 ```text
-services/sync/                 Dashboard / FastAPI
+services/sync/                 Dashboard / FastAPI (inkl. Stable-Audio-Jobs)
 pipeline/                      Orchestrierung + Render/Publish-Skripte
-musicgen/                      Audio-Generator-bezogene Tools / Notebooks
 
 data/upload/songs/             Eingangs-Audio
 data/upload/metadata/          Eingangs-Metadaten

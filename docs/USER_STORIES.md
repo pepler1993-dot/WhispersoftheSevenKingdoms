@@ -38,7 +38,7 @@ Stand: 25.03.2026 | Erstversion basierend auf aktuellem Dashboard + bisherigem F
 **Aktueller Flow:**
 1. `/admin/audio` → Haus/Prompt wählen, Parameter einstellen
 2. "Generieren" drücken
-3. Job läuft (Stable Audio auf GPU oder Kaggle)
+3. Job läuft (Stable Audio Local auf dem GPU-Worker)
 4. Fertiger Song landet automatisch in der Library
 
 **Erwartung:** Ich kann den Song direkt im Browser abspielen und dann entscheiden ob er gut genug ist.

@@ -1,8 +1,13 @@
 # Audio Generation Alternatives Evaluation
 
+> **Archiv / historisch (2026-03):** Im aktuellen Repo ist die Produktion auf **Stable Audio Local** (GPU-Worker, `stable_audio_gen.py` / `audio_jobs.py`) festgelegt. Kaggle, MusicGen-Notebooks und das Verzeichnis `musicgen/` sind entfernt.  
+> **Dieses Dokument** bleibt als **Entscheidungs- und Evaluierungsgrundlage** aus der Übergangsphase erhalten; die Empfehlungen unten sind nicht mehr der aktive Betriebsplan.
+
+---
+
 > Stand: 2026-03-23
 > Autor: Pako
-> Zweck: Entscheidungsgrundlage, wie das aktuelle Kaggle-Setup ersetzt oder ergänzt werden kann.
+> Zweck (historisch): Entscheidungsgrundlage, wie das damalige Kaggle-Setup ersetzt oder ergänzt werden kann.
 > Ziel: Für Smith, Jarvis und weitere Agenten als Review-/Feedback-Basis.
 
 ---

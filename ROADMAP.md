@@ -5,20 +5,20 @@
 
 ## Aktuelle Lage in einem Satz
 
-GPU-Worker Hardware ist ready (nvidia-smi ✅, PyTorch ✅), aber **SSH-Zugang blockiert** die letzten Schritte. Doku wächst parallel stark (Diátaxis + Dashboard-Integration). Webhooks sind gefixt.
+GPU-Worker Hardware ist ready (nvidia-smi ✅, PyTorch ✅). **Audio im Repo:** nur noch **Stable Audio Local**. Doku folgt Diátaxis + Dashboard-Integration. GitHub-Task-Webhooks im alten Sinne gibt es nicht mehr — Koordination über **Tickets** im Dashboard.
 
 ---
 
 ## Prioritäten ab jetzt
 
 ## P0 – GPU-Worker funktionsfähig machen
-**Ziel:** Lokale Audio-Generierung als ernsthafte Alternative zu Kaggle zum Laufen bringen.
+**Ziel:** **Stable Audio Local** auf dem GPU-Worker zuverlässig betreiben.
 
 ### Erledigt ✅
 - [x] `nvidia-smi` in GPU-VM sauber zum Laufen gebracht (GTX 1070, 8GB VRAM, CUDA 12.4)
 - [x] Nouveau-/Treiber-Konflikte gelöst (Kernel 6.12.74 → 6.12.73 Downgrade)
 - [x] PyTorch CUDA 12.1 installiert (`torch-2.5.1+cu121`)
-- [x] Python venv unter `/opt/musicgen-worker/.venv`
+- [x] Python venv unter `/opt/stable-audio-worker/.venv` (oder gleichwertiger Pfad auf der Worker-VM)
 
 ### Offen – blockiert durch SSH-Key
 - [ ] SSH-Key von LXC 103 erneut auf GPU-VM eintragen (**Kevin, manuell via noVNC**)
@@ -34,17 +34,16 @@ GPU-Worker Hardware ist ready (nvidia-smi ✅, PyTorch ✅), aber **SSH-Zugang b
 
 ---
 
-## P1 – Audio-Strategie finalisieren
-**Ziel:** Nicht mehr zwischen Kaggle, Hoffnung und Nebenpfaden treiben.
+## P1 – Audio-Strategie festhalten (Feinschliff)
+**Ziel:** Den gewählten Pfad dokumentieren und am Worker optimieren — ohne neue parallele Stacks im Repo.
 
-### Entscheidungen, die jetzt fallen müssen
-- [ ] Kaggle als Produktionspfad verwerfen oder nur als Fallback markieren
-- [ ] Stable Audio Open vs. anderer lokaler Stack final bewerten
-- [ ] kurze Tracks + Looping als Standard-Produktionslogik festschreiben oder verwerfen
-- [ ] Provider-Strategie für `AudioGenerator` dokumentieren
+### Offen / iterativ
+- [ ] kurze Tracks + Looping als Standard-Produktionslogik in Runbooks festhalten
+- [ ] Worker-Parameter (Steps, Clip-Länge) und Erwartungswerte für Laufzeit dokumentieren
+- [ ] `GPU_WORKER_*` / `GPU_WORKER_CODE_DIR` in einer zentralen Reference-Seite sammeln
 
 ### Ergebnis
-- Ein klarer, schriftlich festgehaltener Audio-Pfad für die nächsten Wochen
+- Betrieb und Onboarding sind ohne mündliche Übergabe möglich
 
 ---
 
@@ -113,17 +112,17 @@ GPU-Worker Hardware ist ready (nvidia-smi ✅, PyTorch ✅), aber **SSH-Zugang b
 - [x] CHANGELOG.md erstellt (Jarvis)
 - [x] Architecture Diagram erstellt (Jarvis)
 - [x] Agenten-Doku begonnen (Pako – wie Agents mit dem Projekt arbeiten)
-- [x] Audio-Strategie-Feedback dokumentiert (Smith + Jarvis)
+- [x] Audio-Strategie (`docs/explanation/audio-strategy.md`) an Stable Audio Local angeglichen
 
 ### Noch offen
 - [ ] Tutorial: "Erstes Video von A bis Z"
-- [ ] How-to: "Neuen Audio-Provider implementieren"
+- [ ] How-to: "GPU-Worker / Stable Audio Local betreiben" (Env-Vars, Pfade, typische Fehler)
 - [ ] How-to: "GPU-Worker einrichten"
 - [ ] Reference: API-Endpoints Übersicht
 - [ ] Reference: DB-Schema + Tabellen
 - [ ] Reference: Umgebungsvariablen + Konfiguration
 - [ ] Explanation: Pipeline-Architektur
-- [ ] Agenten-Doku vervollständigen (Sync Service Protokoll, Push-Workflow, Regeln)
+- [ ] Agenten-Doku vervollständigen (Tickets, Git-Workflow, Regeln — ohne altes Task/Webhook-Protokoll)
 
 ### Aufgabenverteilung
 - **Pako:** Tutorials + How-to Guides + Agenten-Doku + Dashboard-Integration
@@ -139,10 +138,9 @@ GPU-Worker Hardware ist ready (nvidia-smi ✅, PyTorch ✅), aber **SSH-Zugang b
 **Ziel:** Weniger implizites Wissen, stabile Infrastruktur.
 
 ### Erledigt ✅
-- [x] GitHub Webhooks gefixt (Secret-Mismatch behoben, Duplikat-Hook entfernt)
 - [x] PROJECT_STATUS.md Auto-Update Cron (3x täglich, Berliner Winterzeit)
 - [x] Backup-Cron alle 6h
-- [x] Sync Service Pflicht für alle Agents (Issues = Tasks)
+- [x] Koordination über **Tickets** im Dashboard (GitHub-Task-Sync entfernt)
 
 ### Noch offen
 - [ ] SSH-Tunnel stabilisieren (bore als systemd Service ODER Cloudflare Tunnel evaluieren)

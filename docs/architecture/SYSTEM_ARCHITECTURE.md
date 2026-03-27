@@ -20,7 +20,7 @@ The platform automates a publishing workflow for long-form Game of Thrones-theme
 - **Monorepo, clear boundaries**: one repo, but distinct areas for dashboard, pipeline, and model assets
 - **Dashboard-first operations**: user-facing workflow lives in `services/sync/`
 - **Pipeline as orchestration**: rendering, metadata, and publishing are composed steps, not one giant script blob
-- **Provider abstraction for audio**: Kaggle exists today; local GPU worker is the strategic direction
+- **Stable-audio-local only**: audio generation runs exclusively on the local GPU worker
 - **File-system-backed outputs**: generated assets land in predictable directories for inspection and reuse
 
 ## High-level architecture
@@ -30,8 +30,7 @@ flowchart LR
     U[User / Operator] --> D[Dashboard\nservices/sync]
     D --> DB[(SQLite / app store)]
     D --> AJ[Audio Job Layer]
-    AJ --> K[Kaggle Audio Generation]
-    AJ --> G[Local GPU Worker\nplanned / in progress]
+    AJ --> G[Local GPU Worker\nstable-audio-local]
 
     D --> P[Pipeline Orchestrator\npipeline/pipeline.py]
     P --> T[Thumbnail Generator]
@@ -39,7 +38,6 @@ flowchart LR
     P --> R[Video Renderer]
     P --> Y[YouTube Upload]
 
-    K --> FS[(data/upload & data/output)]
     G --> FS
     T --> FS
     M --> FS
@@ -64,7 +62,7 @@ Responsible for:
 Key files called out in project docs:
 - `app/main.py`
 - `app/store.py`
-- `app/kaggle_gen.py`
+- `app/audio_jobs.py`
 - `templates/`
 - `static/css/admin.css`
 
@@ -86,16 +84,12 @@ Subsystems:
 - `scripts/publish/`
 
 ### 3. Audio generation layer
-**Primary current path:** `musicgen/`
+**Primary current path:** `services/sync/app/stable_audio_gen.py`
 
 Current state:
-- Kaggle-backed notebook workflow is implemented
-- dashboard can patch notebook inputs and poll job status
+- stable-audio-local workflow is implemented
+- dashboard can create jobs, stream logs, cancel, and inspect status
 - generated audio lands in shared project storage
-
-Strategic direction:
-- move toward a local GPU worker as the preferred foundation
-- keep provider abstraction so Kaggle / Colab / local execution can coexist
 
 ### 4. Shared data layer
 **Paths:** `data/upload/`, `data/output/`, dashboard-managed state
@@ -108,7 +102,6 @@ Used for:
 - pipeline handoff between components
 
 ### 5. External dependencies
-- **Kaggle** for remote GPU-backed audio generation
 - **YouTube Data API v3** for publishing
 - **ffmpeg** for media rendering
 - **OAuth2 credentials** for upload authorization
@@ -137,7 +130,6 @@ Used for:
 
 ## Current architecture risks / gaps
 
-- Kaggle path exists but is not yet the desired long-term foundation
 - Local GPU worker path is still being operationalized
 - Some documentation still reflects older structure and naming
 - Large generated artifacts may require LFS or stricter repository hygiene
@@ -148,7 +140,6 @@ The likely near-term architecture is:
 - **Dashboard remains the operator control plane**
 - **Pipeline remains the deterministic execution layer**
 - **Local GPU worker becomes the preferred audio backend**
-- **Kaggle / Colab remain fallback or overflow options**
 
 ## Related documents
 

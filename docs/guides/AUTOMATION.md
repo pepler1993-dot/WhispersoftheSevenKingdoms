@@ -117,14 +117,11 @@ Teilweise automatisiert / orchestriert:
 ## Audio-Erzeugung
 Hier liegt die strategische Baustelle.
 
-Vorhanden oder vorbereitet:
-- Kaggle-basierte Audio-Erzeugung
-- lokale Worker-/GPU-Richtung
-- Stable-Audio-/Provider-Ansätze
+Vorhanden:
+- **Stable Audio Local** über den GPU-Worker (Dashboard: Audio Lab, Create „Neu generieren“, Workflows)
 
 Aber:
-- das ist noch nicht überall gleich stabil
-- nicht jede Doku darf so tun, als sei das schon fertig industrialisiert
+- Worker-Erreichbarkeit, Laufzeit und Qualität können je nach Setup variieren — das ist Betrieb, nicht „magisch immer grün“
 
 ---
 

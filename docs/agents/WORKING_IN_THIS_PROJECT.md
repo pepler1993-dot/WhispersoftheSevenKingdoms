@@ -43,16 +43,16 @@ Checkliste:
 
 ---
 
-## Issue-first und Sync-first
+## Ticket-first
 
-Für echte Aufgaben gilt in diesem Projekt ab jetzt:
+Für echte Aufgaben gilt:
 
-1. **erst GitHub-Issue anlegen**
-2. dadurch erscheint die Aufgabe als Task im Sync-Service
-3. **erst dann** Task lesen, claimen und bearbeiten
-4. während der Arbeit regelmäßig den Stand aus dem Sync-Service nachziehen
+1. **Ticket im Dashboard** anlegen oder ein bestehendes übernehmen
+2. Status auf **in progress** setzen (und Owner, falls vorgesehen)
+3. erst dann im Repo arbeiten
+4. bei Abschluss Ticket auf **done** setzen
 
-Ohne Issue kein sauberer Task. Ohne Task keine saubere Koordination.
+Details: [`../guides/AGENT_SYNC.md`](../guides/AGENT_SYNC.md) und `PROJECT_STATUS.md`.
 
 ---
 
@@ -140,8 +140,8 @@ Agenten sollen in Doku klar trennen zwischen:
 - **noch nicht stabilen Bereichen**
 
 Besonders bei diesem Projekt gilt:
-- Audio ist strategisch wichtig, aber nicht überall final stabil
-- alte Pfade existieren in älteren Docs, sind aber nicht mehr Hauptwahrheit
+- Audio-Produktion: **Stable Audio Local** (GPU-Worker); Betrieb kann trotzdem Reibung haben
+- alte Pfade (z. B. `musicgen/`, Kaggle) sind entfernt — nicht wieder einführen, ohne explizite Anforderung
 - Monorepo-Struktur muss konsistent beschrieben werden
 
 ---
@@ -169,33 +169,15 @@ Besonders bei diesem Projekt gilt:
 
 ---
 
-## Task-Lifecycle im Sync Service
+## Tickets im Dashboard
 
-Jeder Agent **muss** den korrekten Task-Lifecycle einhalten:
+Status und Felder werden in der SQLite-DB des Sync-Service geführt (siehe `app/store.py` / Tickets-UI). Üblich:
 
-### Phasen
+- **open** → noch zu bearbeiten
+- **in_progress** → aktiv in Arbeit
+- **done** / **closed** → abgeschlossen (nach Teamgewohnheit)
 
-| Phase | Bedeutung | API-Endpoint |
-|-------|-----------|--------------|
-| `released` | Offen, verfügbar zur Bearbeitung | Standard bei neuem Task |
-| `working` | Agent arbeitet aktiv daran | `POST /api/tasks/{id}/claim` |
-| `blocked` | Wartend auf externe Abhängigkeit | `POST /api/tasks/{id}/update` mit phase=blocked |
-| `done` | **Abgeschlossen** | `POST /api/tasks/{id}/complete` |
-| `archived` | Archiviert (nach Abschluss) | Manuell |
-| `stale` | Lease abgelaufen, nicht mehr aktiv | Automatisch |
-
-### Workflow
-
-1. Task claimen → Phase wird `working`
-2. Arbeit erledigen, regelmäßig Heartbeat senden
-3. **Task abschließen → `/complete` aufrufen** → Phase wird `done`
-
-### ⚠️ Häufiger Fehler
-
-**FALSCH:** Task nach Abschluss auf `released` setzen (= Task erscheint wieder als offen!)
-**RICHTIG:** Task über `/complete` Endpoint abschließen → Phase wird `done` (= "Abgeschlossen")
-
-`released` bedeutet "offen und verfügbar" – **nicht** "fertig und freigegeben".
+Kein separates Claim-API mehr: Zuweisung und Status über die Ticket-Oberfläche bzw. die dazu gehörenden Routen pflegen.
 
 ### Version & Release Workflow (Smith)
 

@@ -186,12 +186,7 @@ Praktisch heißt das:
 
 Audio ist aktuell der heikelste Teil des Gesamtsystems.
 
-Es gibt oder gab mehrere Pfade:
-- Kaggle-basierte Erzeugung
-- lokale Worker / GPU-VM
-- vorbereitete Stable-Audio-/Provider-Ansätze
-
-Für die Pipeline selbst ist das zweitrangig, **solange am Ende eine gültige Audio-Datei im Upload-Ordner liegt**.
+Audio kommt typischerweise aus dem Dashboard (**Stable Audio Local** auf dem GPU-Worker) oder aus manuellen Uploads. Für die Pipeline zählt nur: **gültige Datei** unter `data/upload/songs/` für den Slug.
 
 ---
 

@@ -84,18 +84,12 @@ Haus wählen → Audio generieren (GPU) → Thumbnail → Video → Metadaten �
 Siehe `docs/roadmaps/DASHBOARD_TASK_BACKLOG.md` für Details.
 
 **Priorität A – Workflow & UX:**
-- Task-Zusammenfassungen aussagekräftiger machen
-- Task-Filter: Dropdowns statt Textfelder, Live-Filtering
-- Slug auto-generieren aus Titel (**Pako arbeitet gerade daran**)
-- Audio Lab Ladezeit verbessern
-- `done` vs `released` Semantik durchsetzen
-
-**Status-Check Claim/Heartbeat:**
-- Claim-/Heartbeat-Bausteine sind im Sync-Service bereits vorhanden (`lease_until`, `heartbeat_at`, Heartbeat-Endpoint, Task-Phasenlogik)
-- Das Thema ist aber **noch nicht fertig abgeschlossen**: Investigation, stale-claim visibility, protocol-health warnings und saubere `done` vs `released`-Abnahme bleiben offen
+- Ticket-Listen und Filter im Dashboard weiter verbessern (Lesbarkeit, schnelle Triage)
+- Audio Lab Ladezeit und Status-Feedback optimieren
+- Create-/Workflow-Flows weiter vereinfachen
 
 **Priorität B – Features:**
-- Ticket-System im Dashboard (Bugs, Features, Änderungen)
+- Tickets: Prioritäten, Zuweisung und Übersichten ausbauen
 - Library: Metadata-Formular, MP3/WAV Upload, Song-Preview/Playback
 - Thumbnail-Editor (Drag & Drop Template-System)
 - Animated Video Asset-Handling
@@ -104,15 +98,9 @@ Siehe `docs/roadmaps/DASHBOARD_TASK_BACKLOG.md` für Details.
 - Admin-Login mit Sessions/Cookies
 
 **Priorität C – Cleanup:**
-- Alte Kaggle-Referenzen aus Pipeline + Audio Lab entfernen
 - Doku konsistent aus Anwender-Sicht schreiben
 - Version + Metrics in System-Tab verschieben
 - Nav-Leiste Mobile-Fix
-
-### Agent Sync Guardrails (in Review)
-- Konzept von Jarvis: Heartbeat als Protocol-Watchdog
-- Smith Review: Service-Restart Recovery, GPU-Job Awareness, `/api/protocol-health` Endpoint
-- Rollout in 3 Phasen geplant
 
 ## 🔧 Infrastruktur
 
@@ -138,7 +126,7 @@ Siehe `docs/roadmaps/DASHBOARD_TASK_BACKLOG.md` für Details.
 - GPU: NVIDIA GTX 1070, 8GB VRAM, CUDA 12.4, Driver 550.163.01
 - Python 3.13, PyTorch 2.5.1+cu121
 - Modell: `/mnt/data/models/stable-audio-open-1.0` (~3GB fp16)
-- Worker: `/opt/musicgen-worker/worker_daemon.py`
+- Worker: `/opt/stable-audio-worker/worker_daemon.py`
 - Jobs: `/mnt/data/jobs/` (JSON-File Protokoll)
 - Output: `/mnt/data/output/`
 - 200GB Daten-Disk auf `/mnt/data`
@@ -150,7 +138,7 @@ services/sync/                      ← Dashboard (FastAPI)
   app/main.py                       ← Backend + Routes
   app/store.py                      ← SQLite DB
   app/stable_audio_gen.py           ← GPU Audio Worker Integration
-  app/kaggle_gen.py                 ← Legacy Kaggle Generator
+  app/audio_jobs.py                 ← Audio-Job-Erstellung (stable-audio-local only)
   data/house_templates.json         ← House-Karten Config
   templates/                        ← Jinja2 Templates
   static/css/admin.css              ← Styling
@@ -164,7 +152,6 @@ pipeline/
   scripts/publish/                  ← YouTube Upload
   scripts/audio/                    ← Audio Tools (loop, etc.)
 
-musicgen/                           ← Legacy Kaggle Notebooks
 
 data/upload/songs/                  ← Generierte Audio-Dateien
 data/output/youtube/                ← Fertige Videos + Metadaten
@@ -176,7 +163,7 @@ docs/
 ```
 
 ## 📋 Entscheidungen (FINAL)
-- **Audio:** Stable Audio Open 1.0 via lokalen GPU-Worker (nicht mehr Kaggle)
+- **Audio:** Stable Audio Open 1.0 via lokalen GPU-Worker
 - **GPU:** GTX 1070 auf Kevins Proxmox, Worker-Daemon Modus
 - **Dashboard:** ngrok → Cloudflare Tunnel Migration geplant
 - **Thumbnails:** Template-basiert mit Pillow (kein API-Key)
