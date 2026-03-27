@@ -113,9 +113,10 @@
         <div class="overview-card-facts">
           <span>
             {% set run_start = (run.started_at or run.created_at or '—') %}
-            {{ run_start[:16]|replace('T', ' ')|replace('+01:00', '')|replace('+00:00', '') }}{% if run.finished_at %} → {{ run.finished_at[:16]|replace('T', ' ')|replace('+01:00', '')|replace('+00:00', '') }}{% endif %}
+            {% set run_end = run.finished_at or '' %}
+            {{ run_start[8:10] ~ '.' ~ run_start[5:7] ~ '.' ~ run_start[2:4] ~ ' ' ~ run_start[11:16] if run_start != '—' else '—' }}{% if run_end %} → {{ run_end[8:10] ~ '.' ~ run_end[5:7] ~ '.' ~ run_end[2:4] ~ ' ' ~ run_end[11:16] }}{% endif %}
           </span>
-          <span>{{ (run.config.loop_hours ~ ' Stunden Video') if run.config and run.config.get('loop_hours') else '—' }}</span>
+          <span>{{ (run.config.loop_hours ~ 'h') if run.config and run.config.get('loop_hours') else '—' }}</span>
         </div>
       </a>
       {% endfor %}
@@ -142,9 +143,10 @@
         <div class="overview-card-facts">
           <span>
             {% set job_start = (job.started_at or job.created_at or '—') %}
-            {{ job_start[:16]|replace('T', ' ')|replace('+01:00', '')|replace('+00:00', '') }}{% if job.finished_at %} → {{ job.finished_at[:16]|replace('T', ' ')|replace('+01:00', '')|replace('+00:00', '') }}{% endif %}
+            {% set job_end = job.finished_at or '' %}
+            {{ job_start[8:10] ~ '.' ~ job_start[5:7] ~ '.' ~ job_start[2:4] ~ ' ' ~ job_start[11:16] if job_start != '—' else '—' }}{% if job_end %} → {{ job_end[8:10] ~ '.' ~ job_end[5:7] ~ '.' ~ job_end[2:4] ~ ' ' ~ job_end[11:16] }}{% endif %}
           </span>
-          <span>{{ (job.minutes ~ ' Minuten Song') if job.minutes else '—' }}</span>
+          <span>{{ (job.minutes ~ ' min') if job.minutes else '—' }}</span>
         </div>
       </a>
       {% endfor %}
