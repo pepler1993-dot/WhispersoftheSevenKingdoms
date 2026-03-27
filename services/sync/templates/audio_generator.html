@@ -43,12 +43,13 @@
           <label for="minutes">Ziel-Dauer (Minuten)</label>
           <input type="number" name="minutes" id="minutes" class="form-input" value="42" min="1" max="180" />
         </div>
-        <div class="form-group" id="clip-seconds-wrapper" style="display:none">
-          <label for="clip_seconds">Clip-Länge</label>
-          <input type="number" name="clip_seconds" id="clip_seconds" class="form-input" value="30" min="10" max="60" />
+        <div class="form-group">
+          <label for="clip_seconds">Max. Clip-Länge (Sek.)</label>
+          <input type="number" name="clip_seconds" id="clip_seconds" class="form-input" value="30" min="10" max="47" />
+          <div class="metric-help">Stable Audio Open max: 47s pro Clip</div>
         </div>
       </div>
-      <div class="grid two" id="stable-audio-fields" style="display:none">
+      <div class="grid two" id="stable-audio-fields">
         <div class="form-group">
           <label for="steps">Inference Steps</label>
           <select name="steps" id="steps" class="form-select">
@@ -57,22 +58,8 @@
             <option value="100">100 (beste Qualität, ~7 min/clip)</option>
           </select>
         </div>
-        <div class="form-group">
-          <label for="clip_seconds_stable">Max. Clip-Länge (Sek.)</label>
-          <input type="number" id="clip_seconds_stable" class="form-input" value="47" min="10" max="47" />
-          <div class="metric-help">Stable Audio Open max: 47s pro Clip</div>
-        </div>
       </div>
       <input type="hidden" name="model" id="audio-model" value="stable-audio" />
-      <div class="form-group" id="preset-wrapper" style="display:none">
-        <label for="preset_name">Preset</label>
-        <select name="preset_name" id="preset_name" class="form-select">
-          <option value="">— kein Preset —</option>
-          {% for preset in presets %}
-          <option value="{{ preset.name }}">{{ preset.name }} ({{ preset.category }} / {{ preset.house }})</option>
-          {% endfor %}
-        </select>
-      </div>
       <div class="form-group">
         <label for="house_preset">Prompt-Vorlage (House)</label>
         <select name="house_preset" id="house_preset" class="form-select" onchange="fillPresetPrompts()">
@@ -113,30 +100,14 @@
   const statusEl = document.querySelector('[data-health="status"]');
   const messageEl = document.getElementById('audio-health-message');
   const stableFields = document.getElementById('stable-audio-fields');
-  const presetWrapper = document.getElementById('preset-wrapper');
-  const clipWrapper = document.getElementById('clip-seconds-wrapper');
-  const clipStable = document.getElementById('clip_seconds_stable');
   const clipInput = document.getElementById('clip_seconds');
   const modelInput = document.getElementById('audio-model');
 
-  function applyProviderLayout(provider) {
-    const stable = provider === 'stable-audio-local';
-    stableFields.style.display = stable ? 'grid' : 'none';
-    presetWrapper.style.display = stable ? 'none' : 'block';
-    clipWrapper.style.display = stable ? 'none' : 'block';
-    modelInput.value = stable ? 'stable-audio' : 'stable-audio';
-    if (stable) {
-      clipInput.value = clipStable.value || '47';
-      clipInput.max = '47';
-    } else {
-      clipInput.value = clipInput.value || '30';
-      clipInput.max = '60';
-    }
+  function applyProviderLayout() {
+    stableFields.style.display = 'grid';
+    modelInput.value = 'stable-audio';
+    clipInput.max = '47';
   }
-
-  clipStable.addEventListener('input', function() {
-    clipInput.value = this.value;
-  });
 
   fetch('/admin/audio/health')
     .then(r => r.json())
@@ -145,21 +116,17 @@
       gpuEl.textContent = health.gpu || '—';
       hostEl.textContent = health.host || '—';
       modelEl.textContent = health.model || '—';
-      if (health.provider === 'stable-audio-local') {
-        statusEl.textContent = health.available ? '✅ Online' : '❌ Offline';
-      } else {
-        statusEl.textContent = health.available ? '✅ Verfügbar' : '❌ Nicht verfügbar';
-      }
+      statusEl.textContent = health.available ? '✅ Online' : '❌ Offline';
       messageEl.textContent = health.available
-        ? 'Generator ist grundsätzlich startklar. Der Run hängt ab hier trotzdem noch von Provider-Runtime, Modell und Remote-Execution ab — also bereit, aber nicht magisch unfehlbar.'
-        : (health.error || 'Generator ist noch nicht vollständig bereit. Ohne CLI, Token, Upload-Ziel und Template läuft hier nichts außer ehrlichen Fehlermeldungen.');
-      applyProviderLayout(health.provider);
+        ? 'Stable Audio Local ist grundsätzlich startklar.'
+        : (health.error || 'Stable Audio Local ist aktuell nicht erreichbar.');
+      applyProviderLayout();
     })
     .catch(() => {
       providerEl.textContent = 'unknown';
       statusEl.textContent = '⚠️ Status konnte nicht geladen werden';
       messageEl.textContent = 'Die Seite bleibt benutzbar, aber der Generator-Status konnte gerade nicht geprüft werden.';
-      applyProviderLayout('unknown');
+      applyProviderLayout();
     });
 })();
 </script>

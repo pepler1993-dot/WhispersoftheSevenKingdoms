@@ -17,6 +17,7 @@ uvicorn[standard]>=0.35.0
 httpx>=0.28.1
 pydantic>=2.0.0
 psutil>=5.9.0
+markdown>=3.7
 
 # YouTube upload
 google-api-python-client>=2.120.0
@@ -24,6 +25,6 @@ google-auth-oauthlib>=1.2.0
 google-auth-httplib2>=0.2.0
 
 # Optional / generation-related
-# Needed when running MusicGen locally instead of Colab/Kaggle
+# Needed on the GPU worker for Stable Audio generation
 transformers>=4.39.0
 torch>=2.2.0

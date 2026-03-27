@@ -9,11 +9,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app import shared
 from app.helpers import _load_house_templates, _build_song_metadata, slugify
-from app.kaggle_gen import (
-    create_audio_job,
-    find_prompt_preset,
-    list_prompt_presets,
-)
+from app.audio_jobs import create_audio_job
 from app.stores.workflows import (
     create_workflow,
     get_workflow,
@@ -41,11 +37,9 @@ def admin_workflow_list(request: Request):
 
 @router.get('/admin/workflow/new', response_class=HTMLResponse)
 def admin_workflow_new(request: Request):
-    presets = list_prompt_presets()
     houses = _load_house_templates()
     return shared.templates.TemplateResponse(request, 'workflow_new.html', {
         'page': 'pipeline',
-        'presets': presets,
         'houses': houses,
     })
 
@@ -78,9 +72,8 @@ def admin_workflow_start(
     title: str = Form(...),
     theme: str = Form(...),
     prompt_text: str = Form(''),
-    preset_name: str = Form(''),
     minutes: int = Form(42),
-    model: str = Form('medium'),
+    model: str = Form('stable-audio'),
     clip_seconds: int = Form(30),
     loop_hours: float = Form(0),
     crossfade: int = Form(8),
@@ -95,21 +88,20 @@ def admin_workflow_start(
     slug = slugify(title)
     theme = theme.strip()
     prompt_text = prompt_text.strip()
-    preset_name = preset_name.strip()
 
     if not title:
         raise HTTPException(status_code=400, detail='Title is required')
     if not theme:
         raise HTTPException(status_code=400, detail='Theme is required')
-    if not prompt_text and not preset_name:
-        raise HTTPException(status_code=400, detail='Provide prompt or preset')
+    if not prompt_text:
+        raise HTTPException(status_code=400, detail='Provide prompt text')
 
     # 1. Create audio job
     audio_job_id = create_audio_job(
         slug=slug,
         title=title,
         prompt_text=prompt_text,
-        preset_name=preset_name or None,
+        preset_name=None,
         minutes=minutes,
         model=model,
         clip_seconds=clip_seconds,

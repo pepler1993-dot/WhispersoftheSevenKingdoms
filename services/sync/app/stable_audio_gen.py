@@ -1,12 +1,8 @@
-"""Stable Audio Open generator – daemon-based GPU worker implementation v2.
+"""Stable Audio Open generator – daemon-based GPU worker.
 
 Submits jobs as JSON files to the worker daemon on the GPU VM.
-The daemon keeps the model loaded in VRAM, eliminating ~2-5min load time per clip.
+The daemon keeps the model loaded in VRAM, eliminating load time per clip.
 Falls back to single-shot mode if daemon is not running.
-
-Fixes in v2:
-- Shell-safe job submission (base64-encoded JSON, no shell injection)
-- Proper error handling for daemon readiness
 """
 
 from __future__ import annotations
@@ -21,7 +17,7 @@ from datetime import timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-from app.kaggle_gen import (
+from app.audio_jobs import (
     AudioGenerator,
     get_pipeline_upload_dir,
     is_audio_job_cancelled,
@@ -38,6 +34,7 @@ GPU_WORKER_SSH_KEY = os.environ.get('GPU_WORKER_SSH_KEY', '')
 GPU_WORKER_OUTPUT_DIR = os.environ.get('GPU_WORKER_OUTPUT_DIR', '/mnt/data/output')
 GPU_WORKER_JOB_DIR = '/mnt/data/jobs'
 GPU_WORKER_STATUS_FILE = '/mnt/data/worker_status.json'
+GPU_WORKER_CODE_DIR = os.environ.get('GPU_WORKER_CODE_DIR', '/opt/stable-audio-worker')
 
 MODEL_NAME = 'stabilityai/stable-audio-open-1.0'
 MAX_CLIP_DURATION = 30  # reduced from 47 for 4GB RAM
@@ -305,8 +302,8 @@ class StableAudioGenerator(AudioGenerator):
 
                 else:
                     cmd = (
-                        f'/opt/musicgen-worker/.venv/bin/python3 '
-                        f'/opt/musicgen-worker/worker_daemon.py '
+                        f'{GPU_WORKER_CODE_DIR}/.venv/bin/python3 '
+                        f'{GPU_WORKER_CODE_DIR}/worker_daemon.py '
                         f'--prompt {json.dumps(prompt)} '
                         f'--duration {clip_seconds} '
                         f'--slug {clip_slug} '

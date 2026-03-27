@@ -3,7 +3,7 @@
 {% block content %}
 <div class="page-header">
   <h1>Neues Video erstellen</h1>
-  <div class="page-subtitle">Wähle ein Haus, passe den Titel an, drücke Go.</div>
+  <div class="page-subtitle">Kernfluss: Haus wählen, Audio-Quelle wählen, Video starten.</div>
 </div>
 
 {% if error_message %}
@@ -192,18 +192,15 @@
 
     <!-- Video & Publish Options (visible) -->
     <div style="display:flex; gap:24px; flex-wrap:wrap; margin-bottom:16px;">
-      <div class="form-check" data-tooltip="Rendert Partikeleffekte (Schnee, Funken etc. je nach House). Standard für alle Videos.">
-        <input type="checkbox" name="animated" id="animated" value="true" checked />
-        <label for="animated">🎬 Animiertes Video</label>
-      </div>
       <div class="form-check" data-tooltip="Video nach dem Rendern automatisch auf YouTube hochladen.">
         <input type="checkbox" name="auto_upload" id="auto_upload" value="true" checked />
         <label for="auto_upload">🚀 Auto YouTube Upload</label>
       </div>
-      <div class="form-check" data-tooltip="Direkt als öffentlich hochladen. Wenn aus, wird als privat hochgeladen.">
-        <input type="checkbox" name="public" id="public" value="true" />
-        <label for="public">🌍 Öffentlich auf YouTube</label>
-      </div>
+    </div>
+    <input type="hidden" name="animated" value="true" />
+    <div class="preview-meta" style="margin: 0 0 16px;">
+      Für den schnellen Standardlauf sind Animation und private Sichtbarkeit voreingestellt.
+      Öffentliche Uploads und Spezialoptionen findest du in den erweiterten Einstellungen.
     </div>
 
     <!-- Advanced Settings (collapsed, pre-filled from house presets) -->
@@ -211,6 +208,12 @@
       <summary>⚙️ Erweiterte Einstellungen</summary>
       <div class="advanced-content">
         <div class="grid two">
+          <div class="form-group">
+            <div class="form-check" data-tooltip="Direkt als öffentlich hochladen. Wenn aus, wird als privat hochgeladen.">
+              <input type="checkbox" name="public" id="public" value="true" />
+              <label for="public">🌍 Öffentlich auf YouTube</label>
+            </div>
+          </div>
           <div class="form-group">
             <label for="adv-minutes">Dauer (Minuten)</label>
             <input type="number" id="adv-minutes" class="form-input" value="20" min="1" max="720" />
@@ -900,7 +903,7 @@
     icon.textContent = house.sigil || '🏰';
     name.textContent = house.display_name + ' – Audio Track';
     const pc = (house.prompts || []).length;
-    info.textContent = pc + ' Prompts · ' + (house.defaults?.minutes || 20) + ' Min · MusicGen Medium';
+    info.textContent = pc + ' Prompts · ' + (house.defaults?.minutes || 20) + ' Min · Stable Audio Local';
     // Sync prompt to hidden field for form submission
     document.getElementById('gen_prompt_hidden').value = (house.prompts || []).join('\n');
     btn.disabled = false;

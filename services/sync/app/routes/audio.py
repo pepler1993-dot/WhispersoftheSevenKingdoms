@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+import mimetypes
 from pathlib import Path
 
 from fastapi import APIRouter, Form, HTTPException, Query, Request
@@ -9,14 +10,12 @@ from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 
 from app import shared
 from app.helpers import _load_house_templates
-from app.kaggle_gen import (
+from app.audio_jobs import (
     CANCELLABLE_AUDIO_JOB_STATUSES,
     FINAL_AUDIO_JOB_STATUSES,
     create_audio_job,
-    find_prompt_preset,
-    get_audio_generator,
     get_audio_generator_health,
-    list_prompt_presets,
+    get_audio_generator,
 )
 
 router = APIRouter()
@@ -24,7 +23,6 @@ router = APIRouter()
 
 @router.get('/admin/audio', response_class=HTMLResponse)
 def admin_audio(request: Request):
-    presets = list_prompt_presets()
     jobs = shared.db.list_audio_jobs(limit=100)
     health_placeholder = {
         'provider': 'checking',
@@ -38,7 +36,6 @@ def admin_audio(request: Request):
         'request': request,
         'page': 'audio',
         'health': health_placeholder,
-        'presets': presets,
         'jobs': jobs,
         'house_templates': _load_house_templates(),
     })
@@ -54,7 +51,6 @@ def admin_audio_generate(
     slug: str = Form(...),
     title: str = Form(''),
     prompt_text: str = Form(''),
-    preset_name: str = Form(''),
     minutes: int = Form(42),
     model: str = Form('medium'),
     clip_seconds: int = Form(30),
@@ -62,21 +58,18 @@ def admin_audio_generate(
 ):
     slug = slug.strip().lower()
     title = title.strip() or slug.replace('-', ' ').title()
-    preset_name = preset_name.strip()
     prompt_text = prompt_text.strip()
 
     if not slug:
         raise HTTPException(status_code=400, detail='Slug is required')
-    if not prompt_text and not preset_name:
-        raise HTTPException(status_code=400, detail='Provide prompt text or choose a preset')
-    if preset_name and not find_prompt_preset(preset_name):
-        raise HTTPException(status_code=400, detail='Unknown preset selected')
+    if not prompt_text:
+        raise HTTPException(status_code=400, detail='Provide prompt text')
 
     job_id = create_audio_job(
         slug=slug,
         title=title,
         prompt_text=prompt_text,
-        preset_name=preset_name or None,
+        preset_name=None,
         minutes=minutes,
         model=model,
         clip_seconds=clip_seconds,
@@ -109,7 +102,8 @@ def admin_audio_stream(job_id: str):
     audio_path = Path(job['output_path'])
     if not audio_path.exists():
         raise HTTPException(status_code=404, detail='Audio file missing from disk')
-    return FileResponse(audio_path, media_type='audio/wav', filename=audio_path.name)
+    media_type, _ = mimetypes.guess_type(str(audio_path))
+    return FileResponse(audio_path, media_type=media_type or 'application/octet-stream', filename=audio_path.name)
 
 
 @router.get('/admin/audio/jobs/{job_id}/logs')
@@ -135,7 +129,7 @@ def admin_audio_job_retry(job_id: str):
         slug=job['slug'],
         title=job.get('title', job['slug']),
         prompt_text=job.get('prompt_text', ''),
-        preset_name=job.get('preset_name'),
+        preset_name=None,
         minutes=job.get('minutes') or 42,
         model=job.get('model', 'medium'),
         clip_seconds=job.get('clip_seconds') or 30,
@@ -161,7 +155,7 @@ def admin_audio_job_cancel(job_id: str):
         shared.db.append_audio_job_log(job_id, 'system', f'Cancel ignored: status {status} cannot be cancelled.', now)
         return RedirectResponse(url=f'/admin/audio/jobs/{job_id}', status_code=303)
 
-    generator = get_audio_generator(job.get('provider'))
+    generator = get_audio_generator()
     cancelled = generator.cancel(job, shared.db)
     if not cancelled:
         shared.db.append_audio_job_log(job_id, 'system', 'Cancellation request failed or is not supported for this provider/state.', now)

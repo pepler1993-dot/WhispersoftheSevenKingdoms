@@ -59,8 +59,9 @@ def _stream_reader(pipe, run_id: str, stream_name: str, db: AgentSyncDB) -> None
             line = raw_line.decode('utf-8', errors='replace').rstrip('\n\r')
             if line:
                 db.append_run_log(run_id, stream_name, line, _now_iso())
-    except Exception:
-        pass
+    except Exception as exc:
+        import logging
+        logging.warning('Stream reader error for run %s (%s): %s', run_id, stream_name, exc)
     finally:
         pipe.close()
 
@@ -184,12 +185,17 @@ def cancel_run(run_id: str, db: AgentSyncDB) -> bool:
     except ProcessLookupError:
         db.update_run(run_id, status='cancelled', finished_at=_now_iso(), pid=None)
         return True
-    except Exception:
+    except Exception as exc:
+        import logging
+        logging.warning('Failed to cancel run %s: %s', run_id, exc)
         return False
 
 
 def get_output_path(slug: str, filename: str) -> Path | None:
-    path = PIPELINE_DIR / 'data' / 'output' / 'youtube' / slug / filename
+    base = PIPELINE_DIR / 'data' / 'output' / 'youtube'
+    path = (base / slug / filename).resolve()
+    if not path.is_relative_to(base.resolve()):
+        return None
     if path.exists() and path.is_file():
         return path
     return None
@@ -215,7 +221,7 @@ def list_available_assets() -> dict[str, list[str]]:
 
 
 def list_library_tracks_for_pipeline(db: AgentSyncDB) -> list[dict[str, Any]]:
-    """Tracks under data/upload/songs (e.g. Kaggle downloads) for pipeline picker."""
+    """Tracks under data/upload/songs for the pipeline picker."""
     song_names = sorted(list_available_assets()['songs'])
     jobs = db.list_audio_jobs(limit=400)
     title_by_slug: dict[str, str] = {}

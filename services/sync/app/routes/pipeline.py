@@ -27,7 +27,7 @@ from app.pipeline_runner import (
     trigger_upload,
 )
 from app.pipeline_queue import enqueue_run, get_queue_status
-from app.kaggle_gen import create_audio_job, list_prompt_presets
+from app.audio_jobs import create_audio_job
 from app.stores.workflows import create_workflow, get_workflow
 from app.pipeline_workflow import start_workflow
 
@@ -319,12 +319,12 @@ def admin_pipeline_start(
             'status': 'running',
             'audio_job_id': audio_job_id,
             'config': pipeline_config,
-            'auto_upload': public,
+            'auto_upload': auto_upload,
             'created_at': now,
             'updated_at': now,
         })
 
-        start_workflow(workflow_id, audio_job_id, slug, title, pipeline_config, public, shared.db)
+        start_workflow(workflow_id, audio_job_id, slug, title, pipeline_config, auto_upload, shared.db)
         return RedirectResponse(url=f'/admin/workflow/{workflow_id}', status_code=303)
 
     if not audio_found:
@@ -367,7 +367,7 @@ def admin_pipeline_start(
         'audio_preset': audio_preset,
         'animated': animated,
         'auto_upload': auto_upload,
-            'public': public,
+        'public': public,
         'skip_post_process': skip_post_process,
         'mood': mood or None,
         'house': house or theme or None,
@@ -429,7 +429,7 @@ def admin_pipeline_run_upload(run_id: str):
     run = shared.db.get_run(run_id)
     if not run:
         raise HTTPException(status_code=404, detail='Run not found')
-    if run['status'] not in {'rendered', 'failed'}:
+    if run['status'] != 'rendered':
         raise HTTPException(status_code=409, detail=f'Cannot upload from status {run["status"]}')
 
     trigger_upload(run_id, run['slug'], run.get('config', {}), shared.db)

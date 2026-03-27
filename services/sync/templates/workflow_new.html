@@ -32,16 +32,6 @@
     <h3 style="margin-top:24px; margin-bottom:12px; color:var(--text-secondary); font-size:13px;">🎵 Audio-Einstellungen</h3>
 
     <div class="form-group">
-      <label for="preset_name">Prompt Preset</label>
-      <select id="preset_name" name="preset_name" class="form-input">
-        <option value="">Kein Preset (eigener Prompt)</option>
-        {% for preset in presets %}
-        <option value="{{ preset.name }}">{{ preset.name }}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div class="form-group">
       <label for="prompt_text">Eigener Prompt</label>
       <textarea id="prompt_text" name="prompt_text" rows="3" placeholder="Beschreibung des gewünschten Sounds..." class="form-input"></textarea>
     </div>
@@ -55,13 +45,7 @@
         <label for="clip_seconds">Clip-Länge (s)</label>
         <input type="number" id="clip_seconds" name="clip_seconds" value="30" min="10" max="120" class="form-input" />
       </div>
-      <div class="form-group">
-        <label for="model">Model</label>
-        <select id="model" name="model" class="form-input">
-          <option value="medium" selected>Medium</option>
-          <option value="large">Large</option>
-        </select>
-      </div>
+      <input type="hidden" id="model" name="model" value="stable-audio" />
     </div>
 
     <h3 style="margin-top:24px; margin-bottom:12px; color:var(--text-secondary); font-size:13px;">🎬 Pipeline-Einstellungen</h3>

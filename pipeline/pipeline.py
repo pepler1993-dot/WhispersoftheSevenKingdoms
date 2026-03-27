@@ -17,7 +17,6 @@ METADATA_DIR = UPLOAD_DIR / 'metadata'
 DONE_DIR = UPLOAD_DIR / 'done'
 OUTPUT_YT_DIR = REPO_ROOT / 'data' / 'output' / 'youtube'
 WORK_JOBS_DIR = REPO_ROOT / 'data' / 'work' / 'jobs'
-COLAB_JOBS_DIR = REPO_ROOT / 'musicgen' / 'jobs'
 
 _step_count = 0
 _step_total = 0
@@ -113,7 +112,7 @@ def detect_theme(meta: dict, house: str | None):
 
 
 def ensure_dirs():
-    for p in [DONE_DIR, OUTPUT_YT_DIR, WORK_JOBS_DIR, COLAB_JOBS_DIR]:
+    for p in [DONE_DIR, OUTPUT_YT_DIR, WORK_JOBS_DIR]:
         p.mkdir(parents=True, exist_ok=True)
 
 
@@ -134,8 +133,6 @@ def parse_args():
     p.add_argument('--audio-preset', default='ambient', choices=['ambient', 'dark', 'gentle', 'raw'],
                    help='Audio post-processing preset (default: ambient)')
     p.add_argument('--skip-post-process', action='store_true', help='Skip audio post-processing (EQ/Reverb/Normalize)')
-    p.add_argument('--prepare-colab', action='store_true', help='Prepare job + status files for manual Colab run')
-    p.add_argument('--resume', action='store_true', help='Resume pipeline after Colab has produced audio')
     p.add_argument('--bg-image', help='Explicit background image for video rendering')
     return p.parse_args()
 
@@ -152,37 +149,7 @@ def job_paths(slug: str):
     return {
         'dir': work_dir,
         'status': work_dir / 'status.json',
-        'colab_job': COLAB_JOBS_DIR / f'{slug}.job.json',
     }
-
-
-def prepare_colab_job(slug: str, meta: dict, theme: str, args):
-    paths = job_paths(slug)
-    title = args.song or meta.get('title', slug.replace('-', ' ').title())
-    payload = {
-        'slug': slug,
-        'title': title,
-        'theme': meta.get('theme', theme),
-        'house': args.house or theme,
-        'mood': args.mood or meta.get('mood', []),
-        'minutes': args.minutes,
-        'target_audio_path': f'data/upload/songs/{slug}.mp3',
-        'created_at': now_iso(),
-        'generator': 'google-colab-musicgen',
-        'status': 'waiting_for_colab',
-    }
-    status = {
-        'slug': slug,
-        'phase': 'waiting_for_colab',
-        'updated_at': now_iso(),
-        'notes': 'Run the matching Colab job and place generated audio into data/upload/songs/',
-        'job_file': str(paths['colab_job'].relative_to(REPO_ROOT)),
-    }
-    write_json(paths['colab_job'], payload)
-    write_json(paths['status'], status)
-    print(f'OK: prepared Colab job for {slug}')
-    print(f'JOB: {paths["colab_job"]}')
-    print(f'STATUS: {paths["status"]}')
 
 
 def update_status(slug: str, phase: str, **extra):
@@ -208,15 +175,9 @@ def main():
     meta = load_json(metadata_path)
     theme = detect_theme(meta, args.house)
 
-    if args.prepare_colab:
-        prepare_colab_job(slug, meta, theme, args)
-        return
-
     audio_path = find_first(slug, SONGS_DIR, ('.mp3', '.wav', '.ogg'))
     if audio_path is None:
         print(f'ERROR: audio missing for slug {slug} in {SONGS_DIR}', file=sys.stderr)
-        if args.resume:
-            update_status(slug, 'waiting_for_colab', error='audio_missing_on_resume')
         raise SystemExit(1)
 
     title = meta.get('title', slug.replace('-', ' ').title())
