@@ -3,6 +3,26 @@
 Alle relevanten Änderungen am Projekt werden hier dokumentiert.
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [v3.4.0] – 2026-03-27
+
+### Added
+- **Auth-System** – JWT Login mit bcrypt Passwörtern, Session-Cookies (72h), Login-Seite im Dark-Cinematic-Design.
+- **Team Management** – Settings → Team Tab: User anlegen, löschen, Rollen (Admin/Editor/Viewer).
+- **Varianten-Editor** – Vollständiges CRUD für Preset-Varianten im UI (Audio-Prompts, Hintergrund-Prompts).
+- **Content Types / Pipelines** – Settings Tab zum Aktivieren/Deaktivieren von Pipeline-Typen (Video, Shorts, Audio Only, Thumbnails, Livestream).
+- **Sidebar Create-Folder** – Klappbares Menü (IDE-Style) mit Video, Shorts, Songs als Sub-Items.
+- **Songs-Seite** – Coming Soon Placeholder mit Pipeline-Preview.
+- **Spaces & Users DB** – Tabellen für Multi-Tenancy vorbereitet.
+
+### Changed
+- **Auth standardmäßig an** – Dashboard nur mit Login erreichbar.
+- **Sidebar** – Umstrukturiert: Create-Gruppe, Audio Lab eigenständig, Tree-Line für Sub-Items.
+- **Bottom Nav** – Video + Shorts statt single Create-Button.
+
+### Fixed
+- **Settings Tabs** – `library-presets.css` wird jetzt korrekt geladen.
+- **CSS Cache** – Versionierter Cache-Buster für Style-Updates.
+
 ## [v3.3.0] – 2026-03-27
 
 ### Added
