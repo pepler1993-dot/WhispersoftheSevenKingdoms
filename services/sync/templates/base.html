@@ -45,18 +45,25 @@
           <i data-lucide="sparkles"></i> Overview
         </a>
 
-        <div class="nav-group-label nav-group-label--sub">Create</div>
-        <a href="/admin/pipeline" class="nav-link nav-link--sub {% if page == 'pipeline' %}active{% endif %}">
-          <i data-lucide="film"></i> Video
-        </a>
-        <a href="/admin/shorts" class="nav-link nav-link--sub {% if page == 'shorts' %}active{% endif %}">
-          <i data-lucide="clapperboard"></i> Shorts
-        </a>
-        <a href="/admin/songs" class="nav-link nav-link--sub {% if page == 'songs' %}active{% endif %}">
-          <i data-lucide="music"></i> Songs
-        </a>
+        <div class="nav-folder {% if page in ('pipeline', 'shorts', 'songs') %}open{% endif %}" id="nav-create">
+          <button class="nav-folder-toggle" onclick="toggleNavFolder('nav-create')" type="button">
+            <i data-lucide="wand-sparkles"></i>
+            <span>Create</span>
+            <i data-lucide="chevron-right" class="nav-folder-arrow"></i>
+          </button>
+          <div class="nav-folder-items">
+            <a href="/admin/pipeline" class="nav-link nav-link--sub {% if page == 'pipeline' %}active{% endif %}">
+              <i data-lucide="film"></i> Video
+            </a>
+            <a href="/admin/shorts" class="nav-link nav-link--sub {% if page == 'shorts' %}active{% endif %}">
+              <i data-lucide="clapperboard"></i> Shorts
+            </a>
+            <a href="/admin/songs" class="nav-link nav-link--sub {% if page == 'songs' %}active{% endif %}">
+              <i data-lucide="music"></i> Songs
+            </a>
+          </div>
+        </div>
 
-        <div class="nav-group-label nav-group-label--sub" style="margin-top:6px;"></div>
         <a href="/admin/audio" class="nav-link {% if page == 'audio' %}active{% endif %}">
           <i data-lucide="audio-lines"></i> Audio Lab
         </a>
@@ -124,6 +131,11 @@
     </div>
   </nav>
 
-  <script>lucide.createIcons();</script>
+  <script>
+    lucide.createIcons();
+    function toggleNavFolder(id) {
+      document.getElementById(id).classList.toggle('open');
+    }
+  </script>
 </body>
 </html>

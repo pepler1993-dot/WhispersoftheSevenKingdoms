@@ -271,17 +271,55 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
 
 .nav-link .lucide { width: 18px; height: 18px; stroke-width: 2; flex-shrink: 0; }
 
-/* Sub-navigation for Create group */
-.nav-group-label--sub {
-  padding: 8px 14px 4px 14px;
-  font-size: 0.58rem;
-  margin-top: 2px;
+/* ── Collapsible nav folder ── */
+.nav-folder { margin-bottom: 2px; }
+.nav-folder-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  width: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+  border-left: 3px solid transparent;
+  text-align: left;
 }
+.nav-folder-toggle:hover {
+  background: var(--panel-hover);
+  color: var(--text);
+  border-left-color: var(--line-light);
+}
+.nav-folder-toggle .lucide { width: 18px; height: 18px; stroke-width: 2; flex-shrink: 0; }
+.nav-folder-toggle span { flex: 1; }
+.nav-folder-arrow {
+  width: 14px !important;
+  height: 14px !important;
+  opacity: 0.4;
+  transition: transform 0.25s var(--ease);
+}
+.nav-folder.open .nav-folder-arrow { transform: rotate(90deg); }
+.nav-folder.open .nav-folder-toggle {
+  color: var(--text);
+}
+.nav-folder-items {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.25s ease;
+}
+.nav-folder.open .nav-folder-items { max-height: 200px; }
+
+/* Sub-links inside folder */
 .nav-link--sub {
-  padding-left: 28px;
+  padding-left: 42px;
   font-size: 0.82rem;
 }
-.nav-link--sub .lucide { width: 16px; height: 16px; }
+.nav-link--sub .lucide { width: 15px; height: 15px; }
 
 /* ── mobile header ── */
 
