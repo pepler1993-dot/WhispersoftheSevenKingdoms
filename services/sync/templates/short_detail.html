@@ -34,7 +34,7 @@
 </div>
 
 <div class="library-tabs-wrap shorts-tabs-wrap">
-  <nav class="library-tabs" aria-label="Short-Details">
+  <nav class="library-tabs short-detail-tabs" aria-label="Short-Details">
     <button type="button" class="library-tab active" data-short-detail-tab="overview">Overview</button>
     <button type="button" class="library-tab" data-short-detail-tab="preview">Preview</button>
     <button type="button" class="library-tab" data-short-detail-tab="logs">Logs</button>
@@ -146,6 +146,15 @@
 </script>
 
 <style>
+.short-detail-tabs .library-tab {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  color: var(--text-secondary);
+}
 .short-detail-pane { display: none; }
 .short-detail-pane.is-active { display: block; }
 .short-detail-grid { align-items: start; }
