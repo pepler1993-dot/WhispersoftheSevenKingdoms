@@ -1,5 +1,8 @@
 {% extends 'base.html' %}
 {% block title %}Shorts{% endblock %}
+{% block head_extra %}
+<link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
+{% endblock %}
 {% block content %}
 <div class="page-header page-header-flex">
   <div>
@@ -20,19 +23,19 @@
 {% if shorts_tab == 'new' %}
 <section class="panel panel-accent-blue shorts-preset-panel">
   <div class="section-header-inline"><h2>Haus-Preset wählen</h2><span class="section-note">wie bei Create</span></div>
-  <div class="shorts-house-grid" id="shorts-house-grid">
+  <div class="al-house-grid" id="shorts-house-grid">
     {% for key, house in houses.items() if house is mapping %}
-    <button type="button" class="shorts-house-card" data-house="{{ key }}" style="--house-color: {{ house.color }}; --house-bg: {{ house.bg_color }}">
-      <div class="shorts-house-sigil">{{ house.sigil }}</div>
-      <div class="shorts-house-name">{{ house.display_name }}</div>
-    </button>
+    <div class="al-house-card" data-house="{{ key }}" style="--house-color: {{ house.color }}; --house-bg: {{ house.bg_color }}">
+      <div class="al-house-sigil">{{ house.sigil }}</div>
+      <div class="al-house-name">{{ house.display_name }}</div>
+    </div>
     {% endfor %}
   </div>
 </section>
 
 <section class="panel panel-accent-gold" id="shorts-variant-panel" style="display:none;">
   <div class="section-header-inline"><h2 id="shorts-variant-title">Variante wählen</h2><span class="section-note">filtert hochgeladene Videos</span></div>
-  <div class="shorts-variant-grid" id="shorts-variant-grid"></div>
+  <div class="al-variant-grid" id="shorts-variant-grid"></div>
 </section>
 
 <section class="panel panel-accent-purple" id="shorts-video-panel" style="display:none;">
@@ -137,13 +140,12 @@
     variantGrid.innerHTML = '';
     document.getElementById('shorts-variant-title').textContent = (house?.display_name || houseKey) + ' – Variante wählen';
     Object.entries(variants).forEach(([key, desc]) => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'shorts-variant-card';
-      btn.innerHTML = '<strong>' + titleCase(key) + '</strong><span>' + desc + '</span>';
+      const btn = document.createElement('div');
+      btn.className = 'al-variant-card';
+      btn.innerHTML = '<div class="al-variant-name">' + titleCase(key) + '</div><div class="al-variant-desc">' + desc + '</div>';
       btn.addEventListener('click', () => {
-        variantGrid.querySelectorAll('.shorts-variant-card').forEach(x => x.classList.remove('active'));
-        btn.classList.add('active');
+        variantGrid.querySelectorAll('.al-variant-card').forEach(x => x.classList.remove('selected'));
+        btn.classList.add('selected');
         houseInput.value = houseKey;
         variantInput.value = key;
         renderVideos(houseKey, key);
@@ -179,10 +181,10 @@
     videoPanel.style.display = 'block';
   }
 
-  houseGrid?.querySelectorAll('.shorts-house-card').forEach(card => {
+  houseGrid?.querySelectorAll('.al-house-card').forEach(card => {
     card.addEventListener('click', () => {
-      houseGrid.querySelectorAll('.shorts-house-card').forEach(x => x.classList.remove('active'));
-      card.classList.add('active');
+      houseGrid.querySelectorAll('.al-house-card').forEach(x => x.classList.remove('selected'));
+      card.classList.add('selected');
       videoPanel.style.display = 'none';
       createPanel.style.display = 'none';
       renderVariants(card.dataset.house);
@@ -192,16 +194,13 @@
 </script>
 
 <style>
-.shorts-house-grid,.shorts-variant-grid,.shorts-video-list { display:grid; gap:12px; }
-.shorts-house-grid { grid-template-columns: repeat(auto-fit,minmax(130px,1fr)); }
-.shorts-variant-grid,.shorts-video-list { grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); }
-.shorts-house-card,.shorts-variant-card,.shorts-video-card {
+#shorts-house-grid { margin-top: 4px; }
+#shorts-variant-grid { margin-top: 14px; }
+.shorts-video-list { display:grid; gap:12px; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); }
+.shorts-video-card {
   border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.03); color:var(--text); border-radius:12px; padding:14px; text-align:left; display:grid; gap:6px; transition:all .18s var(--ease);
 }
-.shorts-house-card { background: var(--house-bg, rgba(255,255,255,.03)); }
-.shorts-house-sigil { font-size:2.2rem; line-height:1; }
-.shorts-house-name { font-weight:700; }
-.shorts-variant-card span,.shorts-video-card span { color:var(--muted); font-size:.78rem; }
-.shorts-house-card:hover,.shorts-house-card.active,.shorts-variant-card:hover,.shorts-variant-card.active,.shorts-video-card:hover,.shorts-video-card.active { border-color:var(--gold); transform:translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,.22); }
+.shorts-video-card span { color:var(--muted); font-size:.78rem; }
+.shorts-video-card:hover,.shorts-video-card.active { border-color:var(--gold); transform:translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,.22); }
 </style>
 {% endblock %}
