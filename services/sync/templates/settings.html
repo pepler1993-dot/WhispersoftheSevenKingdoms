@@ -15,11 +15,11 @@
 <div class="library-tabs-wrap">
   <nav class="library-tabs" aria-label="Settings-Bereiche">
     <a class="library-tab{% if settings_tab == 'general' %} active{% endif %}" href="/admin/settings?tab=general">
-      <i data-lucide="sliders-horizontal" style="width:17px;height:17px;opacity:0.9"></i>
+      <i data-lucide="sliders-horizontal" class="icon-md" style="opacity:0.9"></i>
       General
     </a>
     <a class="library-tab{% if settings_tab == 'providers' %} active{% endif %}" href="/admin/settings?tab=providers">
-      <i data-lucide="plug" style="width:17px;height:17px;opacity:0.9"></i>
+      <i data-lucide="plug" class="icon-md" style="opacity:0.9"></i>
       Providers
     </a>
     <a class="library-tab{% if settings_tab == 'pipelines' %} active{% endif %}" href="/admin/settings?tab=pipelines">
@@ -28,7 +28,7 @@
       <span class="library-tab-count">{{ content_type_count }}</span>
     </a>
     <a class="library-tab{% if settings_tab == 'presets' %} active{% endif %}" href="/admin/settings?tab=presets">
-      <i data-lucide="palette" style="width:17px;height:17px;opacity:0.9"></i>
+      <i data-lucide="palette" class="icon-md" style="opacity:0.9"></i>
       Presets
       <span class="library-tab-count">{{ preset_count }}</span>
     </a>
@@ -99,7 +99,7 @@
     </div>
 
     <button type="submit" class="btn btn-primary st-btn-save">
-      <i data-lucide="save" style="width:16px;height:16px"></i> Speichern
+      <i data-lucide="save" class="icon-md"></i> Speichern
     </button>
   </form>
 </section>
@@ -157,7 +157,7 @@
     </div>
 
     <button type="submit" class="btn btn-primary st-btn-save">
-      <i data-lucide="save" style="width:16px;height:16px"></i> Speichern
+      <i data-lucide="save" class="icon-md"></i> Speichern
     </button>
   </form>
 </section>
@@ -373,7 +373,7 @@ fetch('/admin/audio/health')
     </div>
 
     <button type="submit" class="btn btn-primary st-btn-save">
-      <i data-lucide="save" style="width:16px;height:16px"></i> Preset speichern
+      <i data-lucide="save" class="icon-md"></i> Preset speichern
     </button>
     {% if edit_key %}
     <a href="/admin/settings/presets/{{ edit_key }}/variants" class="btn btn-secondary" style="width:100%; margin-top:8px; text-align:center;">
@@ -392,7 +392,7 @@ fetch('/admin/audio/health')
     <div style="display:flex; gap:8px; align-items:center;">
       <span class="section-count">{{ preset_count }}</span>
       <a href="/admin/settings?tab=presets&new=1" class="btn btn-primary btn-sm">
-        <i data-lucide="plus" style="width:14px;height:14px"></i> Neu
+        <i data-lucide="plus" class="icon-sm"></i> Neu
       </a>
     </div>
   </div>

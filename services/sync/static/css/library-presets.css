@@ -603,3 +603,42 @@ button.library-tab {
     padding-bottom: 0;
   }
 }
+
+/* Ultra-wide: mehr Karten pro Zeile, Fließtext bleibt über max-width/ch begrenzt */
+@media (min-width: 1600px) {
+  .house-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+    gap: 1.25rem;
+  }
+  .variant-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  }
+  .house-hero-facts {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  }
+  .lib-house-title {
+    font-size: clamp(1.5rem, 1rem + 1.8vw, 2.35rem);
+  }
+  .library-tab {
+    font-size: clamp(0.84rem, 0.8rem + 0.2vw, 0.95rem);
+    padding: 11px 18px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .house-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  }
+  .preset-dl {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  }
+}
+
+@media (min-width: 2560px) {
+  .house-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+  }
+  .variant-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr));
+  }
+}

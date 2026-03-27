@@ -272,7 +272,7 @@
     </details>
 
     <button type="submit" class="btn btn-primary btn-launch" id="launch-btn">
-      <i data-lucide="rocket" style="width:20px;height:20px"></i> Video erstellen
+      <i data-lucide="rocket" class="icon-lg"></i> Video erstellen
     </button>
     </section>
   </form>
@@ -281,7 +281,7 @@
 <style>
 .variant-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
   gap: 12px;
   margin-top: 16px;
 }
@@ -536,8 +536,20 @@
 .library-audio-row code { font-size: 0.78em; color: var(--muted); }
 
 @media (min-width: 1280px) {
-  .house-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-  .variant-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .house-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+  .variant-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+}
+@media (min-width: 1600px) {
+  .house-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
+  .variant-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+}
+@media (min-width: 1920px) {
+  .house-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); }
+  .variant-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+}
+@media (min-width: 2560px) {
+  .house-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr)); }
+  .variant-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
 }
 
 @media (max-width: 768px) {

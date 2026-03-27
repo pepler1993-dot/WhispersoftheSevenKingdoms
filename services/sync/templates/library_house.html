@@ -20,7 +20,7 @@
   <div style="display:flex; align-items:center; gap:12px;">
     <h1 class="lib-house-title">{{ dname }}</h1>
     <a href="/admin/settings?tab=presets&edit={{ house_key }}" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:0.72rem;" title="Preset bearbeiten">
-      <i data-lucide="pencil" style="width:13px;height:13px"></i> Bearbeiten
+      <i data-lucide="pencil" class="icon-sm"></i> Bearbeiten
     </a>
   </div>
   {% if house.house %}<p class="lib-house-line">{{ house.house }}</p>{% endif %}
@@ -69,7 +69,7 @@
       <p class="variant-tile-desc">{{ v.description }}</p>
       <span class="variant-tile-cta">
         <span>Details ansehen</span>
-        <i data-lucide="chevron-right" style="width:16px;height:16px;flex-shrink:0" aria-hidden="true"></i>
+        <i data-lucide="chevron-right" class="icon-md" style="flex-shrink:0" aria-hidden="true"></i>
       </span>
     </a>
     {% else %}

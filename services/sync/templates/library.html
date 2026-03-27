@@ -46,7 +46,7 @@
         </div>
       </a>
       <a href="/admin/settings?tab=presets&edit={{ h.key }}" class="lib-edit-btn" title="Preset bearbeiten">
-        <i data-lucide="pencil" style="width:14px;height:14px"></i>
+        <i data-lucide="pencil" class="icon-sm"></i>
       </a>
     </div>
     {% else %}
@@ -77,13 +77,13 @@
             <td data-label="Aktionen">
               <div class="row-actions">
                 <button type="button" class="icon-btn" aria-label="Umbenennen" title="Umbenennen" data-rename-asset="songs" data-rename-name="{{ item.name }}">
-                  <i data-lucide="pencil" style="width:16px;height:16px"></i>
+                  <i data-lucide="pencil" class="icon-md"></i>
                 </button>
                 <form method="post" action="/admin/library/delete" onsubmit="return confirm('Song wirklich löschen?');" style="margin:0;">
                   <input type="hidden" name="asset_type" value="songs" />
                   <input type="hidden" name="filename" value="{{ item.name }}" />
                   <button type="submit" class="icon-btn icon-btn-danger" aria-label="Song löschen" title="Song löschen">
-                    <i data-lucide="trash-2" style="width:16px;height:16px"></i>
+                    <i data-lucide="trash-2" class="icon-md"></i>
                   </button>
                 </form>
               </div>
@@ -127,13 +127,13 @@
             <div class="thumb-sub">{{ item.size }} · {{ item.modified }}</div>
             <div class="thumb-actions" style="margin-top:8px; display:flex; gap:6px; align-items:center;">
               <button type="button" class="icon-btn" aria-label="Umbenennen" title="Umbenennen" data-rename-asset="backgrounds" data-rename-name="{{ item.name }}">
-                <i data-lucide="pencil" style="width:16px;height:16px"></i>
+                <i data-lucide="pencil" class="icon-md"></i>
               </button>
               <form method="post" action="/admin/library/delete" onsubmit="return confirm('Hintergrund wirklich löschen?');" style="margin:0;">
                 <input type="hidden" name="asset_type" value="backgrounds" />
                 <input type="hidden" name="filename" value="{{ item.name }}" />
                 <button type="submit" class="icon-btn icon-btn-danger" aria-label="Hintergrund löschen" title="Hintergrund löschen">
-                  <i data-lucide="trash-2" style="width:16px;height:16px"></i>
+                  <i data-lucide="trash-2" class="icon-md"></i>
                 </button>
               </form>
             </div>

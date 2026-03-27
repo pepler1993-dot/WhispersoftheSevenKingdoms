@@ -2,17 +2,17 @@
 <div class="library-tabs-wrap{% if subpage %} library-tabs-wrap--subpage{% endif %}">
   <nav class="library-tabs" aria-label="Library-Bereiche">
     <a class="library-tab{% if library_tab == 'houses' %} active{% endif %}" href="/admin/library" {% if library_tab == 'houses' %}aria-current="page"{% endif %}>
-      <i data-lucide="layers" style="width:17px;height:17px;opacity:0.9"></i>
+      <i data-lucide="layers" class="icon-md" style="opacity:0.9"></i>
       Häuser &amp; Presets
       <span class="library-tab-count">{{ library_house_count }}</span>
     </a>
     <a class="library-tab{% if library_tab == 'songs' %} active{% endif %}" href="/admin/library?tab=songs" {% if library_tab == 'songs' %}aria-current="page"{% endif %}>
-      <i data-lucide="music-2" style="width:17px;height:17px;opacity:0.9"></i>
+      <i data-lucide="music-2" class="icon-md" style="opacity:0.9"></i>
       Songs
       <span class="library-tab-count">{{ library_song_count }}</span>
     </a>
     <a class="library-tab{% if library_tab == 'backgrounds' %} active{% endif %}" href="/admin/library?tab=backgrounds" {% if library_tab == 'backgrounds' %}aria-current="page"{% endif %}>
-      <i data-lucide="image" style="width:17px;height:17px;opacity:0.9"></i>
+      <i data-lucide="image" class="icon-md" style="opacity:0.9"></i>
       Hintergrundbilder
       <span class="library-tab-count">{{ library_background_count }}</span>
     </a>

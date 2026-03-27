@@ -8,7 +8,7 @@
   </div>
   <div class="header-actions">
     <a href="/admin/tickets" class="btn btn-primary btn-sm">
-      <i data-lucide="ticket" style="width:14px;height:14px"></i> Tickets
+      <i data-lucide="ticket" class="icon-sm"></i> Tickets
     </a>
     <a href="/admin/releases" class="btn btn-secondary btn-sm">Releases</a>
   </div>
@@ -171,7 +171,7 @@
       <span id="audio-gen-text">Verbinde...</span>
     </div>
   </div>
-  <div class="gauge-grid" style="grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));">
+  <div class="gauge-grid gauge-grid--metrics">
     <div class="gauge-card-sm" style="text-align:center; padding:10px;">
       <div style="font-size:0.68rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:4px;">Provider</div>
       <div style="font-size:0.88rem; font-weight:600;" id="ag-provider">—</div>
@@ -306,7 +306,7 @@
 /* ── Stats ────────────────────────────────────────────────── */
 .ops-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
   gap: clamp(10px, 1vw, 16px);
   margin-bottom: 24px;
 }
@@ -381,6 +381,9 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
+}
+.gauge-grid--metrics {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 120px), 1fr));
 }
 .gauge-card-sm {
   text-align: center;
@@ -548,6 +551,24 @@
 @media (max-width: 400px) {
   .ops-stats { grid-template-columns: repeat(2, 1fr); }
   .gauge-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1600px) {
+  .ops-stats {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+  }
+  .ops-stat-value { font-size: clamp(1.25rem, 0.9rem + 0.8vw, 1.65rem); }
+  .gauge-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+  }
+}
+@media (min-width: 1920px) {
+  .ops-stats {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 128px), 1fr));
+  }
+}
+@media (min-width: 2560px) {
+  .server-panel { padding: clamp(18px, 1.5vw, 32px); }
 }
 </style>
 {% endblock %}

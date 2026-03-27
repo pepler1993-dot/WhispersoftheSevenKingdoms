@@ -8,7 +8,7 @@
   </div>
   <div class="header-actions">
     <a href="/admin/pipeline/new" class="btn btn-primary btn-sm">
-      <i data-lucide="plus" style="width:14px;height:14px"></i> Neues Video
+      <i data-lucide="plus" class="icon-sm"></i> Neues Video
     </a>
     <a href="/admin/audio" class="btn btn-secondary btn-sm">Audio Lab</a>
   </div>
@@ -186,7 +186,7 @@
 /* ── Studio Stats ────────────────────────────────────────── */
 .studio-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
   gap: clamp(10px, 1vw, 16px);
   margin-bottom: 28px;
 }
@@ -207,7 +207,7 @@
 .studio-section { margin-bottom: 28px; }
 .active-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
   gap: 12px;
 }
 .active-card {
@@ -322,7 +322,7 @@
 /* ── Studio panels ───────────────────────────────────────── */
 .dashboard-main-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
   gap: clamp(12px, 1vw, 18px);
   align-items: start;
 }
@@ -367,7 +367,7 @@
 .mini-item:hover { opacity: 0.85; }
 .overview-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
   gap: clamp(10px, 0.9vw, 14px);
 }
 .overview-card {
@@ -530,6 +530,41 @@
 }
 @media (max-width: 400px) {
   .studio-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1600px) {
+  .studio-stats {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+  }
+  .studio-stat-value { font-size: clamp(1.35rem, 1rem + 0.9vw, 1.9rem); }
+  .active-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  }
+  .dashboard-main-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  }
+  .overview-card-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  }
+}
+@media (min-width: 1920px) {
+  .active-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  }
+  .overview-card-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  }
+}
+@media (min-width: 2560px) {
+  .studio-stats {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 128px), 1fr));
+  }
+  .dashboard-main-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  }
+  .overview-card-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+  }
 }
 </style>
 {% endblock %}

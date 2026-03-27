@@ -20,7 +20,7 @@
     <div style="display:flex; justify-content:space-between; align-items:center;">
       <h2>Beschreibung</h2>
       <button type="button" class="btn btn-secondary btn-sm" id="editDescBtn" onclick="toggleDescEdit()">
-        <i data-lucide="pencil" style="width:14px;height:14px"></i> Bearbeiten
+        <i data-lucide="pencil" class="icon-sm"></i> Bearbeiten
       </button>
     </div>
 
@@ -45,7 +45,7 @@
     {% if ticket.github_issue_url %}
     <div style="margin-top: 16px;">
       <a href="{{ ticket.github_issue_url }}" target="_blank" class="btn btn-secondary btn-sm">
-        <i data-lucide="github" style="width:14px;height:14px"></i> GitHub Issue #{{ ticket.github_issue_number }}
+        <i data-lucide="github" class="icon-sm"></i> GitHub Issue #{{ ticket.github_issue_number }}
       </a>
     </div>
     {% endif %}

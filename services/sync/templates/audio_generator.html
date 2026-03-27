@@ -95,7 +95,7 @@
     </div>
 
     <button type="submit" class="btn btn-primary al-btn-launch">
-      <i data-lucide="sparkles" style="width:18px;height:18px"></i> Audio-Job starten
+      <i data-lucide="sparkles" class="icon-md"></i> Audio-Job starten
     </button>
   </form>
 </section>
@@ -175,7 +175,7 @@
 /* ── House Grid ───────────────────────────────────────────── */
 .al-house-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 110px), 1fr));
   gap: 10px;
 }
 .al-house-card {
@@ -215,7 +215,7 @@
 /* ── Variant Grid ─────────────────────────────────────────── */
 .al-variant-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
   gap: 10px;
 }
 .al-variant-card {
@@ -315,7 +315,23 @@
 
 @media (min-width: 1280px) {
   .al-house-grid,
-  .al-variant-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .al-variant-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+}
+@media (min-width: 1600px) {
+  .al-house-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 100px), 1fr));
+  }
+  .al-variant-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  }
+}
+@media (min-width: 1920px) {
+  .al-variant-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  }
+}
+@media (min-width: 2560px) {
+  .al-step-card { padding: clamp(20px, 1.5vw, 32px); }
 }
 
 /* ── Mobile ───────────────────────────────────────────────── */
