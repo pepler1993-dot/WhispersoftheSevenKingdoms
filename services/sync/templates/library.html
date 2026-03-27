@@ -1,5 +1,8 @@
 {% extends 'base.html' %}
 {% block title %}Library{% endblock %}
+{% block head_extra %}
+<link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
+{% endblock %}
 {% block content %}
 <div class="page-header page-header-flex">
   <div>
@@ -22,12 +25,12 @@
 <section class="panel panel-accent-gold" style="margin-bottom:18px;">
   <h2>Wofür die Library da ist</h2>
   <div class="page-subtitle" style="max-width: 78ch; margin-top: 10px;">
-    Metadaten für Videos kommen aus den Haus-Presets (Titel, Stimmung, Musik-Briefs usw.). Hier pflegst du diese Presets und die Dateien für Audio und Hintergrund.
+    Titel, Stimmung, Musik- und Thumbnail-Vorgaben kommen aus den Haus-Presets. Wähle ein Haus, um Varianten und alle gesetzten Werte übersichtlich zu durchstöbern — ohne Rohdaten.
   </div>
   <details style="margin-top:12px;">
     <summary style="cursor:pointer; font-weight:600;">Asset-Details anzeigen</summary>
     <ul class="list" style="margin-top: 12px;">
-      <li><strong>Haus-Presets</strong> → bearbeitbare JSON-Konfiguration pro Haus (Create-Tab &amp; Metadaten-Quelle)</li>
+      <li><strong>Haus-Presets</strong> → Lesbare Übersicht pro Haus und Variante (Quelle für den Create-Tab)</li>
       <li><strong>Songs</strong> → Audio-Bibliothek im Create-Tab</li>
       <li><strong>Hintergrundbilder</strong> → Video-Hintergründe im Create-Tab</li>
     </ul>
@@ -35,38 +38,18 @@
 </section>
 
 <section class="panel panel-accent-gold" style="margin-bottom:18px;">
-  <div class="section-header-inline"><h2>Haus-Presets</h2><span class="section-note">aus house_templates.json · gespeichert auf dem Server</span></div>
-  <p class="page-subtitle" style="margin:0 0 16px 0; max-width:78ch;">Änderungen als gültiges JSON einfügen und speichern. Ungültiges JSON wird abgelehnt; andere Häuser bleiben unverändert.</p>
-  <div class="preset-grid">
-    {% for key, house in houses|dictsort %}
-    <article class="preset-card">
-      <header class="preset-card-head">
-        <span class="preset-sigil" aria-hidden="true">{{ house.get('sigil', '·') }}</span>
-        <div>
-          <h3 class="preset-title">{{ house.get('display_name', key) }}</h3>
-          <div class="preset-sub">{{ house.get('house', key) }} · <code>{{ key }}</code></div>
-          {% if house.variants is mapping %}
-          <div class="preset-meta">{{ house.variants|length }} Varianten</div>
-          {% endif %}
-        </div>
-      </header>
-      <details class="preset-details">
-        <summary>JSON-Details (Lesen)</summary>
-        <pre class="preset-json-readonly" tabindex="0">{{ house_pretty[key] }}</pre>
-      </details>
-      <form method="post" action="/admin/library/save-house-template" class="preset-edit-form">
-        <input type="hidden" name="house_key" value="{{ key }}" />
-        <label class="preset-label" for="preset-ta-{{ key }}">Preset bearbeiten</label>
-        <textarea id="preset-ta-{{ key }}" name="template_json" rows="16" class="form-input preset-json-ta" required></textarea>
-        <script>
-        (function () {
-          var t = document.getElementById('preset-ta-{{ key }}');
-          if (t) t.value = {{ house_pretty[key]|tojson }};
-        })();
-        </script>
-        <button type="submit" class="btn btn-primary btn-sm" style="margin-top:10px;">Preset speichern</button>
-      </form>
-    </article>
+  <div class="section-header-inline"><h2>Häuser &amp; Presets</h2><span class="section-note">durchstöbern</span></div>
+  <p class="page-subtitle" style="margin:0 0 1.1rem 0; max-width:78ch;">Klicke auf ein Haus, um alle Schauplatz-Varianten zu sehen. Pro Variante zeigen wir, was für Audio, Thumbnail, Titel und Hintergrund voreingestellt ist.</p>
+  <div class="house-grid" role="list">
+    {% for h in house_cards %}
+    <a class="house-card" role="listitem" href="/admin/library/houses/{{ h.key }}" aria-label="{{ h.display_name }}, {{ h.house }}, {{ h.variant_count }} Varianten öffnen" style="background: linear-gradient(145deg, {{ h.color }} 0%, {{ h.bg_color }} 100%);">
+      <div class="house-card-inner">
+        <span class="house-card-sigil" aria-hidden="true">{{ h.sigil }}</span>
+        <h3 class="house-card-title">{{ h.display_name }}</h3>
+        <div class="house-card-sub">{{ h.house }}</div>
+        <span class="house-card-meta">{{ h.variant_count }} Variante{% if h.variant_count != 1 %}n{% endif %} · öffnen</span>
+      </div>
+    </a>
     {% else %}
     <p class="empty-state">Keine Haus-Presets geladen.</p>
     {% endfor %}
@@ -172,74 +155,6 @@
 </div>
 
 <style>
-.preset-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
-  gap: 18px;
-}
-.preset-card {
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  padding: 16px;
-  background: var(--surface);
-}
-.preset-card-head {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  margin-bottom: 12px;
-}
-.preset-sigil {
-  font-size: 2rem;
-  line-height: 1;
-}
-.preset-title {
-  margin: 0;
-  font-size: 1.1rem;
-}
-.preset-sub {
-  font-size: 0.82rem;
-  color: var(--muted);
-  margin-top: 4px;
-}
-.preset-meta {
-  font-size: 0.78rem;
-  color: var(--muted);
-  margin-top: 6px;
-}
-.preset-details summary {
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.88rem;
-  margin-bottom: 8px;
-}
-.preset-json-readonly {
-  margin: 0;
-  max-height: 220px;
-  overflow: auto;
-  font-size: 0.72rem;
-  line-height: 1.35;
-  padding: 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--line);
-  background: rgba(0,0,0,0.2);
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-.preset-label {
-  display: block;
-  font-weight: 600;
-  font-size: 0.85rem;
-  margin-bottom: 6px;
-}
-.preset-json-ta {
-  width: 100%;
-  font-family: ui-monospace, monospace;
-  font-size: 0.78rem;
-  line-height: 1.35;
-  resize: vertical;
-  min-height: 200px;
-}
 .thumb-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));

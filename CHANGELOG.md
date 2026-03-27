@@ -3,6 +3,19 @@
 Alle relevanten Änderungen am Projekt werden hier dokumentiert.
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [v3.2.0] – 2026-03-27
+
+### Added
+- **Library · Haus-Presets (UI)**: Häuser als farbige Karten; **Haus-Detail** mit Variantenliste; **Varianten-Detail** mit strukturierten Abschnitten (Identität, Standard-Parameter mit deutschen Bezeichnern, Musik- & Thumbnail-Richtlinien, YouTube-Titel-Vorlage, Audio-Prompt-Varianten, Hintergrund-/Bild-Prompt inkl. optional `bg_key`) — alles ohne Roh-JSON für Nutzer.
+- **Routen** `GET /admin/library/houses/{house_key}` und `GET /admin/library/houses/{house_key}/variants/{variant_key}`.
+- **Stylesheet** `services/sync/static/css/library-presets.css`; **`{% block head_extra %}`** in `base.html` für zusätzliche CSS-Links.
+
+### Changed
+- **Library-Startseite**: Haus-Presets nur noch als Einstieg in die neue Navigation; Songs und Hintergrundbilder unverändert darunter.
+
+### Removed
+- **JSON-Editor** und **POST `/admin/library/save-house-template`** für Haus-Presets (Anpassungen weiterhin direkt in `house_templates.json` auf dem Server bzw. im Repo).
+
 ## [v3.1.2] – 2026-03-27
 
 ### Fixed

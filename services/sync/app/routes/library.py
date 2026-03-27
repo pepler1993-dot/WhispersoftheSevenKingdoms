@@ -1,9 +1,9 @@
-"""Library routes: upload, preview, listing, house presets."""
+"""Library routes: upload, preview, listing, house presets (UI, no raw JSON)."""
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
+from typing import Any
 
 from fastapi import APIRouter, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
@@ -22,88 +22,173 @@ def _redirect_library(msg: str, *, error: bool = False) -> RedirectResponse:
     return RedirectResponse(f'/admin/library?{q}={quote(msg)}', status_code=303)
 
 
+def _as_list(val: Any) -> list[Any]:
+    if val is None:
+        return []
+    if isinstance(val, list):
+        return val
+    return [val]
+
+
+_DEFAULT_LABELS_DE: dict[str, str] = {
+    'minutes': 'Dauer (Minuten)',
+    'loop_hours': 'Loop (Stunden)',
+    'crossfade': 'Crossfade (Sekunden)',
+    'audio_preset': 'Audio-Preset',
+    'music_tempo': 'Musik-Tempo',
+    'music_energy': 'Musik-Energie',
+}
+
+
+def _format_default_value(v: Any) -> str:
+    if isinstance(v, float) and v == int(v):
+        return str(int(v))
+    if isinstance(v, (list, dict)):
+        return json.dumps(v, ensure_ascii=False)
+    return str(v)
+
+
+def _build_variant_page_context(house_key: str, variant_key: str, house: dict[str, Any]) -> dict[str, Any]:
+    variants = house.get('variants')
+    if not isinstance(variants, dict) or variant_key not in variants:
+        raise HTTPException(status_code=404, detail='Variante nicht gefunden')
+
+    variant_description = variants.get(variant_key)
+    if not isinstance(variant_description, str):
+        variant_description = str(variant_description)
+
+    defaults = house.get('defaults')
+    default_rows: list[dict[str, str]] = []
+    if isinstance(defaults, dict):
+        for k, v in sorted(defaults.items(), key=lambda x: str(x[0])):
+            ks = str(k)
+            default_rows.append({
+                'key': ks,
+                'label': _DEFAULT_LABELS_DE.get(ks, ks.replace('_', ' ').title()),
+                'value': _format_default_value(v),
+            })
+
+    mb = house.get('music_brief') if isinstance(house.get('music_brief'), dict) else {}
+    tb = house.get('thumbnail_brief') if isinstance(house.get('thumbnail_brief'), dict) else {}
+
+    vp = house.get('variant_prompts')
+    audio_prompts: list[str] = []
+    if isinstance(vp, dict) and variant_key in vp:
+        audio_prompts = [str(p) for p in _as_list(vp.get(variant_key))]
+
+    bg_block: dict[str, str] | None = None
+    bp = house.get('background_prompts')
+    if isinstance(bp, dict) and variant_key in bp:
+        raw = bp.get(variant_key)
+        if isinstance(raw, dict):
+            bg_block = {
+                'prompt': str(raw.get('prompt', '') or ''),
+                'bg_key': str(raw.get('bg_key', '') or ''),
+            }
+            if not bg_block['prompt'] and not bg_block['bg_key']:
+                bg_block = None
+
+    title_template = house.get('title_template')
+    if title_template is not None:
+        title_template = str(title_template)
+
+    return {
+        'house_key': house_key,
+        'variant_key': variant_key,
+        'house_display': str(house.get('display_name') or house_key),
+        'house_line': str(house.get('house') or ''),
+        'variant_description': variant_description,
+        'motto': str(house.get('motto') or ''),
+        'seat': str(house.get('seat') or ''),
+        'mood': str(house.get('mood') or ''),
+        'sigil': str(house.get('sigil') or ''),
+        'color': str(house.get('color') or '#334155'),
+        'bg_color': str(house.get('bg_color') or '#0f172a'),
+        'default_rows': default_rows,
+        'music_style': str(mb.get('style') or '') if mb else '',
+        'music_influences': [str(x) for x in _as_list(mb.get('influences'))] if mb else [],
+        'music_avoid': [str(x) for x in _as_list(mb.get('avoid'))] if mb else [],
+        'thumb_scene': str(tb.get('scene') or '') if tb else '',
+        'thumb_elements': [str(x) for x in _as_list(tb.get('elements'))] if tb else [],
+        'thumb_style': str(tb.get('style') or '') if tb else '',
+        'title_template': title_template,
+        'audio_prompts': audio_prompts,
+        'background_block': bg_block,
+    }
+
+
 @router.get('/admin/library', response_class=HTMLResponse)
 def admin_library(request: Request, success: str | None = Query(default=None), error: str | None = Query(default=None)):
     songs = _list_library_dir(PIPELINE_DIR / 'data' / 'upload' / 'songs', {'.mp3', '.wav', '.ogg'})
     backgrounds = _list_library_dir(PIPELINE_DIR / 'data' / 'assets' / 'backgrounds', {'.jpg', '.jpeg', '.png', '.webp'})
     houses = _load_house_templates()
-    house_pretty = {
-        k: json.dumps(v, indent=2, ensure_ascii=False) + '\n'
-        for k, v in sorted(houses.items(), key=lambda x: x[0])
-    }
+    house_cards: list[dict[str, Any]] = []
+    for key, h in sorted(houses.items(), key=lambda x: x[0]):
+        if not isinstance(h, dict):
+            continue
+        n_var = 0
+        v = h.get('variants')
+        if isinstance(v, dict):
+            n_var = len(v)
+        house_cards.append({
+            'key': key,
+            'display_name': str(h.get('display_name') or key),
+            'house': str(h.get('house') or ''),
+            'sigil': str(h.get('sigil') or '·'),
+            'color': str(h.get('color') or '#475569'),
+            'bg_color': str(h.get('bg_color') or '#0f172a'),
+            'variant_count': n_var,
+        })
     return shared.templates.TemplateResponse(request, 'library.html', {
         'request': request,
         'page': 'library',
         'songs': songs,
         'backgrounds': backgrounds,
-        'houses': houses,
-        'house_pretty': house_pretty,
+        'house_cards': house_cards,
         'success_message': success or '',
         'error_message': error or '',
     })
 
 
-@router.post('/admin/library/save-house-template')
-def admin_library_save_house_template(
-    house_key: str = Form(...),
-    template_json: str = Form(...),
-):
-    key = (house_key or '').strip()
-    if not key:
-        return _redirect_library('Haus-Schlüssel fehlt', error=True)
+@router.get('/admin/library/houses/{house_key}', response_class=HTMLResponse)
+def admin_library_house(request: Request, house_key: str):
+    houses = _load_house_templates()
+    house = houses.get(house_key)
+    if not house or not isinstance(house, dict):
+        raise HTTPException(status_code=404, detail='Haus nicht gefunden')
 
-    all_houses = _load_house_templates()
-    if key not in all_houses:
-        return _redirect_library(f'Unbekannter Haus-Schlüssel: {key}', error=True)
+    variant_rows: list[dict[str, str]] = []
+    vmap = house.get('variants')
+    if isinstance(vmap, dict):
+        for vk, desc in sorted(vmap.items(), key=lambda x: x[0]):
+            variant_rows.append({
+                'key': vk,
+                'description': str(desc) if desc is not None else vk,
+                'href': f'/admin/library/houses/{house_key}/variants/{vk}',
+            })
 
-    raw = (template_json or '').strip()
-    if not raw:
-        return _redirect_library('JSON darf nicht leer sein', error=True)
+    return shared.templates.TemplateResponse(request, 'library_house.html', {
+        'request': request,
+        'page': 'library',
+        'house_key': house_key,
+        'house': house,
+        'variants': variant_rows,
+    })
 
-    try:
-        parsed = json.loads(raw)
-    except json.JSONDecodeError as e:
-        return _redirect_library(f'Ungültiges JSON: {e}', error=True)
 
-    if not isinstance(parsed, dict):
-        return _redirect_library('Preset muss ein JSON-Objekt sein', error=True)
+@router.get('/admin/library/houses/{house_key}/variants/{variant_key}', response_class=HTMLResponse)
+def admin_library_variant(request: Request, house_key: str, variant_key: str):
+    houses = _load_house_templates()
+    house = houses.get(house_key)
+    if not house or not isinstance(house, dict):
+        raise HTTPException(status_code=404, detail='Haus nicht gefunden')
 
-    path = shared.HOUSE_TEMPLATES_PATH
-    if not path.exists():
-        return _redirect_library('house_templates.json nicht gefunden', error=True)
-
-    try:
-        data = json.loads(path.read_text(encoding='utf-8'))
-    except (json.JSONDecodeError, OSError) as e:
-        return _redirect_library(f'Datei konnte nicht gelesen werden: {e}', error=True)
-
-    if not isinstance(data, dict):
-        return _redirect_library('Ungültige Struktur in house_templates.json', error=True)
-
-    data[key] = parsed
-
-    try:
-        text = json.dumps(data, indent=2, ensure_ascii=False) + '\n'
-        fd, tmp = tempfile.mkstemp(suffix='.json', dir=str(path.parent))
-        try:
-            Path(fd).write_text(text, encoding='utf-8')
-        except TypeError:
-            # Windows: fd is int
-            Path(tmp).write_text(text, encoding='utf-8')
-        else:
-            import os
-
-            os.close(fd)
-            Path(tmp).write_text(text, encoding='utf-8')
-        Path(tmp).replace(path)
-    except OSError as e:
-        try:
-            Path(tmp).unlink(missing_ok=True)  # type: ignore[arg-type]
-        except Exception:
-            pass
-        return _redirect_library(f'Speichern fehlgeschlagen: {e}', error=True)
-
-    return _redirect_library(f'Haus-Preset „{key}“ gespeichert')
+    ctx = _build_variant_page_context(house_key, variant_key, house)
+    return shared.templates.TemplateResponse(request, 'library_variant.html', {
+        'request': request,
+        'page': 'library',
+        'preset': ctx,
+    })
 
 
 @router.post('/admin/library/delete')

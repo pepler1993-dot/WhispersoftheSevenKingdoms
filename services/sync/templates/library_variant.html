@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% block title %}{{ preset.house_display }} · {{ preset.variant_key | replace('_', ' ') }} · Library{% endblock %}
+{% block head_extra %}
+<link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
+{% endblock %}
+{% block content %}
+<nav class="lib-breadcrumb" aria-label="Brotkrumen">
+  <a href="/admin/library">Library</a>
+  <span class="lib-breadcrumb-sep" aria-hidden="true">/</span>
+  <a href="/admin/library/houses/{{ preset.house_key }}">{{ preset.house_display }}</a>
+  <span class="lib-breadcrumb-sep" aria-hidden="true">/</span>
+  <span aria-current="page">{{ preset.variant_key | replace('_', ' ') }}</span>
+</nav>
+
+<div class="back-link-row">
+  <a href="/admin/library/houses/{{ preset.house_key }}"><i data-lucide="arrow-left" style="width:16px;height:16px"></i> Alle Varianten dieses Hauses</a>
+</div>
+
+<header class="page-header page-header-flex" style="margin-bottom:1.25rem;">
+  <div>
+    <h1 style="margin-bottom:0.35rem;">{{ preset.house_display }}</h1>
+    <div class="page-subtitle" style="font-size:1rem; font-weight:600; color: rgba(255,255,255,0.9);">{{ preset.variant_key | replace('_', ' ') }}</div>
+    <p class="page-subtitle" style="margin-top:0.65rem; max-width:72ch;">{{ preset.variant_description }}</p>
+  </div>
+</header>
+
+<div class="color-swatch-row preset-section" aria-label="Hausfarben">
+  <span class="color-swatch"><i style="background:{{ preset.color }};" title="Akzentfarbe"></i> Akzent</span>
+  <span class="color-swatch"><i style="background:{{ preset.bg_color }};" title="Hintergrundfarbe"></i> Hintergrund</span>
+</div>
+
+{% if preset.house_line or preset.motto or preset.seat or preset.mood or preset.sigil %}
+<section class="panel panel-accent-gold preset-section" aria-labelledby="sec-identity">
+  <h2 id="sec-identity">Identität &amp; Stimmung <span class="preset-section-hint">(Hausweit)</span></h2>
+  <dl class="preset-dl">
+    {% if preset.house_line %}<div><dt>Haus</dt><dd>{{ preset.house_line }}</dd></div>{% endif %}
+    {% if preset.motto %}<div><dt>Wahlspruch</dt><dd>„{{ preset.motto }}“</dd></div>{% endif %}
+    {% if preset.seat %}<div><dt>Sitz</dt><dd>{{ preset.seat }}</dd></div>{% endif %}
+    {% if preset.mood %}<div><dt>Stimmung</dt><dd>{{ preset.mood }}</dd></div>{% endif %}
+    {% if preset.sigil %}<div><dt>Wappenzeichen</dt><dd aria-label="Wappenzeichen">{{ preset.sigil }}</dd></div>{% endif %}
+  </dl>
+</section>
+{% endif %}
+
+{% if preset.default_rows %}
+<section class="panel panel-accent-blue preset-section" aria-labelledby="sec-defaults">
+  <h2 id="sec-defaults">Standard-Parameter <span class="preset-section-hint">Video &amp; Audio, Hausweit</span></h2>
+  <p class="page-subtitle" style="margin:-0.35rem 0 0.75rem 0; max-width:72ch;">Diese Werte sind die Ausgangslage im Create-Tab, sofern du nichts änderst.</p>
+  <dl class="preset-dl">
+    {% for row in preset.default_rows %}
+    <div><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
+    {% endfor %}
+  </dl>
+</section>
+{% endif %}
+
+{% if preset.music_style or preset.music_influences or preset.music_avoid %}
+<section class="panel panel-accent-purple preset-section" aria-labelledby="sec-music">
+  <h2 id="sec-music">Musik-Richtlinie <span class="preset-section-hint">Hausweit</span></h2>
+  <p class="page-subtitle" style="margin:-0.35rem 0 0.75rem 0; max-width:72ch;">Vorgaben für die KI-Musikgenerierung (Stil, Vorbilder, Vermeiden).</p>
+  {% if preset.music_style %}
+  <p class="preset-prose" style="margin-bottom:0.85rem;"><strong>Stil:</strong> {{ preset.music_style }}</p>
+  {% endif %}
+  {% if preset.music_influences %}
+  <p class="preset-section-hint" style="margin-bottom:0.35rem;">Einflüsse / Referenzen</p>
+  <ul class="tag-list" style="margin-bottom:0.85rem;">
+    {% for t in preset.music_influences %}<li>{{ t }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+  {% if preset.music_avoid %}
+  <p class="preset-section-hint" style="margin-bottom:0.35rem;">Vermeiden</p>
+  <ul class="tag-list">
+    {% for t in preset.music_avoid %}<li>{{ t }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+</section>
+{% endif %}
+
+{% if preset.thumb_scene or preset.thumb_elements or preset.thumb_style %}
+<section class="panel panel-accent-teal preset-section" aria-labelledby="sec-thumb">
+  <h2 id="sec-thumb">Thumbnail-Richtlinie <span class="preset-section-hint">Hausweit</span></h2>
+  <p class="page-subtitle" style="margin:-0.35rem 0 0.75rem 0; max-width:72ch;">Beschreibung für das Video-Thumbnail (Szene, Elemente, Look).</p>
+  {% if preset.thumb_scene %}
+  <p class="preset-prose" style="margin-bottom:0.75rem;"><strong>Szene:</strong> {{ preset.thumb_scene }}</p>
+  {% endif %}
+  {% if preset.thumb_elements %}
+  <p class="preset-section-hint" style="margin-bottom:0.35rem;">Elemente</p>
+  <ul class="tag-list" style="margin-bottom:0.75rem;">
+    {% for t in preset.thumb_elements %}<li>{{ t }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+  {% if preset.thumb_style %}
+  <p class="preset-prose"><strong>Stil:</strong> {{ preset.thumb_style }}</p>
+  {% endif %}
+</section>
+{% endif %}
+
+{% if preset.title_template %}
+<section class="panel panel-accent-gold preset-section" aria-labelledby="sec-title">
+  <h2 id="sec-title">YouTube-Titel-Vorlage <span class="preset-section-hint">Hausweit</span></h2>
+  <p class="page-subtitle" style="margin:-0.35rem 0 0.75rem 0; max-width:72ch;">Platzhalter wie <code>{duration}</code> werden beim Rendern ersetzt.</p>
+  <p class="preset-quote-box">{{ preset.title_template }}</p>
+</section>
+{% endif %}
+
+<section class="panel panel-accent-blue preset-section" aria-labelledby="sec-audio-prompts">
+  <h2 id="sec-audio-prompts">Audio-Generierung <span class="preset-section-hint">nur diese Variante</span></h2>
+  <p class="page-subtitle" style="margin:-0.35rem 0 0.75rem 0; max-width:72ch;">Mehrere Prompt-Alternativen — die Pipeline kann daraus wählen oder rotieren.</p>
+  {% if preset.audio_prompts %}
+  <div class="prompt-cards">
+    {% for p in preset.audio_prompts %}
+    <article class="prompt-card">
+      <div class="prompt-card-label">Variante {{ loop.index }}</div>
+      <p class="prompt-card-body">{{ p }}</p>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty-state" style="margin:0;">Keine gespeicherten Audio-Prompts für diese Variante.</p>
+  {% endif %}
+</section>
+
+<section class="panel panel-accent-purple preset-section" aria-labelledby="sec-bg">
+  <h2 id="sec-bg">Hintergrund / Bild-Prompt <span class="preset-section-hint">nur diese Variante</span></h2>
+  <p class="page-subtitle" style="margin:-0.35rem 0 0.75rem 0; max-width:72ch;">Text für die Hintergrundbild-Generierung und optional der empfohlene Asset-Schlüssel.</p>
+  {% if preset.background_block and (preset.background_block.prompt or preset.background_block.bg_key) %}
+  {% if preset.background_block.prompt %}
+  <p class="preset-section-hint" style="margin-bottom:0.35rem;">Bild-Prompt</p>
+  <p class="preset-quote-box" style="margin-bottom:0.85rem;">{{ preset.background_block.prompt }}</p>
+  {% endif %}
+  {% if preset.background_block.bg_key %}
+  <p class="preset-section-hint" style="margin-bottom:0.35rem;">Empfohlener Hintergrund-Schlüssel</p>
+  <p class="preset-prose"><code>{{ preset.background_block.bg_key }}</code> <span class="preset-section-hint">(Zuordnung zu Dateien in eurer Hintergrund-Bibliothek)</span></p>
+  {% endif %}
+  {% else %}
+  <p class="empty-state" style="margin:0;">Kein Hintergrund-Prompt für diese Variante hinterlegt.</p>
+  {% endif %}
+</section>
+{% endblock %}

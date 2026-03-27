@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}{{ house.display_name | default(house_key) }} · Library{% endblock %}
+{% block head_extra %}
+<link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
+{% endblock %}
+{% block content %}
+{% set c = house.color | default('#475569') %}
+{% set bgc = house.bg_color | default('#0f172a') %}
+{% set dname = house.display_name | default(house_key) %}
+
+<nav class="lib-breadcrumb" aria-label="Brotkrumen">
+  <a href="/admin/library">Library</a>
+  <span class="lib-breadcrumb-sep" aria-hidden="true">/</span>
+  <span aria-current="page">{{ dname }}</span>
+</nav>
+
+<div class="back-link-row">
+  <a href="/admin/library"><i data-lucide="arrow-left" style="width:16px;height:16px"></i> Zurück zur Library</a>
+</div>
+
+<div class="page-header page-header-flex" style="margin-bottom:1rem;">
+  <div>
+    <h1 style="margin-bottom:0.25rem;">{{ dname }}</h1>
+    <div class="page-subtitle">{{ house.house | default('') }}</div>
+  </div>
+</div>
+
+<section class="house-hero" style="background: linear-gradient(135deg, {{ c }} 0%, {{ bgc }} 100%);">
+  <div class="house-hero-content">
+    <span class="house-hero-sigil" aria-hidden="true">{{ house.sigil | default('·') }}</span>
+    <div class="house-hero-text">
+      <p class="tagline">Wähle eine Variante, um zu sehen, was die Pipeline für diese Szene voreinstellt (Audio, Thumbnail, Titel, Hintergrund).</p>
+      <div class="house-chips" role="list">
+        {% if house.motto %}<span class="house-chip" role="listitem">„{{ house.motto }}“</span>{% endif %}
+        {% if house.seat %}<span class="house-chip" role="listitem">Sitz: {{ house.seat }}</span>{% endif %}
+        {% if house.mood %}<span class="house-chip" role="listitem">Stimmung: {{ house.mood }}</span>{% endif %}
+        <span class="house-chip" role="listitem">{{ variants | length }} Variante{% if variants | length != 1 %}n{% endif %}</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="panel panel-accent-gold">
+  <div class="section-header-inline"><h2>Varianten</h2><span class="section-note">Schauplätze &amp; Szenen</span></div>
+  <p class="page-subtitle" style="margin:0 0 1rem 0; max-width:72ch;">Jede Variante steht im Create-Tab als eigener Ort zur Auswahl. Hier siehst du die menschenlesbare Kurzbeschreibung — Details folgen auf der nächsten Seite.</p>
+  <div class="variant-grid" role="list">
+    {% for v in variants %}
+    <a class="variant-tile" role="listitem" href="{{ v.href }}">
+      <div class="variant-tile-key">{{ v.key | replace('_', ' ') }}</div>
+      <p class="variant-tile-desc">{{ v.description }}</p>
+      <span class="variant-tile-cta">Alle Preset-Felder anzeigen <i data-lucide="chevron-right" style="width:14px;height:14px"></i></span>
+    </a>
+    {% else %}
+    <p class="empty-state">Für dieses Haus sind keine Varianten hinterlegt.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
