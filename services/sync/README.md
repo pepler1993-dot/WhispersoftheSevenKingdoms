@@ -37,6 +37,52 @@ Audio-Generierung braucht einen erreichbaren **GPU-Worker** (siehe `app/stable_a
 Siehe `deploy/setup.sh` und `deploy/agent-sync.service`.  
 Kein `GITHUB_WEBHOOK_SECRET` mehr — das alte Webhook-Setup ist obsolet.
 
+### CI/CD per GitHub Actions (SSH via Tailscale)
+
+Es gibt jetzt einen Workflow unter `.github/workflows/deploy.yml`.
+
+Trigger:
+- Push auf `main`
+- manueller Start über **Actions → Deploy (SSH via Tailscale) → Run workflow**
+
+Aktueller Netzpfad:
+- GitHub Actions joint per Tailscale euer Tailnet
+- verbindet sich per SSH auf den **PVE-Host**
+- führt den eigentlichen Deploy dann per `pct exec 103 -- ...` im **Sync-Service-LXC** aus
+
+Erwartete Defaults:
+- LXC-ID: `103`
+- Repo im LXC: `/opt/whispers/WhispersoftheSevenKingdoms`
+- Venv: `.venv` im Repo-Root
+- systemd-Service: `agent-sync`
+
+Benötigte GitHub Actions Secrets:
+- `SSH_HOST` → Tailscale-IP oder MagicDNS-Name des **PVE-Hosts**
+- `SSH_USER` → SSH-User auf dem **PVE-Host**
+- `SSH_PRIVATE_KEY`
+- `TS_OAUTH_CLIENT_ID`
+- `TS_OAUTH_SECRET`
+
+Wichtig:
+- Der **PVE-Host** muss bereits im Tailnet sein.
+- Der GitHub-Runner joint im Workflow kurz euer Tailnet und deployt dann per SSH über Tailscale auf den PVE.
+- Tailscale-Setup im LXC ist für diesen Workflow **nicht nötig**.
+
+Optionale Repository Variables:
+- `LXC_ID` (Default: `103`)
+- `DEPLOY_PATH` (Default: `/opt/whispers/WhispersoftheSevenKingdoms`)
+- `SYSTEMD_SERVICE` (Default: `agent-sync`)
+- `GIT_REMOTE` (Default: `origin`)
+
+Ablauf im Workflow:
+1. GitHub-Runner joint Tailscale
+2. SSH-Key laden
+3. per SSH über Tailscale auf den PVE verbinden
+4. im PVE: `pct exec <LXC_ID> -- ...`
+5. im LXC: `git fetch` + `git checkout/reset --hard` auf den Event-Branch
+6. optional `.venv/bin/pip install -r services/sync/requirements.txt`
+7. `systemctl restart agent-sync`
+
 ---
 
 ## Koordination im Team
