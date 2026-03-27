@@ -6,8 +6,13 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-import bcrypt
-import jwt
+try:
+    import bcrypt
+    import jwt
+except ImportError:
+    bcrypt = None  # type: ignore
+    jwt = None  # type: ignore
+
 from fastapi import Request, Response
 
 from app import shared

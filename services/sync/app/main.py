@@ -81,30 +81,30 @@ from app.routes.gpu import router as gpu_router                # noqa: E402
 from app.routes.settings import router as settings_router      # noqa: E402
 from app.routes.auth import router as auth_router              # noqa: E402
 
-# ── Auth middleware ───────────────────────────────────────────────────────
-from starlette.middleware.base import BaseHTTPMiddleware        # noqa: E402
-from starlette.responses import RedirectResponse as StarletteRedirect  # noqa: E402
-from app.auth import get_current_user, ensure_admin_exists     # noqa: E402
+# ── Auth middleware (opt-in via AUTH_ENABLED=1 env var) ────────────────────
+import os as _os_auth                                          # noqa: E402
+AUTH_ENABLED = _os_auth.environ.get('AUTH_ENABLED', '0') == '1'
 
-PUBLIC_PATHS = {'/login', '/static', '/health', '/api/gpu/metrics'}
+if AUTH_ENABLED:
+    from starlette.middleware.base import BaseHTTPMiddleware        # noqa: E402
+    from starlette.responses import RedirectResponse as StarletteRedirect  # noqa: E402
+    from app.auth import get_current_user, ensure_admin_exists     # noqa: E402
 
+    PUBLIC_PATHS = {'/login', '/static', '/health', '/api/gpu/metrics'}
 
-class AuthMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, call_next):
-        path = request.url.path
-        # Allow public paths
-        if any(path.startswith(p) for p in PUBLIC_PATHS):
+    class AuthMiddleware(BaseHTTPMiddleware):
+        async def dispatch(self, request, call_next):
+            path = request.url.path
+            if any(path.startswith(p) for p in PUBLIC_PATHS):
+                return await call_next(request)
+            if path.startswith('/admin'):
+                user = get_current_user(request)
+                if not user:
+                    return StarletteRedirect(url='/login', status_code=302)
+                request.state.user = user
             return await call_next(request)
-        # Check auth for /admin paths
-        if path.startswith('/admin'):
-            user = get_current_user(request)
-            if not user:
-                return StarletteRedirect(url='/login', status_code=302)
-            request.state.user = user
-        return await call_next(request)
 
-
-app.add_middleware(AuthMiddleware)
+    app.add_middleware(AuthMiddleware)
 
 app.include_router(auth_router)
 app.include_router(health_router)
@@ -127,7 +127,8 @@ from app.stores.workflows import ensure_table as _ensure_workflows_table  # noqa
 from app.pipeline_workflow import _ensure_poll_thread  # noqa: E402
 
 _ensure_workflows_table(db)
-ensure_admin_exists()
+if AUTH_ENABLED:
+    ensure_admin_exists()
 
 # ── Recover jobs/runs interrupted by restarts ─────────────────────────────
 import os as _os

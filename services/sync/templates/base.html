@@ -90,7 +90,7 @@
       </nav>
 
       <div class="sidebar-footer">
-        {% if request.state.user is defined and request.state.user %}
+        {% if request.state is defined and request.state.user is defined and request.state.user %}
         <div class="sidebar-user">
           <div class="sidebar-user-name">{{ request.state.user.display_name or request.state.user.username }}</div>
           <div class="sidebar-user-role">{{ request.state.user.role }}</div>
