@@ -83,7 +83,7 @@ from app.routes.auth import router as auth_router              # noqa: E402
 
 # ── Auth middleware (opt-in via AUTH_ENABLED=1 env var) ────────────────────
 import os as _os_auth                                          # noqa: E402
-AUTH_ENABLED = _os_auth.environ.get('AUTH_ENABLED', '0') == '1'
+AUTH_ENABLED = _os_auth.environ.get('AUTH_ENABLED', '1') == '1'
 
 if AUTH_ENABLED:
     from starlette.middleware.base import BaseHTTPMiddleware        # noqa: E402
