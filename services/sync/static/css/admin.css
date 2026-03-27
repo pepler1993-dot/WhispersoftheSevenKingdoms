@@ -289,6 +289,7 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
   transition: all 0.2s var(--ease);
   border-left: 3px solid transparent;
   text-align: left;
+  text-decoration: none;
 }
 .nav-folder-toggle:hover {
   background: var(--panel-hover);
@@ -297,6 +298,13 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
 }
 .nav-folder-toggle .lucide { width: 18px; height: 18px; stroke-width: 2; flex-shrink: 0; }
 .nav-folder-toggle span { flex: 1; }
+/* Active state when a child page is active */
+.nav-folder.has-active .nav-folder-toggle {
+  background: var(--gold-glow);
+  color: var(--gold);
+  font-weight: 600;
+  border-left-color: var(--gold);
+}
 .nav-folder-arrow {
   width: 14px !important;
   height: 14px !important;
@@ -304,9 +312,6 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
   transition: transform 0.25s var(--ease);
 }
 .nav-folder.open .nav-folder-arrow { transform: rotate(90deg); }
-.nav-folder.open .nav-folder-toggle {
-  color: var(--text);
-}
 .nav-folder-items {
   overflow: hidden;
   max-height: 0;
