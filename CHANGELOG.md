@@ -3,6 +3,20 @@
 Alle relevanten Änderungen am Projekt werden hier dokumentiert.
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [v3.1.0] – 2026-03-27
+
+### Added
+- **Create-Flow mit Varianten-Presets**: konsistentes Serververhalten für die Haus-/Varianten-Auswahl.
+- **Detaillierte Use-Case-Dokumentation**: UC-01 bis UC-09 als aktuelle Referenz für Produkt- und Bedienfälle.
+
+### Changed
+- **Stable Audio Architektur bereinigt**: Projekt ist jetzt auf `stable-audio-local` fokussiert.
+- **Dashboard-/Workflow-Struktur gestrafft**: Runtime-Skripte und Abläufe im Sync-Service aufgeräumt.
+- **Dokumentation an aktuelle Architektur angepasst**.
+
+### Removed
+- **Legacy GitHub Task-Sync / Workflow-Reste** aus dem Sync-Service entfernt.
+
 ## [v3.0.1] – 2026-03-26
 
 ### Fixed
