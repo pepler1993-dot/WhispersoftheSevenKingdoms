@@ -14,7 +14,7 @@ from fastapi import APIRouter, Form, HTTPException, Query, Request
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 
 from app import shared
-from app.helpers import slugify
+from app.helpers import slugify, _load_house_templates
 from app.pipeline_runner import PIPELINE_DIR, list_library_tracks_for_pipeline, _stream_reader
 
 router = APIRouter()
@@ -59,6 +59,52 @@ def _pick_short_image(source_audio: str) -> Path | None:
     return None
 
 
+def _list_uploaded_longform_videos() -> list[dict[str, Any]]:
+    houses = _load_house_templates()
+    out: list[dict[str, Any]] = []
+    for run in shared.db.list_runs(limit=300):
+        cfg = run.get('config') or {}
+        if cfg.get('content_type') == 'short' or run.get('status') != 'uploaded':
+            continue
+        slug = run.get('slug') or ''
+        meta_path = PIPELINE_DIR / 'data' / 'upload' / 'metadata' / f'{slug}.json'
+        meta: dict[str, Any] = {}
+        if meta_path.exists():
+            try:
+                meta = json.loads(meta_path.read_text(encoding='utf-8'))
+            except Exception:
+                meta = {}
+        title = run.get('title') or meta.get('title') or slug
+        tags = [str(x).lower() for x in (meta.get('tags') or []) if isinstance(x, str)]
+        text = ' '.join([str(title).lower(), str(meta.get('description') or '').lower(), ' '.join(tags)])
+        house_key = ''
+        variant_key = ''
+        for hk, house in houses.items():
+            if not isinstance(house, dict):
+                continue
+            house_terms = [hk.lower(), str(house.get('display_name') or '').lower(), str(house.get('house') or '').lower()]
+            if any(term and term in text for term in house_terms):
+                house_key = hk
+                variants = house.get('variants') or {}
+                if isinstance(variants, dict):
+                    for vk, desc in variants.items():
+                        terms = [vk.replace('_', ' ').lower(), str(desc).lower()]
+                        if any(term and term in text for term in terms):
+                            variant_key = vk
+                            break
+                break
+        out.append({
+            'run_id': run['run_id'],
+            'slug': slug,
+            'title': title,
+            'created_at': run.get('created_at'),
+            'house_key': house_key,
+            'variant_key': variant_key,
+            'audio_filename': next((f'{slug}{ext}' for ext in ('.mp3','.wav','.ogg') if (PIPELINE_DIR / 'data' / 'upload' / 'songs' / f'{slug}{ext}').exists()), ''),
+        })
+    return out
+
+
 def _build_short_output_metadata(run: dict[str, Any]) -> dict[str, Any]:
     cfg = run.get('config') or {}
     title = run.get('title') or run.get('slug') or 'Untitled Short'
@@ -86,6 +132,8 @@ def _build_short_output_metadata(run: dict[str, Any]) -> dict[str, Any]:
 @router.get('/admin/shorts', response_class=HTMLResponse)
 def admin_shorts(request: Request, success: str | None = Query(default=None), error: str | None = Query(default=None), tab: str | None = Query(default='new')):
     library_tracks = list_library_tracks_for_pipeline(shared.db)
+    houses = _load_house_templates()
+    uploaded_videos = _list_uploaded_longform_videos()
     short_runs = [run for run in shared.db.list_runs(limit=100) if (run.get('config') or {}).get('content_type') == 'short']
     presets = [
         {'key': 'hook-teaser', 'name': 'Hook Teaser', 'duration': 20, 'visual_mode': 'blurred-background', 'start': 0, 'title_suffix': ' | Short'},
@@ -98,6 +146,8 @@ def admin_shorts(request: Request, success: str | None = Query(default=None), er
         'page': 'shorts',
         'shorts_tab': active_tab,
         'library_tracks': library_tracks,
+        'houses': houses,
+        'uploaded_videos': uploaded_videos,
         'short_runs': short_runs[:20],
         'short_presets': presets,
         'success_message': success or '',
@@ -107,7 +157,10 @@ def admin_shorts(request: Request, success: str | None = Query(default=None), er
 
 @router.post('/admin/shorts/create')
 def admin_shorts_create(
-    source_audio: str = Form(...),
+    source_audio: str = Form(''),
+    source_run_id: str = Form(''),
+    house_key: str = Form(''),
+    variant_key: str = Form(''),
     title: str = Form(...),
     slug: str = Form(''),
     clip_start_seconds: int = Form(0),
@@ -116,11 +169,18 @@ def admin_shorts_create(
     visibility: str = Form('private'),
 ):
     source_audio = source_audio.strip()
+    source_run_id = source_run_id.strip()
     title = title.strip()
     slug = slugify(slug.strip() or title)
 
+    if source_run_id and not source_audio:
+        selected = next((v for v in _list_uploaded_longform_videos() if v.get('run_id') == source_run_id), None)
+        if selected:
+            source_audio = str(selected.get('audio_filename') or '')
+            if not title.strip():
+                title = str(selected.get('title') or '').strip()
     if not source_audio:
-        raise HTTPException(status_code=400, detail='Quelle f\u00fcr Audio ist erforderlich')
+        raise HTTPException(status_code=400, detail='Quelle für Audio ist erforderlich')
     if not title:
         raise HTTPException(status_code=400, detail='Titel ist erforderlich')
     if not slug:
@@ -146,6 +206,9 @@ def admin_shorts_create(
         'platform': 'youtube',
         'content_type': 'short',
         'source_audio': source_audio,
+        'source_run_id': source_run_id,
+        'house_key': house_key,
+        'variant_key': variant_key,
         'clip_start_seconds': clip_start_seconds,
         'clip_duration_seconds': clip_duration_seconds,
         'visual_mode': visual_mode,
@@ -163,6 +226,9 @@ def admin_shorts_create(
         'format': 'youtube_short',
         'aspect_ratio': '9:16',
         'source_audio': source_audio,
+        'source_run_id': source_run_id,
+        'house_key': house_key,
+        'variant_key': variant_key,
         'source_audio_path': str(source_path),
         'clip_start_seconds': clip_start_seconds,
         'clip_duration_seconds': clip_duration_seconds,

@@ -4,89 +4,69 @@
 <div class="page-header page-header-flex">
   <div>
     <h1>Shorts</h1>
-    <div class="page-subtitle">Vertikale Kurzform mit Presets, Drafts und separatem Render-Flow.</div>
+    <div class="page-subtitle">Haus-Preset → Variante → hochgeladenes Video → Short.</div>
   </div>
   <div class="header-actions">
     <a href="/admin/pipeline" class="btn btn-secondary btn-sm">Create</a>
-    <a href="/admin/audio" class="btn btn-secondary btn-sm">Audio Lab</a>
+    <a href="/admin/library" class="btn btn-secondary btn-sm">Library</a>
   </div>
 </div>
 
 {% include 'partials/shorts_tabs.html' %}
 
-{% if success_message %}
-<div class="panel panel-accent-teal" style="margin-bottom:18px;">
-  <div class="success-banner">✅ {{ success_message }}</div>
-</div>
-{% endif %}
-{% if error_message %}
-<div class="panel error-panel" style="margin-bottom:18px;">
-  <strong>Fehler:</strong> {{ error_message }}
-</div>
-{% endif %}
+{% if success_message %}<div class="panel panel-accent-teal" style="margin-bottom:18px;"><div class="success-banner">✅ {{ success_message }}</div></div>{% endif %}
+{% if error_message %}<div class="panel error-panel" style="margin-bottom:18px;"><strong>Fehler:</strong> {{ error_message }}</div>{% endif %}
 
 {% if shorts_tab == 'new' %}
 <section class="panel panel-accent-blue shorts-preset-panel">
-  <div class="section-header-inline">
-    <h2>Preset wählen</h2>
-    <span class="section-note">Voreinstellungen für schnelle Shorts</span>
-  </div>
-  <div class="shorts-preset-grid" id="shorts-preset-grid">
-    {% for preset in short_presets %}
-    <button type="button" class="shorts-preset-card{% if loop.first %} active{% endif %}"
-            data-preset="{{ preset.key }}"
-            data-duration="{{ preset.duration }}"
-            data-visual="{{ preset.visual_mode }}"
-            data-start="{{ preset.start }}"
-            data-title-suffix="{{ preset.title_suffix }}">
-      <strong>{{ preset.name }}</strong>
-      <span>{{ preset.duration }}s · {{ preset.visual_mode }}</span>
+  <div class="section-header-inline"><h2>Haus-Preset wählen</h2><span class="section-note">wie bei Create</span></div>
+  <div class="shorts-house-grid" id="shorts-house-grid">
+    {% for key, house in houses.items() if house is mapping %}
+    <button type="button" class="shorts-house-card" data-house="{{ key }}" style="--house-color: {{ house.color }}; --house-bg: {{ house.bg_color }}">
+      <div class="shorts-house-sigil">{{ house.sigil }}</div>
+      <div class="shorts-house-name">{{ house.display_name }}</div>
     </button>
     {% endfor %}
   </div>
 </section>
 
-<section class="panel panel-accent-purple shorts-create-panel">
-  <div class="section-header-inline">
-    <h2>Short konfigurieren</h2>
-    <span class="section-note">Preset → Audio → Ausschnitt → Draft</span>
-  </div>
+<section class="panel panel-accent-gold" id="shorts-variant-panel" style="display:none;">
+  <div class="section-header-inline"><h2 id="shorts-variant-title">Variante wählen</h2><span class="section-note">filtert hochgeladene Videos</span></div>
+  <div class="shorts-variant-grid" id="shorts-variant-grid"></div>
+</section>
 
+<section class="panel panel-accent-purple" id="shorts-video-panel" style="display:none;">
+  <div class="section-header-inline"><h2>Passendes Video wählen</h2><span class="section-note">nur bereits hochgeladene Longform-Videos</span></div>
+  <div class="shorts-video-list" id="shorts-video-list"></div>
+</section>
+
+<section class="panel panel-accent-purple shorts-create-panel" id="shorts-create-panel" style="display:none;">
+  <div class="section-header-inline"><h2>Short konfigurieren</h2><span class="section-note">Video gewählt → Draft anlegen</span></div>
   <form method="post" action="/admin/shorts/create" id="shorts-form">
-    <div class="grid two">
-      <div class="form-group">
-        <label for="source_audio">Quelle</label>
-        <select id="source_audio" name="source_audio" class="form-select" required>
-          <option value="">— Audio aus Bibliothek wählen —</option>
-          {% for t in library_tracks %}
-          <option value="{{ t.filename }}" data-stem="{{ t.stem }}">{{ t.label }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="visual_mode">Visual Mode</label>
-        <select id="visual_mode" name="visual_mode" class="form-select">
-          <option value="static-artwork">Static Artwork</option>
-          <option value="blurred-background">Blurred Background</option>
-          <option value="cinematic-gradient">Cinematic Gradient</option>
-        </select>
-      </div>
+    <input type="hidden" name="source_run_id" id="source_run_id" />
+    <input type="hidden" name="source_audio" id="source_audio" />
+    <input type="hidden" name="house_key" id="house_key" />
+    <input type="hidden" name="variant_key" id="variant_key" />
+
+    <div class="form-group">
+      <label>Gewähltes Video</label>
+      <div class="config-item"><div class="value" id="selected-video-label">—</div></div>
     </div>
 
     <div class="grid two">
       <div class="form-group">
         <label for="title">Titel</label>
-        <input id="title" name="title" class="form-input" required placeholder="Auto aus Preset + Track" />
+        <input id="title" name="title" class="form-input" required />
       </div>
       <div class="form-group">
         <label for="slug">Slug</label>
-        <input id="slug" name="slug" class="form-input" placeholder="auto-aus-titel" />
+        <input id="slug" name="slug" class="form-input" />
       </div>
     </div>
 
     <div class="grid two">
       <div class="form-group">
-        <label for="clip_start_seconds">Start (Sekunden)</label>
+        <label for="clip_start_seconds">Start</label>
         <input id="clip_start_seconds" name="clip_start_seconds" type="number" min="0" value="0" class="form-input" required />
       </div>
       <div class="form-group">
@@ -97,16 +77,20 @@
 
     <div class="grid two">
       <div class="form-group">
+        <label for="visual_mode">Visual Mode</label>
+        <select id="visual_mode" name="visual_mode" class="form-select">
+          <option value="static-artwork">Static Artwork</option>
+          <option value="blurred-background">Blurred Background</option>
+          <option value="cinematic-gradient">Cinematic Gradient</option>
+        </select>
+      </div>
+      <div class="form-group">
         <label for="visibility">Visibility</label>
         <select id="visibility" name="visibility" class="form-select">
           <option value="private">Private</option>
           <option value="unlisted">Unlisted</option>
           <option value="public">Public</option>
         </select>
-      </div>
-      <div class="form-group">
-        <label>Aktives Preset</label>
-        <div class="config-item"><div class="value" id="shorts-active-preset">{{ short_presets[0].name }}</div></div>
       </div>
     </div>
 
@@ -117,104 +101,107 @@
 
 {% if shorts_tab == 'drafts' %}
 <section class="panel panel-accent-blue">
-  <div class="section-header-inline">
-    <h2>Letzte Short-Drafts</h2>
-    <span class="section-note">separat vom Create-Flow</span>
-  </div>
+  <div class="section-header-inline"><h2>Letzte Short-Drafts</h2><span class="section-note">separat vom Create-Flow</span></div>
   <ul class="list">
     {% for run in short_runs %}
-    <li class="timeline-item">
-      <div>
-        <strong>{{ run.title or run.slug }}</strong><br/>
-        <span class="timeline-time">{{ run.status }}</span>
-      </div>
-      <div class="timeline-meta">
-        <a href="/admin/shorts/{{ run.run_id }}" class="btn btn-secondary btn-sm">Details</a>
-        <span class="timeline-time">{{ run.created_at[:16] if run.created_at else '–' }}</span>
-      </div>
-    </li>
-    {% else %}
-    <li class="empty-state">Noch keine Short-Drafts vorhanden</li>
-    {% endfor %}
+    <li class="timeline-item"><div><strong>{{ run.title or run.slug }}</strong><br/><span class="timeline-time">{{ run.status }}</span></div><div class="timeline-meta"><a href="/admin/shorts/{{ run.run_id }}" class="btn btn-secondary btn-sm">Details</a><span class="timeline-time">{{ run.created_at[:16] if run.created_at else '–' }}</span></div></li>
+    {% else %}<li class="empty-state">Noch keine Short-Drafts vorhanden</li>{% endfor %}
   </ul>
 </section>
 {% endif %}
 
 <script>
 (function() {
-  const source = document.getElementById('source_audio');
+  const houses = {{ houses | tojson }};
+  const uploadedVideos = {{ uploaded_videos | tojson }};
+  const houseGrid = document.getElementById('shorts-house-grid');
+  const variantPanel = document.getElementById('shorts-variant-panel');
+  const variantGrid = document.getElementById('shorts-variant-grid');
+  const videoPanel = document.getElementById('shorts-video-panel');
+  const videoList = document.getElementById('shorts-video-list');
+  const createPanel = document.getElementById('shorts-create-panel');
+  const selectedVideoLabel = document.getElementById('selected-video-label');
   const title = document.getElementById('title');
   const slug = document.getElementById('slug');
-  const duration = document.getElementById('clip_duration_seconds');
-  const start = document.getElementById('clip_start_seconds');
-  const visual = document.getElementById('visual_mode');
-  const activePreset = document.getElementById('shorts-active-preset');
-  const presetCards = document.querySelectorAll('.shorts-preset-card');
-  let currentSuffix = ' | Short';
+  const sourceRunId = document.getElementById('source_run_id');
+  const sourceAudio = document.getElementById('source_audio');
+  const houseInput = document.getElementById('house_key');
+  const variantInput = document.getElementById('variant_key');
 
-  function slugify(text) {
-    return (text || '').toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  function slugify(text) { return (text || '').toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
+  function titleCase(text) { return (text || '').replace(/_/g, ' ').replace(/\b\w/g, m => m.toUpperCase()); }
+
+  function renderVariants(houseKey) {
+    const house = houses[houseKey];
+    const variants = house?.variants || {};
+    variantGrid.innerHTML = '';
+    document.getElementById('shorts-variant-title').textContent = (house?.display_name || houseKey) + ' – Variante wählen';
+    Object.entries(variants).forEach(([key, desc]) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'shorts-variant-card';
+      btn.innerHTML = '<strong>' + titleCase(key) + '</strong><span>' + desc + '</span>';
+      btn.addEventListener('click', () => {
+        variantGrid.querySelectorAll('.shorts-variant-card').forEach(x => x.classList.remove('active'));
+        btn.classList.add('active');
+        houseInput.value = houseKey;
+        variantInput.value = key;
+        renderVideos(houseKey, key);
+      });
+      variantGrid.appendChild(btn);
+    });
+    variantPanel.style.display = 'block';
   }
 
-  function syncTitleFromSource() {
-    const opt = source?.options[source.selectedIndex];
-    const stem = opt?.dataset?.stem || '';
-    if (!stem) return;
-    const base = stem.replace(/-/g, ' ').replace(/\b\w/g, m => m.toUpperCase());
-    if (!title.value || title.dataset.auto === '1') {
-      title.value = base + currentSuffix;
-      title.dataset.auto = '1';
-      if (!slug.dataset.touched) slug.value = slugify(title.value);
+  function renderVideos(houseKey, variantKey) {
+    const rows = uploadedVideos.filter(v => v.house_key === houseKey && (!variantKey || v.variant_key === variantKey));
+    videoList.innerHTML = '';
+    rows.forEach(v => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'shorts-video-card';
+      btn.innerHTML = '<strong>' + (v.title || v.slug) + '</strong><span>' + (v.created_at || '').slice(0,16) + '</span>';
+      btn.addEventListener('click', () => {
+        videoList.querySelectorAll('.shorts-video-card').forEach(x => x.classList.remove('active'));
+        btn.classList.add('active');
+        sourceRunId.value = v.run_id || '';
+        sourceAudio.value = v.audio_filename || '';
+        selectedVideoLabel.textContent = v.title || v.slug;
+        title.value = (v.title || v.slug) + ' | Short';
+        slug.value = slugify((v.slug || 'short') + '-short');
+        createPanel.style.display = 'block';
+      });
+      videoList.appendChild(btn);
+    });
+    if (!rows.length) {
+      videoList.innerHTML = '<div class="empty-state">Keine hochgeladenen Videos für dieses Preset / diese Variante gefunden.</div>';
     }
+    videoPanel.style.display = 'block';
   }
 
-  presetCards.forEach(card => {
+  houseGrid?.querySelectorAll('.shorts-house-card').forEach(card => {
     card.addEventListener('click', () => {
-      presetCards.forEach(c => c.classList.remove('active'));
+      houseGrid.querySelectorAll('.shorts-house-card').forEach(x => x.classList.remove('active'));
       card.classList.add('active');
-      duration.value = card.dataset.duration;
-      start.value = card.dataset.start;
-      visual.value = card.dataset.visual;
-      currentSuffix = card.dataset.titleSuffix || ' | Short';
-      if (activePreset) activePreset.textContent = card.querySelector('strong').textContent;
-      syncTitleFromSource();
+      videoPanel.style.display = 'none';
+      createPanel.style.display = 'none';
+      renderVariants(card.dataset.house);
     });
   });
-
-  source?.addEventListener('change', syncTitleFromSource);
-  title?.addEventListener('input', () => {
-    title.dataset.auto = '0';
-    if (!slug.dataset.touched) slug.value = slugify(title.value);
-  });
-  slug?.addEventListener('input', () => { slug.dataset.touched = '1'; });
 })();
 </script>
 
 <style>
-.shorts-preset-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
+.shorts-house-grid,.shorts-variant-grid,.shorts-video-list { display:grid; gap:12px; }
+.shorts-house-grid { grid-template-columns: repeat(auto-fit,minmax(130px,1fr)); }
+.shorts-variant-grid,.shorts-video-list { grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); }
+.shorts-house-card,.shorts-variant-card,.shorts-video-card {
+  border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.03); color:var(--text); border-radius:12px; padding:14px; text-align:left; display:grid; gap:6px; transition:all .18s var(--ease);
 }
-.shorts-preset-card {
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.03);
-  color: var(--text);
-  border-radius: 12px;
-  padding: 14px;
-  display: grid;
-  gap: 6px;
-  text-align: left;
-  transition: all .18s var(--ease);
-}
-.shorts-preset-card span { color: var(--muted); font-size: .78rem; }
-.shorts-preset-card:hover,
-.shorts-preset-card.active {
-  border-color: var(--gold);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(0,0,0,0.22);
-}
-.shorts-preset-panel,
-.shorts-create-panel { margin-bottom: 18px; }
+.shorts-house-card { background: var(--house-bg, rgba(255,255,255,.03)); }
+.shorts-house-sigil { font-size:1.4rem; }
+.shorts-house-name { font-weight:700; }
+.shorts-variant-card span,.shorts-video-card span { color:var(--muted); font-size:.78rem; }
+.shorts-house-card:hover,.shorts-house-card.active,.shorts-variant-card:hover,.shorts-variant-card.active,.shorts-video-card:hover,.shorts-video-card.active { border-color:var(--gold); transform:translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,.22); }
 </style>
 {% endblock %}
