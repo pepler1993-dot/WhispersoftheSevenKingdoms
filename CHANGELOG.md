@@ -3,6 +3,27 @@
 Alle relevanten Änderungen am Projekt werden hier dokumentiert.
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [v3.3.0] – 2026-03-27
+
+### Added
+- **Settings-Seite** (`/admin/settings`) mit Tabs: General, Providers, Presets – erster Schritt Richtung SaaS-Konfigurierbarkeit.
+- **Settings DB-Tabelle** – Key-Value Store für Space-Config (Name, Timezone, Provider-Keys etc.).
+- **Audio Lab Tabs** – aufgeteilt in „Neuer Job" und „Jobs" (wie Pipeline-Tabs).
+- **Audio Lab Haus/Varianten-Grid** – Schnellauswahl oben als klickbare Cards statt Dropdown.
+- **Generator Status → Operations** verschoben, mit Live-Polling alle 15s.
+- **Dashboard Overview Cards** – Pipeline Runs als Karten statt Listen, mit klickbaren Status-Filtern.
+- **Shorts MVP** – Rendering-Pipeline für YouTube Shorts implementiert.
+- **SaaS-Konzept** (`docs/SAAS_CONCEPT.md`) – Spaces, Content Types, Phasenplan.
+- **Design Principles** (`docs/DESIGN_PRINCIPLES.md`) – 10 UI/UX-Regeln abgeleitet aus dem aktuellen Stand.
+
+### Changed
+- **Audio Lab** komplett überarbeitet: Step-Cards, Mini-List für Jobs, konsistente Badge/Dot-Klassen.
+- **Layout** – `max-width` Cap entfernt, Dashboard nutzt volle Breite auf großen Screens.
+- **Dashboard Run-Karten** – kompaktere Timestamps (DD.MM.YY), Dauer inline.
+
+### Removed
+- **Generator Health Panel** aus Audio Lab (→ jetzt in Operations + Settings/Providers).
+
 ## [v3.2.2] – 2026-03-27
 
 ### Added
