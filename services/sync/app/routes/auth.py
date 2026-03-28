@@ -52,3 +52,44 @@ def logout():
     response = RedirectResponse(url='/login', status_code=302)
     clear_session_cookie(response)
     return response
+
+
+@router.get('/admin/profile', response_class=HTMLResponse)
+def profile_page(request: Request):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse(url='/login', status_code=302)
+    return shared.templates.TemplateResponse(request, 'profile.html', {
+        'request': request,
+        'page': 'profile',
+        'profile_user': user,
+    })
+
+
+@router.post('/admin/profile')
+def profile_save(
+    request: Request,
+    display_name: str = Form(''),
+    current_password: str = Form(''),
+    new_password: str = Form(''),
+):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse(url='/login', status_code=302)
+
+    updates: dict = {}
+    if display_name.strip():
+        updates['display_name'] = display_name.strip()
+
+    if new_password.strip():
+        if not current_password or not verify_password(current_password, user['password_hash']):
+            return RedirectResponse(url='/admin/profile?error=password', status_code=303)
+        from app.auth import hash_password
+        try:
+            updates['password_hash'] = hash_password(new_password.strip())
+        except RuntimeError:
+            return RedirectResponse(url='/admin/profile?error=bcrypt', status_code=303)
+
+    if updates:
+        shared.db.update_user(user['user_id'], **updates)
+    return RedirectResponse(url='/admin/profile?saved=1', status_code=303)

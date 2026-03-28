@@ -232,6 +232,39 @@ def delete_team_member(user_id: str = Form('')):
     return RedirectResponse(url='/admin/settings?tab=team&saved=1', status_code=303)
 
 
+@router.post('/admin/settings/team/edit')
+def edit_team_member(
+    user_id: str = Form(''),
+    display_name: str = Form(''),
+    role: str = Form(''),
+    new_password: str = Form(''),
+):
+    from app.auth import hash_password
+
+    if not user_id:
+        raise HTTPException(status_code=400, detail='User ID required')
+    user = shared.db.get_user(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail='User not found')
+    if role not in ('admin', 'editor', 'viewer'):
+        role = user.get('role', 'editor')
+
+    updates: dict = {}
+    if display_name.strip():
+        updates['display_name'] = display_name.strip()
+    if role:
+        updates['role'] = role
+    if new_password.strip():
+        try:
+            updates['password_hash'] = hash_password(new_password.strip())
+        except RuntimeError as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    if updates:
+        shared.db.update_user(user_id, **updates)
+    return RedirectResponse(url='/admin/settings?tab=team&saved=1', status_code=303)
+
+
 # ── Save Pipelines (Content Types) ────────────────────────────────────────
 
 @router.post('/admin/settings/pipelines')

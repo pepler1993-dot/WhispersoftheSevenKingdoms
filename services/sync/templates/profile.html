@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Profil{% endblock %}
+{% block head_extra %}
+<link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Profil</h1>
+  <div class="page-subtitle">Anzeigename und Passwort ändern.</div>
+</div>
+
+{% if request.query_params.get('saved') %}
+<div class="pf-toast">✅ Profil aktualisiert</div>
+{% endif %}
+{% if request.query_params.get('error') == 'password' %}
+<div class="pf-error">❌ Aktuelles Passwort ist falsch.</div>
+{% endif %}
+
+<section class="panel panel-accent-blue" style="margin-top:18px;">
+  <form method="post" action="/admin/profile">
+
+    <div class="pf-step-card">
+      <div class="pf-step-header">
+        <span class="pf-step-icon">👤</span>
+        <div>
+          <h3>Account</h3>
+          <p class="pf-step-desc">@{{ profile_user.username }} · {{ profile_user.role }}</p>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="display_name">Anzeigename</label>
+        <input type="text" name="display_name" id="display_name" class="form-input" value="{{ profile_user.display_name or '' }}" placeholder="{{ profile_user.username }}" />
+      </div>
+    </div>
+
+    <div class="pf-step-card">
+      <div class="pf-step-header">
+        <span class="pf-step-icon">🔒</span>
+        <div>
+          <h3>Passwort ändern</h3>
+          <p class="pf-step-desc">Leer lassen wenn du es nicht ändern willst.</p>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="current_password">Aktuelles Passwort</label>
+        <input type="password" name="current_password" id="current_password" class="form-input" autocomplete="current-password" />
+      </div>
+      <div class="form-group">
+        <label for="new_password">Neues Passwort</label>
+        <input type="password" name="new_password" id="new_password" class="form-input" autocomplete="new-password" />
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary pf-btn-save">
+      <i data-lucide="save" style="width:16px;height:16px"></i> Speichern
+    </button>
+  </form>
+</section>
+
+<style>
+.pf-step-card {
+  background: var(--surface, rgba(255,255,255,0.02));
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  transition: border-color 0.2s ease;
+}
+.pf-step-card:hover { border-color: rgba(255,255,255,0.12); }
+.pf-step-header { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 16px; }
+.pf-step-icon { font-size: 1.4rem; flex-shrink: 0; }
+.pf-step-header h3 { font-size: 0.95rem; font-weight: 700; margin: 0; }
+.pf-step-desc { font-size: 0.78rem; color: var(--muted); margin: 2px 0 0; }
+.pf-btn-save {
+  width: 100%;
+  font-size: 1rem;
+  padding: 14px 32px;
+  margin-top: 8px;
+  box-shadow: 0 4px 20px rgba(59,130,246,0.25);
+  transition: all 0.2s ease;
+}
+.pf-btn-save:hover { box-shadow: 0 6px 28px rgba(59,130,246,0.4); transform: translateY(-2px); }
+.pf-toast {
+  position: fixed; top: 20px; right: 20px;
+  background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.4); color: #4ade80;
+  padding: 12px 20px; border-radius: 10px; font-size: 0.88rem; font-weight: 600; z-index: 999;
+  animation: pf-in 0.3s ease, pf-out 0.3s ease 2.5s forwards;
+}
+.pf-error {
+  background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5;
+  padding: 12px 16px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 16px;
+}
+@keyframes pf-in { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+@keyframes pf-out { from { opacity:1; } to { opacity:0; } }
+@media (max-width: 768px) {
+  .pf-step-card { padding: 14px; }
+  .pf-btn-save { padding: 12px 18px; font-size: 0.92rem; }
+}
+</style>
+{% endblock %}

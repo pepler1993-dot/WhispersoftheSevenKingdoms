@@ -496,19 +496,64 @@ fetch('/admin/audio/health')
         <div class="mini-sub">@{{ u.username }} · {{ u.role }} · Erstellt {{ u.created_at[:10] if u.created_at else '—' }}{% if u.last_login %} · Letzter Login {{ u.last_login[:10] }}{% endif %}</div>
       </div>
       <span class="mini-badge" style="background: {% if u.role == 'admin' %}rgba(201,165,58,0.15); color:#fbbf24{% elif u.role == 'editor' %}rgba(59,130,246,0.15); color:#60a5fa{% else %}rgba(107,114,128,0.15); color:#9ca3af{% endif %};">{{ u.role }}</span>
-      {% if u.username != 'admin' %}
-      <form method="post" action="/admin/settings/team/delete" style="display:inline;" onsubmit="return confirm('User «{{ u.username }}» wirklich löschen?')">
-        <input type="hidden" name="user_id" value="{{ u.user_id }}" />
-        <button type="submit" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:0.7rem; color:#f87171;">🗑️</button>
-      </form>
-      {% endif %}
+      <div style="display:flex; gap:4px;">
+        <button type="button" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:0.7rem;" onclick="editUser('{{ u.user_id }}', '{{ u.display_name or u.username }}', '{{ u.role }}')">✏️</button>
+        {% if u.username != 'admin' %}
+        <form method="post" action="/admin/settings/team/delete" style="display:inline;" onsubmit="return confirm('User «{{ u.username }}» wirklich löschen?')">
+          <input type="hidden" name="user_id" value="{{ u.user_id }}" />
+          <button type="submit" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:0.7rem; color:#f87171;">🗑️</button>
+        </form>
+        {% endif %}
+      </div>
     </div>
     {% endfor %}
   </div>
   {% else %}
   <div class="empty-state-sm">Noch keine User angelegt.</div>
   {% endif %}
+
+  {# Edit user form (inline, hidden) #}
+  <div id="edit-user-form" class="st-step-card" style="display:none; margin-top:16px;">
+    <form method="post" action="/admin/settings/team/edit">
+      <input type="hidden" name="user_id" id="edit_user_id" />
+      <h3 style="margin-bottom:12px;">✏️ User bearbeiten</h3>
+      <div class="grid two">
+        <div class="form-group">
+          <label for="edit_display_name">Anzeigename</label>
+          <input type="text" name="display_name" id="edit_display_name" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label for="edit_role">Rolle</label>
+          <select name="role" id="edit_role" class="form-select">
+            <option value="admin">Admin</option>
+            <option value="editor">Editor</option>
+            <option value="viewer">Viewer</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="edit_password">Neues Passwort (leer = unverändert)</label>
+        <input type="password" name="new_password" id="edit_password" class="form-input" placeholder="Leer lassen" />
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button type="submit" class="btn btn-primary btn-sm">Speichern</button>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('edit-user-form').style.display='none'">Abbrechen</button>
+      </div>
+    </form>
+  </div>
 </section>
+
+<script>
+function editUser(userId, displayName, role) {
+  document.getElementById('edit_user_id').value = userId;
+  document.getElementById('edit_display_name').value = displayName;
+  document.getElementById('edit_role').value = role;
+  document.getElementById('edit_password').value = '';
+  var form = document.getElementById('edit-user-form');
+  form.style.display = 'block';
+  form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+</script>
 {% endif %}
 
 <style>
