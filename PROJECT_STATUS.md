@@ -1,5 +1,5 @@
 # PROJECT STATUS – Whispers of the Seven Kingdoms
-> Letzte Aktualisierung: 2026-03-28T07:00:01Z
+> Letzte Aktualisierung: 2026-03-28T13:00:01Z
 > Aktualisiert von: Smith
 
 **Agents: Lest diese Datei zuerst. Sie enthält alles was ihr wissen müsst.**
@@ -194,35 +194,15 @@ cc1dc9a feat(audio-lab): pass house_templates to audio page (#63)
 
 
 
-## 🕐 Letzte Commits (auto-generated 2026-03-28T07:00:01Z)
+
+## 🕐 Letzte Commits (auto-generated 2026-03-28T13:00:01Z)
 ```
-84f6fbd docs: note auth workaround – POST bypass needs API tokens before production
-51b08f0 fix: allow POST requests and API calls without auth
-102acf6 Merge remote-tracking branch 'origin/main'
-6b9d7dc Fix dashboard responsiveness
-2e76e57 docs: update SaaS concept – status tracking + full roadmap to launch
-d755cf1 feat(shorts): render from selected longform video
-9eba4d8 fix(ui): Desktop-Grids und Library-Tabs für große Viewports
-a4c11c7 feat(ui): full responsiveness for TV, ultra-wide and mobile
-fe1c679 feat(ui): Shorts + pipeline runs responsive phase 2, short detail tabs
-9fd6b2e fix(settings): bind tab query with Query(), validate section; improve tab hit targets
-d4b44f1 feat: complete user management – edit, password change, profile page
-53d3ba1 docs: CHANGELOG for v3.4.0
-1e234a2 fix(shorts): add missing audio lab card styles
-fefa2f4 feat: enable auth by default – login required for dashboard
-e9ab9e6 fix(auth): add missing bcrypt and jwt deps
-9c617a7 fix: auth guards – clear errors when bcrypt/jwt missing, team add error handling
-17ec392 fix: add bcrypt + PyJWT to requirements.txt
-e04e4df fix: make auth opt-in (AUTH_ENABLED=1) to prevent server crash
-c6f0f72 feat: Auth system + Team management (Phase 4)
-fb4657a fix: Create folder sub-items clearly grouped with border-left tree line
-f3fd8cf refactor(shorts): mirror audio lab layout
-6777b90 fix: Create folder sidebar styling – proper size, tree line, subtle chevron
-0acf0f5 ui: Create folder matches nav-link style, gold active state when sub-page active
-3c2888e feat(shorts): improve flow cards and config layout
-55af61e ui: collapsible Create folder in sidebar (IDE-style)
-63f4422 Revert "feat(create): group videos shorts and songs under create"
-eb7ec9e feat(create): group videos shorts and songs under create
-b34f865 ui: restructure sidebar – Create group with Video/Shorts/Songs
+1cebb06 chore(deploy): trigger redeploy
+29ce29d fix(upload): push thumbnails to youtube
+dcb810c refactor: unified workflow architecture - merge pipeline_runs + workflows into single entity
+fa31be6 fix(upload): stabilize youtube credential source
+768410a New sleep music generation strategy
+31da229 ci: ignore markdown-only changes in deploy pipeline
+a4c21f8 auto: update PROJECT_STATUS.md (2026-03-28T07:00:01Z)
 ```
 ---
