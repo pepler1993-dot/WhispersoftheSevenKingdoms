@@ -142,12 +142,13 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
 
 .topbar-user {
   position: absolute;
-  top: var(--content-pad-y);
+  top: 8px;
   right: var(--content-pad-x);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   z-index: 50;
+  font-size: 0.75rem;
 }
 
 .topbar-user-info {
@@ -526,6 +527,7 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
 .content {
   position: relative;
   padding: var(--content-pad-y) var(--content-pad-x);
+  padding-top: calc(var(--content-pad-y) + 28px);
   flex: 1;
   min-width: 0;
   max-width: none;
