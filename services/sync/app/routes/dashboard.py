@@ -33,51 +33,52 @@ def admin_dashboard(request: Request):
     tab = request.query_params.get('tab', 'all')
 
     # All content workflows (exclude audio_lab)
-    all_workflows = shared.db.list_workflows(limit=100)
-    content_workflows = [w for w in all_workflows if w.get('type') != 'audio_lab']
+    all_content = [w for w in shared.db.list_workflows(limit=200) if w.get('type') != 'audio_lab']
 
-    # Counts per type (always across ALL content workflows, not filtered by tab)
-    count_videos = sum(1 for w in content_workflows if w.get('type') == 'video')
-    count_shorts = sum(1 for w in content_workflows if w.get('type') == 'short')
-    count_songs = sum(1 for w in content_workflows if w.get('type') == 'song')
-
-    # Stats across all content workflows
-    status_counts: dict[str, int] = {}
-    for w in content_workflows:
-        status_counts[w['status']] = status_counts.get(w['status'], 0) + 1
-
-    count_running = sum(status_counts.get(s, 0) for s in ('running', 'uploading', 'waiting_for_audio'))
-    count_queued = status_counts.get('queued', 0)
-    count_rendered = status_counts.get('rendered', 0)
-    count_uploaded = status_counts.get('uploaded', 0)
-
-    # Active workflows (running/queued/uploading/waiting)
-    active_workflows = [w for w in content_workflows if w['status'] in ('running', 'queued', 'uploading', 'waiting_for_audio')]
-
-    # Filter by tab for the list
+    # Tab filtering
     if tab == 'videos':
-        filtered = [w for w in content_workflows if w.get('type') == 'video']
+        filtered = [w for w in all_content if w['type'] == 'video']
     elif tab == 'shorts':
-        filtered = [w for w in content_workflows if w.get('type') == 'short']
+        filtered = [w for w in all_content if w['type'] == 'short']
     elif tab == 'songs':
-        filtered = [w for w in content_workflows if w.get('type') == 'song']
+        filtered = [w for w in all_content if w['type'] == 'song']
     else:
-        filtered = content_workflows
+        filtered = all_content
+
+    # Stats (always across ALL content, not filtered)
+    running_statuses = {'running', 'uploading', 'waiting_for_audio'}
+    count_running = sum(1 for w in all_content if w['status'] in running_statuses)
+    count_queued = sum(1 for w in all_content if w['status'] == 'queued')
+    count_rendered = sum(1 for w in all_content if w['status'] == 'rendered')
+    count_uploaded = sum(1 for w in all_content if w['status'] == 'uploaded')
+
+    # Sections
+    active = [w for w in all_content if w['status'] in running_statuses | {'queued'}]
+    needs_attention = [w for w in all_content if w['status'] in ('failed', 'error')]
+    published = [w for w in all_content if w['status'] == 'uploaded'][:8]
+
+    # Type counts for tabs
+    count_all = len(all_content)
+    count_videos = sum(1 for w in all_content if w['type'] == 'video')
+    count_shorts = sum(1 for w in all_content if w['type'] == 'short')
+    count_songs = sum(1 for w in all_content if w['type'] == 'song')
 
     return shared.templates.TemplateResponse(request, 'dashboard.html', {
         'request': request,
         'page': 'dashboard',
         'tab': tab,
         'workflows': filtered[:20],
-        'active_workflows': active_workflows,
+        'active': active,
+        'needs_attention': needs_attention,
+        'published': published,
         'count_running': count_running,
         'count_queued': count_queued,
         'count_rendered': count_rendered,
         'count_uploaded': count_uploaded,
+        'count_all': count_all,
         'count_videos': count_videos,
         'count_shorts': count_shorts,
         'count_songs': count_songs,
-        'count_all': len(content_workflows),
     })
 
 

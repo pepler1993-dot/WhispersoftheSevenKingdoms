@@ -4,10 +4,12 @@
 <link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
 {% endblock %}
 {% block content %}
+
+{# ── Page Header ──────────────────────────────────────────────── #}
 <div class="page-header page-header-flex">
   <div>
     <h1>Studio</h1>
-    <div class="page-subtitle">Content-Produktion: Videos, Shorts und Songs im Überblick.</div>
+    <div class="page-subtitle">Content Production Command Center</div>
   </div>
 </div>
 
@@ -37,76 +39,128 @@
   </nav>
 </div>
 
-{# ── Stats Row ────────────────────────────────────────────────── #}
-<div class="dash-stats">
-  <div class="dash-stat">
-    <div class="dash-stat-icon"><i data-lucide="play-circle"></i></div>
-    <div class="dash-stat-body">
-      <div class="dash-stat-value">{{ count_running }}</div>
-      <div class="dash-stat-label">Running</div>
+{# ── KPI Stats Row ────────────────────────────────────────────── #}
+<div class="kpi-row">
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-icon-running"><i data-lucide="play-circle"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-value">{{ count_running }}</div>
+      <div class="kpi-label">Running</div>
     </div>
   </div>
-  <div class="dash-stat">
-    <div class="dash-stat-icon"><i data-lucide="clock"></i></div>
-    <div class="dash-stat-body">
-      <div class="dash-stat-value">{{ count_queued }}</div>
-      <div class="dash-stat-label">Queued</div>
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-icon-queued"><i data-lucide="clock"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-value">{{ count_queued }}</div>
+      <div class="kpi-label">Queued</div>
     </div>
   </div>
-  <div class="dash-stat">
-    <div class="dash-stat-icon"><i data-lucide="check-circle"></i></div>
-    <div class="dash-stat-body">
-      <div class="dash-stat-value">{{ count_rendered }}</div>
-      <div class="dash-stat-label">Rendered</div>
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-icon-ready"><i data-lucide="check-circle"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-value">{{ count_rendered }}</div>
+      <div class="kpi-label">Ready</div>
     </div>
   </div>
-  <div class="dash-stat">
-    <div class="dash-stat-icon"><i data-lucide="upload-cloud"></i></div>
-    <div class="dash-stat-body">
-      <div class="dash-stat-value">{{ count_uploaded }}</div>
-      <div class="dash-stat-label">Uploaded</div>
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-icon-published"><i data-lucide="upload-cloud"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-value">{{ count_uploaded }}</div>
+      <div class="kpi-label">Published</div>
     </div>
   </div>
 </div>
 
-{# ── Active Workflows ─────────────────────────────────────────── #}
-{% if active_workflows %}
-<section class="dash-active-section">
-  <div class="section-head">
-    <h2><i data-lucide="zap" class="icon-md"></i> Gerade aktiv</h2>
+{# ── Needs Attention ──────────────────────────────────────────── #}
+{% if needs_attention %}
+<section class="attention-section">
+  <div class="attention-header">
+    <span class="attention-icon">⚠️</span>
+    <h2>Needs Attention</h2>
+    <span class="attention-count">{{ needs_attention|length }}</span>
   </div>
-  <div class="active-grid">
-  {% for run in active_workflows %}
-  {% set is_queued = run.status == 'queued' %}
-  {% set is_upload = run.status == 'uploading' %}
-  {% set wtype = run.get('type', 'video') %}
-  {% set href = '/admin/shorts/' ~ run.workflow_id if wtype == 'short' else '/admin/pipeline/run/' ~ run.workflow_id %}
-  <a href="{{ href }}" class="active-card {% if is_queued %}active-card-queued{% elif is_upload %}active-card-upload{% endif %}">
-    <div class="active-glow {% if is_queued %}queued-glow{% elif is_upload %}upload-glow{% endif %}"></div>
-    <div class="active-badge {% if is_queued %}active-badge-queued{% elif is_upload %}active-badge-upload{% endif %}">
-      <span class="active-dot {% if is_queued %}queued-dot{% elif is_upload %}upload-dot{% endif %}"></span>
-      {% if is_queued %}QUEUED{% elif is_upload %}UPLOADING{% else %}RUNNING{% endif %}
-    </div>
-    <div class="active-body">
-      <div class="active-title">{{ run.title or run.slug }}</div>
-      <div class="active-sub">
-        <span class="type-badge type-badge-{{ wtype }}">{{ wtype | capitalize }}</span>
-        · {{ run.slug }}
+  <div class="attention-list">
+    {% for w in needs_attention %}
+    {% set wtype = w.get('type', 'video') %}
+    {% set href = '/admin/shorts/' ~ w.workflow_id if wtype == 'short' else '/admin/pipeline/run/' ~ w.workflow_id %}
+    <a href="{{ href }}" class="attention-card">
+      <div class="attention-card-body">
+        <div class="attention-title">{{ w.title or w.slug }}</div>
+        <div class="attention-meta">{{ w.error_message[:80] if w.error_message else 'Unknown error' }}</div>
       </div>
-      {% if not is_queued %}
-      <div class="active-progress">
-        <div class="active-bar"><div class="active-bar-fill"></div></div>
-      </div>
-      {% endif %}
-    </div>
-  </a>
-  {% endfor %}
+      <span class="type-badge type-badge-{{ wtype }}">{{ wtype|capitalize }}</span>
+    </a>
+    {% endfor %}
   </div>
 </section>
 {% endif %}
 
-{# ── Recent Workflows (unified list) ─────────────────────────── #}
-<section class="dash-recent" style="background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;">
+{# ── Active Productions ───────────────────────────────────────── #}
+{% if active %}
+<section class="active-section">
+  <div class="section-head">
+    <h2>⚡ Active Productions</h2>
+  </div>
+  <div class="active-grid">
+    {% for run in active %}
+    {% set is_queued = run.status == 'queued' %}
+    {% set is_upload = run.status == 'uploading' %}
+    {% set wtype = run.get('type', 'video') %}
+    {% set href = '/admin/shorts/' ~ run.workflow_id if wtype == 'short' else '/admin/pipeline/run/' ~ run.workflow_id %}
+    <a href="{{ href }}" class="active-card {% if is_queued %}active-card-queued{% elif is_upload %}active-card-upload{% endif %}">
+      <div class="active-glow {% if is_queued %}queued-glow{% elif is_upload %}upload-glow{% endif %}"></div>
+      <div class="active-badge {% if is_queued %}active-badge-queued{% elif is_upload %}active-badge-upload{% endif %}">
+        <span class="active-dot {% if is_queued %}queued-dot{% elif is_upload %}upload-dot{% endif %}"></span>
+        {% if is_queued %}QUEUED{% elif is_upload %}UPLOADING{% else %}RUNNING{% endif %}
+      </div>
+      <div class="active-body">
+        <div class="active-title">{{ run.title or run.slug }}</div>
+        <div class="active-sub">
+          <span class="type-badge type-badge-{{ wtype }}">{{ wtype|capitalize }}</span>
+          <span class="active-slug">{{ run.slug }}</span>
+        </div>
+        {% if not is_queued %}
+        <div class="active-progress">
+          <div class="active-bar"><div class="active-bar-fill"></div></div>
+        </div>
+        {% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{# ── Recently Published ───────────────────────────────────────── #}
+{% if published %}
+<section class="published-section">
+  <div class="section-head">
+    <h2>📺 Recently Published</h2>
+  </div>
+  <div class="published-grid">
+    {% for w in published %}
+    {% set wtype = w.get('type', 'video') %}
+    {% set href = '/admin/shorts/' ~ w.workflow_id if wtype == 'short' else '/admin/pipeline/run/' ~ w.workflow_id %}
+    <a href="{{ href }}" class="published-card">
+      <div class="published-thumb">
+        <img src="/admin/pipeline/preview/{{ w.slug }}/thumbnail.jpg" onerror="this.style.display='none'" alt="" />
+        {% if w.config and w.config.get('loop_hours') %}
+        <span class="published-duration">{{ w.config.loop_hours }}h</span>
+        {% endif %}
+        <span class="type-badge type-badge-{{ wtype }} published-type-overlay">{{ wtype|capitalize }}</span>
+      </div>
+      <div class="published-info">
+        <div class="published-title">{{ w.title or w.slug }}</div>
+        <div class="published-meta">{{ w.finished_at[:10] if w.finished_at else '' }}</div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{# ── All Workflows (tab-filtered) ─────────────────────────────── #}
+<section class="workflows-section">
   <div class="section-header-inline">
     <h2>Workflows</h2>
     <a href="/admin/pipeline/logs" class="section-link">Alle anzeigen →</a>
@@ -118,7 +172,7 @@
     {% set href = '/admin/shorts/' ~ w.workflow_id if wtype == 'short' else '/admin/pipeline/run/' ~ w.workflow_id %}
     <a href="{{ href }}" class="workflow-row workflow-row-{{ w.status }}">
       <div class="workflow-row-left">
-        <span class="type-badge type-badge-{{ wtype }}">{{ wtype | capitalize }}</span>
+        <span class="type-badge type-badge-{{ wtype }}">{{ wtype|capitalize }}</span>
         <div class="workflow-row-info">
           <div class="workflow-row-title">{{ w.title or w.slug }}</div>
           <div class="workflow-row-meta">
@@ -142,46 +196,122 @@
 </section>
 
 <style>
-/* ── Stats Row ───────────────────────────────────────────── */
-.dash-stats {
+/* ── KPI Stats Row ───────────────────────────────────────── */
+.kpi-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
   margin-bottom: 28px;
 }
-.dash-stat {
+.kpi-card {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px 18px;
+  gap: 14px;
+  padding: 18px 20px;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 12px;
+  transition: all 0.2s var(--ease);
 }
-.dash-stat-icon { color: var(--muted); }
-.dash-stat-icon svg,
-.dash-stat-icon .lucide { width: 20px; height: 20px; }
-.dash-stat-value { font-size: 1.4rem; font-weight: 800; }
-.dash-stat-label { font-size: 0.72rem; color: var(--muted); font-weight: 500; }
+.kpi-card:hover {
+  border-color: rgba(255,255,255,0.12);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+}
+.kpi-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.kpi-icon svg, .kpi-icon .lucide { width: 20px; height: 20px; }
+.kpi-icon-running { background: rgba(34,197,94,0.12); color: #4ade80; }
+.kpi-icon-queued { background: rgba(217,119,6,0.12); color: #fbbf24; }
+.kpi-icon-ready { background: rgba(212,168,69,0.12); color: var(--gold); }
+.kpi-icon-published { background: rgba(59,130,246,0.12); color: #60a5fa; }
+.kpi-body { min-width: 0; }
+.kpi-value { font-size: 1.3rem; font-weight: 800; line-height: 1.1; }
+.kpi-label { font-size: 0.72rem; color: var(--muted); font-weight: 500; margin-top: 2px; }
 
 /* ── Type badges ─────────────────────────────────────────── */
 .type-badge {
   display: inline-flex;
   align-items: center;
-  font-size: 0.62rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.65rem;
   font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 999px;
   text-transform: uppercase;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.5px;
   flex-shrink: 0;
 }
 .type-badge-video { background: rgba(59,130,246,0.15); color: #60a5fa; }
 .type-badge-short { background: rgba(168,85,247,0.15); color: #c084fc; }
-.type-badge-song  { background: rgba(20,184,166,0.15); color: #2dd4bf; }
+.type-badge-song  { background: rgba(45,212,191,0.15); color: #2dd4bf; }
 
-/* ── Active section ──────────────────────────────────────── */
-.dash-active-section { margin-bottom: 28px; }
+/* ── Needs Attention ─────────────────────────────────────── */
+.attention-section {
+  background: rgba(239,68,68,0.04);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 28px;
+}
+.attention-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.attention-icon { font-size: 1.1rem; }
+.attention-header h2 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0;
+  color: #f87171;
+}
+.attention-count {
+  background: rgba(239,68,68,0.2);
+  color: #f87171;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.attention-list { display: flex; flex-direction: column; gap: 8px; }
+.attention-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(239,68,68,0.06);
+  border: 1px solid rgba(239,68,68,0.15);
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.15s ease;
+}
+.attention-card:hover {
+  background: rgba(239,68,68,0.1);
+  border-color: rgba(239,68,68,0.3);
+  transform: translateY(-1px);
+}
+.attention-card-body { min-width: 0; flex: 1; }
+.attention-title { font-size: 0.88rem; font-weight: 600; margin-bottom: 2px; }
+.attention-meta {
+  font-size: 0.72rem;
+  color: #f87171;
+  opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Active Productions ──────────────────────────────────── */
+.active-section { margin-bottom: 28px; }
 .active-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
@@ -274,7 +404,18 @@
 }
 .active-body { position: relative; z-index: 1; }
 .active-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 3px; }
-.active-sub { font-size: 0.74rem; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.active-sub {
+  font-size: 0.74rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.active-slug {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .active-progress { margin-top: 12px; }
 .active-bar {
   height: 5px;
@@ -295,8 +436,75 @@
   100% { background-position: -200% 0; }
 }
 
-/* ── Recent / Workflow list ──────────────────────────────── */
-.dash-recent {
+/* ── Published Grid ──────────────────────────────────────── */
+.published-section { margin-bottom: 28px; }
+.published-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+.published-card {
+  display: block;
+  text-decoration: none;
+  color: var(--text);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  transition: all 0.2s ease;
+}
+.published-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+  border-color: rgba(255,255,255,0.12);
+}
+.published-thumb {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%; /* 16:9 */
+  background: var(--surface);
+  overflow: hidden;
+}
+.published-thumb img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.published-duration {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0,0,0,0.75);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.published-type-overlay {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+}
+.published-info { padding: 12px 14px; }
+.published-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 3px;
+}
+.published-meta {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+/* ── Workflows Section ───────────────────────────────────── */
+.workflows-section {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -317,13 +525,13 @@
 }
 .section-link:hover { color: var(--text); }
 
-.workflow-list { display: flex; flex-direction: column; gap: 8px; }
+.workflow-list { display: flex; flex-direction: column; gap: 6px; }
 .workflow-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  padding: 14px 18px;
+  padding: 12px 16px;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -339,7 +547,7 @@
 .workflow-row-left {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   min-width: 0;
   flex: 1;
 }
@@ -352,13 +560,10 @@
   text-overflow: ellipsis;
   margin-bottom: 2px;
 }
-.workflow-row-meta {
-  font-size: 0.72rem;
-  color: var(--muted);
-}
+.workflow-row-meta { font-size: 0.72rem; color: var(--muted); }
 .workflow-row-right { flex-shrink: 0; }
 
-/* Status-colored left border accent */
+/* Status-colored left border */
 .workflow-row-uploaded { border-left: 3px solid var(--blue, #4a8fe7); }
 .workflow-row-rendered { border-left: 3px solid var(--gold, #d4a845); }
 .workflow-row-running, .workflow-row-uploading, .workflow-row-waiting_for_audio { border-left: 3px solid var(--good, #34d399); }
@@ -366,24 +571,7 @@
 .workflow-row-cancelled { border-left: 3px solid #6b7280; }
 .workflow-row-created, .workflow-row-queued { border-left: 3px solid var(--warn, #fbbf24); }
 
-/* ── Section head ────────────────────────────────────────── */
-.section-head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-.section-head h2 {
-  font-size: 1rem;
-  font-weight: 700;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.section-head .icon-md { width: 18px; height: 18px; }
-
-/* ── Mini badges (reuse) ─────────────────────────────────── */
+/* ── Mini badges ─────────────────────────────────────────── */
 .mini-badge {
   font-size: 0.65rem;
   font-weight: 700;
@@ -403,6 +591,19 @@
 .mini-badge-failed, .mini-badge-error { background: rgba(239,68,68,0.15); color: #f87171; }
 .mini-badge-cancelled { background: rgba(107,114,128,0.15); color: #9ca3af; }
 
+/* ── Section head ────────────────────────────────────────── */
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.section-head h2 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0;
+}
+
 .empty-state-sm {
   padding: 24px;
   text-align: center;
@@ -412,25 +613,27 @@
 
 /* ── Mobile ──────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .dash-stats { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .dash-stat { padding: 12px; gap: 10px; }
-  .dash-stat-value { font-size: 1.15rem; }
-  .dash-stat-icon svg,
-  .dash-stat-icon .lucide { width: 16px; height: 16px; }
+  .kpi-row { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .kpi-card { padding: 14px; gap: 10px; }
+  .kpi-icon { width: 34px; height: 34px; }
+  .kpi-value { font-size: 1.15rem; }
 
   .active-card { padding: 16px; }
   .active-title { font-size: 0.95rem; }
-  .active-badge { font-size: 0.6rem; padding: 2px 8px; }
-  .active-sub { font-size: 0.7rem; }
   .active-grid { grid-template-columns: 1fr; }
 
-  .dash-recent { padding: 14px; }
-  .workflow-row { padding: 10px 0; }
+  .published-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+
+  .workflows-section { padding: 14px; }
+  .workflow-row { padding: 10px 12px; }
   .workflow-row-title { font-size: 0.82rem; }
   .workflow-row-meta { font-size: 0.66rem; }
+
+  .attention-section { padding: 14px 16px; }
 }
 @media (max-width: 400px) {
-  .dash-stats { grid-template-columns: repeat(2, 1fr); }
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .published-grid { grid-template-columns: 1fr; }
 }
 </style>
 {% endblock %}
