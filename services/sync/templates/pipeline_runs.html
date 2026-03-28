@@ -89,7 +89,7 @@
     <div class="live-badge"><span class="live-dot"></span> LIVE</div>
     <div class="live-body">
       <div class="live-title">{{ run.title or run.slug }}</div>
-      <div class="live-sub">{{ run.slug }} · {{ run.workflow_id[:8] }}</div>
+      <div class="live-sub">Gestartet {{ run.started_at[11:16] if run.started_at else "—" }}</div>
       <div class="live-progress">
         <div class="live-bar"><div class="live-bar-fill"></div></div>
         <div class="live-progress-info">
@@ -121,7 +121,7 @@
       <div class="queue-position">{{ loop.index }}</div>
       <div class="queue-info">
         <div class="queue-title">{{ run.title or run.slug }}</div>
-        <div class="queue-sub">{{ run.slug }} · {{ run.workflow_id[:8] }}</div>
+        <div class="queue-sub">Erstellt {{ run.created_at[11:16] if run.created_at else "—" }}</div>
       </div>
       <div class="queue-details">
         {% if run.config and run.config.get('loop_hours') %}<span>{{ run.config.loop_hours }}h</span>{% endif %}
@@ -161,7 +161,6 @@
       <div class="yt-info">
         <div class="yt-title">{{ run.title or run.slug }}</div>
         <div class="yt-meta">
-          <span>{{ run.slug }}</span>
           {% if run.started_at and run.finished_at %}
           <span>{{ run.started_at[:10] }}</span>
           {% endif %}
@@ -200,7 +199,6 @@
       <div class="yt-info">
         <div class="yt-title">{{ run.title or run.slug }}</div>
         <div class="yt-meta">
-          <span>{{ run.slug }}</span>
           {% if run.started_at and run.finished_at %}
           <span>{{ run.started_at[:10] }}</span>
           {% endif %}
@@ -228,7 +226,7 @@
       <div class="run-status-indicator failed-dot"></div>
       <div class="run-info">
         <div class="run-title">{{ run.title or run.slug }}</div>
-        <div class="run-sub">{{ run.slug }} · {{ run.workflow_id[:8] }}</div>
+        <div class="run-sub">{{ run.created_at[:10] if run.created_at else "—" }}</div>
       </div>
       <div class="run-error">{{ run.error_display or run.error_message[:60] or "Unbekannter Fehler" }}</div>
       <div class="run-time">{{ run.finished_at[:16] if run.finished_at else '—' }}</div>
@@ -252,7 +250,7 @@
       <div class="run-status-indicator cancelled-dot"></div>
       <div class="run-info">
         <div class="run-title">{{ run.title or run.slug }}</div>
-        <div class="run-sub">{{ run.slug }} · {{ run.workflow_id[:8] }}</div>
+        <div class="run-sub">{{ run.created_at[:10] if run.created_at else "—" }}</div>
       </div>
       <div class="run-duration">{{ run.finished_at[:16] if run.finished_at else '—' }}</div>
       <div class="run-time"></div>

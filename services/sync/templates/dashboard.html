@@ -113,7 +113,7 @@
       <div class="active-body">
         <div class="active-title">{{ run.title or run.slug }}</div>
         <div class="active-sub">
-  <span class="active-slug">{{ run.slug }}</span>
+  {% if run.phase == "audio" %}🎵 Audio{% elif run.phase == "upload" %}🚀 Upload{% else %}🎬 Render{% endif %}
         </div>
         {% if not is_queued %}
         <div class="active-progress">
@@ -173,7 +173,7 @@
   </div>
   {% if workflows %}
   <div class="wf-card-grid">
-    {% for w in workflows %}
+    {% for w in workflows if w.status not in ("failed", "error") %}
     {% set wtype = w.get('type', 'video') %}
     {% set href = '/admin/shorts/' ~ w.workflow_id if wtype == 'short' else '/admin/pipeline/run/' ~ w.workflow_id %}
     <a href="{{ href }}" class="wf-card wf-card-{{ w.status }}">
@@ -198,7 +198,14 @@
     {% endfor %}
   </div>
   {% else %}
-  <div class="empty-state-sm">Noch keine Workflows in dieser Kategorie.</div>
+  <div class="empty-state-box">
+    <div class="empty-state-icon">{% if tab == "shorts" %}📱{% elif tab == "songs" %}🎵{% else %}🎬{% endif %}</div>
+    <div class="empty-state-text">
+      {% if tab == "shorts" %}Noch keine Shorts erstellt{% elif tab == "songs" %}Songs-Feature kommt bald{% else %}Noch keine Videos erstellt{% endif %}
+    </div>
+    {% if tab == "shorts" %}<a href="/admin/shorts" class="btn btn-primary" style="margin-top:16px">Ersten Short erstellen</a>
+    {% elif tab != "songs" %}<a href="/admin/pipeline/new" class="btn btn-primary" style="margin-top:16px">Erstes Video erstellen</a>{% endif %}
+  </div>
   {% endif %}
 </section>
 
@@ -678,6 +685,21 @@
 .wf-card-cancelled { border-top: 2px solid #6b7280; }
 .wf-card-created, .wf-card-queued { border-top: 2px solid var(--warn, #fbbf24); }
 
+
+/* ── Phase badge ──────────────────────────────────────── */
+.active-phase-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.7);
+  vertical-align: middle;
+}
 /* ── Mobile ──────────────────────────────────────────────── */
 /* ── Empty State ─────────────────────────────────────────── */
 .dashboard-empty-state {
