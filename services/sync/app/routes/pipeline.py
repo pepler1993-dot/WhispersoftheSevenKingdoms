@@ -157,8 +157,11 @@ def admin_pipeline_logs(request: Request):
     from app.routes.dashboard import _humanize_error
     workflows = shared.db.list_workflows(type='video', limit=100)
     for w in workflows:
-        if w.get('error_message'):
-            w['error_display'] = _humanize_error(w['error_message'])
+        try:
+            if w.get('error_message'):
+                w['error_display'] = _humanize_error(w['error_message'])
+        except Exception:
+            w['error_display'] = str(w.get('error_message', ''))[:60]
     houses = _load_house_templates()
     queue = get_queue_status(shared.db)
     return shared.templates.TemplateResponse(request, 'pipeline_runs.html', {
