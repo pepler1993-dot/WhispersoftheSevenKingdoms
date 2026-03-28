@@ -152,15 +152,16 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 10px;
-  padding: 10px 24px;
-  background: transparent;
-  border-bottom: 1px solid var(--line);
+  gap: 8px;
+  padding: 0 var(--content-pad-x);
   height: 52px;
   position: sticky;
   top: 0;
   z-index: 90;
-  background: linear-gradient(180deg, #0f172a 80%, transparent);
+  background: rgba(15,23,42,0.96);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
 }
 
 .topbar-user {
@@ -169,44 +170,47 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
   gap: 8px;
   text-decoration: none;
   color: var(--text);
-  padding: 5px 10px;
+  padding: 6px 12px;
   border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.08);
   background: rgba(255,255,255,0.04);
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 .topbar-user:hover {
   background: rgba(255,255,255,0.08);
-  border-color: rgba(255,255,255,0.14);
+  border-color: rgba(255,255,255,0.16);
 }
 .topbar-user-name {
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: var(--text);
+  line-height: 1.2;
 }
 .topbar-user-role {
-  font-size: 0.64rem;
+  font-size: 0.62rem;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  line-height: 1.2;
 }
 .topbar-logout {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.08);
   background: rgba(255,255,255,0.04);
   color: var(--muted);
   text-decoration: none;
   transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  flex-shrink: 0;
 }
 .topbar-logout:hover {
   color: #f87171;
   background: rgba(239,68,68,0.08);
-  border-color: rgba(239,68,68,0.2);
+  border-color: rgba(239,68,68,0.22);
 }
 
 @media (max-width: 768px) {
