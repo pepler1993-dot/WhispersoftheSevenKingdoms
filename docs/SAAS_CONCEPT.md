@@ -133,6 +133,10 @@ Whisper Studio wird eine konfigurierbare Content-Produktionsplattform. Jeder Use
 
 ---
 
+## ⚠️ Bekannte Workarounds (vor Production fixen!)
+
+- **Auth nur auf GET-Requests** – POST/API-Calls sind aktuell ohne Login möglich, damit Agents (Jarvis etc.) Tickets anlegen und Jobs starten können. Vor Production: API-Keys oder Service-Tokens für Agents einführen, dann alle Routen absichern.
+
 ## Technische Schulden & Infra
 
 Bevor SaaS-Launch:
