@@ -54,6 +54,7 @@ def admin_dashboard(request: Request):
 
     # Sections (scoped to current tab)
     active = [w for w in filtered if w['status'] in running_statuses | {'queued'}]
+    errors = [w for w in filtered if w['status'] in {'failed', 'error'}]
     published = [w for w in filtered if w['status'] == 'uploaded'][:8]
 
     # Type counts for tabs
@@ -68,7 +69,9 @@ def admin_dashboard(request: Request):
         'tab': tab,
         'workflows': filtered[:20],
         'active': active,
+        'errors': errors[:6],
         'published': published,
+        'show_empty_state': not active and not errors and not published,
         'count_running': count_running,
         'count_queued': count_queued,
         'count_rendered': count_rendered,

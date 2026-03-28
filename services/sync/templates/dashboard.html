@@ -54,7 +54,7 @@
     <div class="kpi-icon kpi-icon-ready"><i data-lucide="check-circle"></i></div>
     <div class="kpi-body">
       <div class="kpi-value">{{ count_rendered }}</div>
-      <div class="kpi-label">Ready</div>
+      <div class="kpi-label">Rendered</div>
     </div>
   </div>
   <div class="kpi-card">
@@ -67,6 +67,30 @@
 </div>
 
 
+{# ── Needs Attention ──────────────────────────────────────────── #}
+{% if errors %}
+<section class="attention-section">
+  <div class="section-head">
+    <h2>⚠️ Needs Attention</h2>
+  </div>
+  <div class="attention-grid">
+    {% for w in errors %}
+    {% set wtype = w.get('type', 'video') %}
+    {% set href = '/admin/shorts/' ~ w.workflow_id if wtype == 'short' else '/admin/pipeline/run/' ~ w.workflow_id %}
+    <a href="{{ href }}" class="attention-card">
+      <div class="attention-card-head">
+        <span class="mini-badge mini-badge-{{ w.status }}">{{ w.status }}</span>
+        <span class="attention-link">Details anzeigen →</span>
+      </div>
+      <div class="attention-title">{{ w.title or w.slug }}</div>
+      <div class="attention-error">
+        {{ (w.error_message or 'Fehler ohne Details protokolliert')[:80] }}{% if w.error_message and w.error_message|length > 80 %}…{% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
 
 {# ── Active Productions ───────────────────────────────────────── #}
 {% if active %}
@@ -115,7 +139,11 @@
     {% set href = '/admin/shorts/' ~ w.workflow_id if wtype == 'short' else '/admin/pipeline/run/' ~ w.workflow_id %}
     <a href="{{ href }}" class="published-card">
       <div class="published-thumb">
-        <img src="/admin/pipeline/preview/{{ w.slug }}/thumbnail.jpg" onerror="this.style.display='none'" alt="" />
+        <img src="/admin/pipeline/preview/{{ w.slug }}/thumbnail.jpg" onerror="this.style.display='none'; this.nextElementSibling.hidden = false;" alt="{{ w.title or w.slug }} thumbnail" />
+        <div class="published-thumb-fallback" hidden>
+          <span class="published-thumb-emoji" aria-hidden="true">🎬</span>
+          <span>Thumbnail unavailable</span>
+        </div>
         {% if w.config and w.config.get('loop_hours') %}
         <span class="published-duration">{{ w.config.loop_hours }}h</span>
         {% endif %}
@@ -154,6 +182,9 @@
         {% if we %} → {{ we[11:16] }}{% endif %}
         {% if w.config and w.config.get('loop_hours') %} · {{ w.config.loop_hours }}h{% endif %}
       </div>
+      {% if w.status in ('failed', 'error') %}
+      <div class="wf-card-error">{{ (w.error_message or 'Fehler ohne Details protokolliert')[:80] }}{% if w.error_message and w.error_message|length > 80 %}…{% endif %}</div>
+      {% endif %}
       {% if w.status in ('running', 'uploading', 'waiting_for_audio') %}
       <div class="wf-card-progress"><div class="wf-card-bar"><div class="wf-card-bar-fill"></div></div></div>
       {% endif %}
@@ -164,6 +195,14 @@
   <div class="empty-state-sm">Noch keine Workflows in dieser Kategorie.</div>
   {% endif %}
 </section>
+
+{% if show_empty_state %}
+<section class="dashboard-empty-state">
+  <div class="dashboard-empty-icon">🌙</div>
+  <h2>Alles ruhig — keine aktiven Workflows</h2>
+  <p>Für diesen Bereich gibt es gerade keine laufenden, veröffentlichten oder fehlgeschlagenen Workflows.</p>
+</section>
+{% endif %}
 
 <style>
 /* ── KPI Stats Row ───────────────────────────────────────── */
@@ -204,6 +243,56 @@
 .kpi-body { min-width: 0; }
 .kpi-value { font-size: 1.3rem; font-weight: 800; line-height: 1.1; }
 .kpi-label { font-size: 0.72rem; color: var(--muted); font-weight: 500; margin-top: 2px; }
+
+/* ── Needs Attention ─────────────────────────────────────── */
+.attention-section { margin-bottom: 28px; }
+.attention-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 12px;
+}
+.attention-card {
+  display: block;
+  text-decoration: none;
+  color: var(--text);
+  background: rgba(239,68,68,0.04);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 14px;
+  padding: 16px 18px;
+  transition: all 0.2s ease;
+}
+.attention-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(239,68,68,0.36);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.24);
+}
+.attention-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.attention-link {
+  font-size: 0.72rem;
+  color: #fca5a5;
+  white-space: nowrap;
+}
+.attention-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.35;
+  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.attention-error {
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: #f3c3c3;
+}
 
 /* ── Type badges ─────────────────────────────────────────── */
 .type-badge {
@@ -386,6 +475,25 @@
   height: 100%;
   object-fit: cover;
 }
+.published-thumb-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  color: rgba(255,255,255,0.8);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 12px;
+}
+.published-thumb-emoji {
+  font-size: 1.4rem;
+  line-height: 1;
+}
 .published-duration {
   position: absolute;
   bottom: 8px;
@@ -534,6 +642,12 @@
   color: var(--muted);
   margin-top: auto;
 }
+.wf-card-error {
+  margin-top: 8px;
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: #f2b3b3;
+}
 .wf-card-progress { margin-top: 10px; }
 .wf-card-bar {
   height: 4px;
@@ -559,12 +673,36 @@
 .wf-card-created, .wf-card-queued { border-top: 2px solid var(--warn, #fbbf24); }
 
 /* ── Mobile ──────────────────────────────────────────────── */
+/* ── Empty State ─────────────────────────────────────────── */
+.dashboard-empty-state {
+  margin-top: 22px;
+  padding: 30px 22px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  text-align: center;
+}
+.dashboard-empty-icon {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+}
+.dashboard-empty-state h2 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+.dashboard-empty-state p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
 @media (max-width: 768px) {
   .kpi-row { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .kpi-card { padding: 14px; gap: 10px; }
   .kpi-icon { width: 34px; height: 34px; }
   .kpi-value { font-size: 1.15rem; }
 
+  .attention-card-head { align-items: flex-start; flex-direction: column; }
   .active-card { padding: 16px; }
   .active-title { font-size: 0.95rem; }
   .active-grid { grid-template-columns: 1fr; }
