@@ -136,13 +136,7 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
 .page-header .page-subtitle { max-width: 78ch; }
 
 .page-header::after {
-  content: '';
-  display: block;
-  width: 48px;
-  height: 3px;
-  background: linear-gradient(90deg, var(--gold), transparent);
-  border-radius: 2px;
-  margin-top: 10px;
+  display: none;
 }
 
 .page-subtitle {
@@ -152,11 +146,85 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
   margin-top: 2px;
 }
 
+/* ── topbar ── */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 10px 24px;
+  background: transparent;
+  border-bottom: 1px solid var(--line);
+  height: 52px;
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  background: linear-gradient(180deg, #0f172a 80%, transparent);
+}
+
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--text);
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.04);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.topbar-user:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.14);
+}
+.topbar-user-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.topbar-user-role {
+  font-size: 0.64rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.topbar-logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.04);
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+.topbar-logout:hover {
+  color: #f87171;
+  background: rgba(239,68,68,0.08);
+  border-color: rgba(239,68,68,0.2);
+}
+
+@media (max-width: 768px) {
+  .topbar { display: none; }
+}
+
 /* ── layout ── */
 
 .layout {
   display: flex;
   min-height: 100vh;
+}
+
+.main-wrap {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
 }
 
 /* ── sidebar ── */
@@ -466,85 +534,8 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
 
 /* ── content ── */
 
-.sidebar-footer {
-  padding: 12px 14px;
-  border-top: 1px solid var(--line);
-  margin-top: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.sidebar-footer-user-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  min-width: 0;
-}
-.sidebar-user {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-  flex: 1;
-  text-decoration: none;
-}
-.sidebar-user-name {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.sidebar-user-role {
-  font-size: 0.62rem;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-.sidebar-logout {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--muted);
-  padding: 6px;
-  border-radius: 6px;
-  transition: color 0.2s ease, background 0.2s ease;
-}
-.sidebar-logout:hover {
-  color: #f87171;
-  background: rgba(239,68,68,0.08);
-}
-
-.build-badge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  color: var(--text-secondary);
-  font-size: 0.72rem;
-  font-weight: 600;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.build-badge-label {
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: rgba(255,255,255,0.38);
-  font-size: 0.62rem;
-}
-
-.build-badge-value {
-  color: #91b6ff;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  margin-left: auto;
-}
+/* sidebar-footer entfernt – User/Logout jetzt in Topbar */
+.sidebar-footer { display: none; }
 
 .content {
   padding: var(--content-pad-y) var(--content-pad-x);
@@ -552,6 +543,7 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
   min-width: 0;
   max-width: none;
   width: 100%;
+  overflow-x: hidden;
 }
 
 /* ── shared header helpers ── */
