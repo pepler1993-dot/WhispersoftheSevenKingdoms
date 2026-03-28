@@ -14,6 +14,7 @@ class AgentSyncDB:
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self.db_path = self.data_dir / 'agent_sync.db'
         self._lock = Lock()
+        self._rename_legacy_tables()
         self._init_db()
         self._migrate_legacy_tables()
         self._integrity_check()
@@ -171,46 +172,59 @@ class AgentSyncDB:
                 pass
             conn.commit()
 
+    def _rename_legacy_tables(self) -> None:
+        """Rename old tables before _init_db creates the new schema."""
+        try:
+            with self._connect() as conn:
+                tables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()}
+
+                # Rename old workflows table (has pipeline_run_id column) if it exists
+                if 'workflows' in tables:
+                    cols = {r[1] for r in conn.execute('PRAGMA table_info(workflows)').fetchall()}
+                    if 'pipeline_run_id' in cols:
+                        conn.execute('ALTER TABLE workflows RENAME TO _old_workflows_backup')
+                        conn.commit()
+                        logging.info('Renamed old workflows table to _old_workflows_backup')
+
+                # Rename old pipeline tables
+                tables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()}
+                if 'pipeline_runs' in tables:
+                    conn.execute('ALTER TABLE pipeline_runs RENAME TO _pipeline_runs_backup')
+                    if 'pipeline_run_logs' in tables:
+                        conn.execute('ALTER TABLE pipeline_run_logs RENAME TO _pipeline_run_logs_backup')
+                    conn.commit()
+                    logging.info('Renamed old pipeline_runs tables to _backup')
+        except Exception as e:
+            logging.warning('Legacy table rename (non-fatal): %s', e)
+
     def _migrate_legacy_tables(self) -> None:
-        """Migrate data from old pipeline_runs + old workflows tables into unified workflows table."""
+        """Migrate data from backup tables into the new unified workflows table."""
         try:
             self._do_migrate_legacy()
         except Exception as e:
             logging.error('Legacy migration failed (non-fatal): %s', e)
 
     def _do_migrate_legacy(self) -> None:
-        with self._connect() as conn:
-            tables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()}
+        with self._lock:
+            with self._connect() as conn:
+                tables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()}
+                if '_pipeline_runs_backup' not in tables:
+                    return  # Nothing to migrate
 
-            if 'pipeline_runs' not in tables:
-                return
-
-            # Load old workflows data (keyed by pipeline_run_id) for merging
-            old_wf_by_run: dict[str, dict] = {}
-            if '_old_workflows_backup' not in tables:
-                # Check if workflows table has the old schema (pipeline_run_id column)
-                cols = {r[1] for r in conn.execute('PRAGMA table_info(workflows)').fetchall()}
-                if 'pipeline_run_id' in cols:
-                    for row in conn.execute('SELECT * FROM workflows').fetchall():
+                # Load old workflow data for merging (audio_job_id, auto_upload)
+                old_wf_by_run: dict[str, dict] = {}
+                if '_old_workflows_backup' in tables:
+                    for row in conn.execute('SELECT * FROM _old_workflows_backup').fetchall():
                         d = dict(row)
                         run_id = d.get('pipeline_run_id')
                         if run_id:
                             old_wf_by_run[run_id] = d
-                    # Rename old workflows table before we drop/recreate
-                    conn.execute('ALTER TABLE workflows RENAME TO _old_workflows_backup')
-                    conn.commit()
 
-            # Rename old pipeline tables
-            conn.execute('ALTER TABLE pipeline_runs RENAME TO _pipeline_runs_backup')
-            if 'pipeline_run_logs' in tables:
-                conn.execute('ALTER TABLE pipeline_run_logs RENAME TO _pipeline_run_logs_backup')
-            conn.commit()
+                # Skip if already migrated (workflows table has data)
+                existing = conn.execute('SELECT COUNT(*) FROM workflows').fetchone()[0]
+                if existing > 0:
+                    return
 
-        # Re-init to create new schema
-        self._init_db()
-
-        with self._lock:
-            with self._connect() as conn:
                 # Migrate pipeline_runs → workflows
                 for row in conn.execute('SELECT * FROM _pipeline_runs_backup').fetchall():
                     d = dict(row)
