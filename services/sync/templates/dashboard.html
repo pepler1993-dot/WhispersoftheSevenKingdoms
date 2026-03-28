@@ -34,13 +34,13 @@
         el.childNodes[el.childNodes.length - 1].textContent = ' ' + label;
       }
       var gpu = h.gpu_worker || {};
-      setHealth('health-gpu', gpu.status || 'offline', 'GPU ' + (gpu.status === 'healthy' ? '✓' : gpu.status === 'offline' ? '✗' : '?'));
+      setHealth('health-gpu', gpu.status || 'offline', 'GPU Worker · ' + (gpu.status === 'healthy' ? 'Online' : 'Offline'));
       var q = h.queue || {};
-      setHealth('health-queue', q.status || 'idle', 'Queue ' + (q.running || 0) + ' running, ' + (q.queued || 0) + ' queued');
+      setHealth('health-queue', q.status || 'idle', 'Queue · ' + (q.running ? q.running + ' aktiv' : 'Idle'));
       var u = h.upload || {};
-      setHealth('health-upload', u.status || 'healthy', 'Upload ' + (u.success_rate || 'n/a'));
+      setHealth('health-upload', u.status || 'healthy', 'YouTube · ' + (u.status === 'healthy' ? 'OK' : u.success_rate || '—'));
       var p = h.pipeline || {};
-      setHealth('health-pipeline', p.status || 'healthy', 'Pipeline ' + (p.status === 'healthy' ? '✓' : p.recent_failures + ' failures'));
+      setHealth('health-pipeline', p.status || 'healthy', 'Pipeline · ' + (p.status === 'healthy' ? 'Stabil' : p.recent_failures + ' Fehler'));
     })
     .catch(function() {});
 })();
@@ -115,13 +115,13 @@
         el.childNodes[el.childNodes.length - 1].textContent = ' ' + label;
       }
       var gpu = h.gpu_worker || {};
-      setHealth('health-gpu', gpu.status || 'offline', 'GPU ' + (gpu.status === 'healthy' ? '✓' : gpu.status === 'offline' ? '✗' : '?'));
+      setHealth('health-gpu', gpu.status || 'offline', 'GPU Worker · ' + (gpu.status === 'healthy' ? 'Online' : 'Offline'));
       var q = h.queue || {};
-      setHealth('health-queue', q.status || 'idle', 'Queue ' + (q.running || 0) + ' running, ' + (q.queued || 0) + ' queued');
+      setHealth('health-queue', q.status || 'idle', 'Queue · ' + (q.running ? q.running + ' aktiv' : 'Idle'));
       var u = h.upload || {};
-      setHealth('health-upload', u.status || 'healthy', 'Upload ' + (u.success_rate || 'n/a'));
+      setHealth('health-upload', u.status || 'healthy', 'YouTube · ' + (u.status === 'healthy' ? 'OK' : u.success_rate || '—'));
       var p = h.pipeline || {};
-      setHealth('health-pipeline', p.status || 'healthy', 'Pipeline ' + (p.status === 'healthy' ? '✓' : p.recent_failures + ' failures'));
+      setHealth('health-pipeline', p.status || 'healthy', 'Pipeline · ' + (p.status === 'healthy' ? 'Stabil' : p.recent_failures + ' Fehler'));
     })
     .catch(function() {});
 })();
@@ -692,9 +692,11 @@
 .published-title {
   font-size: 0.85rem;
   font-weight: 600;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.3;
   margin-bottom: 3px;
 }
 .published-meta {
@@ -984,13 +986,13 @@
         el.childNodes[el.childNodes.length - 1].textContent = ' ' + label;
       }
       var gpu = h.gpu_worker || {};
-      setHealth('health-gpu', gpu.status || 'offline', 'GPU ' + (gpu.status === 'healthy' ? '✓' : gpu.status === 'offline' ? '✗' : '?'));
+      setHealth('health-gpu', gpu.status || 'offline', 'GPU Worker · ' + (gpu.status === 'healthy' ? 'Online' : 'Offline'));
       var q = h.queue || {};
-      setHealth('health-queue', q.status || 'idle', 'Queue ' + (q.running || 0) + ' running, ' + (q.queued || 0) + ' queued');
+      setHealth('health-queue', q.status || 'idle', 'Queue · ' + (q.running ? q.running + ' aktiv' : 'Idle'));
       var u = h.upload || {};
-      setHealth('health-upload', u.status || 'healthy', 'Upload ' + (u.success_rate || 'n/a'));
+      setHealth('health-upload', u.status || 'healthy', 'YouTube · ' + (u.status === 'healthy' ? 'OK' : u.success_rate || '—'));
       var p = h.pipeline || {};
-      setHealth('health-pipeline', p.status || 'healthy', 'Pipeline ' + (p.status === 'healthy' ? '✓' : p.recent_failures + ' failures'));
+      setHealth('health-pipeline', p.status || 'healthy', 'Pipeline · ' + (p.status === 'healthy' ? 'Stabil' : p.recent_failures + ' Fehler'));
     })
     .catch(function() {});
 })();

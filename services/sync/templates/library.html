@@ -386,6 +386,7 @@ document.querySelectorAll('form[action="/admin/library/upload"]').forEach(functi
   border-radius: 10px;
   transition: all 0.15s ease;
 }
+.song-card:nth-child(even) { background: var(--surface); }
 .song-card:hover {
   border-color: rgba(255,255,255,0.15);
   transform: translateY(-1px);
@@ -418,9 +419,9 @@ document.querySelectorAll('form[action="/admin/library/upload"]').forEach(functi
   text-overflow: ellipsis;
 }
 .song-card-meta {
-  font-size: 0.7rem;
-  color: var(--muted);
-  margin-top: 2px;
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+  margin-top: 3px;
 }
 .song-card-actions {
   display: flex;
