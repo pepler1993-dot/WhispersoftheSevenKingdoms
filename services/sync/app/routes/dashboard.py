@@ -30,7 +30,7 @@ def admin_songs(request: Request):
 
 @router.get('/admin', response_class=HTMLResponse)
 def admin_dashboard(request: Request):
-    tab = request.query_params.get('tab', 'all')
+    tab = request.query_params.get('tab', 'videos')
 
     # All content workflows (exclude audio_lab)
     all_content = [w for w in shared.db.list_workflows(limit=200) if w.get('type') != 'audio_lab']

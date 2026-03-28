@@ -16,11 +16,6 @@
 {# ── Tab Navigation ───────────────────────────────────────────── #}
 <div class="library-tabs-wrap">
   <nav class="library-tabs" aria-label="Dashboard-Filter">
-    <a class="library-tab{% if tab == 'all' %} active{% endif %}" href="/admin?tab=all" {% if tab == 'all' %}aria-current="page"{% endif %}>
-      <i data-lucide="layout-grid" class="icon-md" style="opacity:0.9"></i>
-      Alle
-      <span class="library-tab-count">{{ count_all }}</span>
-    </a>
     <a class="library-tab{% if tab == 'videos' %} active{% endif %}" href="/admin?tab=videos" {% if tab == 'videos' %}aria-current="page"{% endif %}>
       <i data-lucide="film" class="icon-md" style="opacity:0.9"></i>
       Videos
@@ -71,29 +66,7 @@
   </div>
 </div>
 
-{# ── Needs Attention ──────────────────────────────────────────── #}
-{% if needs_attention %}
-<section class="attention-section">
-  <div class="attention-header">
-    <span class="attention-icon">⚠️</span>
-    <h2>Needs Attention</h2>
-    <span class="attention-count">{{ needs_attention|length }}</span>
-  </div>
-  <div class="attention-list">
-    {% for w in needs_attention %}
-    {% set wtype = w.get('type', 'video') %}
-    {% set href = '/admin/shorts/' ~ w.workflow_id if wtype == 'short' else '/admin/pipeline/run/' ~ w.workflow_id %}
-    <a href="{{ href }}" class="attention-card">
-      <div class="attention-card-body">
-        <div class="attention-title">{{ w.title or w.slug }}</div>
-        <div class="attention-meta">{{ w.error_message[:80] if w.error_message else 'Unknown error' }}</div>
-      </div>
-      <span class="type-badge type-badge-{{ wtype }}">{{ wtype|capitalize }}</span>
-    </a>
-    {% endfor %}
-  </div>
-</section>
-{% endif %}
+
 
 {# ── Active Productions ───────────────────────────────────────── #}
 {% if active %}
@@ -166,32 +139,31 @@
     <a href="/admin/pipeline/logs" class="section-link">Alle anzeigen →</a>
   </div>
   {% if workflows %}
-  <div class="workflow-list">
+  <div class="wf-card-grid">
     {% for w in workflows %}
     {% set wtype = w.get('type', 'video') %}
     {% set href = '/admin/shorts/' ~ w.workflow_id if wtype == 'short' else '/admin/pipeline/run/' ~ w.workflow_id %}
-    <a href="{{ href }}" class="workflow-row workflow-row-{{ w.status }}">
-      <div class="workflow-row-left">
+    <a href="{{ href }}" class="wf-card wf-card-{{ w.status }}">
+      <div class="wf-card-header">
         <span class="type-badge type-badge-{{ wtype }}">{{ wtype|capitalize }}</span>
-        <div class="workflow-row-info">
-          <div class="workflow-row-title">{{ w.title or w.slug }}</div>
-          <div class="workflow-row-meta">
-            {% set ws = (w.started_at or w.created_at or '') %}
-            {% set we = w.finished_at or '' %}
-            {% if ws %}{{ ws[8:10] ~ '.' ~ ws[5:7] ~ '.' ~ ws[2:4] ~ ' ' ~ ws[11:16] }}{% else %}—{% endif %}
-            {% if we %} → {{ we[8:10] ~ '.' ~ we[5:7] ~ '.' ~ we[2:4] ~ ' ' ~ we[11:16] }}{% endif %}
-            {% if w.config and w.config.get('loop_hours') %} · {{ w.config.loop_hours }}h{% endif %}
-          </div>
-        </div>
-      </div>
-      <div class="workflow-row-right">
         <span class="mini-badge mini-badge-{{ w.status }}">{{ w.status }}</span>
       </div>
+      <div class="wf-card-title">{{ w.title or w.slug }}</div>
+      <div class="wf-card-meta">
+        {% set ws = (w.started_at or w.created_at or '') %}
+        {% set we = w.finished_at or '' %}
+        {% if ws %}{{ ws[8:10] ~ '.' ~ ws[5:7] ~ '.' ~ ws[2:4] ~ ' ' ~ ws[11:16] }}{% else %}—{% endif %}
+        {% if we %} → {{ we[11:16] }}{% endif %}
+        {% if w.config and w.config.get('loop_hours') %} · {{ w.config.loop_hours }}h{% endif %}
+      </div>
+      {% if w.status in ('running', 'uploading', 'waiting_for_audio') %}
+      <div class="wf-card-progress"><div class="wf-card-bar"><div class="wf-card-bar-fill"></div></div></div>
+      {% endif %}
     </a>
     {% endfor %}
   </div>
   {% else %}
-  <div class="empty-state-sm">Noch keine Workflows{% if tab != 'all' %} in dieser Kategorie{% endif %}.</div>
+  <div class="empty-state-sm">Noch keine Workflows in dieser Kategorie.</div>
   {% endif %}
 </section>
 
@@ -251,64 +223,7 @@
 .type-badge-short { background: rgba(168,85,247,0.15); color: #c084fc; }
 .type-badge-song  { background: rgba(45,212,191,0.15); color: #2dd4bf; }
 
-/* ── Needs Attention ─────────────────────────────────────── */
-.attention-section {
-  background: rgba(239,68,68,0.04);
-  border: 1px solid rgba(239,68,68,0.2);
-  border-radius: 12px;
-  padding: 18px 20px;
-  margin-bottom: 28px;
-}
-.attention-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-.attention-icon { font-size: 1.1rem; }
-.attention-header h2 {
-  font-size: 0.95rem;
-  font-weight: 700;
-  margin: 0;
-  color: #f87171;
-}
-.attention-count {
-  background: rgba(239,68,68,0.2);
-  color: #f87171;
-  font-size: 0.65rem;
-  font-weight: 800;
-  padding: 2px 8px;
-  border-radius: 999px;
-}
-.attention-list { display: flex; flex-direction: column; gap: 8px; }
-.attention-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 16px;
-  background: rgba(239,68,68,0.06);
-  border: 1px solid rgba(239,68,68,0.15);
-  border-radius: 10px;
-  text-decoration: none;
-  color: var(--text);
-  transition: all 0.15s ease;
-}
-.attention-card:hover {
-  background: rgba(239,68,68,0.1);
-  border-color: rgba(239,68,68,0.3);
-  transform: translateY(-1px);
-}
-.attention-card-body { min-width: 0; flex: 1; }
-.attention-title { font-size: 0.88rem; font-weight: 600; margin-bottom: 2px; }
-.attention-meta {
-  font-size: 0.72rem;
-  color: #f87171;
-  opacity: 0.8;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+
 
 /* ── Active Productions ──────────────────────────────────── */
 .active-section { margin-bottom: 28px; }
@@ -525,51 +440,16 @@
 }
 .section-link:hover { color: var(--text); }
 
-.workflow-list { display: flex; flex-direction: column; gap: 6px; }
-.workflow-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 12px 16px;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  text-decoration: none;
-  color: var(--text);
-  transition: all 0.15s ease;
-}
-.workflow-row:hover {
-  border-color: rgba(255,255,255,0.15);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-}
-.workflow-row-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-  flex: 1;
-}
-.workflow-row-info { min-width: 0; flex: 1; }
-.workflow-row-title {
-  font-size: 0.88rem;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 2px;
-}
-.workflow-row-meta { font-size: 0.72rem; color: var(--muted); }
-.workflow-row-right { flex-shrink: 0; }
 
-/* Status-colored left border */
-.workflow-row-uploaded { border-left: 3px solid var(--blue, #4a8fe7); }
-.workflow-row-rendered { border-left: 3px solid var(--gold, #d4a845); }
-.workflow-row-running, .workflow-row-uploading, .workflow-row-waiting_for_audio { border-left: 3px solid var(--good, #34d399); }
-.workflow-row-failed, .workflow-row-error { border-left: 3px solid var(--bad, #f87171); }
-.workflow-row-cancelled { border-left: 3px solid #6b7280; }
-.workflow-row-created, .workflow-row-queued { border-left: 3px solid var(--warn, #fbbf24); }
+
+
+
+
+
+
+
+
+
 
 /* ── Mini badges ─────────────────────────────────────────── */
 .mini-badge {
@@ -611,6 +491,75 @@
   font-size: 0.84rem;
 }
 
+
+/* ── Workflow Cards Grid ─────────────────────────────────── */
+.wf-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+.wf-card {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 18px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.2s ease;
+  min-height: 100px;
+}
+.wf-card:hover {
+  border-color: rgba(255,255,255,0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+}
+.wf-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.wf-card-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.wf-card-meta {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: auto;
+}
+.wf-card-progress { margin-top: 10px; }
+.wf-card-bar {
+  height: 4px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.wf-card-bar-fill {
+  height: 100%;
+  width: 60%;
+  background: linear-gradient(90deg, #22c55e, #3dd4bc, #22c55e);
+  background-size: 200% 100%;
+  border-radius: 2px;
+  animation: shimmer 2.5s ease-in-out infinite;
+}
+
+/* Status border-top accent */
+.wf-card-uploaded { border-top: 2px solid var(--blue, #4a8fe7); }
+.wf-card-rendered { border-top: 2px solid var(--gold, #d4a845); }
+.wf-card-running, .wf-card-uploading, .wf-card-waiting_for_audio { border-top: 2px solid var(--good, #34d399); }
+.wf-card-failed, .wf-card-error { border-top: 2px solid var(--bad, #f87171); }
+.wf-card-cancelled { border-top: 2px solid #6b7280; }
+.wf-card-created, .wf-card-queued { border-top: 2px solid var(--warn, #fbbf24); }
+
 /* ── Mobile ──────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .kpi-row { grid-template-columns: repeat(2, 1fr); gap: 8px; }
@@ -625,11 +574,10 @@
   .published-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
 
   .workflows-section { padding: 14px; }
-  .workflow-row { padding: 10px 12px; }
-  .workflow-row-title { font-size: 0.82rem; }
-  .workflow-row-meta { font-size: 0.66rem; }
+  
+  
+  
 
-  .attention-section { padding: 14px 16px; }
 }
 @media (max-width: 400px) {
   .kpi-row { grid-template-columns: repeat(2, 1fr); }
