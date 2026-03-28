@@ -1,7 +1,67 @@
 {% extends 'base.html' %}
-{% block title %}Library{% endblock %}
+{% block title %}Library
+<script>
+var currentAudio = null;
+var currentBtn = null;
+function togglePlay(btn, src) {
+  if (currentAudio && currentBtn === btn) {
+    currentAudio.pause();
+    currentAudio = null;
+    btn.textContent = '▶';
+    btn.classList.remove('playing');
+    currentBtn = null;
+    return;
+  }
+  if (currentAudio) {
+    currentAudio.pause();
+    if (currentBtn) { currentBtn.textContent = '▶'; currentBtn.classList.remove('playing'); }
+  }
+  currentAudio = new Audio(src);
+  currentBtn = btn;
+  btn.textContent = '⏸';
+  btn.classList.add('playing');
+  currentAudio.play();
+  currentAudio.onended = function() {
+    btn.textContent = '▶';
+    btn.classList.remove('playing');
+    currentAudio = null;
+    currentBtn = null;
+  };
+}
+</script>
+{% endblock %}
 {% block head_extra %}
 <link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
+
+<script>
+var currentAudio = null;
+var currentBtn = null;
+function togglePlay(btn, src) {
+  if (currentAudio && currentBtn === btn) {
+    currentAudio.pause();
+    currentAudio = null;
+    btn.textContent = '▶';
+    btn.classList.remove('playing');
+    currentBtn = null;
+    return;
+  }
+  if (currentAudio) {
+    currentAudio.pause();
+    if (currentBtn) { currentBtn.textContent = '▶'; currentBtn.classList.remove('playing'); }
+  }
+  currentAudio = new Audio(src);
+  currentBtn = btn;
+  btn.textContent = '⏸';
+  btn.classList.add('playing');
+  currentAudio.play();
+  currentAudio.onended = function() {
+    btn.textContent = '▶';
+    btn.classList.remove('playing');
+    currentAudio = null;
+    currentBtn = null;
+  };
+}
+</script>
 {% endblock %}
 {% block content %}
 <div class="library-page" id="library-page" data-active-tab="{{ library_tab }}">
@@ -64,7 +124,7 @@
     {% for item in songs %}
     {% set clean_name = item.name.replace('-', ' ').replace('.mp3','').replace('.wav','').replace('.ogg','').replace(' looped processed','').replace(' looped','').replace(' processed','') %}
     <div class="song-card">
-      <div class="song-card-icon">🎵</div>
+      <button type="button" class="song-play-btn" onclick="togglePlay(this, '/admin/library/preview/songs/{{ item.name }}')" title="Abspielen">▶</button>
       <div class="song-card-info">
         <div class="song-card-title">{{ clean_name | title }}</div>
         <div class="song-card-meta">{{ item.size }} · {{ item.modified }} · {{ item.name.split('.')[-1] | upper }}</div>
@@ -331,7 +391,24 @@ document.querySelectorAll('form[action="/admin/library/upload"]').forEach(functi
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
-.song-card-icon { font-size: 1.3rem; flex-shrink: 0; }
+
+.song-play-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(59,130,246,0.15);
+  color: #60a5fa;
+  font-size: 0.9rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.song-play-btn:hover { background: rgba(59,130,246,0.25); transform: scale(1.05); }
+.song-play-btn.playing { background: rgba(34,197,94,0.15); color: #4ade80; }
+
 .song-card-info { flex: 1; min-width: 0; }
 .song-card-title {
   font-size: 0.88rem;
@@ -403,4 +480,34 @@ document.querySelectorAll('form[action="/admin/library/upload"]').forEach(functi
   border-color: var(--gold, #c9a53a);
 }
 </style>
+
+<script>
+var currentAudio = null;
+var currentBtn = null;
+function togglePlay(btn, src) {
+  if (currentAudio && currentBtn === btn) {
+    currentAudio.pause();
+    currentAudio = null;
+    btn.textContent = '▶';
+    btn.classList.remove('playing');
+    currentBtn = null;
+    return;
+  }
+  if (currentAudio) {
+    currentAudio.pause();
+    if (currentBtn) { currentBtn.textContent = '▶'; currentBtn.classList.remove('playing'); }
+  }
+  currentAudio = new Audio(src);
+  currentBtn = btn;
+  btn.textContent = '⏸';
+  btn.classList.add('playing');
+  currentAudio.play();
+  currentAudio.onended = function() {
+    btn.textContent = '▶';
+    btn.classList.remove('playing');
+    currentAudio = null;
+    currentBtn = null;
+  };
+}
+</script>
 {% endblock %}

@@ -507,6 +507,78 @@ def admin_pipeline_run_cancel(workflow_id: str):
     return RedirectResponse(url=f'/admin/pipeline/run/{workflow_id}', status_code=303)
 
 
+
+
+@router.get('/admin/pipeline/run/{workflow_id}/progress')
+def admin_pipeline_run_progress(workflow_id: str):
+    """Live progress for a running workflow."""
+    import re
+    wf = shared.db.get_workflow(workflow_id)
+    if not wf:
+        return {'error': 'not found'}
+    
+    phase = wf.get('phase', 'render')
+    status = wf.get('status', 'created')
+    
+    # Parse progress from latest logs
+    logs = shared.db.get_workflow_logs(workflow_id, limit=500)
+    progress_pct = 0
+    progress_text = ''
+    
+    if status in ('running', 'waiting_for_audio', 'uploading'):
+        for log in reversed(logs):
+            msg = log.get('message', '')
+            
+            # Audio clip progress: "Generating clip 3/7"
+            m = re.search(r'clip\s+(\d+)/(\d+)', msg, re.IGNORECASE)
+            if m:
+                current, total = int(m.group(1)), int(m.group(2))
+                progress_pct = int(current / total * 100) if total > 0 else 0
+                progress_text = f'Clip {current}/{total}'
+                break
+            
+            # Stitching
+            if 'stitch' in msg.lower() or 'crossfade' in msg.lower():
+                progress_pct = 85
+                progress_text = 'Stitching...'
+                break
+            
+            # Downloading
+            if 'download' in msg.lower():
+                progress_pct = 90
+                progress_text = 'Downloading...'
+                break
+            
+            # Pipeline steps
+            if 'post-process' in msg.lower() or 'post_process' in msg.lower():
+                progress_pct = 60
+                progress_text = 'Post-Processing...'
+                break
+            if 'loop' in msg.lower() and 'audio' in msg.lower():
+                progress_pct = 40
+                progress_text = 'Audio looping...'
+                break
+            if 'render' in msg.lower() and 'video' in msg.lower():
+                progress_pct = 70
+                progress_text = 'Video rendern...'
+                break
+            if 'thumbnail' in msg.lower():
+                progress_pct = 80
+                progress_text = 'Thumbnail...'
+                break
+            if 'upload' in msg.lower() and 'youtube' in msg.lower():
+                progress_pct = 95
+                progress_text = 'YouTube Upload...'
+                break
+    
+    return {
+        'workflow_id': workflow_id,
+        'status': status,
+        'phase': phase,
+        'progress_pct': progress_pct,
+        'progress_text': progress_text,
+    }
+
 @router.get('/admin/pipeline/preview/{slug}/{filename}')
 def admin_pipeline_preview_file(slug: str, filename: str):
     path = get_output_path(slug, filename)

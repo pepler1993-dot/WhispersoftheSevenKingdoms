@@ -20,6 +20,31 @@
   }
 })();
 </script>
+
+<script>
+(function() {
+  fetch('/api/health/overview')
+    .then(function(r) { return r.json(); })
+    .then(function(h) {
+      function setHealth(id, status, label) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var dot = el.querySelector('.health-dot');
+        if (dot) dot.className = 'health-dot ' + status;
+        el.childNodes[el.childNodes.length - 1].textContent = ' ' + label;
+      }
+      var gpu = h.gpu_worker || {};
+      setHealth('health-gpu', gpu.status || 'offline', 'GPU ' + (gpu.status === 'healthy' ? '✓' : gpu.status === 'offline' ? '✗' : '?'));
+      var q = h.queue || {};
+      setHealth('health-queue', q.status || 'idle', 'Queue ' + (q.running || 0) + ' running, ' + (q.queued || 0) + ' queued');
+      var u = h.upload || {};
+      setHealth('health-upload', u.status || 'healthy', 'Upload ' + (u.success_rate || 'n/a'));
+      var p = h.pipeline || {};
+      setHealth('health-pipeline', p.status || 'healthy', 'Pipeline ' + (p.status === 'healthy' ? '✓' : p.recent_failures + ' failures'));
+    })
+    .catch(function() {});
+})();
+</script>
 {% endblock %}
 {% block head_extra %}
 <link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
@@ -42,6 +67,31 @@
     });
     grid.parentElement.appendChild(btn);
   }
+})();
+</script>
+
+<script>
+(function() {
+  fetch('/api/health/overview')
+    .then(function(r) { return r.json(); })
+    .then(function(h) {
+      function setHealth(id, status, label) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var dot = el.querySelector('.health-dot');
+        if (dot) dot.className = 'health-dot ' + status;
+        el.childNodes[el.childNodes.length - 1].textContent = ' ' + label;
+      }
+      var gpu = h.gpu_worker || {};
+      setHealth('health-gpu', gpu.status || 'offline', 'GPU ' + (gpu.status === 'healthy' ? '✓' : gpu.status === 'offline' ? '✗' : '?'));
+      var q = h.queue || {};
+      setHealth('health-queue', q.status || 'idle', 'Queue ' + (q.running || 0) + ' running, ' + (q.queued || 0) + ' queued');
+      var u = h.upload || {};
+      setHealth('health-upload', u.status || 'healthy', 'Upload ' + (u.success_rate || 'n/a'));
+      var p = h.pipeline || {};
+      setHealth('health-pipeline', p.status || 'healthy', 'Pipeline ' + (p.status === 'healthy' ? '✓' : p.recent_failures + ' failures'));
+    })
+    .catch(function() {});
 })();
 </script>
 {% endblock %}
@@ -108,6 +158,14 @@
   </div>
 </div>
 
+
+{# ── Health Strip ──────────────────────────────────────────────── #}
+<div class="health-strip" id="health-strip">
+  <div class="health-item" id="health-gpu"><span class="health-dot"></span> GPU Worker</div>
+  <div class="health-item" id="health-queue"><span class="health-dot"></span> Queue</div>
+  <div class="health-item" id="health-upload"><span class="health-dot"></span> Upload</div>
+  <div class="health-item" id="health-pipeline"><span class="health-dot"></span> Pipeline</div>
+</div>
 
 {# ── Needs Attention ──────────────────────────────────────────── #}
 {% if errors %}
@@ -742,6 +800,42 @@
   color: rgba(255,255,255,0.7);
   vertical-align: middle;
 }
+
+/* ── Health Strip ─────────────────────────────────────── */
+.health-strip {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 10px 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.health-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+.health-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+.health-dot.healthy { background: #22c55e; }
+.health-dot.active { background: #3b82f6; animation: health-pulse 1.5s infinite; }
+.health-dot.degraded { background: #f59e0b; }
+.health-dot.offline, .health-dot.error { background: #ef4444; }
+.health-dot.idle { background: #6b7280; }
+.health-dot.waiting { background: #f59e0b; }
+@keyframes health-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0.3); }
+  50% { box-shadow: 0 0 0 4px rgba(59,130,246,0); }
+}
 /* ── Mobile ──────────────────────────────────────────────── */
 /* ── Empty State ─────────────────────────────────────────── */
 .dashboard-empty-state {
@@ -809,6 +903,31 @@
     });
     grid.parentElement.appendChild(btn);
   }
+})();
+</script>
+
+<script>
+(function() {
+  fetch('/api/health/overview')
+    .then(function(r) { return r.json(); })
+    .then(function(h) {
+      function setHealth(id, status, label) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var dot = el.querySelector('.health-dot');
+        if (dot) dot.className = 'health-dot ' + status;
+        el.childNodes[el.childNodes.length - 1].textContent = ' ' + label;
+      }
+      var gpu = h.gpu_worker || {};
+      setHealth('health-gpu', gpu.status || 'offline', 'GPU ' + (gpu.status === 'healthy' ? '✓' : gpu.status === 'offline' ? '✗' : '?'));
+      var q = h.queue || {};
+      setHealth('health-queue', q.status || 'idle', 'Queue ' + (q.running || 0) + ' running, ' + (q.queued || 0) + ' queued');
+      var u = h.upload || {};
+      setHealth('health-upload', u.status || 'healthy', 'Upload ' + (u.success_rate || 'n/a'));
+      var p = h.pipeline || {};
+      setHealth('health-pipeline', p.status || 'healthy', 'Pipeline ' + (p.status === 'healthy' ? '✓' : p.recent_failures + ' failures'));
+    })
+    .catch(function() {});
 })();
 </script>
 {% endblock %}
