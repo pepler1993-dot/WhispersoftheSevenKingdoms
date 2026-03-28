@@ -87,12 +87,12 @@
     <span class="section-count">{{ running|length }}</span>
   </div>
   {% for run in running %}
-  <a href="/admin/pipeline/run/{{ run.run_id }}" class="live-card">
+  <a href="/admin/pipeline/run/{{ run.workflow_id }}" class="live-card">
     <div class="live-glow"></div>
     <div class="live-badge"><span class="live-dot"></span> LIVE</div>
     <div class="live-body">
       <div class="live-title">{{ run.title or run.slug }}</div>
-      <div class="live-sub">{{ run.slug }} · {{ run.run_id[:8] }}</div>
+      <div class="live-sub">{{ run.slug }} · {{ run.workflow_id[:8] }}</div>
       <div class="live-progress">
         <div class="live-bar"><div class="live-bar-fill"></div></div>
         <div class="live-progress-info">
@@ -120,11 +120,11 @@
   </div>
   <div class="queue-list">
     {% for run in queued %}
-    <a href="/admin/pipeline/run/{{ run.run_id }}" class="queue-item">
+    <a href="/admin/pipeline/run/{{ run.workflow_id }}" class="queue-item">
       <div class="queue-position">{{ loop.index }}</div>
       <div class="queue-info">
         <div class="queue-title">{{ run.title or run.slug }}</div>
-        <div class="queue-sub">{{ run.slug }} · {{ run.run_id[:8] }}</div>
+        <div class="queue-sub">{{ run.slug }} · {{ run.workflow_id[:8] }}</div>
       </div>
       <div class="queue-details">
         {% if run.config and run.config.get('loop_hours') %}<span>{{ run.config.loop_hours }}h</span>{% endif %}
@@ -150,7 +150,7 @@
   </div>
   <div class="yt-grid">
     {% for run in uploaded %}
-    <a href="/admin/pipeline/run/{{ run.run_id }}" class="yt-card">
+    <a href="/admin/pipeline/run/{{ run.workflow_id }}" class="yt-card">
       <div class="yt-thumb-wrap">
         <img class="yt-thumb" src="/admin/pipeline/preview/{{ run.slug }}/thumbnail.jpg" alt="{{ run.title or run.slug }}" onerror="this.style.display='none'; this.parentElement.classList.add('yt-thumb-fallback');" />
         <div class="yt-play-overlay">
@@ -187,7 +187,7 @@
   </div>
   <div class="yt-grid">
     {% for run in rendered %}
-    <a href="/admin/pipeline/run/{{ run.run_id }}" class="yt-card yt-card-rendered">
+    <a href="/admin/pipeline/run/{{ run.workflow_id }}" class="yt-card yt-card-rendered">
       <div class="yt-thumb-wrap">
         <img class="yt-thumb" src="/admin/pipeline/preview/{{ run.slug }}/thumbnail.jpg" alt="{{ run.title or run.slug }}" onerror="this.style.display='none'; this.parentElement.classList.add('yt-thumb-fallback');" />
         <div class="yt-play-overlay">
@@ -225,11 +225,11 @@
   </div>
   <div class="run-list run-list-muted">
     {% for run in failed %}
-    <a href="/admin/pipeline/run/{{ run.run_id }}" class="run-row run-row-failed">
+    <a href="/admin/pipeline/run/{{ run.workflow_id }}" class="run-row run-row-failed">
       <div class="run-status-indicator failed-dot"></div>
       <div class="run-info">
         <div class="run-title">{{ run.title or run.slug }}</div>
-        <div class="run-sub">{{ run.slug }} · {{ run.run_id[:8] }}</div>
+        <div class="run-sub">{{ run.slug }} · {{ run.workflow_id[:8] }}</div>
       </div>
       <div class="run-error">{{ run.error_message[:60] if run.error_message else 'Unbekannter Fehler' }}{% if run.error_message and run.error_message|length > 60 %}…{% endif %}</div>
       <div class="run-time">{{ run.finished_at[:16] if run.finished_at else '—' }}</div>
@@ -249,11 +249,11 @@
   </div>
   <div class="run-list run-list-muted">
     {% for run in cancelled %}
-    <a href="/admin/pipeline/run/{{ run.run_id }}" class="run-row run-row-cancelled">
+    <a href="/admin/pipeline/run/{{ run.workflow_id }}" class="run-row run-row-cancelled">
       <div class="run-status-indicator cancelled-dot"></div>
       <div class="run-info">
         <div class="run-title">{{ run.title or run.slug }}</div>
-        <div class="run-sub">{{ run.slug }} · {{ run.run_id[:8] }}</div>
+        <div class="run-sub">{{ run.slug }} · {{ run.workflow_id[:8] }}</div>
       </div>
       <div class="run-duration">{{ run.finished_at[:16] if run.finished_at else '—' }}</div>
       <div class="run-time"></div>

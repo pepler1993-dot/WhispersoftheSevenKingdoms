@@ -62,11 +62,10 @@ def _pick_short_image(source_audio: str) -> Path | None:
 def _list_uploaded_longform_videos() -> list[dict[str, Any]]:
     houses = _load_house_templates()
     out: list[dict[str, Any]] = []
-    for run in shared.db.list_runs(limit=300):
-        cfg = run.get('config') or {}
-        if cfg.get('content_type') == 'short' or run.get('status') != 'uploaded':
+    for wf in shared.db.list_workflows(type='video', limit=300):
+        if wf.get('status') != 'uploaded':
             continue
-        slug = run.get('slug') or ''
+        slug = wf.get('slug') or ''
         meta_path = PIPELINE_DIR / 'data' / 'upload' / 'metadata' / f'{slug}.json'
         meta: dict[str, Any] = {}
         if meta_path.exists():
@@ -74,7 +73,7 @@ def _list_uploaded_longform_videos() -> list[dict[str, Any]]:
                 meta = json.loads(meta_path.read_text(encoding='utf-8'))
             except Exception:
                 meta = {}
-        title = run.get('title') or meta.get('title') or slug
+        title = wf.get('title') or meta.get('title') or slug
         tags = [str(x).lower() for x in (meta.get('tags') or []) if isinstance(x, str)]
         text = ' '.join([str(title).lower(), str(meta.get('description') or '').lower(), ' '.join(tags)])
         house_key = ''
@@ -94,10 +93,10 @@ def _list_uploaded_longform_videos() -> list[dict[str, Any]]:
                             break
                 break
         out.append({
-            'run_id': run['run_id'],
+            'workflow_id': wf['workflow_id'],
             'slug': slug,
             'title': title,
-            'created_at': run.get('created_at'),
+            'created_at': wf.get('created_at'),
             'house_key': house_key,
             'variant_key': variant_key,
             'audio_filename': next((f'{slug}{ext}' for ext in ('.mp3','.wav','.ogg') if (PIPELINE_DIR / 'data' / 'upload' / 'songs' / f'{slug}{ext}').exists()), ''),
@@ -118,7 +117,7 @@ def _build_short_output_metadata(run: dict[str, Any]) -> dict[str, Any]:
     return {
         'title': title,
         'titles': {'primary': title},
-        'description': f'{title}\n\nSource track: {stem}\nClip: {clip_start}s–{clip_start + clip_duration}s\nVisual: {visual_mode}\n#shorts',
+        'description': f'{title}\n\nSource track: {stem}\nClip: {clip_start}s\u2013{clip_start + clip_duration}s\nVisual: {visual_mode}\n#shorts',
         'tags': ['shorts', 'youtube shorts', 'ambient', 'sleep music', stem.replace('-', ' ')],
         'category': '10',
         'language': 'en',
@@ -135,7 +134,7 @@ def admin_shorts(request: Request, success: str | None = Query(default=None), er
     library_tracks = list_library_tracks_for_pipeline(shared.db)
     houses = _load_house_templates()
     uploaded_videos = _list_uploaded_longform_videos()
-    short_runs = [run for run in shared.db.list_runs(limit=100) if (run.get('config') or {}).get('content_type') == 'short']
+    short_runs = shared.db.list_workflows(type='short', limit=100)
     presets = [
         {'key': 'hook-teaser', 'name': 'Hook Teaser', 'duration': 20, 'visual_mode': 'blurred-background', 'start': 0, 'title_suffix': ' | Short'},
         {'key': 'ambient-loop', 'name': 'Ambient Loop', 'duration': 30, 'visual_mode': 'cinematic-gradient', 'start': 15, 'title_suffix': ' | Ambient Short'},
@@ -175,7 +174,7 @@ def admin_shorts_create(
     slug = slugify(slug.strip() or title)
 
     if source_run_id and not source_audio:
-        selected = next((v for v in _list_uploaded_longform_videos() if v.get('run_id') == source_run_id), None)
+        selected = next((v for v in _list_uploaded_longform_videos() if v.get('workflow_id') == source_run_id), None)
         if selected:
             source_audio = str(selected.get('audio_filename') or '')
             if not title.strip():
@@ -195,7 +194,7 @@ def admin_shorts_create(
     if visibility not in {'private', 'unlisted', 'public'}:
         raise HTTPException(status_code=400, detail='Ung\u00fcltige Sichtbarkeit')
 
-    selected = next((v for v in _list_uploaded_longform_videos() if v.get('run_id') == source_run_id), None) if source_run_id else None
+    selected = next((v for v in _list_uploaded_longform_videos() if v.get('workflow_id') == source_run_id), None) if source_run_id else None
     source_path = PIPELINE_DIR / 'data' / 'upload' / 'songs' / source_audio
     source_video_path = Path(selected.get('video_path')) if selected and selected.get('video_path') else Path()
     if not source_path.exists():
@@ -204,7 +203,7 @@ def admin_shorts_create(
         raise HTTPException(status_code=400, detail='Gewähltes Video existiert nicht')
 
     now = datetime.now(shared.CET).isoformat()
-    run_id = uuid.uuid4().hex[:12]
+    workflow_id = uuid.uuid4().hex[:12]
     metadata = {
         'slug': slug,
         'title': title,
@@ -243,27 +242,28 @@ def admin_shorts_create(
         'metadata_path': str(metadata_path),
     }
 
-    shared.db.create_run({
-        'run_id': run_id,
+    shared.db.create_workflow({
+        'workflow_id': workflow_id,
         'slug': slug,
         'title': title,
+        'type': 'short',
         'status': 'created',
         'config': config,
         'created_at': now,
     })
-    shared.db.append_run_log(run_id, 'system', f'Short draft created from {source_audio}', now)
-    shared.db.append_run_log(run_id, 'system', f'Clip window: start={clip_start_seconds}s duration={clip_duration_seconds}s', now)
-    shared.db.append_run_log(run_id, 'system', f'Visual mode: {visual_mode} \u00b7 visibility: {visibility}', now)
+    shared.db.append_workflow_log(workflow_id, 'system', f'Short draft created from {source_audio}', now)
+    shared.db.append_workflow_log(workflow_id, 'system', f'Clip window: start={clip_start_seconds}s duration={clip_duration_seconds}s', now)
+    shared.db.append_workflow_log(workflow_id, 'system', f'Visual mode: {visual_mode} \u00b7 visibility: {visibility}', now)
 
-    return RedirectResponse(url=f'/admin/shorts/{run_id}?success=Short-Entwurf+{slug}+wurde+angelegt', status_code=303)
+    return RedirectResponse(url=f'/admin/shorts/{workflow_id}?success=Short-Entwurf+{slug}+wurde+angelegt', status_code=303)
 
 
-@router.get('/admin/shorts/{run_id}', response_class=HTMLResponse)
-def admin_shorts_detail(request: Request, run_id: str, success: str | None = Query(default=None), error: str | None = Query(default=None)):
-    run = shared.db.get_run(run_id)
-    if not run or (run.get('config') or {}).get('content_type') != 'short':
+@router.get('/admin/shorts/{workflow_id}', response_class=HTMLResponse)
+def admin_shorts_detail(request: Request, workflow_id: str, success: str | None = Query(default=None), error: str | None = Query(default=None)):
+    run = shared.db.get_workflow(workflow_id)
+    if not run or run.get('type') != 'short':
         raise HTTPException(status_code=404, detail='Short run not found')
-    logs = shared.db.get_run_logs(run_id, limit=1000)
+    logs = shared.db.get_workflow_logs(workflow_id, limit=1000)
     output_files: list[dict[str, str]] = []
     output_dir = PIPELINE_DIR / 'data' / 'output' / 'shorts' / run['slug']
     if output_dir.exists():
@@ -281,10 +281,10 @@ def admin_shorts_detail(request: Request, run_id: str, success: str | None = Que
     })
 
 
-@router.post('/admin/shorts/{run_id}/render')
-def admin_shorts_render(run_id: str):
-    run = shared.db.get_run(run_id)
-    if not run or (run.get('config') or {}).get('content_type') != 'short':
+@router.post('/admin/shorts/{workflow_id}/render')
+def admin_shorts_render(workflow_id: str):
+    run = shared.db.get_workflow(workflow_id)
+    if not run or run.get('type') != 'short':
         raise HTTPException(status_code=404, detail='Short run not found')
     if run.get('status') in {'running', 'uploading'}:
         raise HTTPException(status_code=409, detail='Short is already processing')
@@ -320,22 +320,22 @@ def admin_shorts_render(run_id: str):
 
     now = _now_iso()
     cmd_str = ' '.join(cmd)
-    shared.db.update_run(run_id, status='running', started_at=now, error_message=None)
-    shared.db.append_run_log(run_id, 'system', f'Starting Shorts render: {cmd_str}', now)
-    shared.db.append_run_log(run_id, 'system', f'Using source video: {source_video_path.name}', now)
+    shared.db.update_workflow(workflow_id, status='running', started_at=now, error_message=None)
+    shared.db.append_workflow_log(workflow_id, 'system', f'Starting Shorts render: {cmd_str}', now)
+    shared.db.append_workflow_log(workflow_id, 'system', f'Using source video: {source_video_path.name}', now)
     if image_path:
-        shared.db.append_run_log(run_id, 'system', f'Fallback image available: {image_path.name}', now)
+        shared.db.append_workflow_log(workflow_id, 'system', f'Fallback image available: {image_path.name}', now)
 
     def worker():
         try:
             proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=str(PIPELINE_DIR))
         except Exception as exc:
-            shared.db.update_run(run_id, status='failed', error_message=f'Render start failed: {exc}')
-            shared.db.append_run_log(run_id, 'system', f'Render start failed: {exc}', _now_iso())
+            shared.db.update_workflow(workflow_id, status='failed', error_message=f'Render start failed: {exc}')
+            shared.db.append_workflow_log(workflow_id, 'system', f'Render start failed: {exc}', _now_iso())
             return
 
-        t_out = threading.Thread(target=_stream_reader, args=(proc.stdout, run_id, 'stdout', shared.db), daemon=True)
-        t_err = threading.Thread(target=_stream_reader, args=(proc.stderr, run_id, 'stderr', shared.db), daemon=True)
+        t_out = threading.Thread(target=_stream_reader, args=(proc.stdout, workflow_id, 'stdout', shared.db), daemon=True)
+        t_err = threading.Thread(target=_stream_reader, args=(proc.stderr, workflow_id, 'stderr', shared.db), daemon=True)
         t_out.start()
         t_err.start()
         code = proc.wait()
@@ -343,29 +343,29 @@ def admin_shorts_render(run_id: str):
         t_err.join(timeout=5)
         finished = _now_iso()
         if code == 0 and output_video.exists():
-            shared.db.update_run(run_id, status='rendered', finished_at=finished, error_message=None)
-            shared.db.append_run_log(run_id, 'system', 'Short rendered successfully', finished)
+            shared.db.update_workflow(workflow_id, status='rendered', finished_at=finished, error_message=None)
+            shared.db.append_workflow_log(workflow_id, 'system', 'Short rendered successfully', finished)
         else:
-            shared.db.update_run(run_id, status='failed', finished_at=finished, error_message=f'Shorts render failed (exit {code})')
-            shared.db.append_run_log(run_id, 'system', f'Shorts render failed with exit code {code}', finished)
+            shared.db.update_workflow(workflow_id, status='failed', finished_at=finished, error_message=f'Shorts render failed (exit {code})')
+            shared.db.append_workflow_log(workflow_id, 'system', f'Shorts render failed with exit code {code}', finished)
 
     threading.Thread(target=worker, daemon=True).start()
-    return RedirectResponse(url=f'/admin/shorts/{run_id}?success=Short-Rendering+wurde+gestartet', status_code=303)
+    return RedirectResponse(url=f'/admin/shorts/{workflow_id}?success=Short-Rendering+wurde+gestartet', status_code=303)
 
 
-@router.get('/admin/shorts/{run_id}/logs')
-def admin_shorts_logs(run_id: str, after_id: int = Query(default=0, ge=0)):
-    run = shared.db.get_run(run_id)
-    if not run or (run.get('config') or {}).get('content_type') != 'short':
+@router.get('/admin/shorts/{workflow_id}/logs')
+def admin_shorts_logs(workflow_id: str, after_id: int = Query(default=0, ge=0)):
+    run = shared.db.get_workflow(workflow_id)
+    if not run or run.get('type') != 'short':
         raise HTTPException(status_code=404, detail='Short run not found')
-    logs = shared.db.get_run_logs(run_id, after_id=after_id)
+    logs = shared.db.get_workflow_logs(workflow_id, after_id=after_id)
     return JSONResponse({'logs': logs, 'status': run['status'], 'error_message': run.get('error_message')})
 
 
-@router.post('/admin/shorts/{run_id}/upload')
-def admin_shorts_upload(run_id: str):
-    run = shared.db.get_run(run_id)
-    if not run or (run.get('config') or {}).get('content_type') != 'short':
+@router.post('/admin/shorts/{workflow_id}/upload')
+def admin_shorts_upload(workflow_id: str):
+    run = shared.db.get_workflow(workflow_id)
+    if not run or run.get('type') != 'short':
         raise HTTPException(status_code=404, detail='Short run not found')
     if run.get('status') in {'created', 'failed', 'queued', 'running'}:
         raise HTTPException(status_code=409, detail='Short must be rendered before upload')
@@ -389,20 +389,20 @@ def admin_shorts_upload(run_id: str):
     if run_cfg.get('visibility') == 'public':
         cmd.append('--public')
 
-    shared.db.update_run(run_id, status='uploading', error_message=None)
+    shared.db.update_workflow(workflow_id, status='uploading', error_message=None)
     cmd_str = ' '.join(cmd)
-    shared.db.append_run_log(run_id, 'system', f'Starting Shorts upload: {cmd_str}', datetime.now(shared.CET).isoformat())
+    shared.db.append_workflow_log(workflow_id, 'system', f'Starting Shorts upload: {cmd_str}', datetime.now(shared.CET).isoformat())
 
     def worker():
         try:
             proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=str(PIPELINE_DIR))
         except Exception as exc:
-            shared.db.update_run(run_id, status='rendered', error_message=f'Upload start failed: {exc}')
-            shared.db.append_run_log(run_id, 'system', f'Upload start failed: {exc}', datetime.now(shared.CET).isoformat())
+            shared.db.update_workflow(workflow_id, status='rendered', error_message=f'Upload start failed: {exc}')
+            shared.db.append_workflow_log(workflow_id, 'system', f'Upload start failed: {exc}', datetime.now(shared.CET).isoformat())
             return
         from app.pipeline_runner import _stream_reader
-        t_out = threading.Thread(target=_stream_reader, args=(proc.stdout, run_id, 'stdout', shared.db), daemon=True)
-        t_err = threading.Thread(target=_stream_reader, args=(proc.stderr, run_id, 'stderr', shared.db), daemon=True)
+        t_out = threading.Thread(target=_stream_reader, args=(proc.stdout, workflow_id, 'stdout', shared.db), daemon=True)
+        t_err = threading.Thread(target=_stream_reader, args=(proc.stderr, workflow_id, 'stderr', shared.db), daemon=True)
         t_out.start()
         t_err.start()
         code = proc.wait()
@@ -410,14 +410,14 @@ def admin_shorts_upload(run_id: str):
         t_err.join(timeout=5)
         now = datetime.now(shared.CET).isoformat()
         if code == 0:
-            shared.db.update_run(run_id, status='uploaded', finished_at=now, error_message=None)
-            shared.db.append_run_log(run_id, 'system', 'Short uploaded successfully', now)
+            shared.db.update_workflow(workflow_id, status='uploaded', finished_at=now, error_message=None)
+            shared.db.append_workflow_log(workflow_id, 'system', 'Short uploaded successfully', now)
         else:
-            shared.db.update_run(run_id, status='rendered', error_message=f'Shorts upload failed (exit {code})')
-            shared.db.append_run_log(run_id, 'system', f'Shorts upload failed with exit code {code}', now)
+            shared.db.update_workflow(workflow_id, status='rendered', error_message=f'Shorts upload failed (exit {code})')
+            shared.db.append_workflow_log(workflow_id, 'system', f'Shorts upload failed with exit code {code}', now)
 
     threading.Thread(target=worker, daemon=True).start()
-    return RedirectResponse(url=f'/admin/shorts/{run_id}?success=Short-Upload+wurde+gestartet', status_code=303)
+    return RedirectResponse(url=f'/admin/shorts/{workflow_id}?success=Short-Upload+wurde+gestartet', status_code=303)
 
 
 @router.get('/admin/shorts/preview/{slug}/{filename}')

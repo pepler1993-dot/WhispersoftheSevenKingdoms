@@ -1,4 +1,4 @@
-"""Legacy workflow routes kept as compatibility redirects/API."""
+"""Workflow routes – compatibility redirects and API."""
 from __future__ import annotations
 
 import uuid
@@ -10,8 +10,7 @@ from fastapi.responses import RedirectResponse
 from app import shared
 from app.helpers import _build_song_metadata, slugify
 from app.audio_jobs import create_audio_job
-from app.stores.workflows import create_workflow, get_workflow
-from app.pipeline_workflow import start_workflow
+from app.workflow_orchestrator import start_workflow
 
 router = APIRouter()
 
@@ -32,12 +31,10 @@ def admin_workflow_new(request: Request):
 
 @router.get('/admin/workflow/{workflow_id}')
 def admin_workflow_detail(request: Request, workflow_id: str):
-    wf = get_workflow(shared.db, workflow_id)
+    wf = shared.db.get_workflow(workflow_id)
     if not wf:
         raise HTTPException(status_code=404, detail='Workflow not found')
-    if wf.get('pipeline_run_id'):
-        return RedirectResponse(url=f'/admin/pipeline/run/{wf["pipeline_run_id"]}', status_code=303)
-    raise HTTPException(status_code=409, detail='Workflow has no pipeline run yet')
+    return RedirectResponse(url=f'/admin/pipeline/run/{workflow_id}', status_code=303)
 
 
 @router.post('/admin/workflow/start')
@@ -105,39 +102,28 @@ def admin_workflow_start(
 
     now = _now_iso()
     workflow_id = uuid.uuid4().hex[:12]
-    run_id = uuid.uuid4().hex[:12]
 
-    shared.db.create_run({
-        'run_id': run_id,
-        'slug': slug,
-        'title': title,
-        'status': 'waiting_for_audio',
-        'config': pipeline_config,
-        'created_at': now,
-    })
-    shared.db.append_run_log(run_id, 'system', 'One-Click-Workflow gestartet. Warte auf Audio-Job.', now)
-
-    create_workflow(shared.db, {
+    shared.db.create_workflow({
         'workflow_id': workflow_id,
-        'title': title,
         'slug': slug,
+        'title': title,
+        'type': 'video',
+        'status': 'waiting_for_audio',
         'phase': 'audio',
-        'status': 'running',
         'audio_job_id': audio_job_id,
-        'pipeline_run_id': run_id,
-        'config': pipeline_config,
         'auto_upload': auto_upload,
+        'config': pipeline_config,
         'created_at': now,
-        'updated_at': now,
     })
+    shared.db.append_workflow_log(workflow_id, 'system', 'One-Click-Workflow gestartet. Warte auf Audio-Job.', now)
 
     start_workflow(workflow_id, audio_job_id, slug, title, pipeline_config, auto_upload, shared.db)
-    return RedirectResponse(url=f'/admin/pipeline/run/{run_id}', status_code=303)
+    return RedirectResponse(url=f'/admin/pipeline/run/{workflow_id}', status_code=303)
 
 
 @router.get('/api/workflow/{workflow_id}')
 def api_workflow_detail(workflow_id: str):
-    wf = get_workflow(shared.db, workflow_id)
+    wf = shared.db.get_workflow(workflow_id)
     if not wf:
         raise HTTPException(status_code=404, detail='Workflow not found')
     return wf

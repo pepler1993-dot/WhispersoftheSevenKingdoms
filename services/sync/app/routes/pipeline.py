@@ -26,10 +26,9 @@ from app.pipeline_runner import (
     list_library_tracks_for_pipeline,
     trigger_upload,
 )
-from app.pipeline_queue import enqueue_run, get_queue_status
+from app.pipeline_queue import enqueue_workflow, get_queue_status
 from app.audio_jobs import create_audio_job
-from app.stores.workflows import create_workflow, get_workflow, get_workflow_by_run_id
-from app.pipeline_workflow import start_workflow
+from app.workflow_orchestrator import start_workflow
 
 router = APIRouter()
 
@@ -146,24 +145,24 @@ def _prompts_from_house_variant(house_key: str, variant_key: str) -> str:
         )
     raw = vp[variant_key]
     if not isinstance(raw, list):
-        raise HTTPException(status_code=400, detail=f'Ungültige Prompt-Liste für Variante „{variant_key}“.')
+        raise HTTPException(status_code=400, detail=f'Ungültige Prompt-Liste für Variante „{variant_key}".')
     lines = [x for x in raw if isinstance(x, str) and x.strip()]
     if not lines:
-        raise HTTPException(status_code=400, detail=f'Keine Prompts für Variante „{variant_key}“ hinterlegt.')
+        raise HTTPException(status_code=400, detail=f'Keine Prompts für Variante „{variant_key}" hinterlegt.')
     return '\n'.join(lines)
 
 
 @router.get('/admin/pipeline/logs', response_class=HTMLResponse)
 def admin_pipeline_logs(request: Request):
-    runs = shared.db.list_runs(limit=100)
+    workflows = shared.db.list_workflows(type='video', limit=100)
     houses = _load_house_templates()
     queue = get_queue_status(shared.db)
     return shared.templates.TemplateResponse(request, 'pipeline_runs.html', {
         'request': request,
         'page': 'pipeline',
         'pipeline_tab': 'overview',
-        'pipeline_run_count': len(runs),
-        'runs': runs,
+        'pipeline_run_count': len(workflows),
+        'runs': workflows,
         'houses': houses,
         'queue': queue,
     })
@@ -175,7 +174,7 @@ def admin_pipeline_new(request: Request, slug: str | None = Query(default=None),
     assets = list_available_assets()
     themes = list_available_themes()
     houses = _load_house_templates()
-    runs = shared.db.list_runs(limit=100)
+    workflows = shared.db.list_workflows(type='video', limit=100)
     library_tracks = list_library_tracks_for_pipeline(shared.db)
     thumb_dir = Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'output' / 'thumbnails'
     library_thumbnails = sorted(f.name for f in thumb_dir.iterdir() if f.is_file() and f.suffix in {'.jpg', '.jpeg', '.png', '.webp'}) if thumb_dir.exists() else []
@@ -187,7 +186,7 @@ def admin_pipeline_new(request: Request, slug: str | None = Query(default=None),
         'request': request,
         'page': 'pipeline',
         'pipeline_tab': 'new',
-        'pipeline_run_count': len(runs),
+        'pipeline_run_count': len(workflows),
         'assets': assets,
         'themes': themes,
         'houses': houses,
@@ -297,7 +296,7 @@ def admin_pipeline_start(
         for ext in ALLOWED_AUDIO_EXT
     )
 
-    # ── Generate mode: start full workflow (Audio → Pipeline → Upload) ──
+    # -- Generate mode: start full workflow (Audio -> Pipeline -> Upload) --
     if not audio_found and audio_source == 'generate':
         prompt_text = gen_prompt.strip()
         if not prompt_text:
@@ -353,34 +352,23 @@ def admin_pipeline_start(
 
         now = datetime.now(shared.CET).isoformat()
         workflow_id = uuid.uuid4().hex[:12]
-        run_id = uuid.uuid4().hex[:12]
 
-        shared.db.create_run({
-            'run_id': run_id,
-            'slug': slug,
-            'title': title,
-            'status': 'waiting_for_audio',
-            'config': pipeline_config,
-            'created_at': now,
-        })
-        shared.db.append_run_log(run_id, 'system', 'Generate-Workflow gestartet. Warte auf Audio-Job.', now)
-
-        create_workflow(shared.db, {
+        shared.db.create_workflow({
             'workflow_id': workflow_id,
-            'title': title,
             'slug': slug,
+            'title': title,
+            'type': 'video',
+            'status': 'waiting_for_audio',
             'phase': 'audio',
-            'status': 'running',
             'audio_job_id': audio_job_id,
-            'pipeline_run_id': run_id,
-            'config': pipeline_config,
             'auto_upload': auto_upload,
+            'config': pipeline_config,
             'created_at': now,
-            'updated_at': now,
         })
+        shared.db.append_workflow_log(workflow_id, 'system', 'Generate-Workflow gestartet. Warte auf Audio-Job.', now)
 
         start_workflow(workflow_id, audio_job_id, slug, title, pipeline_config, auto_upload, shared.db)
-        return RedirectResponse(url=f'/admin/pipeline/run/{run_id}', status_code=303)
+        return RedirectResponse(url=f'/admin/pipeline/run/{workflow_id}', status_code=303)
 
     if not audio_found:
         return RedirectResponse(
@@ -434,33 +422,33 @@ def admin_pipeline_start(
         'background_source': background_source,
     }
 
-    run_id = uuid.uuid4().hex[:12]
+    workflow_id = uuid.uuid4().hex[:12]
     now = datetime.now(shared.CET).isoformat()
 
-    shared.db.create_run({
-        'run_id': run_id,
+    shared.db.create_workflow({
+        'workflow_id': workflow_id,
         'slug': slug,
         'title': title,
+        'type': 'video',
         'status': 'created',
         'config': config,
         'created_at': now,
     })
 
-    enqueue_run(run_id, slug, config, shared.db)
-    return RedirectResponse(url=f'/admin/pipeline/run/{run_id}', status_code=303)
+    enqueue_workflow(workflow_id, slug, config, shared.db)
+    return RedirectResponse(url=f'/admin/pipeline/run/{workflow_id}', status_code=303)
 
 
-@router.get('/admin/pipeline/run/{run_id}', response_class=HTMLResponse)
-def admin_pipeline_run_detail(request: Request, run_id: str):
-    run = shared.db.get_run(run_id)
+@router.get('/admin/pipeline/run/{workflow_id}', response_class=HTMLResponse)
+def admin_pipeline_run_detail(request: Request, workflow_id: str):
+    run = shared.db.get_workflow(workflow_id)
     if not run:
         raise HTTPException(status_code=404, detail='Run not found')
-    logs = shared.db.get_run_logs(run_id, limit=1000)
+    logs = shared.db.get_workflow_logs(workflow_id, limit=1000)
 
-    workflow = get_workflow_by_run_id(shared.db, run_id)
     audio_job = None
-    if workflow and workflow.get('audio_job_id'):
-        audio_job = shared.db.get_audio_job(workflow['audio_job_id'])
+    if run.get('audio_job_id'):
+        audio_job = shared.db.get_audio_job(run['audio_job_id'])
 
     output_files: list[dict[str, str]] = []
     output_dir = PIPELINE_DIR / 'data' / 'output' / 'youtube' / run['slug']
@@ -473,47 +461,46 @@ def admin_pipeline_run_detail(request: Request, run_id: str):
         'request': request,
         'page': 'pipeline',
         'run': run,
-        'workflow': workflow,
         'audio_job': audio_job,
         'logs': logs,
         'output_files': output_files,
     })
 
 
-@router.get('/admin/pipeline/run/{run_id}/logs')
-def admin_pipeline_run_logs(run_id: str, after_id: int = Query(default=0, ge=0)):
-    run = shared.db.get_run(run_id)
+@router.get('/admin/pipeline/run/{workflow_id}/logs')
+def admin_pipeline_run_logs(workflow_id: str, after_id: int = Query(default=0, ge=0)):
+    run = shared.db.get_workflow(workflow_id)
     if not run:
         raise HTTPException(status_code=404, detail='Run not found')
-    logs = shared.db.get_run_logs(run_id, after_id=after_id)
+    logs = shared.db.get_workflow_logs(workflow_id, after_id=after_id)
     return {'logs': logs, 'status': run['status'], 'error_message': run.get('error_message')}
 
 
-@router.post('/admin/pipeline/run/{run_id}/upload')
-def admin_pipeline_run_upload(run_id: str):
-    run = shared.db.get_run(run_id)
+@router.post('/admin/pipeline/run/{workflow_id}/upload')
+def admin_pipeline_run_upload(workflow_id: str):
+    run = shared.db.get_workflow(workflow_id)
     if not run:
         raise HTTPException(status_code=404, detail='Run not found')
     if run['status'] != 'rendered':
         raise HTTPException(status_code=409, detail=f'Cannot upload from status {run["status"]}')
 
-    trigger_upload(run_id, run['slug'], run.get('config', {}), shared.db)
-    return RedirectResponse(url=f'/admin/pipeline/run/{run_id}', status_code=303)
+    trigger_upload(workflow_id, run['slug'], run.get('config', {}), shared.db)
+    return RedirectResponse(url=f'/admin/pipeline/run/{workflow_id}', status_code=303)
 
 
-@router.post('/admin/pipeline/run/{run_id}/cancel')
-def admin_pipeline_run_cancel(run_id: str):
-    run = shared.db.get_run(run_id)
+@router.post('/admin/pipeline/run/{workflow_id}/cancel')
+def admin_pipeline_run_cancel(workflow_id: str):
+    run = shared.db.get_workflow(workflow_id)
     if not run:
         raise HTTPException(status_code=404, detail='Run not found')
     if run['status'] == 'queued':
-        shared.db.update_run(run_id, status='cancelled', finished_at=datetime.now(shared.CET).isoformat())
-        shared.db.append_run_log(run_id, 'system', 'Job aus Warteschlange entfernt.', datetime.now(shared.CET).isoformat())
-        return RedirectResponse(url=f'/admin/pipeline/run/{run_id}', status_code=303)
+        shared.db.update_workflow(workflow_id, status='cancelled', finished_at=datetime.now(shared.CET).isoformat())
+        shared.db.append_workflow_log(workflow_id, 'system', 'Job aus Warteschlange entfernt.', datetime.now(shared.CET).isoformat())
+        return RedirectResponse(url=f'/admin/pipeline/run/{workflow_id}', status_code=303)
     if run['status'] != 'running':
         raise HTTPException(status_code=409, detail='Can only cancel running or queued pipelines')
-    cancel_run(run_id, shared.db)
-    return RedirectResponse(url=f'/admin/pipeline/run/{run_id}', status_code=303)
+    cancel_run(workflow_id, shared.db)
+    return RedirectResponse(url=f'/admin/pipeline/run/{workflow_id}', status_code=303)
 
 
 @router.get('/admin/pipeline/preview/{slug}/{filename}')

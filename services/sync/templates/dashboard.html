@@ -68,7 +68,7 @@
   </div>
   <div class="active-grid">
   {% for run in active_runs %}
-  <a href="/admin/pipeline/run/{{ run.run_id }}" class="active-card {% if run.status == 'queued' %}active-card-queued{% endif %}">
+  <a href="/admin/pipeline/run/{{ run.workflow_id }}" class="active-card {% if run.status == 'queued' %}active-card-queued{% endif %}">
     <div class="active-glow {% if run.status == 'queued' %}queued-glow{% endif %}"></div>
     <div class="active-badge {% if run.status == 'queued' %}active-badge-queued{% endif %}"><span class="active-dot {% if run.status == 'queued' %}queued-dot{% endif %}"></span> {% if run.status == 'running' %}RENDERING{% else %}QUEUED{% endif %}</div>
     <div class="active-body">
@@ -106,7 +106,7 @@
     {% if recent_runs %}
     <div class="overview-card-grid">
       {% for run in recent_runs %}
-      <a href="/admin/pipeline/run/{{ run.run_id }}" class="overview-card overview-card-run overview-card-{{ run.status }}">
+      <a href="/admin/pipeline/run/{{ run.workflow_id }}" class="overview-card overview-card-run overview-card-{{ run.status }}">
         <div class="overview-card-top">
           <span class="overview-status-dot mini-dot-{{ run.status }}"></span>
           <span class="mini-badge mini-badge-{{ run.status }}">{{ run.status }}</span>
@@ -167,7 +167,7 @@
   {% if recent_shorts %}
   <div class="mini-list">
     {% for run in recent_shorts %}
-    <a href="/admin/shorts/{{ run.run_id }}" class="mini-item">
+    <a href="/admin/shorts/{{ run.workflow_id }}" class="mini-item">
       <div class="mini-dot mini-dot-{{ run.status }}"></div>
       <div class="mini-info">
         <div class="mini-title">{{ run.title or run.slug }}</div>
