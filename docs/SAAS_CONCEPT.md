@@ -28,11 +28,57 @@ Whisper Studio wird eine konfigurierbare Content-Produktionsplattform. Jeder Use
 - DB-Tabellen für Users + Spaces angelegt
 - Default Admin bei Erststart
 
+### ✅ Phase 3c – Unified Workflow Architecture (28.03.2026)
+- `pipeline_runs` + `workflows` zu einer einzigen `workflows` Tabelle zusammengeführt
+- Jeder Content-Typ (video/short/song/audio_lab) ist ein Workflow mit `type` Feld
+- Workflow-Phasen: audio → render → upload → done
+- Automatische DB-Migration von altem Schema
+- Dashboard als SaaS Command Center mit Tab-Navigation pro Content-Type
+- KPI-Stats, Active Productions, Recently Published Grid
+- User/Logout oben rechts im Content-Bereich
+
 ### ⏸️ Phase 3b – Space-Isolation (geparkt)
 > Bewusst geparkt – erst relevant mit externen Usern.
 - Runs, Jobs, Presets, Settings pro Space trennen (space_id Filter auf allen Queries)
 - Space-Switcher im UI
 - Einladungslinks für neue Spaces
+
+---
+
+## 🔴 Phase 3d – UI/UX Production-Ready (NÄCHSTER SCHRITT)
+
+**Ziel:** UI sieht aus wie ein echtes SaaS-Produkt — nicht wie ein Dev-Tool.
+
+### Konsistenz & Polish
+- [ ] Alle Seiten folgen denselben Design Principles (DESIGN_PRINCIPLES.md)
+- [ ] Einheitliches Card-Design überall (gleiche Radii, Shadows, Hover-Effekte)
+- [ ] Konsistente Statusfarben auf allen Seiten (Status-Farbsystem aus Design Principles)
+- [ ] Keine doppelten/widersprüchlichen Badges (Type vs Status Farben)
+- [ ] Section Headers einheitlich (mit oder ohne Deko — entscheiden und durchziehen)
+- [ ] Sidebar: Logo responsive auf allen Bildschirmgrößen
+- [ ] Mobile: alle Seiten sauber responsive getestet
+
+### Create-Flows
+- [ ] Video Create: Progressive Disclosure (Step-Cards statt langes Formular)
+- [ ] Shorts Create: gleicher Standard
+- [ ] Songs Create: MVP Seite fertig bauen
+- [ ] Preset-basierte Defaults überall ("Zero Config to Launch")
+
+### Workflow-Detailseiten
+- [ ] Video Run Detail: sauberes Layout, Live-Log, Status-Anzeige
+- [ ] Short Detail: gleicher Standard
+- [ ] Audio Job Detail: gleicher Standard
+- [ ] Einheitlicher "Workflow Detail" Style für alle Typen
+
+### Fehlerzustände
+- [ ] Fehler prominent anzeigen (nicht in normaler Liste verstecken)
+- [ ] Retry-Buttons direkt sichtbar
+- [ ] Leere Zustände ("Noch keine Videos") mit Call-to-Action
+
+### Status-Labels aufräumen
+- [ ] `waiting_for_audio` → im UI als "Running" anzeigen (nicht als eigener Status)
+- [ ] `uploading` → im UI als "Running" anzeigen
+- [ ] Nur 5 UI-Status: Running, Queued, Ready, Published, Failed
 
 ---
 
@@ -45,11 +91,7 @@ Whisper Studio wird eine konfigurierbare Content-Produktionsplattform. Jeder Use
 - [ ] **Registrierung** – Sign-up Seite (Email + Passwort)
 - [ ] **Email-Verifizierung** – Bestätigungsmail bei Registrierung
 - [ ] **Passwort vergessen** – Reset-Flow per Email
-- [ ] **Onboarding-Wizard** – Schritt-für-Schritt Setup beim ersten Login:
-  1. Space-Name + Branding wählen
-  2. Ersten Preset erstellen oder Template importieren
-  3. GPU-Provider verbinden (oder Managed nutzen)
-  4. Erstes Video/Audio erstellen
+- [ ] **Onboarding-Wizard** – Schritt-für-Schritt Setup beim ersten Login
 - [ ] **Template Gallery** – Vorgefertigte Preset-Pakete (Lo-Fi, Nature, Gaming, Meditation...)
 - [ ] **OAuth Login** – Google / GitHub als Alternative
 
@@ -69,55 +111,32 @@ Whisper Studio wird eine konfigurierbare Content-Produktionsplattform. Jeder Use
 
 - [ ] **Usage Tracking** – GPU-Minuten, Storage (GB), Uploads pro Space
 - [ ] **Usage Dashboard** – Verbrauch visualisieren, Limits anzeigen
-- [ ] **Overage Handling** – Soft-Limits mit Upgrade-Prompts
-- [ ] **Invoices** – Automatische Rechnungen via Stripe
 - [ ] **Trial Period** – 14 Tage Creator-Features kostenlos
 
 ### Phase 6 – Managed GPU & Infrastructure
-
-**Ziel:** User brauchen keine eigene GPU – wir stellen die Compute bereit.
-
 - [ ] **GPU Job Queue** – Multi-Tenant Job-Scheduler
 - [ ] **Auto-Scaling** – GPU-VMs on-demand starten/stoppen
-- [ ] **Provider-Abstraction** – Hetzner, RunPod, Lambda Labs, AWS als Backends
-- [ ] **Cost Tracking** – GPU-Kosten pro Space/Job erfassen
-- [ ] **Fair Scheduling** – Priority Queue basierend auf Tier
+- [ ] **Provider-Abstraction** – Hetzner, RunPod, Lambda Labs als Backends
 - [ ] **Bring-Your-Own-GPU** – User können eigene GPU-Worker verbinden
 
 ### Phase 7 – Distribution & Publishing
-
-**Ziel:** Multi-Plattform Publishing aus einem Flow.
-
 - [ ] **YouTube Auto-Upload** ✅ (existiert)
-- [ ] **Spotify/Apple Music** – DistroKid oder eigene Distribution für Audio
-- [ ] **TikTok Upload API** – Shorts direkt auf TikTok pushen
-- [ ] **Instagram Reels** – Shorts cross-posten
-- [ ] **Scheduling** – Content Calendar: Wann wird was veröffentlicht
-- [ ] **Analytics Dashboard** – Views, Watch Time, Revenue pro Video/Song
-- [ ] **A/B Testing** – Verschiedene Thumbnails/Titel testen
+- [ ] **Spotify/Apple Music** – DistroKid oder eigene Distribution
+- [ ] **TikTok Upload API** – Shorts direkt auf TikTok
+- [ ] **Scheduling** – Content Calendar
+- [ ] **Analytics Dashboard** – Views, Watch Time, Revenue
 
 ### Phase 8 – AI & Automation
-
-**Ziel:** Content-Produktion weiter automatisieren.
-
-- [ ] **AI Title Generator** – Optimierte Titel basierend auf Niche + SEO
-- [ ] **AI Thumbnail Generator** – Stable Diffusion direkt im Flow
-- [ ] **Auto-Tagging** – YouTube Tags automatisch aus Content ableiten
-- [ ] **Trend Detection** – Was performt gerade gut in der Niche?
-- [ ] **Batch Production** – "Erstelle 10 Videos für alle Varianten" in einem Klick
-- [ ] **Content Calendar AI** – Optimaler Upload-Zeitplan basierend auf Analytics
-- [ ] **Voice-over Integration** – ElevenLabs/TTS für Intros/Outros
+- [ ] **AI Title Generator** – SEO-optimierte Titel
+- [ ] **AI Thumbnail Generator** – Stable Diffusion im Flow
+- [ ] **Batch Production** – 10 Videos in einem Klick
+- [ ] **Content Calendar AI** – Optimaler Upload-Zeitplan
 
 ### Phase 9 – Enterprise & White-Label
-
-**Ziel:** B2B-Kunden und Agenturen.
-
 - [ ] **White-Label** – Eigenes Branding, eigene Domain
-- [ ] **API** – REST API für externe Integrationen
-- [ ] **Webhooks** – Notifications bei Job-Completion, Upload etc.
-- [ ] **SSO** – SAML/OIDC für Enterprise-Kunden
+- [ ] **REST API** – Externe Integrationen
+- [ ] **SSO** – SAML/OIDC
 - [ ] **Audit Log** – Wer hat was wann gemacht
-- [ ] **SLA & Support Tiers** – Premium Support für Enterprise
 
 ---
 
@@ -126,39 +145,36 @@ Whisper Studio wird eine konfigurierbare Content-Produktionsplattform. Jeder Use
 - [ ] **Landing Page** – whisperstudio.io / Content Engine Pitch
 - [ ] **Pricing Page** – Klare Tier-Übersicht
 - [ ] **Demo Video** – 60s Product Demo
-- [ ] **Blog / Content Marketing** – SEO für "AI video generator", "sleep music automation"
-- [ ] **Discord Community** – Support + Feature Requests
-- [ ] **Docs Site** – Public API Docs, Guides, Tutorials
-- [ ] **Changelog** – Öffentlich, automatisch aus Git-Tags
+- [ ] **Blog / Content Marketing** – SEO
+- [ ] **Docs Site** – Public API Docs, Guides
 
 ---
 
 ## ⚠️ Bekannte Workarounds (vor Production fixen!)
 
-- **Auth nur auf GET-Requests** – POST/API-Calls sind aktuell ohne Login möglich, damit Agents (Jarvis etc.) Tickets anlegen und Jobs starten können. Vor Production: API-Keys oder Service-Tokens für Agents einführen, dann alle Routen absichern.
+- **Auth nur auf GET-Requests** – POST/API-Calls sind aktuell ohne Login möglich. Vor Production: API-Keys oder Service-Tokens einführen.
 
 ## Technische Schulden & Infra
 
 Bevor SaaS-Launch:
 
+- [ ] **API-Token-Auth** – Alle POST-Endpoints absichern (🔴 Prio 1)
 - [ ] **Tests** – Unit + Integration Tests für Auth, Pipeline, Settings
 - [ ] **CI/CD** – Automated Tests in GitHub Actions vor Deploy
 - [ ] **Monitoring** – Sentry oder ähnliches für Error Tracking
 - [ ] **Logging** – Structured Logging (JSON), zentralisiert
-- [ ] **Backups** – Automatische DB-Backups (existiert teilweise)
 - [ ] **Rate Limiting** – API + Login Brute-Force Protection
-- [ ] **HTTPS** – TLS überall (Cloudflare Tunnel erledigt das aktuell)
-- [ ] **CORS** – Korrekte CORS-Config für API
-- [ ] **Secrets Management** – JWT Secret, API Keys nicht in Code/Env
 - [ ] **Docker** – Containerized Deployment
-- [ ] **DB Migration** – Schema-Versionierung (Alembic oder manuell)
+- [ ] **DB Migration** – Schema-Versionierung (Alembic o.ä.)
 
 ---
 
 ## Priorität für die nächsten Wochen
 
-1. **Shorts-Flow** produktionsreif machen (läuft)
-2. **Songs-Seite** MVP (Standalone Audio → Export)
-3. **Space-Isolation** wenn erster externer User kommt
+1. **UI/UX Production-Ready** (Phase 3d) — alle Seiten SaaS-tauglich
+2. **API absichern** — Token-Auth für POST-Endpoints
+3. **Songs-Seite** MVP (Standalone Audio → Export)
 4. **Landing Page** als Visitenkarte
-5. **Stripe** wenn Landing Page steht
+5. **Domain** — dashboard.ka189.de via Cloudflare finalisieren
+6. **Tests** — mindestens Auth + Workflow + Migration
+7. **Stripe** wenn Landing Page steht
