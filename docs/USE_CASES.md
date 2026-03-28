@@ -1,368 +1,397 @@
-# Use Cases – Whispers of the Seven Kingdoms (Detaildokument)
+# Use Cases – Whisper Studio SaaS Platform
 
-**Stand:** 27.03.2026  
-**Bezug:** Erweitert die Kurzform in `[USER_STORIES.md](USER_STORIES.md)`.  
-**Zielgruppe:** Produktionsteam (Produzent, Reviewer), Entwicklung, Onboarding.
+**Stand:** 28.03.2026
+**Zielgruppe:** UI/UX Tests, Produktentwicklung, QA
 
 ---
 
 ## Konventionen
 
-
-| Feld          | Bedeutung                                                         |
-| ------------- | ----------------------------------------------------------------- |
-| **ID**        | Stabile Referenz (UC-XX)                                          |
-| **Priorität** | A = Kern-Workflow, B = Betrieb, C = später / experimentell        |
-| **Akteur**    | Primärer auslösender Benutzer                                     |
-| **System**    | Dashboard (`services/sync`), Pipeline (`pipeline/`), Audio-Worker |
-
-
-**Abkürzungen:** „Library“ = zentrale Mediensammlung im Dashboard; „Preset“ = Eintrag in `services/sync/data/house_templates.json`.
+| Feld | Bedeutung |
+|------|-----------|
+| **ID** | Stabile Referenz (UC-XX) |
+| **Phase** | Aktuell = bereits gebaut, SaaS = für Launch nötig, Future = spätere Iteration |
+| **Akteur** | Creator, Admin, Viewer, System |
 
 ---
 
-## UC-01: Neues Video von A bis Z erstellen
+## Kern-Workflows (Content Production)
 
+### UC-01: Neues Video erstellen (End-to-End)
 
-|               |                                                                                                                        |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| **Priorität** | A                                                                                                                      |
-| **Akteur**    | Produzent                                                                                                              |
-| **Ziel**      | Ein Longform-Sleep-Video (Audio → Loop-Video → Thumbnail → optional YouTube) mit minimalem manuellen Aufwand erzeugen. |
+| | |
+|---|---|
+| **Phase** | Aktuell |
+| **Akteur** | Creator |
+| **Ziel** | Longform-Video von Hauswahl bis YouTube-Upload in einem Flow |
 
+**Flow:** Haus wählen → Variante → Länge → Audio-Quelle (generieren oder Bibliothek) → Video erstellen → Automatischer Render → Optional Auto-Upload
 
-### Kurzbeschreibung
-
-Der Produzent wählt Stil (Haus), konkrete **Variante**, **Länge** und Audio-Quelle; Metadaten und Briefings werden aus dem Haus-Preset befüllt. Nach Start läuft die Kette automatisch (inkl. Audio-Generierung falls nötig).
-
-### Vorbedingungen
-
-- Dashboard erreichbar; bei Generierung: Audio-Worker (Stable Audio) betriebsbereit.
-- Für gewählte Variante existieren Einträge in `variant_prompts` und `background_prompts` im JSON-Preset.
-- Optional: gewünschte Hintergrunddatei liegt unter `pipeline/data/assets/backgrounds/` (sonst Server-Fallback über `bg_key`).
-
-### Hauptszenario
-
-1. Akteur öffnet `**/admin/pipeline/new`** (z. B. über Dashboard „Neues Video“).
-2. Akteur wählt ein **Haus** (Karte).
-3. System zeigt **Varianten**; Akteur wählt **eine Variante** (Pflicht für Audio-Prompts).
-4. System setzt u. a. Theme, `notes` (Varianten-Key), Thumbnail-Brief (variantenbezogen), **Video-Hintergrund** nach Preset (`bg_key` + passende Dateiendung), Titel nach `title_template` inkl. Variantenname und Dauerplatzhalter.
-5. Akteur wählt **Länge** (1 / 3 / 5 / 8 Stunden); Loop-Stunden und Titel-Dauer-Text werden angepasst.
-6. Konfigurationsbereich erscheint; Stimmung/Titel sind vorbefüllt, **technischer Slug** wird intern **nur aus dem Video-Titel** abgeleitet (nicht als eigenes UI-Feld sichtbar).
-7. Akteur wählt **Audio-Quelle**:
-  - **Neu generieren:** verstecktes Feld enthält ausschließlich **Varianten-Prompts**; „Video erstellen“ startet Workflow mit Audio-Job, dann Pipeline.
-  - **Aus Bibliothek:** vorhandener Track mit passendem Dateinamen (Slug aus Titel) muss existieren, sonst Hinweis/Fehlerpfad.
-8. Akteur kann **Video-Hintergrund** im gleichen Schritt wie zuvor sichtbar anpassen oder „Automatisch aus Preset“ belassen (Server löst leere Auswahl über Haus + Variante auf).
-9. Akteur startet mit **„Video erstellen“** (Submit).
-10. System legt Metadaten an, startet Run bzw. Workflow; Akteur verfolgt Status auf Workflow-/Run-Seite.
-
-### Alternativverläufe
-
-- **A1 – Nur Pipeline, Audio schon da:** Schritt 7 Bibliothek, Datei `upload/songs/<slug>.{mp3,wav,ogg}` existiert → kein Audio-Job, direkter Pipeline-Run.
-- **A2 – Hintergrund nicht in Dropdown:** Select bleibt leer; Server setzt Datei aus Preset-`bg_key`, sofern Datei im Assets-Ordner existiert.
-- **A3 – Erweiterte Einstellungen:** Minuten, Loop, Crossfade, Musik-Brief, Thumbnail-Szene, Upload-Flags manuell feinjustierbar.
-
-### Nachbedingungen
-
-- Erfolg: Run/Workflow angelegt; nach Abschluss liegen erwartbare Outputs unter den üblichen Pipeline-Pfaden; optional Auto-Upload wenn gesetzt.
-- Fehler: HTTP-Fehlerseite oder Redirect mit `error`-Query; kein inkonsistenter halbfertiger Zustand ohne erkennbare Meldung (Zielbild).
-
-### Akzeptanzkriterien
-
-- Ohne Variantenwahl sind **keine** Haus-weiten Fallback-Prompts verfügbar; Generierung ohne Variante wird zuverlässig verhindert (Client + Server).
-- Titeländerung aktualisiert internen Slug konsistent; Nutzer sieht kein separates Slug-Feld.
-- Preset-Daten (Musik-Brief, Thumbnail, Hintergrund) sind mit Variante konsistent, sofern JSON vollständig ist.
-
-### UI- / Routen-Referenz
-
-- Create: `/admin/pipeline/new`
-- Start: `POST /admin/pipeline/start`
-- Logs/Runs: `/admin/pipeline/logs`, `/admin/pipeline/run/{id}`, `/admin/workflow/{id}`
+**Seiten:** `/admin/pipeline/new` → `/admin/pipeline/run/{id}`
 
 ---
 
-## UC-02: Song im Audio Lab generieren
+### UC-02: Short aus bestehendem Video erstellen
 
+| | |
+|---|---|
+| **Phase** | Aktuell |
+| **Akteur** | Creator |
+| **Ziel** | Clip aus fertigem Video als YouTube Short generieren |
 
-|               |                                                                                               |
-| ------------- | --------------------------------------------------------------------------------------------- |
-| **Priorität** | A                                                                                             |
-| **Akteur**    | Produzent                                                                                     |
-| **Ziel**      | Einzelnen Track erzeugen, Qualität prüfen, ohne sofort die gesamte Video-Pipeline zu starten. |
+**Flow:** Quellvideo wählen → Clip-Start/Dauer konfigurieren → Visual Mode → Render → Upload
 
-
-### Kurzbeschreibung
-
-Separates Formular lädt **nur Varianten-Prompts** aus den Haus-Templates; Titel bestimmt den Slug für Dateinamen/Job.
-
-### Vorbedingungen
-
-- `/admin/audio` erreichbar; Generator-Health ok (`/admin/audio/health`).
-
-### Hauptszenario
-
-1. Akteur öffnet `**/admin/audio`** (Audio Lab).
-2. Akteur trägt **Titel** ein; Slug wird im Hintergrund aus Titel abgeleitet.
-3. Akteur wählt **Haus · Variante** aus Dropdown; Prompt-Textarea füllt sich mit den **variant_prompts**-Zeilen.
-4. Akteur passt optional Dauer, Clip-Länge, Steps an.
-5. Akteur startet **„Audio-Job anlegen“**.
-6. System erstellt Job; Akteur beobachtet Status auf Job-Detailseite; fertiger Track erscheint in der Library (sofern Worker erfolgreich).
-
-### Alternativverläufe
-
-- **A1 – Eigener Prompt:** Dropdown „eigener Prompt“, freier Text im Textarea (kein Preset-Zwang auf dieser Seite).
-
-### Nachbedingungen
-
-- Job in DB/History; bei Erfolg nutzbarer Track für UC-01 (Bibliothek + passender Slug aus späterem Video-Titel).
-
-### Akzeptanzkriterien
-
-- Kein veraltetes „nur Haus“-Preset ohne Variante in der UI.
-- Fehlende/leere Prompts blockieren Job mit verständlicher Meldung.
-
-### UI- / Routen-Referenz
-
-- `/admin/audio`, `POST /admin/audio/generate`, `/admin/audio/jobs/{job_id}`
+**Seiten:** `/admin/shorts` → `/admin/shorts/{id}`
 
 ---
 
-## UC-03: Video-Ergebnis prüfen und freigeben
+### UC-03: Audio im Audio Lab generieren
 
+| | |
+|---|---|
+| **Phase** | Aktuell |
+| **Akteur** | Creator |
+| **Ziel** | Standalone Audio-Track erzeugen (ohne Video-Pipeline) |
 
-|               |                                                                                          |
-| ------------- | ---------------------------------------------------------------------------------------- |
-| **Priorität** | A                                                                                        |
-| **Akteur**    | Reviewer (oder Produzent in QA-Rolle)                                                    |
-| **Ziel**      | Fertiges Video, Thumbnail und Metadaten im Browser bewerten und Upload gezielt auslösen. |
+**Flow:** Titel + Haus/Variante wählen → Prompts prüfen → Dauer/Steps → Job starten → Track in Library
 
-
-### Vorbedingungen
-
-- Pipeline-Run abgeschlossen oder zumindest relevante Outputs vorhanden.
-
-### Hauptszenario
-
-1. Akteur öffnet `**/admin/pipeline/run/{run_id}`** (oder verlinkt vom Dashboard).
-2. Akteur spielt **Video** ab und prüft **Thumbnail** und angezeigte **Metadaten**.
-3. Wenn in Ordnung: Akteur löst **Upload** aus (sofern nicht schon automatisch erfolgt).
-
-### Alternativverläufe
-
-- **A1 – Auto-Upload war aktiv:** Schritt 3 entfällt; Review prüft nur noch YouTube-Ergebnis extern.
-
-### Nachbedingungen
-
-- Entscheidung dokumentiert bzw. Upload durchgeführt; bei manuellem Upload keine doppelten Uploads ohne Absicherung (Systemverhalten laut Implementierung).
-
-### Akzeptanzkriterien
-
-- Vorschau ohne zwingenden Download des gesamten Pakets für die reine Sichtprüfung.
-- Klare Anzeige von Slug/Titel/Status zum Abgleich mit Checklisten.
-
-### UI- / Routen-Referenz
-
-- `/admin/pipeline/run/{id}`, ggf. Upload-Trigger aus Run-UI
+**Seiten:** `/admin/audio` → `/admin/audio/jobs/{id}`
 
 ---
 
-## UC-04: Library verwalten
+### UC-04: Song erstellen und exportieren
 
+| | |
+|---|---|
+| **Phase** | SaaS (MVP fehlt) |
+| **Akteur** | Creator |
+| **Ziel** | Fertigen Song (Audio + Metadaten) für Streaming-Plattformen produzieren |
 
-|               |                                                                                            |
-| ------------- | ------------------------------------------------------------------------------------------ |
-| **Priorität** | A                                                                                          |
-| **Akteur**    | Produzent                                                                                  |
-| **Ziel**      | Songs, Thumbnails und verwandte Assets überblicken, hochladen und für die Pipeline nutzen. |
+**Flow:** Genre/Stil wählen → Audio generieren → Post-Processing (Preset: ambient/dark/gentle) → Metadaten → Export als MP3/WAV → Optional Distribution (Spotify, Apple Music)
 
-
-### Vorbedingungen
-
-- Berechtigung für Admin-Bereich; Speicherpfade verfügbar.
-
-### Hauptszenario
-
-1. Akteur öffnet `**/admin/library`**.
-2. Akteur listet/filtert **Audio** / **Thumbnails** / **Backgrounds** (je nach Implementierung der Seite).
-3. Akteur lädt Dateien hoch oder nutzt generierte Tracks.
-4. Akteur prüft Wiedergabe/Qualität in der UI wo vorhanden.
-
-### Alternativverläufe
-
-- **A1 – Umbenennen/Löschen:** gemäß Dashboard-Funktionen; Konsistenz mit Slug aus UC-01 beachten.
-
-### Akzeptanzkriterien
-
-- Keine „toten“ Aktionen; große Uploads ohne Browser-Absturz (Streaming/Chunking wo implementiert).
-
-### UI- / Routen-Referenz
-
-- `/admin/library`
+**Seiten:** `/admin/songs` (aktuell Placeholder)
 
 ---
 
-## UC-05: Projektstatus auf einen Blick
+## Dashboard & Monitoring
 
+### UC-05: Production Overview prüfen
 
-|               |                                                                               |
-| ------------- | ----------------------------------------------------------------------------- |
-| **Priorität** | B                                                                             |
-| **Akteur**    | Produzent                                                                     |
-| **Ziel**      | Laufende und kürzlich abgeschlossene Aktivitäten ohne Seitenwechsel erfassen. |
+| | |
+|---|---|
+| **Phase** | Aktuell |
+| **Akteur** | Creator, Admin |
+| **Ziel** | Auf einen Blick sehen: Was läuft, was ist fertig, was ist kaputt |
 
+**Flow:** Dashboard öffnen → Tab wählen (Videos/Shorts/Songs) → KPIs scannen → Active Runs sehen → Published Content prüfen → Bei Bedarf in Detail springen
 
-### Hauptszenario
-
-1. Akteur öffnet `**/admin`** (Dashboard).
-2. Sieht Kacheln/Kurzinfos zu letztem Run, Jobs, Serverhinweisen.
-
-### Akzeptanzkriterien
-
-- Kein leeres Dashboard ohne Erklärung bei leerer DB; Links zu relevanten Detailseiten.
-
-### UI- / Routen-Referenz
-
-- `/admin` (`dashboard.html`)
+**Seiten:** `/admin`
 
 ---
 
-## UC-06: Bugs und Feature-Wünsche melden
+### UC-06: Workflow-Status im Detail verfolgen
 
+| | |
+|---|---|
+| **Phase** | Aktuell |
+| **Akteur** | Creator |
+| **Ziel** | Live-Logs, Fortschritt und Ergebnis eines laufenden Workflows sehen |
 
-|               |                                                                      |
-| ------------- | -------------------------------------------------------------------- |
-| **Priorität** | B                                                                    |
-| **Akteur**    | Produzent                                                            |
-| **Ziel**      | Feedback strukturiert erfassen, ohne sofort GitHub öffnen zu müssen. |
+**Flow:** Workflow in Overview/Liste anklicken → Live-Log verfolgen → Video-Preview → Thumbnail prüfen → Upload auslösen oder Retry
 
-
-### Hauptszenario
-
-1. Akteur öffnet `**/admin/tickets/new`**.
-2. Füllt Formular (Titel, Beschreibung, ggf. Typ).
-3. Sendet ab; Ticket wird gespeichert (Roadmap: optional GitHub-Issue).
-
-### Akzeptanzkriterien
-
-- Validierung und Erfolgs-/Fehlermeldung verständlich; keine stillen Fehler.
-
-### UI- / Routen-Referenz
-
-- `/admin/tickets/new`, Tickets-Liste falls vorhanden
+**Seiten:** `/admin/pipeline/run/{id}`, `/admin/shorts/{id}`, `/admin/audio/jobs/{id}`
 
 ---
 
-## UC-07: Pipeline-Queue überwachen
+### UC-07: Fehlgeschlagenen Workflow fixen
 
+| | |
+|---|---|
+| **Phase** | Aktuell |
+| **Akteur** | Creator |
+| **Ziel** | Fehler erkennen, verstehen und Workflow erneut starten |
 
-|               |                                                |
-| ------------- | ---------------------------------------------- |
-| **Priorität** | B                                              |
-| **Akteur**    | Produzent                                      |
-| **Ziel**      | Wissen, ob und was gerade rendert oder wartet. |
+**Flow:** Failed-Status in Overview sehen → Detail öffnen → Fehlermeldung lesen → Retry klicken oder Config anpassen → Neuen Run starten
 
-
-### Hauptszenario
-
-1. Akteur öffnet `**/admin/pipeline`** oder Pipeline-Logs.
-2. Liest Queue-/Statusanzeige (running, waiting, Fehler).
-
-### Akzeptanzkriterien
-
-- Konsistente Begriffe mit Run-Detailseiten; bei Stau erkennbare Ursache oder nächster Schritt.
-
-### UI- / Routen-Referenz
-
-- `/admin/pipeline`, `/admin/pipeline/logs`
+**Erwartung:** Fehlermeldung ist verständlich (nicht nur Traceback), Retry-Button direkt sichtbar
 
 ---
 
-## UC-08: Shorts erstellen
+## Library & Assets
 
+### UC-08: Library durchsuchen und Assets verwalten
 
-|               |                                                |
-| ------------- | ---------------------------------------------- |
-| **Priorität** | C                                              |
-| **Akteur**    | Produzent                                      |
-| **Ziel**      | Kurzformate aus vorhandenem Material erzeugen. |
+| | |
+|---|---|
+| **Phase** | Aktuell |
+| **Akteur** | Creator |
+| **Ziel** | Songs, Thumbnails, Backgrounds finden, anhören, hochladen |
 
+**Flow:** Library öffnen → Filter nach Typ → Audio abspielen → Asset für neuen Workflow auswählen
 
-### Vorbedingungen
-
-- Feature gemäß Produktstand (Seite kann existieren, Funktionalität teils in Entwicklung).
-
-### Hauptszenario (Soll)
-
-1. Akteur öffnet `**/admin/shorts`**.
-2. Wählt Quellmaterial und Schnittparameter.
-3. Erzeugt Short; prüft Vorschau; veröffentlicht oder übergibt an Upload-Flow.
-
-### Akzeptanzkriterien (Zielbild)
-
-- Parallele Nutzung ohne Longform-Pipeline zu blockieren; klare Trennung der Outputs.
-
-### UI- / Routen-Referenz
-
-- `/admin/shorts`
+**Seiten:** `/admin/library`
 
 ---
 
-## UC-09: Dokumentation lesen
+### UC-09: Video-Ergebnis prüfen und freigeben
 
+| | |
+|---|---|
+| **Phase** | Aktuell |
+| **Akteur** | Creator (QA-Rolle) |
+| **Ziel** | Fertiges Video + Thumbnail + Metadaten bewerten, dann Upload auslösen |
 
-|               |                                         |
-| ------------- | --------------------------------------- |
-| **Priorität** | C (Onboarding relevant)                 |
-| **Akteur**    | Produzent, neues Teammitglied           |
-| **Ziel**      | Selbsthilfe bei Bedienung und Abläufen. |
+**Flow:** Run-Detail öffnen → Video abspielen → Thumbnail checken → Metadaten prüfen → Upload Button
 
-
-### Hauptszenario
-
-1. Akteur öffnet `**/admin/docs`**.
-2. Navigiert Themen → liest Seiten; optional Suche nutzen.
-
-### Akzeptanzkriterien
-
-- Verlinkung aus Dashboard; aktuelle Pfade und Begriffe (z. B. Varianten-Presets) in Doku nachziehen, wenn sich der Flow ändert.
-
-### UI- / Routen-Referenz
-
-- `/admin/docs`
+**Seiten:** `/admin/pipeline/run/{id}`
 
 ---
 
-## Querschnitt: Preset-Daten (`house_templates.json`)
+## Team & Settings
 
-Für **UC-01** und Teile von **UC-02** relevant:
+### UC-10: Presets verwalten
 
+| | |
+|---|---|
+| **Phase** | Aktuell |
+| **Akteur** | Admin |
+| **Ziel** | Haus-Templates und Varianten erstellen, bearbeiten, löschen |
 
-| Konzept  | JSON-Felder (typisch)                                                                                      |
-| -------- | ---------------------------------------------------------------------------------------------------------- |
-| Haus     | Top-Level-Key (`stark`, …), `display_name`, `title_template`, `defaults`, `music_brief`, `thumbnail_brief` |
-| Variante | `variants`, `variant_prompts`, `background_prompts` (`bg_key`, `prompt`, optional `thumbnail_brief`)       |
+**Flow:** Settings → Presets Tab → Preset auswählen → Varianten bearbeiten → Prompts, Backgrounds, Thumbnails konfigurieren
 
-
-**Wichtig:** Audio-Prompts existieren **nur** auf Varianten-Ebene (`variant_prompts`); es gibt keine separaten hausweiten `prompts`-Listen mehr.
-
----
-
-## Abgleich mit Produktregeln (Anti-Patterns)
-
-Aus `[USER_STORIES.md](USER_STORIES.md)` – weiterhin gültig als nicht-funktionale Anforderungen:
-
-- Kein unnötiges Springen zwischen vielen Seiten für den Standard-Video-Flow.
-- Keine rein technischen Fehlermeldungen ohne Kontext.
-- Keine toten UI-Elemente.
-- Automatisierung wo sinnvoll (Presets, Slug aus Titel, Hintergrund aus Variante).
+**Seiten:** `/admin/settings`
 
 ---
 
-## Änderungshistorie (Dokument)
+### UC-11: Team-Mitglieder verwalten
 
+| | |
+|---|---|
+| **Phase** | Aktuell |
+| **Akteur** | Admin |
+| **Ziel** | User anlegen, Rollen zuweisen (Admin/Editor/Viewer) |
 
-| Datum      | Änderung                                                                                          |
-| ---------- | ------------------------------------------------------------------------------------------------- |
-| 27.03.2026 | Erstversion als Detaildokument; UC-01/UC-02 an aktuellen Create-Flow und JSON-Struktur angepasst. |
+**Flow:** Settings → Team Tab → User einladen → Rolle zuweisen → User kann sich einloggen
 
+**Seiten:** `/admin/settings` (Team Tab)
 
+---
+
+### UC-12: Provider-Einstellungen konfigurieren
+
+| | |
+|---|---|
+| **Phase** | Aktuell |
+| **Akteur** | Admin |
+| **Ziel** | GPU-Worker, YouTube-API, Audio-Modell konfigurieren |
+
+**Flow:** Settings → Providers Tab → GPU Host/Modell setzen → YouTube Credentials → Speichern
+
+**Seiten:** `/admin/settings` (Providers Tab)
+
+---
+
+## Tickets & Ops
+
+### UC-13: Bug oder Feature-Wunsch melden
+
+| | |
+|---|---|
+| **Phase** | Aktuell |
+| **Akteur** | Creator, Admin |
+| **Ziel** | Feedback strukturiert erfassen |
+
+**Flow:** Tickets → Neues Ticket → Typ (Bug/Feature/Task) → Beschreibung → Absenden
+
+**Seiten:** `/admin/tickets/new`, `/admin/tickets`
+
+---
+
+### UC-14: System-Health und Server-Status prüfen
+
+| | |
+|---|---|
+| **Phase** | Aktuell |
+| **Akteur** | Admin |
+| **Ziel** | CPU, RAM, Disk, GPU-Status, Service-Health auf einen Blick |
+
+**Flow:** Operations öffnen → Server-Stats sehen → GPU-Worker Status → DB-Backup auslösen
+
+**Seiten:** `/admin/ops`
+
+---
+
+## SaaS-spezifische Use Cases (noch zu bauen)
+
+### UC-20: Erstmalige Registrierung und Onboarding
+
+| | |
+|---|---|
+| **Phase** | SaaS (Phase 4) |
+| **Akteur** | Neuer User |
+| **Ziel** | Account erstellen und sofort produktiv sein |
+
+**Flow:** Landing Page → Sign Up → Email verifizieren → Onboarding-Wizard (Space-Name, ersten Preset wählen, GPU verbinden oder Managed nutzen) → Erstes Video erstellen
+
+**Erwartung:** Innerhalb von 5 Minuten nach Registrierung das erste Video gestartet
+
+---
+
+### UC-21: Space erstellen und konfigurieren
+
+| | |
+|---|---|
+| **Phase** | SaaS (Phase 3b) |
+| **Akteur** | Admin |
+| **Ziel** | Eigenen isolierten Workspace mit eigenem Branding |
+
+**Flow:** Space-Switcher → Neuer Space → Name + Branding → Presets importieren oder neu erstellen → Team einladen
+
+**Erwartung:** Vollständige Datenisolation zwischen Spaces
+
+---
+
+### UC-22: Subscription verwalten und Billing
+
+| | |
+|---|---|
+| **Phase** | SaaS (Phase 5) |
+| **Akteur** | Admin |
+| **Ziel** | Plan wählen, Zahlungsmethode hinterlegen, Usage sehen |
+
+**Flow:** Settings → Billing → Plan auswählen (Free/Creator/Studio/Enterprise) → Stripe Checkout → Usage Dashboard sehen → Rechnungen herunterladen
+
+**Erwartung:** Transparente Kosten, keine versteckten Limits
+
+---
+
+### UC-23: Content auf mehrere Plattformen veröffentlichen
+
+| | |
+|---|---|
+| **Phase** | SaaS (Phase 7) |
+| **Akteur** | Creator |
+| **Ziel** | Ein Video/Song gleichzeitig auf YouTube, TikTok, Spotify pushen |
+
+**Flow:** Workflow abgeschlossen → Publish-Dialog → Plattformen auswählen (YouTube ✅, TikTok ✅, Instagram ✅) → Plattform-spezifische Anpassungen → Publish All
+
+**Erwartung:** Ein Klick für Multi-Platform, plattformspezifische Formate automatisch
+
+---
+
+### UC-24: Content-Kalender und Scheduling
+
+| | |
+|---|---|
+| **Phase** | SaaS (Phase 7) |
+| **Akteur** | Creator |
+| **Ziel** | Content im Voraus planen und automatisch veröffentlichen |
+
+**Flow:** Calendar öffnen → Datum/Uhrzeit wählen → Workflow zuweisen → System veröffentlicht automatisch zum Zeitpunkt
+
+**Erwartung:** Kalenderansicht, Drag & Drop, Zeitzone-aware
+
+---
+
+### UC-25: Analytics und Performance einsehen
+
+| | |
+|---|---|
+| **Phase** | SaaS (Phase 7) |
+| **Akteur** | Creator, Admin |
+| **Ziel** | Views, Watch Time, Revenue pro Video/Song/Channel sehen |
+
+**Flow:** Analytics öffnen → Zeitraum wählen → Pro Content oder pro Channel filtern → Trends erkennen
+
+**Erwartung:** Daten direkt von YouTube/Spotify APIs, nicht manuell
+
+---
+
+### UC-26: GPU-Provider verbinden (Bring Your Own GPU)
+
+| | |
+|---|---|
+| **Phase** | SaaS (Phase 6) |
+| **Akteur** | Admin |
+| **Ziel** | Eigene GPU-Hardware für Audio-Generierung nutzen |
+
+**Flow:** Settings → Providers → GPU hinzufügen → SSH-Key/Host konfigurieren → Health Check → Worker aktiv
+
+**Erwartung:** Fallback auf Managed GPU wenn eigene offline
+
+---
+
+### UC-27: Batch-Produktion starten
+
+| | |
+|---|---|
+| **Phase** | SaaS (Phase 8) |
+| **Akteur** | Creator |
+| **Ziel** | Mehrere Videos/Songs auf einmal erstellen |
+
+**Flow:** Preset/Haus wählen → "Alle Varianten" → Bulk-Config (Länge, Auto-Upload) → 8 Videos auf einmal starten
+
+**Erwartung:** Queue-Management, Progress für alle gleichzeitig sichtbar
+
+---
+
+### UC-28: API-Integration für externe Tools
+
+| | |
+|---|---|
+| **Phase** | SaaS (Phase 9) |
+| **Akteur** | Developer (externer User) |
+| **Ziel** | Workflows programmatisch starten und Status abfragen |
+
+**Flow:** Settings → API Keys → Key erstellen → REST API Docs lesen → Workflow per API starten → Webhook bei Completion
+
+**Erwartung:** Vollständige REST API, API Key Auth, Webhook Notifications
+
+---
+
+### UC-29: White-Label für Agentur-Kunden
+
+| | |
+|---|---|
+| **Phase** | SaaS (Phase 9) |
+| **Akteur** | Agentur-Admin |
+| **Ziel** | Eigenes Branding, eigene Domain, Kunden-Management |
+
+**Flow:** Enterprise Settings → Domain verbinden → Logo/Farben anpassen → Sub-Spaces für Kunden erstellen
+
+**Erwartung:** Endkunde sieht nur Agentur-Branding, nicht Whisper Studio
+
+---
+
+## Querschnitt-Anforderungen (alle Use Cases)
+
+### UX-Prinzipien
+- **5-Sekunden-Test:** User versteht sofort wo er ist und was er tun kann
+- **Progressive Disclosure:** Komplexität nur wenn nötig
+- **Zero-Config Default:** Presets füllen alles vor, User kann überschreiben
+- **Fehler = Handlung:** Jeder Fehler zeigt was der User tun soll
+- **Output first:** Fertige Inhalte prominenter als Prozess-Details
+
+### Status-System (UI)
+Nur 5 sichtbare Status für den User:
+- 🟢 **Running** (inkl. waiting_for_audio, uploading)
+- 🟡 **Queued**
+- 🟠 **Ready** (rendered, bereit zum Upload)
+- 🔵 **Published** (uploaded)
+- 🔴 **Failed** (error, cancelled)
+
+### Anti-Patterns
+- Keine technischen Fehlermeldungen ohne Kontext
+- Keine toten UI-Elemente oder leere Seiten ohne CTA
+- Keine Tabellen-Listen (immer Cards)
+- Kein GoT-spezifisches Branding in der Produktstruktur
+- Keine doppelten/widersprüchlichen Status-Badges
+
+---
+
+## Änderungshistorie
+
+| Datum | Änderung |
+|-------|----------|
+| 27.03.2026 | Erstversion UC-01 bis UC-09 |
+| 28.03.2026 | Komplett überarbeitet für SaaS. UC-01 bis UC-29. Querschnitt-Anforderungen, Status-System, Anti-Patterns hinzugefügt. |
