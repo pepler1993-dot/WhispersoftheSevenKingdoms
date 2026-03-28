@@ -38,7 +38,9 @@
   <div class="house-grid" role="list">
     {% for h in house_cards %}
     <div class="house-card-wrap" style="position:relative;">
-      <a class="house-card" role="listitem" href="/admin/library/houses/{{ h.key }}" aria-label="{{ h.display_name }}{% if h.house %}, {{ h.house }}{% endif %}" style="background: linear-gradient(145deg, {{ h.color }} 0%, {{ h.bg_color }} 100%);">
+      <a class="house-card" role="listitem" href="/admin/library/houses/{{ h.key }}" aria-label="{{ h.display_name }}{% if h.house %}, {{ h.house }}{% endif %}" style="--house-color: {{ h.color }}; --house-bg: {{ h.bg_color }}; background: var(--house-bg);">
+        <img class="house-card-bg" src="/static/backgrounds/{{ h.key }}.jpg" onerror="this.style.display='none'" alt="" />
+        <div class="house-card-overlay"></div>
         <div class="house-card-inner">
           <span class="house-card-sigil" aria-hidden="true">{{ h.sigil }}</span>
           <h3 class="house-card-title">{{ h.display_name }}</h3>
@@ -315,6 +317,33 @@ document.querySelectorAll('form[action="/admin/library/upload"]').forEach(functi
 </script>
 <style>
 .house-card-wrap { position: relative; }
+.house-card {
+  position: relative;
+  overflow: hidden;
+}
+.house-card-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  transition: transform 0.4s ease;
+}
+.house-card:hover .house-card-bg { transform: scale(1.05); }
+.house-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.05) 100%);
+  z-index: 1;
+}
+.house-card-inner {
+  position: relative;
+  z-index: 2;
+}
+.house-card-sigil { text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+.house-card-title { color: #fff !important; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+.house-card-sub { color: rgba(255,255,255,0.7) !important; }
 .lib-edit-btn {
   position: absolute;
   top: 8px;
