@@ -45,6 +45,38 @@
     .catch(function() {});
 })();
 </script>
+
+<script>
+(function() {
+  var bars = document.querySelectorAll('[data-progress-bar]');
+  if (!bars.length) return;
+  
+  function pollProgress() {
+    bars.forEach(function(bar) {
+      var wfId = bar.dataset.progressBar;
+      var textEl = document.querySelector('[data-progress-text="' + wfId + '"]');
+      fetch('/admin/pipeline/run/' + wfId + '/progress')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.progress_pct > 0) {
+            bar.style.width = data.progress_pct + '%';
+            bar.style.animation = 'none';
+          }
+          if (textEl && data.progress_text) {
+            textEl.textContent = data.progress_text + (data.progress_pct > 0 ? ' · ' + data.progress_pct + '%' : '');
+          }
+          if (data.status && !['running', 'waiting_for_audio', 'uploading', 'queued'].includes(data.status)) {
+            setTimeout(function() { location.reload(); }, 2000);
+          }
+        })
+        .catch(function() {});
+    });
+    setTimeout(pollProgress, 5000);
+  }
+  
+  setTimeout(pollProgress, 1000);
+})();
+</script>
 {% endblock %}
 {% block head_extra %}
 <link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
@@ -92,6 +124,38 @@
       setHealth('health-pipeline', p.status || 'healthy', 'Pipeline ' + (p.status === 'healthy' ? '✓' : p.recent_failures + ' failures'));
     })
     .catch(function() {});
+})();
+</script>
+
+<script>
+(function() {
+  var bars = document.querySelectorAll('[data-progress-bar]');
+  if (!bars.length) return;
+  
+  function pollProgress() {
+    bars.forEach(function(bar) {
+      var wfId = bar.dataset.progressBar;
+      var textEl = document.querySelector('[data-progress-text="' + wfId + '"]');
+      fetch('/admin/pipeline/run/' + wfId + '/progress')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.progress_pct > 0) {
+            bar.style.width = data.progress_pct + '%';
+            bar.style.animation = 'none';
+          }
+          if (textEl && data.progress_text) {
+            textEl.textContent = data.progress_text + (data.progress_pct > 0 ? ' · ' + data.progress_pct + '%' : '');
+          }
+          if (data.status && !['running', 'waiting_for_audio', 'uploading', 'queued'].includes(data.status)) {
+            setTimeout(function() { location.reload(); }, 2000);
+          }
+        })
+        .catch(function() {});
+    });
+    setTimeout(pollProgress, 5000);
+  }
+  
+  setTimeout(pollProgress, 1000);
 })();
 </script>
 {% endblock %}
@@ -216,8 +280,9 @@
   {% if run.phase == "audio" %}🎵 Audio{% elif run.phase == "upload" %}🚀 Upload{% else %}🎬 Render{% endif %}
         </div>
         {% if not is_queued %}
-        <div class="active-progress">
-          <div class="active-bar"><div class="active-bar-fill"></div></div>
+        <div class="active-progress" data-progress-wf="{{ run.workflow_id }}">
+          <div class="active-bar"><div class="active-bar-fill" data-progress-bar="{{ run.workflow_id }}"></div></div>
+          <div class="active-progress-text" data-progress-text="{{ run.workflow_id }}" style="font-size:0.72rem; color:var(--muted); margin-top:4px;"></div>
         </div>
         {% endif %}
       </div>
@@ -928,6 +993,38 @@
       setHealth('health-pipeline', p.status || 'healthy', 'Pipeline ' + (p.status === 'healthy' ? '✓' : p.recent_failures + ' failures'));
     })
     .catch(function() {});
+})();
+</script>
+
+<script>
+(function() {
+  var bars = document.querySelectorAll('[data-progress-bar]');
+  if (!bars.length) return;
+  
+  function pollProgress() {
+    bars.forEach(function(bar) {
+      var wfId = bar.dataset.progressBar;
+      var textEl = document.querySelector('[data-progress-text="' + wfId + '"]');
+      fetch('/admin/pipeline/run/' + wfId + '/progress')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.progress_pct > 0) {
+            bar.style.width = data.progress_pct + '%';
+            bar.style.animation = 'none';
+          }
+          if (textEl && data.progress_text) {
+            textEl.textContent = data.progress_text + (data.progress_pct > 0 ? ' · ' + data.progress_pct + '%' : '');
+          }
+          if (data.status && !['running', 'waiting_for_audio', 'uploading', 'queued'].includes(data.status)) {
+            setTimeout(function() { location.reload(); }, 2000);
+          }
+        })
+        .catch(function() {});
+    });
+    setTimeout(pollProgress, 5000);
+  }
+  
+  setTimeout(pollProgress, 1000);
 })();
 </script>
 {% endblock %}
