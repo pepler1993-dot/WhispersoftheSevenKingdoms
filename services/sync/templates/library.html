@@ -59,52 +59,49 @@
 
 <section id="library-panel-songs" class="panel panel-accent-blue library-tab-panel" aria-label="Songs" {% if library_tab != 'songs' %}hidden{% endif %}>
   <p class="library-tab-hint">Diese Dateien erscheinen im Create-Tab unter der Audio-Bibliothek. Unterstützt: MP3, WAV, OGG.</p>
-  <div class="library-asset-toolbar">
-    <span class="section-note" style="margin:0;">Massenaktionen</span>
-    <form id="form-songs-bulk-delete" method="post" action="/admin/library/delete-multi" onsubmit="return confirm('Ausgewählte Songs wirklich löschen?');">
-      <input type="hidden" name="asset_type" value="songs" />
-      <button type="submit" class="btn btn-danger btn-sm">Ausgewählte löschen</button>
-    </form>
-  </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th class="th-check"></th><th>Datei</th><th>Größe</th><th>Geändert</th><th></th></tr></thead>
-        <tbody>
-          {% for item in songs %}
-          <tr>
-            <td data-label="Auswahl"><input form="form-songs-bulk-delete" type="checkbox" name="filenames" value="{{ item.name }}" aria-label="Auswählen: {{ item.name }}" /></td>
-            <td data-label="Datei">{{ item.name }}</td>
-            <td data-label="Größe">{{ item.size }}</td>
-            <td data-label="Geändert">{{ item.modified }}</td>
-            <td data-label="Aktionen">
-              <div class="row-actions">
-                <button type="button" class="icon-btn" aria-label="Umbenennen" title="Umbenennen" data-rename-asset="songs" data-rename-name="{{ item.name }}">
-                  <i data-lucide="pencil" class="icon-md"></i>
-                </button>
-                <form method="post" action="/admin/library/delete" onsubmit="return confirm('Song wirklich löschen?');" style="margin:0;">
-                  <input type="hidden" name="asset_type" value="songs" />
-                  <input type="hidden" name="filename" value="{{ item.name }}" />
-                  <button type="submit" class="icon-btn icon-btn-danger" aria-label="Song löschen" title="Song löschen">
-                    <i data-lucide="trash-2" class="icon-md"></i>
-                  </button>
-                </form>
-              </div>
-            </td>
-          </tr>
-          {% else %}
-          <tr><td colspan="5" class="empty-state">Keine Songs vorhanden</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
+  {% if songs %}
+  <div class="song-card-list">
+    {% for item in songs %}
+    {% set clean_name = item.name.replace('-', ' ').replace('.mp3','').replace('.wav','').replace('.ogg','').replace(' looped processed','').replace(' looped','').replace(' processed','') %}
+    <div class="song-card">
+      <div class="song-card-icon">🎵</div>
+      <div class="song-card-info">
+        <div class="song-card-title">{{ clean_name | title }}</div>
+        <div class="song-card-meta">{{ item.size }} · {{ item.modified }} · {{ item.name.split('.')[-1] | upper }}</div>
+      </div>
+      <div class="song-card-actions">
+        <button type="button" class="icon-btn" aria-label="Umbenennen" title="Umbenennen" data-rename-asset="songs" data-rename-name="{{ item.name }}">
+          <i data-lucide="pencil" class="icon-md"></i>
+        </button>
+        <form method="post" action="/admin/library/delete" onsubmit="return confirm('Song wirklich löschen?');" style="margin:0;">
+          <input type="hidden" name="asset_type" value="songs" />
+          <input type="hidden" name="filename" value="{{ item.name }}" />
+          <button type="submit" class="icon-btn icon-btn-danger" aria-label="Löschen" title="Löschen">
+            <i data-lucide="trash-2" class="icon-md"></i>
+          </button>
+        </form>
+      </div>
     </div>
-    <form method="post" action="/admin/library/upload" enctype="multipart/form-data" style="margin-top:16px;">
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state-box" style="margin-top:16px;">
+    <div class="empty-state-icon">🎵</div>
+    <div class="empty-state-text">Noch keine Songs in der Library</div>
+  </div>
+  {% endif %}
+
+  <details style="margin-top:20px;">
+    <summary class="btn btn-secondary btn-sm" style="cursor:pointer;">Song hochladen</summary>
+    <form method="post" action="/admin/library/upload" enctype="multipart/form-data" style="margin-top:12px;">
       <input type="hidden" name="asset_type" value="songs" />
       <div class="form-group">
-        <label for="song_file">Song hochladen</label>
+        <label for="song_file">Audiodatei wählen</label>
         <input id="song_file" name="file" type="file" class="form-input" accept=".mp3,.wav,.ogg" required />
       </div>
-      <button type="submit" class="btn btn-primary btn-sm">Song hochladen</button>
+      <button type="submit" class="btn btn-primary btn-sm">Hochladen</button>
     </form>
+  </details>
 </section>
 
 <section id="library-panel-backgrounds" class="panel panel-accent-blue library-tab-panel" aria-label="Hintergrundbilder" {% if library_tab != 'backgrounds' %}hidden{% endif %}>
@@ -316,6 +313,43 @@ document.querySelectorAll('form[action="/admin/library/upload"]').forEach(functi
 });
 </script>
 <style>
+
+/* ── Song Cards ──────────────────────────────────────── */
+.song-card-list { display: flex; flex-direction: column; gap: 6px; }
+.song-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  transition: all 0.15s ease;
+}
+.song-card:hover {
+  border-color: rgba(255,255,255,0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.song-card-icon { font-size: 1.3rem; flex-shrink: 0; }
+.song-card-info { flex: 1; min-width: 0; }
+.song-card-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.song-card-meta {
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.song-card-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
 .house-card-wrap { position: relative; }
 .house-card {
   position: relative;
