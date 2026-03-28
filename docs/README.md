@@ -1,69 +1,46 @@
 # Documentation Index
 
-Diese Dokumentation ist nach dem **Diátaxis-Framework** organisiert, damit unterschiedliche Zielgruppen schnell die richtige Art von Information finden.
+## Start here
 
-## Start hier
+- [Repository Overview](../README.md)
+- [Project Status](../PROJECT_STATUS.md)
+- [Roadmap](../ROADMAP.md)
+- [Changelog](../CHANGELOG.md)
 
-- **Repository-Überblick**: [`../README.md`](../README.md)
-- **Projektstatus**: [`../PROJECT_STATUS.md`](../PROJECT_STATUS.md)
-- **Roadmap**: [`../ROADMAP.md`](../ROADMAP.md)
-- **Changelog**: [`../CHANGELOG.md`](../CHANGELOG.md)
+## Architecture & Concepts
 
----
+- [System Architecture](architecture/SYSTEM_ARCHITECTURE.md)
+- [SaaS Concept & Roadmap](SAAS_CONCEPT.md)
+- [Shorts Expansion Plan](architecture/SHORTS_EXPANSION_PLAN.md)
+- [Tech Decisions](architecture/TECH_DECISIONS.md)
+- [Design Principles](DESIGN_PRINCIPLES.md)
+
+## Use Cases & UX
+
+- [Use Cases (UC-01 to UC-29)](USE_CASES.md)
+- [User Stories](USER_STORIES.md)
+
+## Guides
+
+- [Quick Start](guides/QUICKSTART.md)
+- [Pipeline Guide](guides/PIPELINE.md)
+- [Agent Sync Service](guides/AGENT_SYNC.md)
+- [Branching & Git](guides/BRANCHING.md)
+- [Contributing](guides/CONTRIBUTING.md)
 
 ## Tutorials
-Lernpfade von null bis zu einem funktionierenden Ergebnis.
 
-- [`tutorials/README.md`](tutorials/README.md)
-- [`tutorials/first-local-pipeline-run.md`](tutorials/first-local-pipeline-run.md)
-- [`tutorials/dashboard-local-start.md`](tutorials/dashboard-local-start.md)
-- [`tutorials/song-to-output.md`](tutorials/song-to-output.md)
+- [First Local Pipeline Run](tutorials/first-local-pipeline-run.md)
+- [Dashboard Local Start](tutorials/dashboard-local-start.md)
 
-## How-to Guides
-Aufgabenorientierte Anleitungen für konkrete Ziele.
+## Technical Reference
 
-- [`guides/QUICKSTART.md`](guides/QUICKSTART.md)
-- [`guides/PIPELINE.md`](guides/PIPELINE.md)
-- [`guides/AUTOMATION.md`](guides/AUTOMATION.md)
-- [`guides/AGENT_SYNC.md`](guides/AGENT_SYNC.md)
-- [`guides/BRANCHING.md`](guides/BRANCHING.md)
-- [`guides/CONTRIBUTING.md`](guides/CONTRIBUTING.md)
+- [Metadata Format](technical/metadata.md)
+- [Repo Structure](technical/repo-structure.md)
+- [Upload Checklist](checklists/upload-checklist.md)
 
-## Agent Operations
-Arbeitsregeln und Betriebswissen für Agenten, die im Projekt aktiv Änderungen machen.
+## Agent Docs
 
-- [`agents/README.md`](agents/README.md)
-- [`agents/WORKING_IN_THIS_PROJECT.md`](agents/WORKING_IN_THIS_PROJECT.md)
-- [`agents/GITHUB_AND_PAT.md`](agents/GITHUB_AND_PAT.md)
-- [`agents/PLAYBOOKS.md`](agents/PLAYBOOKS.md)
-
-## Reference
-Lookup-Material: technische Fakten, Formate, Konventionen und Diagramme.
-
-- [`reference/README.md`](reference/README.md)
-- [`reference/architecture-diagram.md`](reference/architecture-diagram.md)
-- [`reference/RESPONSIVE_UI_PATTERN_HANDBOOK.md`](reference/RESPONSIVE_UI_PATTERN_HANDBOOK.md)
-- [`technical/repo-structure.md`](technical/repo-structure.md)
-- [`technical/metadata.md`](technical/metadata.md)
-- [`technical/validation.md`](technical/validation.md)
-- [`technical/preflight.md`](technical/preflight.md)
-- [`technical/upload-completeness.md`](technical/upload-completeness.md)
-- [`templates/`](templates/)
-- [`publishing/`](publishing/)
-
-## Explanation
-Warum Dinge so gebaut sind, welche Tradeoffs gelten und welche Strategie verfolgt wird.
-
-- [`explanation/README.md`](explanation/README.md)
-- [`explanation/architecture-overview.md`](explanation/architecture-overview.md)
-- [`explanation/audio-strategy.md`](explanation/audio-strategy.md)
-- [`architecture/TECH_DECISIONS.md`](architecture/TECH_DECISIONS.md)
-- [`architecture/EXPANSION_PLAN_FINAL.md`](architecture/EXPANSION_PLAN_FINAL.md)
-- [`AUDIO_GENERATION_ALTERNATIVES_EVALUATION.md`](AUDIO_GENERATION_ALTERNATIVES_EVALUATION.md)
-
----
-
-## Hinweis zu älteren Dokumenten
-
-Ältere Review-, Strategie- und Kontextdokumente bleiben bewusst im Repository erhalten, wenn sie für Nachvollziehbarkeit und historische Entscheidungen noch relevant sind.
-Die primären Einstiege liegen aber in den oben verlinkten Bereichen.
+- [Agent README](agents/README.md)
+- [Working in this Project](agents/WORKING_IN_THIS_PROJECT.md)
+- [GitHub & PAT](agents/GITHUB_AND_PAT.md)
