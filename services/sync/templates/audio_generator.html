@@ -141,7 +141,11 @@
           const btn = document.createElement('div');
           btn.className = 'al-variant-card';
           btn.style.setProperty('--house-color', house.color || 'var(--gold)');
-          btn.innerHTML = '<div class="al-variant-name">' + vName + '</div><div class="al-variant-desc">' + vDesc + '</div>';
+          const bgPrompts = house.background_prompts || {};
+          const bgData = bgPrompts[vKey];
+          const bgKey = (bgData && bgData.bg_key) ? bgData.bg_key : '';
+          const bgImg = bgKey ? '<img class="al-variant-bg" src="/static/backgrounds/' + bgKey + '.jpg" onerror="this.style.display=\'none\'" alt="" /><div class="al-variant-overlay"></div>' : '';
+          btn.innerHTML = bgImg + '<div class="al-variant-content"><div class="al-variant-name">' + vName + '</div><div class="al-variant-desc">' + vDesc + '</div></div>';
           btn.addEventListener('click', () => {
             variantGrid.querySelectorAll('.al-variant-card').forEach(c => c.classList.remove('selected'));
             btn.classList.add('selected');
