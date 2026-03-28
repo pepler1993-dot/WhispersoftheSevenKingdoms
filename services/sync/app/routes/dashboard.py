@@ -31,7 +31,10 @@ def admin_songs(request: Request):
 @router.get('/admin', response_class=HTMLResponse)
 def admin_dashboard(request: Request):
     all_workflows = shared.db.list_workflows(limit=100)
-    recent_audio = shared.db.list_audio_jobs(limit=10)
+    recent_audio = shared.db.list_audio_jobs(limit=50)
+
+    # Audio job IDs that belong to a workflow (not standalone)
+    workflow_audio_ids = {r['audio_job_id'] for r in all_workflows if r.get('audio_job_id')}
 
     # Count by status
     status_counts: dict[str, int] = {}
@@ -40,7 +43,9 @@ def admin_dashboard(request: Request):
 
     # Active workflows (running + queued + uploading, videos only)
     active_workflows = [r for r in all_workflows if r['status'] in ('running', 'queued', 'uploading', 'waiting_for_audio') and r.get('type') != 'short']
-    active_audio = [j for j in recent_audio if j['status'] in ('queued', 'pushing', 'running', 'downloading')]
+    # Only standalone audio jobs (not part of a video workflow)
+    standalone_audio = [j for j in recent_audio if j['job_id'] not in workflow_audio_ids]
+    active_audio = [j for j in standalone_audio if j['status'] in ('queued', 'pushing', 'running', 'downloading')]
 
     # Split by type
     video_workflows = [r for r in all_workflows if r.get('type') != 'short']
@@ -50,7 +55,7 @@ def admin_dashboard(request: Request):
         'request': request,
         'page': 'dashboard',
         'recent_runs': video_workflows[:5],
-        'recent_audio': recent_audio[:5],
+        'recent_audio': standalone_audio[:5],
         'recent_shorts': recent_shorts,
         'active_runs': active_workflows,
         'active_audio': active_audio,
