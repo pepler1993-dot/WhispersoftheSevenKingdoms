@@ -52,6 +52,18 @@ APP_VERSION = _detect_version()
 shared.APP_VERSION = APP_VERSION
 templates.env.globals['app_version'] = APP_VERSION
 
+# ── Template helpers ──────────────────────────────────────────────────────
+
+_INTERNAL_STATUS_MAP = {
+    'waiting_for_audio': 'running',
+}
+
+def _display_status(status: str) -> str:
+    return _INTERNAL_STATUS_MAP.get(status, status)
+
+templates.env.globals['display_status'] = _display_status
+templates.env.filters['display_status'] = _display_status
+
 # ── App ───────────────────────────────────────────────────────────────────
 
 app = FastAPI(title='Whisper Studio')

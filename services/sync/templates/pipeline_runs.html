@@ -14,8 +14,8 @@
 {% set failed = [] %}
 {% set cancelled = [] %}
 {% for run in runs %}
-  {% if run.status == 'running' %}{% set _ = running.append(run) %}
-  {% elif run.status == 'queued' %}{% set _ = queued.append(run) %}
+  {% if run.status | display_status == 'running' %}{% set _ = running.append(run) %}
+  {% elif run.status | display_status == 'queued' %}{% set _ = queued.append(run) %}
   {% elif run.status == 'rendered' %}{% set _ = rendered.append(run) %}
   {% elif run.status == 'uploaded' %}{% set _ = uploaded.append(run) %}
   {% elif run.status == 'failed' %}{% set _ = failed.append(run) %}

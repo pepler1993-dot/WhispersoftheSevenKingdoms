@@ -9,9 +9,9 @@
   </a>
   <div class="run-detail-title-row">
     <h1>{{ run.title or run.slug }}</h1>
-    <span class="run-status-pill run-status-{{ run.status }}">
-      {% if run.status == 'running' %}<span class="status-dot-pulse"></span>{% endif %}
-      {{ run.status }}
+    <span class="run-status-pill run-status-{{ run.status | display_status }}">
+      {% if run.status | display_status == 'running' %}<span class="status-dot-pulse"></span>{% endif %}
+      {{ run.status | display_status }}
     </span>
   </div>
   <div class="run-detail-sub">
@@ -27,7 +27,7 @@
 
 {# ── Actions ──────────────────────────────────────────────────── #}
 <div class="run-actions">
-  {% if run.status in ('running', 'queued') %}
+  {% if run.status | display_status in ('running', 'queued') %}
   <form method="post" action="/admin/pipeline/run/{{ run.workflow_id }}/cancel" style="margin:0">
     <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Run wirklich abbrechen?')">
       <i data-lucide="square" class="icon-sm"></i> {% if run.status == 'queued' %}Aus Queue entfernen{% else %}Abbrechen{% endif %}
@@ -241,7 +241,7 @@
 
 <script>
 (function() {
-  var status = '{{ run.status }}';
+  var status = '{{ run.status | display_status }}';
   var runId = '{{ run.workflow_id }}';
   var slug = '{{ run.slug }}';
   var viewer = document.getElementById('log-viewer');
