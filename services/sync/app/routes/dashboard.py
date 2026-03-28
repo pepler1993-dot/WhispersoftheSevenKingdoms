@@ -38,17 +38,18 @@ def admin_dashboard(request: Request):
     for r in all_workflows:
         status_counts[r['status']] = status_counts.get(r['status'], 0) + 1
 
-    # Active workflows (running + queued)
-    active_workflows = [r for r in all_workflows if r['status'] in ('running', 'queued')]
+    # Active workflows (running + queued, videos only)
+    active_workflows = [r for r in all_workflows if r['status'] in ('running', 'queued') and r.get('type') != 'short']
     active_audio = [j for j in recent_audio if j['status'] in ('queued', 'pushing', 'running', 'downloading')]
 
-    # Shorts
+    # Split by type
+    video_workflows = [r for r in all_workflows if r.get('type') != 'short']
     recent_shorts = [r for r in all_workflows if r.get('type') == 'short'][:5]
 
     return shared.templates.TemplateResponse(request, 'dashboard.html', {
         'request': request,
         'page': 'dashboard',
-        'recent_runs': all_workflows[:5],
+        'recent_runs': video_workflows[:5],
         'recent_audio': recent_audio[:5],
         'recent_shorts': recent_shorts,
         'active_runs': active_workflows,

@@ -17,6 +17,7 @@ class AgentSyncDB:
         self._rename_legacy_tables()
         self._init_db()
         self._migrate_legacy_tables()
+        self._fix_workflow_types()
         self._integrity_check()
 
     def _integrity_check(self) -> None:
@@ -278,8 +279,42 @@ class AgentSyncDB:
                            SELECT run_id, stream, message, created_at FROM _pipeline_run_logs_backup'''
                     )
 
+                # Fix any workflows with wrong type based on config
+                for row in conn.execute("SELECT workflow_id, config_json, type FROM workflows").fetchall():
+                    d = dict(row)
+                    try:
+                        config = json.loads(d.get('config_json') or '{}')
+                    except (json.JSONDecodeError, TypeError):
+                        config = {}
+                    correct_type = 'short' if config.get('content_type') == 'short' else d['type']
+                    if correct_type != d['type']:
+                        conn.execute('UPDATE workflows SET type = ? WHERE workflow_id = ?',
+                                     (correct_type, d['workflow_id']))
+
                 conn.commit()
                 logging.info('Migrated legacy pipeline_runs + workflows into unified workflows table.')
+
+    def _fix_workflow_types(self) -> None:
+        """One-time fix: ensure workflow type matches config.content_type for existing data."""
+        try:
+            with self._connect() as conn:
+                updated = 0
+                for row in conn.execute("SELECT workflow_id, config_json, type FROM workflows").fetchall():
+                    d = dict(row)
+                    try:
+                        config = json.loads(d.get('config_json') or '{}')
+                    except (json.JSONDecodeError, TypeError):
+                        continue
+                    expected = 'short' if config.get('content_type') == 'short' else None
+                    if expected and d['type'] != expected:
+                        conn.execute('UPDATE workflows SET type = ? WHERE workflow_id = ?',
+                                     (expected, d['workflow_id']))
+                        updated += 1
+                if updated:
+                    conn.commit()
+                    logging.info('Fixed %d workflow types based on config.content_type', updated)
+        except Exception as e:
+            logging.warning('Workflow type fix (non-fatal): %s', e)
 
     def get_system_summary(self) -> dict[str, Any]:
         with self._connect() as conn:

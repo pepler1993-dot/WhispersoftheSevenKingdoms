@@ -6,7 +6,7 @@
 {% block content %}
 <div class="pipeline-runs-page">
 
-{# ── Group runs by status ─────────────────────────────────────── #}
+{# ── Group workflows by status ────────────────────────────────── #}
 {% set running = [] %}
 {% set queued = [] %}
 {% set rendered = [] %}
@@ -26,7 +26,7 @@
 <div class="page-header page-header-flex">
   <div>
     <h1>Meine Videos</h1>
-    <div class="page-subtitle">Alle Pipeline-Runs — filtern nach Status, Details öffnen.</div>
+    <div class="page-subtitle">Alle Video Runs — filtern nach Status, Details öffnen.</div>
   </div>
   <div class="header-actions">
     <a href="/admin/pipeline/new" class="btn btn-primary btn-sm">Neues Video</a>

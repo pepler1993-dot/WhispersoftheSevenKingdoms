@@ -73,7 +73,7 @@
     <div class="active-badge {% if run.status == 'queued' %}active-badge-queued{% endif %}"><span class="active-dot {% if run.status == 'queued' %}queued-dot{% endif %}"></span> {% if run.status == 'running' %}RENDERING{% else %}QUEUED{% endif %}</div>
     <div class="active-body">
       <div class="active-title">{{ run.title or run.slug }}</div>
-      <div class="active-sub">{{ run.slug }} · Pipeline Run</div>
+      <div class="active-sub">{{ run.slug }} · Video Run</div>
       {% if run.status == 'running' %}
       <div class="active-progress">
         <div class="active-bar"><div class="active-bar-fill"></div></div>
@@ -100,7 +100,7 @@
 <div class="dashboard-main-grid">
   <section class="studio-panel">
     <div class="section-header-inline">
-      <h2>🎬 Pipeline Runs</h2>
+      <h2>🎬 Video Runs</h2>
       <a href="/admin/pipeline/logs" class="section-link">Alle anzeigen →</a>
     </div>
     {% if recent_runs %}
@@ -124,7 +124,7 @@
       {% endfor %}
     </div>
     {% else %}
-    <div class="empty-state-sm">Noch keine Pipeline Runs</div>
+    <div class="empty-state-sm">Noch keine Video Runs</div>
     {% endif %}
   </section>
 
