@@ -30,41 +30,54 @@ def admin_songs(request: Request):
 
 @router.get('/admin', response_class=HTMLResponse)
 def admin_dashboard(request: Request):
+    tab = request.query_params.get('tab', 'all')
+
+    # All content workflows (exclude audio_lab)
     all_workflows = shared.db.list_workflows(limit=100)
-    recent_audio = shared.db.list_audio_jobs(limit=50)
+    content_workflows = [w for w in all_workflows if w.get('type') != 'audio_lab']
 
-    # Audio job IDs that belong to a workflow (not standalone)
-    workflow_audio_ids = {r['audio_job_id'] for r in all_workflows if r.get('audio_job_id')}
+    # Counts per type (always across ALL content workflows, not filtered by tab)
+    count_videos = sum(1 for w in content_workflows if w.get('type') == 'video')
+    count_shorts = sum(1 for w in content_workflows if w.get('type') == 'short')
+    count_songs = sum(1 for w in content_workflows if w.get('type') == 'song')
 
-    # Count by status
+    # Stats across all content workflows
     status_counts: dict[str, int] = {}
-    for r in all_workflows:
-        status_counts[r['status']] = status_counts.get(r['status'], 0) + 1
+    for w in content_workflows:
+        status_counts[w['status']] = status_counts.get(w['status'], 0) + 1
 
-    # Active workflows (running + queued + uploading, videos only)
-    active_workflows = [r for r in all_workflows if r['status'] in ('running', 'queued', 'uploading', 'waiting_for_audio') and r.get('type') != 'short']
-    # Only standalone audio jobs (not part of a video workflow)
-    standalone_audio = [j for j in recent_audio if j['job_id'] not in workflow_audio_ids]
-    active_audio = [j for j in standalone_audio if j['status'] in ('queued', 'pushing', 'running', 'downloading')]
+    count_running = sum(status_counts.get(s, 0) for s in ('running', 'uploading', 'waiting_for_audio'))
+    count_queued = status_counts.get('queued', 0)
+    count_rendered = status_counts.get('rendered', 0)
+    count_uploaded = status_counts.get('uploaded', 0)
 
-    # Split by type
-    video_workflows = [r for r in all_workflows if r.get('type') != 'short']
-    recent_shorts = [r for r in all_workflows if r.get('type') == 'short'][:5]
+    # Active workflows (running/queued/uploading/waiting)
+    active_workflows = [w for w in content_workflows if w['status'] in ('running', 'queued', 'uploading', 'waiting_for_audio')]
+
+    # Filter by tab for the list
+    if tab == 'videos':
+        filtered = [w for w in content_workflows if w.get('type') == 'video']
+    elif tab == 'shorts':
+        filtered = [w for w in content_workflows if w.get('type') == 'short']
+    elif tab == 'songs':
+        filtered = [w for w in content_workflows if w.get('type') == 'song']
+    else:
+        filtered = content_workflows
 
     return shared.templates.TemplateResponse(request, 'dashboard.html', {
         'request': request,
         'page': 'dashboard',
-        'recent_runs': video_workflows[:5],
-        'recent_audio': standalone_audio[:5],
-        'recent_shorts': recent_shorts,
-        'active_runs': active_workflows,
-        'active_audio': active_audio,
-        'count_running': sum(status_counts.get(s, 0) for s in ('running', 'uploading', 'waiting_for_audio')),
-        'count_queued': status_counts.get('queued', 0),
-        'count_rendered': status_counts.get('rendered', 0),
-        'count_uploaded': status_counts.get('uploaded', 0),
-        'count_audio_active': len(active_audio),
-        'count_shorts': len(recent_shorts),
+        'tab': tab,
+        'workflows': filtered[:20],
+        'active_workflows': active_workflows,
+        'count_running': count_running,
+        'count_queued': count_queued,
+        'count_rendered': count_rendered,
+        'count_uploaded': count_uploaded,
+        'count_videos': count_videos,
+        'count_shorts': count_shorts,
+        'count_songs': count_songs,
+        'count_all': len(content_workflows),
     })
 
 

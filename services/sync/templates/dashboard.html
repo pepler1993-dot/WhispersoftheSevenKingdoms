@@ -4,74 +4,92 @@
 <div class="page-header page-header-flex">
   <div>
     <h1>Studio</h1>
-    <div class="page-subtitle">Alles rund um Content-Produktion: Videos, Audio und Shorts.</div>
+    <div class="page-subtitle">Content-Produktion: Videos, Shorts und Songs im Überblick.</div>
   </div>
 </div>
 
-{# ── Studio Stats ─────────────────────────────────────────────── #}
-<div class="studio-stats">
-  <div class="studio-stat">
-    <div class="studio-stat-icon">🎬</div>
-    <div class="studio-stat-body">
-      <div class="studio-stat-value">{{ count_running }}</div>
-      <div class="studio-stat-label">Laufend</div>
+{# ── Tab Navigation ───────────────────────────────────────────── #}
+<div class="library-tabs-wrap">
+  <nav class="library-tabs" aria-label="Dashboard-Filter">
+    <a class="library-tab{% if tab == 'all' %} active{% endif %}" href="/admin?tab=all" {% if tab == 'all' %}aria-current="page"{% endif %}>
+      <i data-lucide="layout-grid" class="icon-md" style="opacity:0.9"></i>
+      Alle
+      <span class="library-tab-count">{{ count_all }}</span>
+    </a>
+    <a class="library-tab{% if tab == 'videos' %} active{% endif %}" href="/admin?tab=videos" {% if tab == 'videos' %}aria-current="page"{% endif %}>
+      <i data-lucide="film" class="icon-md" style="opacity:0.9"></i>
+      Videos
+      <span class="library-tab-count">{{ count_videos }}</span>
+    </a>
+    <a class="library-tab{% if tab == 'shorts' %} active{% endif %}" href="/admin?tab=shorts" {% if tab == 'shorts' %}aria-current="page"{% endif %}>
+      <i data-lucide="smartphone" class="icon-md" style="opacity:0.9"></i>
+      Shorts
+      <span class="library-tab-count">{{ count_shorts }}</span>
+    </a>
+    <a class="library-tab{% if tab == 'songs' %} active{% endif %}" href="/admin?tab=songs" {% if tab == 'songs' %}aria-current="page"{% endif %}>
+      <i data-lucide="music" class="icon-md" style="opacity:0.9"></i>
+      Songs
+      <span class="library-tab-count">{{ count_songs }}</span>
+    </a>
+  </nav>
+</div>
+
+{# ── Stats Row ────────────────────────────────────────────────── #}
+<div class="dash-stats">
+  <div class="dash-stat">
+    <div class="dash-stat-icon"><i data-lucide="play-circle"></i></div>
+    <div class="dash-stat-body">
+      <div class="dash-stat-value">{{ count_running }}</div>
+      <div class="dash-stat-label">Running</div>
     </div>
   </div>
-  <div class="studio-stat">
-    <div class="studio-stat-icon">⏳</div>
-    <div class="studio-stat-body">
-      <div class="studio-stat-value">{{ count_queued }}</div>
-      <div class="studio-stat-label">Warteschlange</div>
+  <div class="dash-stat">
+    <div class="dash-stat-icon"><i data-lucide="clock"></i></div>
+    <div class="dash-stat-body">
+      <div class="dash-stat-value">{{ count_queued }}</div>
+      <div class="dash-stat-label">Queued</div>
     </div>
   </div>
-  <div class="studio-stat">
-    <div class="studio-stat-icon">✅</div>
-    <div class="studio-stat-body">
-      <div class="studio-stat-value">{{ count_rendered }}</div>
-      <div class="studio-stat-label">Gerendert</div>
+  <div class="dash-stat">
+    <div class="dash-stat-icon"><i data-lucide="check-circle"></i></div>
+    <div class="dash-stat-body">
+      <div class="dash-stat-value">{{ count_rendered }}</div>
+      <div class="dash-stat-label">Rendered</div>
     </div>
   </div>
-  <div class="studio-stat">
-    <div class="studio-stat-icon">🚀</div>
-    <div class="studio-stat-body">
-      <div class="studio-stat-value">{{ count_uploaded }}</div>
-      <div class="studio-stat-label">Hochgeladen</div>
-    </div>
-  </div>
-  <div class="studio-stat">
-    <div class="studio-stat-icon">🎵</div>
-    <div class="studio-stat-body">
-      <div class="studio-stat-value">{{ count_audio_active }}</div>
-      <div class="studio-stat-label">Audio Jobs aktiv</div>
-    </div>
-  </div>
-  <div class="studio-stat">
-    <div class="studio-stat-icon">📱</div>
-    <div class="studio-stat-body">
-      <div class="studio-stat-value">{{ count_shorts }}</div>
-      <div class="studio-stat-label">Shorts</div>
+  <div class="dash-stat">
+    <div class="dash-stat-icon"><i data-lucide="upload-cloud"></i></div>
+    <div class="dash-stat-body">
+      <div class="dash-stat-value">{{ count_uploaded }}</div>
+      <div class="dash-stat-label">Uploaded</div>
     </div>
   </div>
 </div>
 
-{# ── Active now (running pipeline + audio) ────────────────────── #}
-{% if active_runs %}
-<section class="studio-section">
+{# ── Active Workflows ─────────────────────────────────────────── #}
+{% if active_workflows %}
+<section class="dash-active-section">
   <div class="section-head">
-    <h2>🔥 Gerade aktiv</h2>
+    <h2><i data-lucide="zap" class="icon-md"></i> Gerade aktiv</h2>
   </div>
   <div class="active-grid">
-  {% for run in active_runs %}
+  {% for run in active_workflows %}
   {% set is_queued = run.status == 'queued' %}
-  <a href="/admin/pipeline/run/{{ run.workflow_id }}" class="active-card {% if is_queued %}active-card-queued{% endif %}">
-    <div class="active-glow {% if is_queued %}queued-glow{% endif %}"></div>
-    <div class="active-badge {% if is_queued %}active-badge-queued{% endif %}">
-      <span class="active-dot {% if is_queued %}queued-dot{% endif %}"></span>
-      {% if is_queued %}QUEUED{% else %}RUNNING{% endif %}
+  {% set is_upload = run.status == 'uploading' %}
+  {% set wtype = run.get('type', 'video') %}
+  {% set href = '/admin/shorts/' ~ run.workflow_id if wtype == 'short' else '/admin/pipeline/run/' ~ run.workflow_id %}
+  <a href="{{ href }}" class="active-card {% if is_queued %}active-card-queued{% elif is_upload %}active-card-upload{% endif %}">
+    <div class="active-glow {% if is_queued %}queued-glow{% elif is_upload %}upload-glow{% endif %}"></div>
+    <div class="active-badge {% if is_queued %}active-badge-queued{% elif is_upload %}active-badge-upload{% endif %}">
+      <span class="active-dot {% if is_queued %}queued-dot{% elif is_upload %}upload-dot{% endif %}"></span>
+      {% if is_queued %}QUEUED{% elif is_upload %}UPLOADING{% else %}RUNNING{% endif %}
     </div>
     <div class="active-body">
       <div class="active-title">{{ run.title or run.slug }}</div>
-      <div class="active-sub">{{ run.slug }} · Video Run</div>
+      <div class="active-sub">
+        <span class="type-badge type-badge-{{ wtype }}">{{ wtype | capitalize }}</span>
+        · {{ run.slug }}
+      </div>
       {% if not is_queued %}
       <div class="active-progress">
         <div class="active-bar"><div class="active-bar-fill"></div></div>
@@ -80,115 +98,55 @@
     </div>
   </a>
   {% endfor %}
-  {% for job in active_audio %}
-  <a href="/admin/audio/jobs/{{ job.job_id }}" class="active-card active-card-audio">
-    <div class="active-glow audio-glow"></div>
-    <div class="active-badge active-badge-audio"><span class="active-dot audio-dot"></span> GENERATING</div>
-    <div class="active-body">
-      <div class="active-title">{{ job.title or job.slug }}</div>
-      <div class="active-sub">{{ job.slug }} · Audio Job</div>
-    </div>
-  </a>
-  {% endfor %}
   </div>
 </section>
 {% endif %}
 
-{# ── Recent panels ────────────────────────────────────────────── #}
-<div class="dashboard-main-grid">
-  <section class="studio-panel">
-    <div class="section-header-inline">
-      <h2>🎬 Video Runs</h2>
-      <a href="/admin/pipeline/logs" class="section-link">Alle anzeigen →</a>
-    </div>
-    {% if recent_runs %}
-    <div class="overview-card-grid">
-      {% for run in recent_runs %}
-      <a href="/admin/pipeline/run/{{ run.workflow_id }}" class="overview-card overview-card-run overview-card-{{ run.status }}">
-        <div class="overview-card-top">
-          <span class="overview-status-dot mini-dot-{{ run.status }}"></span>
-          <span class="mini-badge mini-badge-{{ run.status }}">{{ run.status }}</span>
-        </div>
-        <div class="overview-card-title">{{ run.title or run.slug }}</div>
-        <div class="overview-card-facts">
-          <span>
-            {% set run_start = (run.started_at or run.created_at or '—') %}
-            {% set run_end = run.finished_at or '' %}
-            {{ run_start[8:10] ~ '.' ~ run_start[5:7] ~ '.' ~ run_start[2:4] ~ ' ' ~ run_start[11:16] if run_start != '—' else '—' }}{% if run_end %} → {{ run_end[8:10] ~ '.' ~ run_end[5:7] ~ '.' ~ run_end[2:4] ~ ' ' ~ run_end[11:16] }}{% endif %}
-          </span>
-          <span>{{ (run.config.loop_hours ~ 'h') if run.config and run.config.get('loop_hours') else '—' }}</span>
-        </div>
-      </a>
-      {% endfor %}
-    </div>
-    {% else %}
-    <div class="empty-state-sm">Noch keine Video Runs</div>
-    {% endif %}
-  </section>
-
-  <section class="studio-panel">
-    <div class="section-header-inline">
-      <h2>🎵 Audio Jobs</h2>
-      <a href="/admin/audio" class="section-link">Alle anzeigen →</a>
-    </div>
-    {% if recent_audio %}
-    <div class="overview-card-grid">
-      {% for job in recent_audio %}
-      <a href="/admin/audio/jobs/{{ job.job_id }}" class="overview-card overview-card-audio-item overview-card-{{ job.status }}">
-        <div class="overview-card-top">
-          <span class="overview-status-dot mini-dot-{{ job.status }}"></span>
-          <span class="mini-badge mini-badge-{{ job.status }}">{{ job.status }}</span>
-        </div>
-        <div class="overview-card-title">{{ job.title or job.slug }}</div>
-        <div class="overview-card-facts">
-          <span>
-            {% set job_start = (job.started_at or job.created_at or '—') %}
-            {% set job_end = job.finished_at or '' %}
-            {{ job_start[8:10] ~ '.' ~ job_start[5:7] ~ '.' ~ job_start[2:4] ~ ' ' ~ job_start[11:16] if job_start != '—' else '—' }}{% if job_end %} → {{ job_end[8:10] ~ '.' ~ job_end[5:7] ~ '.' ~ job_end[2:4] ~ ' ' ~ job_end[11:16] }}{% endif %}
-          </span>
-          <span>{{ (job.minutes ~ ' min') if job.minutes else '—' }}</span>
-        </div>
-      </a>
-      {% endfor %}
-    </div>
-    {% else %}
-    <div class="empty-state-sm">Noch keine Audio Jobs — <a href="/admin/audio">starte einen</a>!</div>
-    {% endif %}
-  </section>
-
-{# ── Shorts ───────────────────────────────────────────────────── #}
-<section class="studio-panel" style="margin-top: 0;">
+{# ── Recent Workflows (unified list) ─────────────────────────── #}
+<section class="dash-recent">
   <div class="section-header-inline">
-    <h2>📱 Shorts</h2>
-    <a href="/admin/shorts" class="section-link">Alle anzeigen →</a>
+    <h2>Workflows</h2>
+    <a href="/admin/pipeline/logs" class="section-link">Alle anzeigen →</a>
   </div>
-  {% if recent_shorts %}
-  <div class="mini-list">
-    {% for run in recent_shorts %}
-    <a href="/admin/shorts/{{ run.workflow_id }}" class="mini-item">
-      <div class="mini-dot mini-dot-{{ run.status }}"></div>
-      <div class="mini-info">
-        <div class="mini-title">{{ run.title or run.slug }}</div>
-        <div class="mini-sub">{{ run.created_at[:10] if run.created_at else '—' }} <span class="mini-badge mini-badge-{{ run.status }}">{{ run.status }}</span></div>
+  {% if workflows %}
+  <div class="workflow-list">
+    {% for w in workflows %}
+    {% set wtype = w.get('type', 'video') %}
+    {% set href = '/admin/shorts/' ~ w.workflow_id if wtype == 'short' else '/admin/pipeline/run/' ~ w.workflow_id %}
+    <a href="{{ href }}" class="workflow-row workflow-row-{{ w.status }}">
+      <div class="workflow-row-left">
+        <span class="type-badge type-badge-{{ wtype }}">{{ wtype | capitalize }}</span>
+        <div class="workflow-row-info">
+          <div class="workflow-row-title">{{ w.title or w.slug }}</div>
+          <div class="workflow-row-meta">
+            {% set ws = (w.started_at or w.created_at or '') %}
+            {% set we = w.finished_at or '' %}
+            {% if ws %}{{ ws[8:10] ~ '.' ~ ws[5:7] ~ '.' ~ ws[2:4] ~ ' ' ~ ws[11:16] }}{% else %}—{% endif %}
+            {% if we %} → {{ we[8:10] ~ '.' ~ we[5:7] ~ '.' ~ we[2:4] ~ ' ' ~ we[11:16] }}{% endif %}
+            {% if w.config and w.config.get('loop_hours') %} · {{ w.config.loop_hours }}h{% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="workflow-row-right">
+        <span class="mini-badge mini-badge-{{ w.status }}">{{ w.status }}</span>
       </div>
     </a>
     {% endfor %}
   </div>
   {% else %}
-  <div class="empty-state-sm">Noch keine Shorts — <a href="/admin/shorts">erstelle einen</a>!</div>
+  <div class="empty-state-sm">Noch keine Workflows{% if tab != 'all' %} in dieser Kategorie{% endif %}.</div>
   {% endif %}
 </section>
-</div>
 
 <style>
-/* ── Studio Stats ────────────────────────────────────────── */
-.studio-stats {
+/* ── Stats Row ───────────────────────────────────────────── */
+.dash-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
-  gap: clamp(10px, 1vw, 16px);
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
   margin-bottom: 28px;
 }
-.studio-stat {
+.dash-stat {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -197,12 +155,30 @@
   border: 1px solid var(--line);
   border-radius: 12px;
 }
-.studio-stat-icon { font-size: 1.5rem; }
-.studio-stat-value { font-size: 1.4rem; font-weight: 800; }
-.studio-stat-label { font-size: 0.72rem; color: var(--muted); font-weight: 500; }
+.dash-stat-icon { color: var(--muted); }
+.dash-stat-icon svg,
+.dash-stat-icon .lucide { width: 20px; height: 20px; }
+.dash-stat-value { font-size: 1.4rem; font-weight: 800; }
+.dash-stat-label { font-size: 0.72rem; color: var(--muted); font-weight: 500; }
 
-/* ── Active cards ────────────────────────────────────────── */
-.studio-section { margin-bottom: 28px; }
+/* ── Type badges ─────────────────────────────────────────── */
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  flex-shrink: 0;
+}
+.type-badge-video { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.type-badge-short { background: rgba(168,85,247,0.15); color: #c084fc; }
+.type-badge-song  { background: rgba(20,184,166,0.15); color: #2dd4bf; }
+
+/* ── Active section ──────────────────────────────────────── */
+.dash-active-section { margin-bottom: 28px; }
 .active-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
@@ -215,7 +191,6 @@
   border: 1px solid rgba(34,197,94,0.25);
   border-radius: 14px;
   padding: 20px 24px;
-  margin-bottom: 10px;
   text-decoration: none;
   color: var(--text);
   overflow: hidden;
@@ -234,13 +209,13 @@
   border-color: rgba(217,119,6,0.5);
   box-shadow: 0 6px 24px rgba(217,119,6,0.12);
 }
-.active-card-audio {
-  background: linear-gradient(135deg, rgba(139,92,246,0.08), rgba(168,85,247,0.03));
-  border-color: rgba(139,92,246,0.25);
+.active-card-upload {
+  background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(99,102,241,0.03));
+  border-color: rgba(59,130,246,0.25);
 }
-.active-card-audio:hover {
-  border-color: rgba(139,92,246,0.5);
-  box-shadow: 0 6px 24px rgba(139,92,246,0.12);
+.active-card-upload:hover {
+  border-color: rgba(59,130,246,0.5);
+  box-shadow: 0 6px 24px rgba(59,130,246,0.12);
 }
 .active-glow {
   position: absolute;
@@ -252,16 +227,7 @@
   pointer-events: none;
 }
 .queued-glow { background: radial-gradient(circle, rgba(217,119,6,0.06) 0%, transparent 70%); }
-.audio-glow { background: radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%); }
 .upload-glow { background: radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 70%); }
-.active-card-upload {
-  background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(99,102,241,0.03));
-  border-color: rgba(59,130,246,0.25);
-}
-.active-card-upload:hover {
-  border-color: rgba(59,130,246,0.5);
-  box-shadow: 0 6px 24px rgba(59,130,246,0.12);
-}
 .active-badge {
   display: inline-flex;
   align-items: center;
@@ -281,11 +247,6 @@
   border-color: rgba(217,119,6,0.3);
   color: #fbbf24;
 }
-.active-badge-audio {
-  background: rgba(139,92,246,0.15);
-  border-color: rgba(139,92,246,0.3);
-  color: #c084fc;
-}
 .active-badge-upload {
   background: rgba(59,130,246,0.15);
   border-color: rgba(59,130,246,0.3);
@@ -300,18 +261,17 @@
 }
 .queued-dot { background: #d97706; animation-name: pulse-queued; }
 .upload-dot { background: #3b82f6; animation-name: pulse-active; }
-@keyframes pulse-queued {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(217,119,6,0.3); }
-  50% { box-shadow: 0 0 0 5px rgba(217,119,6,0); }
-}
-.audio-dot { background: #a855f7; }
 @keyframes pulse-active {
   0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.3); }
   50% { box-shadow: 0 0 0 5px rgba(34,197,94,0); }
 }
+@keyframes pulse-queued {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(217,119,6,0.3); }
+  50% { box-shadow: 0 0 0 5px rgba(217,119,6,0); }
+}
 .active-body { position: relative; z-index: 1; }
 .active-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 3px; }
-.active-sub { font-size: 0.74rem; color: var(--muted); }
+.active-sub { font-size: 0.74rem; color: var(--muted); display: flex; align-items: center; gap: 6px; }
 .active-progress { margin-top: 12px; }
 .active-bar {
   height: 5px;
@@ -332,25 +292,12 @@
   100% { background-position: -200% 0; }
 }
 
-/* ── Studio panels ───────────────────────────────────────── */
-.dashboard-main-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
-  gap: clamp(12px, 1vw, 18px);
-  align-items: start;
-}
-/* Shorts unter Pipeline + Audio, nicht als dritte schmale Spalte neben Audio */
-.dashboard-main-grid > .studio-panel:nth-child(3) {
-  grid-column: 1 / -1;
-}
-.studio-panel {
+/* ── Recent / Workflow list ──────────────────────────────── */
+.dash-recent {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 20px;
-  margin-bottom: 16px;
-  overflow: hidden;
-  min-width: 0;
 }
 .section-header-inline {
   display: flex;
@@ -367,108 +314,60 @@
 }
 .section-link:hover { color: var(--text); }
 
-/* ── Mini list / overview cards ──────────────────────────── */
-.mini-list { display: flex; flex-direction: column; overflow: hidden; }
-.mini-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--line);
-  text-decoration: none;
-  color: var(--text);
-  transition: background 0.1s;
-  min-width: 0;
-}
-.mini-item:last-child { border-bottom: none; }
-.mini-item:hover { opacity: 0.85; }
-/* Overview: eine Karte pro Zeile = volle Panel-Breite (keine schmalen Multi-Spalten) */
-.overview-card-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: clamp(10px, 0.9vw, 14px);
-}
-.overview-card {
-  display: block;
-  width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-  text-decoration: none;
-  color: var(--text);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 14px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
-}
-.overview-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(255,255,255,0.18);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.22);
-}
-.overview-card-top {
+.workflow-list { display: flex; flex-direction: column; }
+.workflow-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+  color: var(--text);
+  transition: opacity 0.15s;
 }
-.overview-status-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
+.workflow-row:last-child { border-bottom: none; }
+.workflow-row:hover { opacity: 0.85; }
+.workflow-row-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
 }
-.overview-card-title {
-  font-size: 0.9rem;
-  font-weight: 700;
-  line-height: 1.35;
-  margin-bottom: 4px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.overview-card-facts {
-  display: grid;
-  gap: 6px;
-  font-size: 0.74rem;
-  color: var(--muted);
-}
-.overview-card-facts span {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.overview-card-running { border-color: rgba(34,197,94,0.22); background: linear-gradient(135deg, rgba(34,197,94,0.07), rgba(16,185,129,0.02)); }
-.overview-card-queued, .overview-card-pushing, .overview-card-downloading { border-color: rgba(217,119,6,0.22); background: linear-gradient(135deg, rgba(217,119,6,0.07), rgba(245,158,11,0.02)); }
-.overview-card-rendered { border-color: rgba(201,165,58,0.22); background: linear-gradient(135deg, rgba(201,165,58,0.07), rgba(201,165,58,0.02)); }
-.overview-card-uploaded, .overview-card-complete { border-color: rgba(59,130,246,0.22); background: linear-gradient(135deg, rgba(59,130,246,0.07), rgba(59,130,246,0.02)); }
-.overview-card-failed, .overview-card-error { border-color: rgba(239,68,68,0.22); background: linear-gradient(135deg, rgba(239,68,68,0.07), rgba(239,68,68,0.02)); }
-.overview-card-cancelled { border-color: rgba(107,114,128,0.22); background: linear-gradient(135deg, rgba(107,114,128,0.08), rgba(107,114,128,0.02)); opacity: 0.82; }
-.mini-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.mini-dot-running { background: var(--good, #22c55e); }
-.mini-dot-queued { background: var(--warning, #d97706); }
-.mini-dot-rendered { background: var(--gold, #c9a53a); }
-.mini-dot-uploaded { background: var(--blue, #3b82f6); }
-.mini-dot-complete { background: var(--blue, #3b82f6); }
-.mini-dot-failed, .mini-dot-error { background: var(--bad, #ef4444); }
-.mini-dot-cancelled { background: #6b7280; }
-.mini-dot-pushing, .mini-dot-downloading { background: var(--warning, #d97706); }
-.mini-info { flex: 1; min-width: 0; }
-.mini-title {
-  font-size: 0.84rem;
+.workflow-row-info { min-width: 0; flex: 1; }
+.workflow-row-title {
+  font-size: 0.88rem;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.mini-sub { font-size: 0.7rem; color: var(--muted); margin-top: 1px; }
+.workflow-row-meta {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.workflow-row-right { flex-shrink: 0; }
+
+/* ── Section head ────────────────────────────────────────── */
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.section-head h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-head .icon-md { width: 18px; height: 18px; }
+
+/* ── Mini badges (reuse) ─────────────────────────────────── */
 .mini-badge {
   font-size: 0.65rem;
   font-weight: 700;
@@ -480,12 +379,13 @@
 }
 .mini-badge-running { background: rgba(34,197,94,0.15); color: #4ade80; }
 .mini-badge-queued { background: rgba(217,119,6,0.15); color: #fbbf24; }
+.mini-badge-waiting_for_audio { background: rgba(217,119,6,0.15); color: #fbbf24; }
 .mini-badge-rendered { background: rgba(201,165,58,0.15); color: var(--gold, #c9a53a); }
 .mini-badge-uploaded { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.mini-badge-uploading { background: rgba(59,130,246,0.15); color: #60a5fa; }
 .mini-badge-complete { background: rgba(59,130,246,0.15); color: #60a5fa; }
 .mini-badge-failed, .mini-badge-error { background: rgba(239,68,68,0.15); color: #f87171; }
 .mini-badge-cancelled { background: rgba(107,114,128,0.15); color: #9ca3af; }
-.mini-badge-pushing, .mini-badge-downloading { background: rgba(217,119,6,0.15); color: #fbbf24; }
 
 .empty-state-sm {
   padding: 24px;
@@ -493,90 +393,28 @@
   color: var(--muted);
   font-size: 0.84rem;
 }
-.empty-state-sm a { color: var(--gold, #c9a53a); }
-
-/* ── Section head ────────────────────────────────────────── */
-.section-head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-.section-head h2 { font-size: 1rem; font-weight: 700; margin: 0; }
-
-/* ── Empty state ─────────────────────────────────────────── */
-.empty-state-box {
-  text-align: center;
-  padding: 60px 20px;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-}
-.empty-state-icon { font-size: 3rem; margin-bottom: 12px; }
-.empty-state-text { color: var(--muted); font-size: 1rem; }
 
 /* ── Mobile ──────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .studio-stats { grid-template-columns: repeat(3, 1fr); gap: 6px; }
-  .studio-stat { padding: 10px; gap: 8px; flex-direction: column; text-align: center; }
-  .studio-stat-icon { font-size: 1.1rem; }
-  .studio-stat-value { font-size: 1.1rem; }
-  .studio-stat-label { font-size: 0.65rem; }
+  .dash-stats { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .dash-stat { padding: 12px; gap: 10px; }
+  .dash-stat-value { font-size: 1.15rem; }
+  .dash-stat-icon svg,
+  .dash-stat-icon .lucide { width: 16px; height: 16px; }
 
   .active-card { padding: 16px; }
   .active-title { font-size: 0.95rem; }
   .active-badge { font-size: 0.6rem; padding: 2px 8px; }
   .active-sub { font-size: 0.7rem; }
-  .active-config { flex-wrap: wrap; gap: 8px; font-size: 0.7rem; }
-
-  .studio-panel { padding: 14px; }
-  .section-header-inline { flex-wrap: wrap; gap: 8px; }
-  .section-header-inline h2 { font-size: 0.88rem; }
-  .dashboard-main-grid { grid-template-columns: 1fr; gap: 12px; }
   .active-grid { grid-template-columns: 1fr; }
 
-  .mini-item { gap: 8px; padding: 8px 0; }
-  .mini-title { font-size: 0.78rem; }
-  .mini-sub { font-size: 0.65rem; display: flex; align-items: center; gap: 6px; }
-  .mini-badge { font-size: 0.58rem; padding: 2px 5px; }
-  .overview-card-grid { grid-template-columns: 1fr; gap: 10px; }
-  .overview-card { padding: 12px; }
-  .overview-card-title { font-size: 0.84rem; }
-  .overview-card-facts { font-size: 0.68rem; }
-
-  .studio-panel { padding: 12px; }
-  .section-link { font-size: 0.68rem; }
-
-  .grid.two { grid-template-columns: 1fr; gap: 12px; }
+  .dash-recent { padding: 14px; }
+  .workflow-row { padding: 10px 0; }
+  .workflow-row-title { font-size: 0.82rem; }
+  .workflow-row-meta { font-size: 0.66rem; }
 }
 @media (max-width: 400px) {
-  .studio-stats { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (min-width: 1600px) {
-  .studio-stats {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
-  }
-  .studio-stat-value { font-size: clamp(1.35rem, 1rem + 0.9vw, 1.9rem); }
-  .active-grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
-  }
-  .dashboard-main-grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
-  }
-}
-@media (min-width: 1920px) {
-  .active-grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
-  }
-}
-@media (min-width: 2560px) {
-  .studio-stats {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
-  }
-  .dashboard-main-grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
-  }
+  .dash-stats { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 {% endblock %}
