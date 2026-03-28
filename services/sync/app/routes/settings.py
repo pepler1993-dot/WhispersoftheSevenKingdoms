@@ -95,7 +95,7 @@ def _save_content_types(ct: dict[str, Any]) -> None:
 
 router = APIRouter()
 
-_SETTINGS_SECTIONS = frozenset({'general', 'providers', 'presets'})
+_SETTINGS_SECTIONS = frozenset({'general', 'providers', 'presets', 'pipelines', 'team'})
 
 # ── Default settings ──────────────────────────────────────────────────────
 
