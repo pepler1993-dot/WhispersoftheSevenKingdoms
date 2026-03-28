@@ -154,7 +154,11 @@ def _prompts_from_house_variant(house_key: str, variant_key: str) -> str:
 
 @router.get('/admin/pipeline/logs', response_class=HTMLResponse)
 def admin_pipeline_logs(request: Request):
+    from app.routes.dashboard import _humanize_error
     workflows = shared.db.list_workflows(type='video', limit=100)
+    for w in workflows:
+        if w.get('error_message'):
+            w['error_display'] = _humanize_error(w['error_message'])
     houses = _load_house_templates()
     queue = get_queue_status(shared.db)
     return shared.templates.TemplateResponse(request, 'pipeline_runs.html', {

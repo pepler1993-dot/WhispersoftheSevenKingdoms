@@ -56,6 +56,8 @@ templates.env.globals['app_version'] = APP_VERSION
 
 _INTERNAL_STATUS_MAP = {
     'waiting_for_audio': 'running',
+    'uploading': 'running',
+    'error': 'failed',
 }
 
 def _display_status(status: str) -> str:

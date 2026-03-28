@@ -150,6 +150,7 @@
     <a href="/admin/pipeline/run/{{ run.workflow_id }}" class="yt-card">
       <div class="yt-thumb-wrap">
         <img class="yt-thumb" src="/admin/pipeline/preview/{{ run.slug }}/thumbnail.jpg" alt="{{ run.title or run.slug }}" onerror="this.style.display='none'; this.parentElement.classList.add('yt-thumb-fallback');" />
+        <div class="yt-thumb-title">{{ run.title or run.slug }}</div>
         <div class="yt-play-overlay">
           <div class="yt-play-btn">▶</div>
         </div>
@@ -187,6 +188,7 @@
     <a href="/admin/pipeline/run/{{ run.workflow_id }}" class="yt-card yt-card-rendered">
       <div class="yt-thumb-wrap">
         <img class="yt-thumb" src="/admin/pipeline/preview/{{ run.slug }}/thumbnail.jpg" alt="{{ run.title or run.slug }}" onerror="this.style.display='none'; this.parentElement.classList.add('yt-thumb-fallback');" />
+        <div class="yt-thumb-title">{{ run.title or run.slug }}</div>
         <div class="yt-play-overlay">
           <div class="yt-play-btn">▶</div>
         </div>
@@ -228,7 +230,7 @@
         <div class="run-title">{{ run.title or run.slug }}</div>
         <div class="run-sub">{{ run.slug }} · {{ run.workflow_id[:8] }}</div>
       </div>
-      <div class="run-error">{{ run.error_message[:60] if run.error_message else 'Unbekannter Fehler' }}{% if run.error_message and run.error_message|length > 60 %}…{% endif %}</div>
+      <div class="run-error">{{ run.error_display or run.error_message[:60] or "Unbekannter Fehler" }}</div>
       <div class="run-time">{{ run.finished_at[:16] if run.finished_at else '—' }}</div>
       <i data-lucide="chevron-right" class="run-arrow"></i>
     </a>
@@ -553,6 +555,22 @@
   display: block;
 }
 .yt-thumb-fallback { background: linear-gradient(135deg, #1a1a2e, #16213e); }
+.yt-thumb-fallback .yt-thumb-title {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.yt-thumb-wrap:not(.yt-thumb-fallback) .yt-thumb-title { display: none; }
 .yt-thumb-fallback::after {
   content: '🎬';
   position: absolute;
