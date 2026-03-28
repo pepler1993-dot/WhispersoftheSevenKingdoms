@@ -105,15 +105,7 @@ h2 {
   gap: 8px;
 }
 
-h2::before {
-  content: '';
-  display: inline-block;
-  width: 3px;
-  height: 16px;
-  background: linear-gradient(180deg, var(--gold), var(--gold-dim));
-  border-radius: 2px;
-  flex-shrink: 0;
-}
+/* h2::before gold bar removed – replaced by topbar-user */
 
 h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-height: 1.25; }
 
@@ -146,47 +138,51 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
   margin-top: 2px;
 }
 
-/* ── sidebar user row (bottom of sidebar) ── */
+/* ── topbar user (top-right of content area) ── */
 
-.sidebar-user-row {
+.topbar-user {
+  position: absolute;
+  top: var(--content-pad-y);
+  right: var(--content-pad-x);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 12px 14px;
-  border-top: 1px solid var(--line);
-  background: rgba(0,0,0,0.2);
-  flex-shrink: 0;
+  gap: 10px;
+  z-index: 50;
 }
 
-.sidebar-user-info {
+.topbar-user-info {
   display: flex;
-  flex-direction: column;
-  gap: 1px;
+  align-items: center;
+  gap: 8px;
   text-decoration: none;
-  min-width: 0;
-  flex: 1;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: background 0.15s ease;
 }
-.sidebar-user-info:hover .sidebar-user-name {
-  color: var(--gold, #c9a53a);
+.topbar-user-info:hover {
+  background: rgba(255,255,255,0.04);
 }
-.sidebar-user-name {
-  font-size: 0.78rem;
+.topbar-user-name {
+  font-size: 0.8rem;
   font-weight: 600;
-  color: var(--text);
+  color: var(--text-secondary);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   transition: color 0.15s ease;
 }
-.sidebar-user-role {
-  font-size: 0.6rem;
+.topbar-user-info:hover .topbar-user-name {
+  color: var(--gold);
+}
+.topbar-user-role {
+  font-size: 0.62rem;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.07em;
+  padding: 2px 6px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
 }
 
-.sidebar-user-logout {
+.topbar-user-logout {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -198,7 +194,7 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
   flex-shrink: 0;
   transition: color 0.15s ease, background 0.15s ease;
 }
-.sidebar-user-logout:hover {
+.topbar-user-logout:hover {
   color: #f87171;
   background: rgba(239,68,68,0.1);
 }
@@ -231,8 +227,7 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
 
 .sidebar-nav {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   padding-bottom: 8px;
 }
 
@@ -529,6 +524,7 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
 .sidebar-footer { display: none; }
 
 .content {
+  position: relative;
   padding: var(--content-pad-y) var(--content-pad-x);
   flex: 1;
   min-width: 0;

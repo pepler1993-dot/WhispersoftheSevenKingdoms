@@ -89,21 +89,21 @@
         </a>
       </nav>
 
-      {% if request.state is defined and request.state.user is defined and request.state.user %}
-      <div class="sidebar-user-row">
-        <a href="/admin/profile" class="sidebar-user-info">
-          <span class="sidebar-user-name">{{ request.state.user.display_name or request.state.user.username }}</span>
-          <span class="sidebar-user-role">{{ request.state.user.role }}</span>
-        </a>
-        <a href="/logout" class="sidebar-user-logout" title="Abmelden">
-          <i data-lucide="log-out" style="width:14px;height:14px"></i>
-        </a>
-      </div>
-      {% endif %}
 
     </aside>
 
     <main class="content">
+      {% if request.state is defined and request.state.user is defined and request.state.user %}
+      <div class="topbar-user">
+        <a href="/admin/profile" class="topbar-user-info">
+          <span class="topbar-user-name">{{ request.state.user.display_name or request.state.user.username }}</span>
+          <span class="topbar-user-role">{{ request.state.user.role }}</span>
+        </a>
+        <a href="/logout" class="topbar-user-logout" title="Abmelden">
+          <i data-lucide="log-out" style="width:14px;height:14px"></i>
+        </a>
+      </div>
+      {% endif %}
       {% block content %}{% endblock %}
     </main>
   </div>
