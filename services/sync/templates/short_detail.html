@@ -54,7 +54,6 @@
   <div class="panel panel-accent-purple">
     <h2>Konfiguration</h2>
     <div class="config-grid">
-      <div class="config-item"><div class="label">Kurzname</div><div class="value">{{ run.slug }}</div></div>
       <div class="config-item"><div class="label">Format</div><div class="value">{{ run.config.get('format', 'youtube_short') }}</div></div>
       <div class="config-item"><div class="label">Seitenverhältnis</div><div class="value">{{ run.config.get('aspect_ratio', '9:16') }}</div></div>
       <div class="config-item"><div class="label">Audio-Quelle</div><div class="value" style="font-size:0.85rem;word-break:break-word;">{{ run.config.get('source_audio', '—') }}</div></div>
@@ -67,9 +66,25 @@
 
   <div class="panel panel-accent-blue">
     <h2>Status</h2>
-    <div class="preview-meta">
-      {% if run.status == 'created' %}Entwurf bereit — als Nächstes renden.{% elif run.status == 'running' %}Rendering läuft.{% elif run.status == 'rendered' %}Video fertig — Upload möglich.{% elif run.status == 'uploading' %}Upload läuft.{% elif run.status == 'uploaded' %}Short wurde veröffentlicht.{% else %}Fehler — Log prüfen und erneut versuchen.{% endif %}
+    <div class="preview-meta" style="margin-bottom:14px;">
+      {% if run.status == 'created' %}📝 Entwurf bereit — als Nächstes rendern.
+      {% elif run.status == 'running' %}🔄 Rendering läuft...
+      {% elif run.status == 'rendered' %}✅ Video fertig — Upload möglich.
+      {% elif run.status == 'uploading' %}🚀 Upload läuft...
+      {% elif run.status == 'uploaded' %}📺 Short wurde veröffentlicht.
+      {% else %}❌ Fehler — Log prüfen und erneut versuchen.{% endif %}
     </div>
+    {% if run.config.get('source_audio') %}
+    <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--line);">
+      <div class="label" style="margin-bottom:6px;">Quelle</div>
+      <div style="font-size:0.82rem;">
+        🎵 {{ run.config.source_audio.replace('-', ' ').replace('.mp3','').replace('.wav','') | title }}
+        {% if run.config.get('clip_start_seconds') is not none %}
+        <br><span style="font-size:0.72rem; color:var(--muted);">Clip: {{ run.config.clip_start_seconds }}s – {{ run.config.clip_start_seconds + run.config.get('clip_duration_seconds', 30) }}s</span>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
   </div>
 </div>
 
