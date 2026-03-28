@@ -68,13 +68,23 @@
   </div>
   <div class="active-grid">
   {% for run in active_runs %}
-  <a href="/admin/pipeline/run/{{ run.workflow_id }}" class="active-card {% if run.status == 'queued' %}active-card-queued{% endif %}">
-    <div class="active-glow {% if run.status == 'queued' %}queued-glow{% endif %}"></div>
-    <div class="active-badge {% if run.status == 'queued' %}active-badge-queued{% endif %}"><span class="active-dot {% if run.status == 'queued' %}queued-dot{% endif %}"></span> {% if run.status == 'running' %}RENDERING{% else %}QUEUED{% endif %}</div>
+  {% set is_queued = run.status in ('queued',) %}
+  {% set is_uploading = run.status == 'uploading' %}
+  {% set is_waiting = run.status == 'waiting_for_audio' %}
+  <a href="/admin/pipeline/run/{{ run.workflow_id }}" class="active-card {% if is_queued %}active-card-queued{% elif is_uploading %}active-card-upload{% elif is_waiting %}active-card-audio{% endif %}">
+    <div class="active-glow {% if is_queued %}queued-glow{% elif is_uploading %}upload-glow{% elif is_waiting %}audio-glow{% endif %}"></div>
+    <div class="active-badge {% if is_queued %}active-badge-queued{% elif is_uploading %}active-badge-upload{% elif is_waiting %}active-badge-audio{% endif %}">
+      <span class="active-dot {% if is_queued %}queued-dot{% elif is_uploading %}upload-dot{% elif is_waiting %}audio-dot{% endif %}"></span>
+      {% if run.status == 'running' %}RENDERING
+      {% elif run.status == 'uploading' %}UPLOADING
+      {% elif run.status == 'waiting_for_audio' %}AUDIO
+      {% elif run.status == 'queued' %}QUEUED
+      {% else %}{{ run.status | upper }}{% endif %}
+    </div>
     <div class="active-body">
       <div class="active-title">{{ run.title or run.slug }}</div>
       <div class="active-sub">{{ run.slug }} · Video Run</div>
-      {% if run.status == 'running' %}
+      {% if run.status in ('running', 'uploading') %}
       <div class="active-progress">
         <div class="active-bar"><div class="active-bar-fill"></div></div>
       </div>
@@ -255,6 +265,15 @@
 }
 .queued-glow { background: radial-gradient(circle, rgba(217,119,6,0.06) 0%, transparent 70%); }
 .audio-glow { background: radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%); }
+.upload-glow { background: radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 70%); }
+.active-card-upload {
+  background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(99,102,241,0.03));
+  border-color: rgba(59,130,246,0.25);
+}
+.active-card-upload:hover {
+  border-color: rgba(59,130,246,0.5);
+  box-shadow: 0 6px 24px rgba(59,130,246,0.12);
+}
 .active-badge {
   display: inline-flex;
   align-items: center;
@@ -279,6 +298,11 @@
   border-color: rgba(139,92,246,0.3);
   color: #c084fc;
 }
+.active-badge-upload {
+  background: rgba(59,130,246,0.15);
+  border-color: rgba(59,130,246,0.3);
+  color: #60a5fa;
+}
 .active-dot {
   width: 7px;
   height: 7px;
@@ -287,6 +311,7 @@
   animation: pulse-active 1.5s ease-in-out infinite;
 }
 .queued-dot { background: #d97706; animation-name: pulse-queued; }
+.upload-dot { background: #3b82f6; animation-name: pulse-active; }
 @keyframes pulse-queued {
   0%, 100% { box-shadow: 0 0 0 0 rgba(217,119,6,0.3); }
   50% { box-shadow: 0 0 0 5px rgba(217,119,6,0); }

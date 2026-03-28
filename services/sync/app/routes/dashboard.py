@@ -38,8 +38,8 @@ def admin_dashboard(request: Request):
     for r in all_workflows:
         status_counts[r['status']] = status_counts.get(r['status'], 0) + 1
 
-    # Active workflows (running + queued, videos only)
-    active_workflows = [r for r in all_workflows if r['status'] in ('running', 'queued') and r.get('type') != 'short']
+    # Active workflows (running + queued + uploading, videos only)
+    active_workflows = [r for r in all_workflows if r['status'] in ('running', 'queued', 'uploading', 'waiting_for_audio') and r.get('type') != 'short']
     active_audio = [j for j in recent_audio if j['status'] in ('queued', 'pushing', 'running', 'downloading')]
 
     # Split by type
@@ -54,7 +54,7 @@ def admin_dashboard(request: Request):
         'recent_shorts': recent_shorts,
         'active_runs': active_workflows,
         'active_audio': active_audio,
-        'count_running': status_counts.get('running', 0),
+        'count_running': status_counts.get('running', 0) + status_counts.get('uploading', 0) + status_counts.get('waiting_for_audio', 0),
         'count_queued': status_counts.get('queued', 0),
         'count_rendered': status_counts.get('rendered', 0),
         'count_uploaded': status_counts.get('uploaded', 0),
