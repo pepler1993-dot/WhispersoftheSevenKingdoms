@@ -1,62 +1,196 @@
 {% extends 'base.html' %}
-{% block title %}Audio Jobs{% endblock %}
+{% block title %}Audio Lab – Jobs{% endblock %}
 {% block content %}
 <div class="page-header page-header-flex">
   <div>
     <h1>Audio Lab</h1>
-    <div class="page-subtitle">Alle Audio-Jobs und deren Status.</div>
+    <div class="page-subtitle">Alle Audio Runs — Status, Details, Retry.</div>
   </div>
   <div class="header-actions">
-    <a href="/admin/pipeline" class="btn btn-secondary btn-sm">Create</a>
-    <a href="/admin/ops" class="btn btn-secondary btn-sm">Operations</a>
+    <a href="/admin/audio" class="btn btn-primary btn-sm">Neuer Job</a>
   </div>
 </div>
 
 {% include 'partials/audio_tabs.html' %}
 
-<section class="panel" style="margin-top:18px;">
-  <div class="section-header-inline">
-    <h2>🎵 Audio-Jobs</h2>
-    <span class="section-count">{{ jobs | length }}</span>
-  </div>
-  {% if jobs %}
-  <div class="mini-list">
-    {% for job in jobs %}
-    <a href="/admin/audio/jobs/{{ job.job_id }}" class="mini-item">
-      <div class="mini-dot mini-dot-{{ job.status }}"></div>
-      <div class="mini-info">
-        <div class="mini-title">{{ job.slug or job.job_id[:8] }}</div>
-        <div class="mini-sub">{{ job.model or 'stable-audio' }} · {{ job.preset_name or 'custom' }} · {{ job.created_at[:16] if job.created_at else '—' }}</div>
-      </div>
-      <span class="mini-badge mini-badge-{{ job.status }}">{{ job.status }}</span>
-      {% if job.status in ('error', 'cancelled') %}
-      <form method="post" action="/admin/audio/jobs/{{ job.job_id }}/retry" style="display:inline;" onclick="event.stopPropagation();">
-        <button type="submit" class="btn btn-secondary btn-sm" style="padding:2px 8px; font-size:0.7rem;">🔄</button>
-      </form>
-      {% endif %}
-    </a>
-    {% endfor %}
-  </div>
-  {% else %}
-  <div class="empty-state-sm">Noch keine Audio-Jobs vorhanden — <a href="/admin/audio">Neuen Job starten</a></div>
+{# ── Group jobs by status ─────────────────────────────────────── #}
+{% set running = [] %}
+{% set queued = [] %}
+{% set complete = [] %}
+{% set failed = [] %}
+{% set cancelled = [] %}
+{% for job in jobs %}
+  {% if job.status == 'running' %}{% set _ = running.append(job) %}
+  {% elif job.status == 'queued' %}{% set _ = queued.append(job) %}
+  {% elif job.status == 'complete' %}{% set _ = complete.append(job) %}
+  {% elif job.status == 'error' %}{% set _ = failed.append(job) %}
+  {% elif job.status == 'cancelled' %}{% set _ = cancelled.append(job) %}
   {% endif %}
+{% endfor %}
+
+{# ── Stats bar ────────────────────────────────────────────────── #}
+<div class="audio-stats" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
+  <span class="stat-pill stat-running"><span class="stat-dot running"></span> {{ running|length }} Laufend</span>
+  <span class="stat-pill stat-queued"><span class="stat-dot queued"></span> {{ queued|length }} Warteschlange</span>
+  <span class="stat-pill stat-complete"><span class="stat-dot complete"></span> {{ complete|length }} Fertig</span>
+  <span class="stat-pill stat-failed"><span class="stat-dot failed"></span> {{ failed|length }} Fehler</span>
+  {% if cancelled %}<span class="stat-pill stat-cancelled"><span class="stat-dot cancelled"></span> {{ cancelled|length }} Abgebrochen</span>{% endif %}
+</div>
+
+{% if not jobs %}
+<div class="empty-state-box">
+  <div class="empty-state-icon">🎵</div>
+  <div class="empty-state-text">Noch keine Audio-Jobs</div>
+  <a href="/admin/audio" class="btn btn-primary" style="margin-top:16px">Ersten Job starten</a>
+</div>
+{% endif %}
+
+{# ── Running ──────────────────────────────────────────────────── #}
+{% if running %}
+<section class="aj-section">
+  <div class="section-head"><h2>🔥 Laufend</h2><span class="section-count">{{ running|length }}</span></div>
+  {% for job in running %}
+  <a href="/admin/audio/jobs/{{ job.job_id }}" class="aj-card aj-card-running">
+    <div class="aj-dot running-pulse"></div>
+    <div class="aj-info">
+      <div class="aj-title">{{ job.title or job.slug or job.job_id[:8] }}</div>
+      <div class="aj-sub">{{ job.slug }} · {{ job.minutes or '?' }} Min · {{ job.model or 'stable-audio' }} · {{ job.created_at[:16] if job.created_at else '—' }}</div>
+    </div>
+    <span class="aj-badge aj-badge-running">running</span>
+  </a>
+  {% endfor %}
 </section>
+{% endif %}
+
+{# ── Queued ───────────────────────────────────────────────────── #}
+{% if queued %}
+<section class="aj-section">
+  <div class="section-head"><h2>⏳ Warteschlange</h2><span class="section-count">{{ queued|length }}</span></div>
+  {% for job in queued %}
+  <a href="/admin/audio/jobs/{{ job.job_id }}" class="aj-card">
+    <div class="aj-dot aj-dot-queued"></div>
+    <div class="aj-info">
+      <div class="aj-title">{{ job.title or job.slug or job.job_id[:8] }}</div>
+      <div class="aj-sub">{{ job.slug }} · {{ job.minutes or '?' }} Min · {{ job.model or 'stable-audio' }}</div>
+    </div>
+    <span class="aj-badge aj-badge-queued">queued</span>
+  </a>
+  {% endfor %}
+</section>
+{% endif %}
+
+{# ── Complete ─────────────────────────────────────────────────── #}
+{% if complete %}
+<section class="aj-section">
+  <div class="section-head"><h2>✅ Fertig</h2><span class="section-count">{{ complete|length }}</span></div>
+  {% for job in complete %}
+  <a href="/admin/audio/jobs/{{ job.job_id }}" class="aj-card">
+    <div class="aj-dot aj-dot-complete"></div>
+    <div class="aj-info">
+      <div class="aj-title">{{ job.title or job.slug or job.job_id[:8] }}</div>
+      <div class="aj-sub">{{ job.slug }} · {{ job.minutes or '?' }} Min · {{ job.created_at[:16] if job.created_at else '—' }}</div>
+    </div>
+    <span class="aj-badge aj-badge-complete">complete</span>
+  </a>
+  {% endfor %}
+</section>
+{% endif %}
+
+{# ── Failed ───────────────────────────────────────────────────── #}
+{% if failed %}
+<section class="aj-section">
+  <div class="section-head"><h2>❌ Fehlgeschlagen</h2><span class="section-count">{{ failed|length }}</span></div>
+  {% for job in failed %}
+  <a href="/admin/audio/jobs/{{ job.job_id }}" class="aj-card aj-card-muted">
+    <div class="aj-dot aj-dot-error"></div>
+    <div class="aj-info">
+      <div class="aj-title">{{ job.title or job.slug or job.job_id[:8] }}</div>
+      <div class="aj-sub">{{ job.error_message[:80] if job.error_message else 'Unbekannter Fehler' }}</div>
+    </div>
+    <span class="aj-badge aj-badge-error">error</span>
+    <form method="post" action="/admin/audio/jobs/{{ job.job_id }}/retry" style="display:inline;" onclick="event.stopPropagation();">
+      <button type="submit" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:0.72rem;">🔄 Retry</button>
+    </form>
+  </a>
+  {% endfor %}
+</section>
+{% endif %}
+
+{# ── Cancelled ────────────────────────────────────────────────── #}
+{% if cancelled %}
+<section class="aj-section">
+  <div class="section-head"><h2>🚫 Abgebrochen</h2><span class="section-count">{{ cancelled|length }}</span></div>
+  {% for job in cancelled %}
+  <a href="/admin/audio/jobs/{{ job.job_id }}" class="aj-card aj-card-muted">
+    <div class="aj-dot aj-dot-cancelled"></div>
+    <div class="aj-info">
+      <div class="aj-title">{{ job.title or job.slug or job.job_id[:8] }}</div>
+      <div class="aj-sub">{{ job.slug }} · {{ job.created_at[:16] if job.created_at else '—' }}</div>
+    </div>
+    <span class="aj-badge aj-badge-cancelled">cancelled</span>
+    <form method="post" action="/admin/audio/jobs/{{ job.job_id }}/retry" style="display:inline;" onclick="event.stopPropagation();">
+      <button type="submit" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:0.72rem;">🔄 Retry</button>
+    </form>
+  </a>
+  {% endfor %}
+</section>
+{% endif %}
 
 <style>
-.mini-dot-queued { background: var(--warning, #d97706); }
-.mini-dot-running { background: var(--blue, #3b82f6); animation: al-pulse 1.5s infinite; }
-.mini-dot-complete { background: var(--good, #22c55e); }
-.mini-dot-error { background: #ef4444; }
-.mini-dot-cancelled { background: #6b7280; }
-.mini-dot-pushing { background: var(--blue, #3b82f6); }
-.mini-dot-downloading { background: #8b5cf6; }
-@keyframes al-pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
-.mini-badge-queued { background: rgba(217,119,6,0.15); color: #fbbf24; }
-.mini-badge-running { background: rgba(59,130,246,0.15); color: #60a5fa; }
-.mini-badge-complete { background: rgba(34,197,94,0.15); color: #4ade80; }
-.mini-badge-error { background: rgba(239,68,68,0.15); color: #f87171; }
-.mini-badge-cancelled { background: rgba(107,114,128,0.15); color: #9ca3af; }
-.mini-badge-pushing { background: rgba(59,130,246,0.15); color: #60a5fa; }
-.mini-badge-downloading { background: rgba(139,92,246,0.15); color: #a78bfa; }
+.aj-section { margin-bottom: 24px; }
+.section-head { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+.section-head h2 { font-size:1rem; font-weight:700; margin:0; }
+.section-count { background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:2px 10px; font-size:0.72rem; font-weight:600; color:var(--muted); }
+
+.aj-card {
+  display:flex; align-items:center; gap:14px;
+  padding:14px 18px; margin-bottom:6px;
+  background:var(--panel); border:1px solid var(--line); border-radius:10px;
+  text-decoration:none; color:var(--text);
+  transition:all 0.15s ease;
+}
+.aj-card:hover { border-color:rgba(255,255,255,0.2); transform:translateY(-1px); box-shadow:0 4px 16px rgba(0,0,0,0.2); }
+.aj-card-running { background:linear-gradient(135deg, rgba(59,130,246,0.06), rgba(59,130,246,0.02)); border-color:rgba(59,130,246,0.3); }
+.aj-card-muted { opacity:0.7; }
+.aj-card-muted:hover { opacity:0.9; }
+
+.aj-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.aj-dot-queued { background:var(--warning, #d97706); }
+.aj-dot-complete { background:var(--good, #22c55e); }
+.aj-dot-error { background:#ef4444; }
+.aj-dot-cancelled { background:#6b7280; }
+.running-pulse { background:var(--blue, #3b82f6); animation:aj-pulse 1.5s ease-in-out infinite; }
+@keyframes aj-pulse { 0%,100% { box-shadow:0 0 0 0 rgba(59,130,246,0.4); } 50% { box-shadow:0 0 0 6px rgba(59,130,246,0); } }
+
+.aj-info { flex:1; min-width:0; }
+.aj-title { font-size:0.9rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.aj-sub { font-size:0.74rem; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+.aj-badge { padding:3px 10px; border-radius:999px; font-size:0.7rem; font-weight:600; white-space:nowrap; }
+.aj-badge-running { background:rgba(59,130,246,0.15); color:#60a5fa; }
+.aj-badge-queued { background:rgba(217,119,6,0.15); color:#fbbf24; }
+.aj-badge-complete { background:rgba(34,197,94,0.15); color:#4ade80; }
+.aj-badge-error { background:rgba(239,68,68,0.15); color:#f87171; }
+.aj-badge-cancelled { background:rgba(107,114,128,0.15); color:#9ca3af; }
+
+/* Stats */
+.stat-pill { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:999px; font-size:0.78rem; font-weight:600; background:var(--surface); border:1px solid var(--line); color:var(--muted); }
+.stat-dot { width:8px; height:8px; border-radius:50%; }
+.stat-dot.running { background:var(--blue, #3b82f6); }
+.stat-dot.queued { background:var(--warning, #d97706); }
+.stat-dot.complete { background:var(--good, #22c55e); }
+.stat-dot.failed { background:#ef4444; }
+.stat-dot.cancelled { background:#6b7280; }
+
+.empty-state-box { text-align:center; padding:60px 20px; background:var(--panel); border:1px solid var(--line); border-radius:10px; }
+.empty-state-icon { font-size:3rem; margin-bottom:12px; }
+.empty-state-text { color:var(--muted); font-size:1rem; }
+
+@media (max-width:768px) {
+  .aj-card { padding:12px 14px; gap:10px; }
+  .aj-title { font-size:0.84rem; }
+  .aj-sub { font-size:0.7rem; }
+  .aj-badge { font-size:0.65rem; padding:2px 8px; }
+}
 </style>
 {% endblock %}
