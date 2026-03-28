@@ -97,13 +97,18 @@ def _handle_audio_phase(wf: dict[str, Any], db: AgentSyncDB) -> None:
     status = job.get('status', '')
 
     if status == 'complete':
-        # Audio done → enqueue this workflow for render
         now = _now_iso()
         config = wf.get('config', {})
 
-        db.update_workflow(wf_id, status='created', phase='render', updated_at=now)
-        db.append_workflow_log(wf_id, 'system', 'Audio abgeschlossen – Render wird in die Warteschlange gestellt.', now)
-        enqueue_workflow(wf_id, wf['slug'], config, db)
+        if wf.get('type') == 'audio_lab':
+            # Audio Lab: no render step, just mark as done
+            db.update_workflow(wf_id, status='completed', phase='done', updated_at=now)
+            db.append_workflow_log(wf_id, 'system', 'Audio abgeschlossen – Audio Lab Workflow fertig.', now)
+        else:
+            # Video: enqueue render phase
+            db.update_workflow(wf_id, status='created', phase='render', updated_at=now)
+            db.append_workflow_log(wf_id, 'system', 'Audio abgeschlossen – Render wird in die Warteschlange gestellt.', now)
+            enqueue_workflow(wf_id, wf['slug'], config, db)
 
     elif status in ('error', 'cancelled'):
         db.update_workflow(wf_id,

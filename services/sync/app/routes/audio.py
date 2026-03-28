@@ -1,6 +1,7 @@
 """Audio generator routes."""
 from __future__ import annotations
 
+import uuid
 from datetime import datetime
 import mimetypes
 from pathlib import Path
@@ -23,24 +24,25 @@ router = APIRouter()
 
 @router.get('/admin/audio', response_class=HTMLResponse)
 def admin_audio(request: Request):
-    jobs = shared.db.list_audio_jobs(limit=100)
+    workflows = shared.db.list_workflows(type='audio_lab', limit=100)
     return shared.templates.TemplateResponse(request, 'audio_generator.html', {
         'request': request,
         'page': 'audio',
         'audio_tab': 'new',
-        'audio_job_count': len(jobs),
+        'audio_job_count': len(workflows),
         'house_templates': _load_house_templates(),
     })
 
 
 @router.get('/admin/audio/jobs', response_class=HTMLResponse)
 def admin_audio_jobs_list(request: Request):
+    workflows = shared.db.list_workflows(type='audio_lab', limit=100)
     jobs = shared.db.list_audio_jobs(limit=100)
     return shared.templates.TemplateResponse(request, 'audio_jobs.html', {
         'request': request,
         'page': 'audio',
         'audio_tab': 'jobs',
-        'audio_job_count': len(jobs),
+        'audio_job_count': len(workflows),
         'jobs': jobs,
     })
 
@@ -80,6 +82,29 @@ def admin_audio_generate(
         db=shared.db,
         steps=steps,
     )
+
+    # Create Audio Lab workflow
+    workflow_id = uuid.uuid4().hex[:12]
+    now = datetime.now(shared.CET).isoformat()
+    shared.db.create_workflow({
+        'workflow_id': workflow_id,
+        'slug': slug,
+        'title': title,
+        'type': 'audio_lab',
+        'phase': 'audio',
+        'status': 'waiting_for_audio',
+        'audio_job_id': job_id,
+        'config': {
+            'prompt_text': prompt_text,
+            'minutes': minutes,
+            'model': model,
+            'clip_seconds': clip_seconds,
+            'steps': steps,
+        },
+        'created_at': now,
+    })
+    shared.db.append_workflow_log(workflow_id, 'system', f'Audio Lab Workflow gestartet. Audio-Job: {job_id}', now)
+
     return RedirectResponse(url=f'/admin/audio/jobs/{job_id}', status_code=303)
 
 
