@@ -96,7 +96,7 @@ async def admin_ticket_update(request: Request, ticket_id: str):
         raise HTTPException(status_code=404, detail='Ticket not found')
 
     updates = {'updated_at': _now_iso()}
-    for field in ('title', 'type', 'priority', 'description', 'status'):
+    for field in ('title', 'type', 'priority', 'description', 'status', 'assigned_to'):
         val = form.get(field)
         if val is not None:
             updates[field] = val.strip() if isinstance(val, str) else val

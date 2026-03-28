@@ -15,7 +15,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Redirect
 
 from app import shared
 from app.helpers import slugify, _load_house_templates
-from app.pipeline_runner import PIPELINE_DIR, list_library_tracks_for_pipeline, _stream_reader
+from app.pipeline_runner import PIPELINE_DIR, list_library_tracks_for_pipeline, _stream_reader, _upload_env
 
 router = APIRouter()
 
@@ -389,13 +389,16 @@ def admin_shorts_upload(run_id: str):
     if run_cfg.get('visibility') == 'public':
         cmd.append('--public')
 
+    upload_env = _upload_env()
     shared.db.update_run(run_id, status='uploading', error_message=None)
     cmd_str = ' '.join(cmd)
-    shared.db.append_run_log(run_id, 'system', f'Starting Shorts upload: {cmd_str}', datetime.now(shared.CET).isoformat())
+    now = datetime.now(shared.CET).isoformat()
+    shared.db.append_run_log(run_id, 'system', f'Starting Shorts upload: {cmd_str}', now)
+    shared.db.append_run_log(run_id, 'system', f'YouTube credentials source: {upload_env.get("GOOGLE_CLIENT_SECRET", "client_secret.json")}', now)
 
     def worker():
         try:
-            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=str(PIPELINE_DIR))
+            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=str(PIPELINE_DIR), env=upload_env)
         except Exception as exc:
             shared.db.update_run(run_id, status='rendered', error_message=f'Upload start failed: {exc}')
             shared.db.append_run_log(run_id, 'system', f'Upload start failed: {exc}', datetime.now(shared.CET).isoformat())

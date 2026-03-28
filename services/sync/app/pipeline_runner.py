@@ -20,6 +20,18 @@ def _utf8_env():
     return env
 
 
+def _upload_env():
+    env = _utf8_env()
+    client_secret = env.get('GOOGLE_CLIENT_SECRET', '').strip()
+    if client_secret:
+        env['GOOGLE_CLIENT_SECRET'] = str(Path(client_secret).resolve())
+    else:
+        default_client_secret = PIPELINE_DIR / 'client_secret.json'
+        if default_client_secret.exists():
+            env['GOOGLE_CLIENT_SECRET'] = str(default_client_secret)
+    return env
+
+
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -137,14 +149,16 @@ def trigger_upload(run_id: str, slug: str, config: dict[str, Any], db: AgentSync
     if config.get('public'):
         cmd.append('--public')
 
+    upload_env = _upload_env()
     db.update_run(run_id, status='uploading')
     db.append_run_log(run_id, 'system', f'Starting YouTube upload: {" ".join(cmd)}', _now_iso())
+    db.append_run_log(run_id, 'system', f'YouTube credentials source: {upload_env.get("GOOGLE_CLIENT_SECRET", "client_secret.json")}', _now_iso())
 
     def _upload():
         try:
             proc = subprocess.Popen(
                 cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=str(PIPELINE_DIR),
-                env=_utf8_env(),
+                env=upload_env,
             )
             stdout_t = threading.Thread(
                 target=_stream_reader, args=(proc.stdout, run_id, 'stdout', db), daemon=True

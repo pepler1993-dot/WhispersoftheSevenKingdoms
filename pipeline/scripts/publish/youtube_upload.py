@@ -22,6 +22,7 @@ import json
 import os
 import sys
 import time
+from typing import Any
 
 # Optional imports – nur wenn tatsächlich uploaden
 try:
@@ -45,6 +46,39 @@ MAX_RETRIES = 3
 RETRY_DELAY = 5
 
 
+def _get_client_secret_path() -> str:
+    return os.environ.get("GOOGLE_CLIENT_SECRET", "client_secret.json")
+
+
+def _load_client_secret_info(client_secret_path: str) -> dict[str, Any]:
+    if not os.path.exists(client_secret_path):
+        return {}
+    try:
+        with open(client_secret_path, encoding="utf-8") as f:
+            payload = json.load(f)
+    except Exception:
+        return {}
+    installed = payload.get("installed") or payload.get("web") or {}
+    return {
+        "client_id": installed.get("client_id") or "",
+        "project_id": installed.get("project_id") or "",
+    }
+
+
+def _print_auth_context(client_secret_path: str, creds=None) -> None:
+    info = _load_client_secret_info(client_secret_path)
+    token_client_id = getattr(creds, 'client_id', '') if creds else ''
+    print(f"🔐 OAuth client secret: {client_secret_path}")
+    if info.get("project_id"):
+        print(f"📦 Google project: {info['project_id']}")
+    if info.get("client_id"):
+        print(f"🆔 Client ID (secret): {info['client_id']}")
+    if token_client_id:
+        print(f"🪪 Client ID (token):  {token_client_id}")
+    if info.get("client_id") and token_client_id and info["client_id"] != token_client_id:
+        print("⚠️  Token und client_secret.json gehören zu unterschiedlichen OAuth Clients.")
+
+
 def check_dependencies():
     """Prüft ob Google API Libraries installiert sind."""
     if not HAS_GOOGLE_API:
@@ -56,19 +90,29 @@ def check_dependencies():
 def get_credentials():
     """Holt oder refreshed OAuth2 Credentials."""
     creds = None
+    client_secret = _get_client_secret_path()
 
     # Existing token?
     if os.path.exists(TOKEN_PATH):
         creds = Credentials.from_authorized_user_file(TOKEN_PATH, SCOPES)
 
+    _print_auth_context(client_secret, creds)
+
     # Refresh or new auth needed?
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             print("🔄 Token wird refreshed...")
-            creds.refresh(Request())
+            try:
+                creds.refresh(Request())
+            except Exception as exc:
+                msg = str(exc)
+                print(f"❌ OAuth Refresh fehlgeschlagen: {msg}")
+                if 'disabled_client' in msg:
+                    print("💡 Der verwendete OAuth Client ist bei Google deaktiviert oder das Token gehört zu einem alten/deaktivierten Client.")
+                    print("💡 Prüfe client_secret.json / GOOGLE_CLIENT_SECRET und erneuere danach das Token mit --setup.")
+                raise
         else:
             # New auth flow
-            client_secret = os.environ.get("GOOGLE_CLIENT_SECRET", "client_secret.json")
             if not os.path.exists(client_secret):
                 print(f"❌ Client Secret nicht gefunden: {client_secret}")
                 print("   Setze GOOGLE_CLIENT_SECRET env var oder lege client_secret.json ab.")
