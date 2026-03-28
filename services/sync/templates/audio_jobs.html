@@ -4,7 +4,7 @@
 <div class="page-header page-header-flex">
   <div>
     <h1>Audio Lab</h1>
-    <div class="page-subtitle">Alle Audio Runs — Status, Details, Retry.</div>
+    <div class="page-subtitle">Alle Audio Runs — filtern nach Status, Details öffnen.</div>
   </div>
   <div class="header-actions">
     <a href="/admin/audio" class="btn btn-primary btn-sm">Neuer Job</a>
@@ -28,13 +28,34 @@
   {% endif %}
 {% endfor %}
 
-{# ── Stats bar ────────────────────────────────────────────────── #}
-<div class="audio-stats" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
-  <span class="stat-pill stat-running"><span class="stat-dot running"></span> {{ running|length }} Laufend</span>
-  <span class="stat-pill stat-queued"><span class="stat-dot queued"></span> {{ queued|length }} Warteschlange</span>
-  <span class="stat-pill stat-complete"><span class="stat-dot complete"></span> {{ complete|length }} Fertig</span>
-  <span class="stat-pill stat-failed"><span class="stat-dot failed"></span> {{ failed|length }} Fehler</span>
-  {% if cancelled %}<span class="stat-pill stat-cancelled"><span class="stat-dot cancelled"></span> {{ cancelled|length }} Abgebrochen</span>{% endif %}
+{# ── Filter bar ───────────────────────────────────────────────── #}
+<div class="run-filter-bar">
+  <div class="run-stats" id="aj-filters">
+    <button type="button" class="stat-pill stat-running active" data-filter-status="running" aria-pressed="true">
+      <span class="stat-dot running"></span>
+      <span class="stat-count">{{ running|length }}</span> Laufend
+    </button>
+    <button type="button" class="stat-pill stat-queued active" data-filter-status="queued" aria-pressed="true">
+      <span class="stat-dot queued"></span>
+      <span class="stat-count">{{ queued|length }}</span> Warteschlange
+    </button>
+    <button type="button" class="stat-pill stat-complete active" data-filter-status="complete" aria-pressed="true">
+      <span class="stat-dot complete"></span>
+      <span class="stat-count">{{ complete|length }}</span> Fertig
+    </button>
+    <button type="button" class="stat-pill stat-failed active" data-filter-status="failed" aria-pressed="true">
+      <span class="stat-dot failed"></span>
+      <span class="stat-count">{{ failed|length }}</span> Fehler
+    </button>
+    <button type="button" class="stat-pill stat-cancelled active" data-filter-status="cancelled" aria-pressed="true">
+      <span class="stat-dot cancelled"></span>
+      <span class="stat-count">{{ cancelled|length }}</span> Abgebrochen
+    </button>
+  </div>
+  <div class="run-filter-actions">
+    <button type="button" class="btn btn-secondary btn-sm" id="aj-filter-all-on">Alle auswählen</button>
+    <button type="button" class="btn btn-secondary btn-sm" id="aj-filter-all-off">Alle abwählen</button>
+  </div>
 </div>
 
 {% if not jobs %}
@@ -47,7 +68,7 @@
 
 {# ── Running ──────────────────────────────────────────────────── #}
 {% if running %}
-<section class="aj-section">
+<section class="run-section" data-run-section="running">
   <div class="section-head"><h2>🔥 Laufend</h2><span class="section-count">{{ running|length }}</span></div>
   {% for job in running %}
   <a href="/admin/audio/jobs/{{ job.job_id }}" class="aj-card aj-card-running">
@@ -64,7 +85,7 @@
 
 {# ── Queued ───────────────────────────────────────────────────── #}
 {% if queued %}
-<section class="aj-section">
+<section class="run-section" data-run-section="queued">
   <div class="section-head"><h2>⏳ Warteschlange</h2><span class="section-count">{{ queued|length }}</span></div>
   {% for job in queued %}
   <a href="/admin/audio/jobs/{{ job.job_id }}" class="aj-card">
@@ -81,7 +102,7 @@
 
 {# ── Complete ─────────────────────────────────────────────────── #}
 {% if complete %}
-<section class="aj-section">
+<section class="run-section" data-run-section="complete">
   <div class="section-head"><h2>✅ Fertig</h2><span class="section-count">{{ complete|length }}</span></div>
   {% for job in complete %}
   <a href="/admin/audio/jobs/{{ job.job_id }}" class="aj-card">
@@ -98,7 +119,7 @@
 
 {# ── Failed ───────────────────────────────────────────────────── #}
 {% if failed %}
-<section class="aj-section">
+<section class="run-section" data-run-section="failed">
   <div class="section-head"><h2>❌ Fehlgeschlagen</h2><span class="section-count">{{ failed|length }}</span></div>
   {% for job in failed %}
   <a href="/admin/audio/jobs/{{ job.job_id }}" class="aj-card aj-card-muted">
@@ -118,7 +139,7 @@
 
 {# ── Cancelled ────────────────────────────────────────────────── #}
 {% if cancelled %}
-<section class="aj-section">
+<section class="run-section" data-run-section="cancelled">
   <div class="section-head"><h2>🚫 Abgebrochen</h2><span class="section-count">{{ cancelled|length }}</span></div>
   {% for job in cancelled %}
   <a href="/admin/audio/jobs/{{ job.job_id }}" class="aj-card aj-card-muted">
@@ -137,11 +158,30 @@
 {% endif %}
 
 <style>
-.aj-section { margin-bottom: 24px; }
+/* ── Filter bar (reuses pipeline_runs pattern) ─────────────── */
+.run-filter-bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:clamp(16px,2vw,24px); }
+.run-stats { display:flex; gap:10px; flex-wrap:wrap; }
+.run-filter-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.stat-pill { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:999px; font-size:0.78rem; font-weight:600; background:var(--surface); border:1px solid var(--line); color:var(--muted); cursor:pointer; transition:all 0.18s ease; }
+.stat-pill:hover { transform:translateY(-1px); border-color:rgba(255,255,255,0.2); }
+.stat-pill.active { color:var(--text); box-shadow:0 0 0 1px rgba(255,255,255,0.05) inset; }
+.stat-pill:not(.active) { opacity:0.45; filter:grayscale(0.2); }
+.stat-count { color:inherit; }
+.stat-dot { width:8px; height:8px; border-radius:50%; }
+.stat-dot.running { background:var(--blue, #3b82f6); }
+.stat-dot.queued { background:var(--warning, #d97706); }
+.stat-dot.complete { background:var(--good, #22c55e); }
+.stat-dot.failed { background:#ef4444; }
+.stat-dot.cancelled { background:#6b7280; }
+
+/* ── Sections ──────────────────────────────────────────────── */
+.run-section { margin-bottom:24px; }
+.run-section[hidden] { display:none !important; }
 .section-head { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
 .section-head h2 { font-size:1rem; font-weight:700; margin:0; }
 .section-count { background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:2px 10px; font-size:0.72rem; font-weight:600; color:var(--muted); }
 
+/* ── Cards ─────────────────────────────────────────────────── */
 .aj-card {
   display:flex; align-items:center; gap:14px;
   padding:14px 18px; margin-bottom:6px;
@@ -173,24 +213,53 @@
 .aj-badge-error { background:rgba(239,68,68,0.15); color:#f87171; }
 .aj-badge-cancelled { background:rgba(107,114,128,0.15); color:#9ca3af; }
 
-/* Stats */
-.stat-pill { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:999px; font-size:0.78rem; font-weight:600; background:var(--surface); border:1px solid var(--line); color:var(--muted); }
-.stat-dot { width:8px; height:8px; border-radius:50%; }
-.stat-dot.running { background:var(--blue, #3b82f6); }
-.stat-dot.queued { background:var(--warning, #d97706); }
-.stat-dot.complete { background:var(--good, #22c55e); }
-.stat-dot.failed { background:#ef4444; }
-.stat-dot.cancelled { background:#6b7280; }
-
 .empty-state-box { text-align:center; padding:60px 20px; background:var(--panel); border:1px solid var(--line); border-radius:10px; }
 .empty-state-icon { font-size:3rem; margin-bottom:12px; }
 .empty-state-text { color:var(--muted); font-size:1rem; }
 
 @media (max-width:768px) {
+  .run-stats { gap:4px; }
+  .stat-pill { padding:4px 8px; font-size:0.68rem; }
   .aj-card { padding:12px 14px; gap:10px; }
   .aj-title { font-size:0.84rem; }
   .aj-sub { font-size:0.7rem; }
   .aj-badge { font-size:0.65rem; padding:2px 8px; }
 }
 </style>
+
+<script>
+(function() {
+  const buttons = Array.from(document.querySelectorAll('#aj-filters [data-filter-status]'));
+  const sections = Array.from(document.querySelectorAll('[data-run-section]'));
+  const btnAllOn = document.getElementById('aj-filter-all-on');
+  const btnAllOff = document.getElementById('aj-filter-all-off');
+  if (!buttons.length || !sections.length) return;
+
+  const active = new Set(buttons.map(btn => btn.dataset.filterStatus));
+
+  function render() {
+    buttons.forEach(btn => {
+      const on = active.has(btn.dataset.filterStatus);
+      btn.classList.toggle('active', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    sections.forEach(section => {
+      section.hidden = !active.has(section.dataset.runSection);
+    });
+  }
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.filterStatus;
+      if (active.has(key)) active.delete(key); else active.add(key);
+      render();
+    });
+  });
+
+  if (btnAllOn) btnAllOn.addEventListener('click', () => { buttons.forEach(btn => active.add(btn.dataset.filterStatus)); render(); });
+  if (btnAllOff) btnAllOff.addEventListener('click', () => { active.clear(); render(); });
+
+  render();
+})();
+</script>
 {% endblock %}
