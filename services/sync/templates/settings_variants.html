@@ -16,9 +16,6 @@
     <h1>{{ preset.sigil }} {{ preset.display_name }} – Varianten</h1>
     <div class="page-subtitle">Varianten verwalten: Beschreibung, Audio-Prompts, Hintergrund-Prompts.</div>
   </div>
-  <div class="header-actions">
-    <a href="/admin/settings?tab=presets&edit={{ preset_key }}" class="btn btn-secondary btn-sm">← Preset</a>
-  </div>
 </div>
 
 {% if request.query_params.get('saved') %}

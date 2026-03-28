@@ -142,7 +142,7 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
 
 .topbar-user {
   position: absolute;
-  top: 8px;
+  top: var(--content-pad-y);
   right: var(--content-pad-x);
   display: flex;
   align-items: center;
@@ -290,7 +290,7 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
 .brand-sub {
   font-size: 0.72rem;
   color: var(--muted);
-  margin-top: 8px;
+  margin-top: var(--content-pad-y);
   line-height: 1.5;
 }
 
@@ -527,7 +527,7 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
 .content {
   position: relative;
   padding: var(--content-pad-y) var(--content-pad-x);
-  padding-top: calc(var(--content-pad-y) + 28px);
+  
   flex: 1;
   min-width: 0;
   max-width: none;
