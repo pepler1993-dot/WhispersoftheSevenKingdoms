@@ -101,6 +101,7 @@ def _list_uploaded_longform_videos() -> list[dict[str, Any]]:
             'house_key': house_key,
             'variant_key': variant_key,
             'audio_filename': next((f'{slug}{ext}' for ext in ('.mp3','.wav','.ogg') if (PIPELINE_DIR / 'data' / 'upload' / 'songs' / f'{slug}{ext}').exists()), ''),
+            'video_path': str(PIPELINE_DIR / 'data' / 'output' / 'youtube' / slug / 'video.mp4'),
         })
     return out
 
@@ -194,9 +195,13 @@ def admin_shorts_create(
     if visibility not in {'private', 'unlisted', 'public'}:
         raise HTTPException(status_code=400, detail='Ung\u00fcltige Sichtbarkeit')
 
+    selected = next((v for v in _list_uploaded_longform_videos() if v.get('run_id') == source_run_id), None) if source_run_id else None
     source_path = PIPELINE_DIR / 'data' / 'upload' / 'songs' / source_audio
+    source_video_path = Path(selected.get('video_path')) if selected and selected.get('video_path') else Path()
     if not source_path.exists():
-        raise HTTPException(status_code=400, detail='Gew\u00e4hlte Audio-Datei existiert nicht')
+        raise HTTPException(status_code=400, detail='Gewählte Audio-Datei existiert nicht')
+    if not source_video_path.is_file():
+        raise HTTPException(status_code=400, detail='Gewähltes Video existiert nicht')
 
     now = datetime.now(shared.CET).isoformat()
     run_id = uuid.uuid4().hex[:12]
@@ -230,6 +235,7 @@ def admin_shorts_create(
         'house_key': house_key,
         'variant_key': variant_key,
         'source_audio_path': str(source_path),
+        'source_video_path': str(source_video_path),
         'clip_start_seconds': clip_start_seconds,
         'clip_duration_seconds': clip_duration_seconds,
         'visual_mode': visual_mode,
@@ -285,12 +291,13 @@ def admin_shorts_render(run_id: str):
 
     cfg = run.get('config') or {}
     source_audio_path = Path(cfg.get('source_audio_path') or '')
+    source_video_path = Path(cfg.get('source_video_path') or '')
     if not source_audio_path.is_file():
         raise HTTPException(status_code=400, detail='Source audio path is invalid')
+    if not source_video_path.is_file():
+        raise HTTPException(status_code=400, detail='Source video path is invalid')
 
     image_path = _pick_short_image(cfg.get('source_audio', ''))
-    if not image_path:
-        raise HTTPException(status_code=400, detail='No thumbnail/background image available for short rendering')
 
     output_dir = PIPELINE_DIR / 'data' / 'output' / 'shorts' / run['slug']
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -301,19 +308,23 @@ def admin_shorts_render(run_id: str):
     cmd = [
         sys.executable,
         str(PIPELINE_DIR / 'pipeline' / 'scripts' / 'video' / 'render_short.py'),
+        '--video', str(source_video_path),
         '--audio', str(source_audio_path),
-        '--image', str(image_path),
         '--output', str(output_video),
         '--clip-start', str(cfg.get('clip_start_seconds', 0)),
         '--clip-duration', str(cfg.get('clip_duration_seconds', 30)),
         '--visual-mode', str(cfg.get('visual_mode', 'static-artwork')),
     ]
+    if image_path:
+        cmd += ['--image', str(image_path)]
 
     now = _now_iso()
     cmd_str = ' '.join(cmd)
     shared.db.update_run(run_id, status='running', started_at=now, error_message=None)
     shared.db.append_run_log(run_id, 'system', f'Starting Shorts render: {cmd_str}', now)
-    shared.db.append_run_log(run_id, 'system', f'Using image: {image_path.name}', now)
+    shared.db.append_run_log(run_id, 'system', f'Using source video: {source_video_path.name}', now)
+    if image_path:
+        shared.db.append_run_log(run_id, 'system', f'Fallback image available: {image_path.name}', now)
 
     def worker():
         try:
