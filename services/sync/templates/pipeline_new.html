@@ -288,6 +288,18 @@
       </div>
     </details>
 
+    <!-- Review Summary -->
+    <div class="review-summary" id="review-summary">
+      <div class="review-header">📋 Zusammenfassung</div>
+      <div class="review-grid">
+        <div class="review-item"><span class="review-label">Haus</span><span class="review-value" id="review-house">—</span></div>
+        <div class="review-item"><span class="review-label">Variante</span><span class="review-value" id="review-variant">—</span></div>
+        <div class="review-item"><span class="review-label">Länge</span><span class="review-value" id="review-duration">—</span></div>
+        <div class="review-item"><span class="review-label">Audio</span><span class="review-value" id="review-audio">—</span></div>
+        <div class="review-item"><span class="review-label">Auto-Upload</span><span class="review-value" id="review-upload">Nein</span></div>
+      </div>
+    </div>
+
     <button type="submit" class="btn btn-primary btn-launch" id="launch-btn">
       <i data-lucide="rocket" class="icon-lg"></i> Video erstellen
     </button>
@@ -979,6 +991,7 @@
         variantPanel.style.display = 'none';
         configPanel.style.display = 'block';
         updateSteps(4);
+        setTimeout(updateReviewSummary, 100);
         configPanel.style.borderTopColor = house.color || 'var(--gold)';
         setTimeout(() => configPanel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
       }
