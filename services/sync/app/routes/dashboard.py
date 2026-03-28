@@ -15,6 +15,32 @@ from app.helpers import _get_release_notes
 router = APIRouter()
 
 
+def _humanize_error(msg: str | None) -> str:
+    """Translate technical error messages to human-readable text."""
+    if not msg:
+        return 'Unbekannter Fehler'
+    m = msg.lower()
+    if 'exited with code -15' in m or 'sigterm' in m:
+        return 'Vom Server gestoppt (Neustart)'
+    if 'exited with code -9' in m or 'sigkill' in m:
+        return 'Abgebrochen (Speicher/Timeout)'
+    if 'exited with code 1' in m:
+        return 'Pipeline-Fehler beim Rendern'
+    if 'restarted while' in m:
+        return 'Durch Server-Neustart unterbrochen'
+    if 'audio job' in m and ('error' in m or 'cancelled' in m):
+        return 'Audio-Generierung fehlgeschlagen'
+    if 'upload failed' in m:
+        return 'YouTube-Upload fehlgeschlagen'
+    if 'timeout' in m:
+        return 'Zeitüberschreitung'
+    if 'ssh' in m or 'connection' in m:
+        return 'GPU-Worker nicht erreichbar'
+    # Fallback: first 60 chars, cleaned up
+    clean = msg.replace('Process exited with code ', 'Exit ').strip()
+    return clean[:60] + ('…' if len(clean) > 60 else '')
+
+
 @router.get('/')
 def root_redirect(request: Request):
     return RedirectResponse(url='/admin', status_code=302)
@@ -56,6 +82,14 @@ def admin_dashboard(request: Request):
     active = [w for w in filtered if w['status'] in running_statuses | {'queued'}]
     errors = [w for w in filtered if w['status'] in {'failed', 'error'}]
     published = [w for w in filtered if w['status'] == 'uploaded'][:8]
+
+    # Humanize error messages for display
+    for w in filtered:
+        if w.get('error_message'):
+            w['error_display'] = _humanize_error(w['error_message'])
+    for w in errors:
+        if w.get('error_message'):
+            w['error_display'] = _humanize_error(w['error_message'])
 
     # Type counts for tabs
     count_all = len(all_content)

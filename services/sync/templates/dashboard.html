@@ -84,7 +84,7 @@
       </div>
       <div class="attention-title">{{ w.title or w.slug }}</div>
       <div class="attention-error">
-        {{ (w.error_message or 'Fehler ohne Details protokolliert')[:80] }}{% if w.error_message and w.error_message|length > 80 %}…{% endif %}
+        {{ (w.error_display or 'Unbekannter Fehler')}}
       </div>
     </a>
     {% endfor %}
@@ -139,10 +139,16 @@
     {% set href = '/admin/shorts/' ~ w.workflow_id if wtype == 'short' else '/admin/pipeline/run/' ~ w.workflow_id %}
     <a href="{{ href }}" class="published-card">
       <div class="published-thumb">
-        <img src="/admin/pipeline/preview/{{ w.slug }}/thumbnail.jpg" onerror="this.style.display='none'; this.nextElementSibling.hidden = false;" alt="{{ w.title or w.slug }} thumbnail" />
+        <img src="/admin/pipeline/preview/{{ w.slug }}/thumbnail.jpg" onerror="
+          var bg = this.parentElement.querySelector('.published-thumb-bg');
+          if (bg) { bg.onerror = function() { bg.style.display='none'; }; bg.hidden = false; }
+          this.style.display='none';
+          this.nextElementSibling.hidden = false;
+        " alt="{{ w.title or w.slug }} thumbnail" />
+        {% set house = (w.config.house or w.config.get('mood') or w.slug.split('-')[0]) if w.config else w.slug.split('-')[0] %}
+        <img class="published-thumb-bg" src="/static/backgrounds/{{ house }}.jpg" onerror="this.style.display='none'; this.nextElementSibling.hidden=false;" hidden alt="" />
         <div class="published-thumb-fallback" hidden>
-          <span class="published-thumb-emoji" aria-hidden="true">🎬</span>
-          <span>Thumbnail unavailable</span>
+          <div class="published-thumb-title">{{ w.title or w.slug }}</div>
         </div>
         {% if w.config and w.config.get('loop_hours') %}
         <span class="published-duration">{{ w.config.loop_hours }}h</span>
@@ -183,7 +189,7 @@
         {% if w.config and w.config.get('loop_hours') %} · {{ w.config.loop_hours }}h{% endif %}
       </div>
       {% if w.status in ('failed', 'error') %}
-      <div class="wf-card-error">{{ (w.error_message or 'Fehler ohne Details protokolliert')[:80] }}{% if w.error_message and w.error_message|length > 80 %}…{% endif %}</div>
+      <div class="wf-card-error">{{ (w.error_display or 'Unbekannter Fehler')}}</div>
       {% endif %}
       {% if w.status in ('running', 'uploading', 'waiting_for_audio') %}
       <div class="wf-card-progress"><div class="wf-card-bar"><div class="wf-card-bar-fill"></div></div></div>
