@@ -39,7 +39,7 @@
         <div class="brand-sub">Seven Kingdoms · Content Production</div>
       </div>
 
-      <nav>
+      <nav class="sidebar-nav">
         <div class="nav-group-label">Studio</div>
         <a href="/admin" class="nav-link {% if page == 'dashboard' %}active{% endif %}">
           <i data-lucide="sparkles"></i> Overview
@@ -89,6 +89,17 @@
         </a>
       </nav>
 
+      {% if request.state is defined and request.state.user is defined and request.state.user %}
+      <div class="sidebar-user-row">
+        <a href="/admin/profile" class="sidebar-user-info">
+          <span class="sidebar-user-name">{{ request.state.user.display_name or request.state.user.username }}</span>
+          <span class="sidebar-user-role">{{ request.state.user.role }}</span>
+        </a>
+        <a href="/logout" class="sidebar-user-logout" title="Abmelden">
+          <i data-lucide="log-out" style="width:14px;height:14px"></i>
+        </a>
+      </div>
+      {% endif %}
 
     </aside>
 
@@ -97,17 +108,7 @@
     </main>
   </div>
 
-  {% if request.state is defined and request.state.user is defined and request.state.user %}
-  <div class="user-pill">
-    <a href="/admin/profile" class="user-pill-info">
-      <span class="user-pill-name">{{ request.state.user.display_name or request.state.user.username }}</span>
-      <span class="user-pill-role">{{ request.state.user.role }}</span>
-    </a>
-    <a href="/logout" class="user-pill-logout" title="Abmelden">
-      <i data-lucide="log-out" style="width:14px;height:14px"></i>
-    </a>
-  </div>
-  {% endif %}
+
 
   <nav class="bottom-nav">
     <div class="bottom-nav-inner">

@@ -146,71 +146,61 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
   margin-top: 2px;
 }
 
-/* ── user pill (fixed top-right) ── */
+/* ── sidebar user row (bottom of sidebar) ── */
 
-.user-pill {
-  position: fixed;
-  top: 12px;
-  right: 16px;
-  z-index: 200;
+.sidebar-user-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--line);
+  background: rgba(0,0,0,0.2);
+  flex-shrink: 0;
 }
 
-.user-pill-info {
+.sidebar-user-info {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  text-decoration: none;
-  padding: 5px 10px;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(15,23,42,0.85);
-  backdrop-filter: blur(8px);
-  transition: background 0.15s ease, border-color 0.15s ease;
   gap: 1px;
+  text-decoration: none;
+  min-width: 0;
+  flex: 1;
 }
-.user-pill-info:hover {
-  background: rgba(30,41,59,0.95);
-  border-color: rgba(255,255,255,0.15);
+.sidebar-user-info:hover .sidebar-user-name {
+  color: var(--gold, #c9a53a);
 }
-.user-pill-name {
+.sidebar-user-name {
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--text);
-  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.15s ease;
 }
-.user-pill-role {
+.sidebar-user-role {
   font-size: 0.6rem;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  line-height: 1.2;
 }
 
-.user-pill-logout {
+.sidebar-user-logout {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(15,23,42,0.85);
-  backdrop-filter: blur(8px);
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
   color: var(--muted);
   text-decoration: none;
-  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  flex-shrink: 0;
+  transition: color 0.15s ease, background 0.15s ease;
 }
-.user-pill-logout:hover {
+.sidebar-user-logout:hover {
   color: #f87171;
   background: rgba(239,68,68,0.1);
-  border-color: rgba(239,68,68,0.25);
-}
-
-@media (max-width: 768px) {
-  .user-pill { display: none; }
 }
 
 /* ── layout ── */
@@ -235,8 +225,15 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
   width: var(--sidebar-w);
   min-width: var(--sidebar-w);
   height: 100vh;
-  overflow-y: auto;
+  overflow: hidden;
   z-index: 100;
+}
+
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 8px;
 }
 
 .brand {
@@ -529,7 +526,6 @@ h3 { font-size: var(--h3-size); font-weight: 600; margin-bottom: 8px; line-heigh
 
 /* ── content ── */
 
-/* sidebar-footer entfernt – User/Logout jetzt in Topbar */
 .sidebar-footer { display: none; }
 
 .content {
