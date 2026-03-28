@@ -90,12 +90,24 @@ if AUTH_ENABLED:
     from starlette.responses import RedirectResponse as StarletteRedirect  # noqa: E402
     from app.auth import get_current_user, ensure_admin_exists     # noqa: E402
 
-    PUBLIC_PATHS = {'/login', '/static', '/health', '/api/gpu/metrics'}
+    PUBLIC_PATHS = {'/login', '/static', '/health', '/api/gpu/metrics', '/api/'}
 
     class AuthMiddleware(BaseHTTPMiddleware):
         async def dispatch(self, request, call_next):
             path = request.url.path
+            # Allow public paths
             if any(path.startswith(p) for p in PUBLIC_PATHS):
+                return await call_next(request)
+            # Allow all API calls (JSON endpoints used by agents/scripts)
+            if '/api/' in path:
+                return await call_next(request)
+            # Allow non-GET requests (form posts, API calls from agents)
+            # Only browser GET requests to /admin need login
+            if request.method != 'GET' and path.startswith('/admin'):
+                # Try to set user if available, but don't block
+                user = get_current_user(request)
+                if user:
+                    request.state.user = user
                 return await call_next(request)
             if path.startswith('/admin'):
                 user = get_current_user(request)
