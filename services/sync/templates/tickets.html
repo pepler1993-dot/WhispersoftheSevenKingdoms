@@ -1,5 +1,13 @@
 {% extends 'base.html' %}
-{% block title %}Tickets{% endblock %}
+{% block title %}Tickets
+<style>
+/* Ticket table readability */
+.table-wrap table { font-size: 0.82rem; }
+.table-wrap th { font-size: 0.75rem; padding: 10px 12px; }
+.table-wrap td { padding: 12px; line-height: 1.5; }
+.table-wrap tr:hover { background: rgba(255,255,255,0.02); }
+</style>
+{% endblock %}
 {% block content %}
 <div class="page-header page-header-flex">
   <div>
@@ -92,4 +100,12 @@
     </table>
   </div>
 </section>
+
+<style>
+/* Ticket table readability */
+.table-wrap table { font-size: 0.82rem; }
+.table-wrap th { font-size: 0.75rem; padding: 10px 12px; }
+.table-wrap td { padding: 12px; line-height: 1.5; }
+.table-wrap tr:hover { background: rgba(255,255,255,0.02); }
+</style>
 {% endblock %}

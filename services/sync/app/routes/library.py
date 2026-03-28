@@ -16,6 +16,11 @@ from app.pipeline_runner import PIPELINE_DIR
 
 router = APIRouter()
 
+@router.get('/admin/library/house/{house_key}')
+def admin_library_house_redirect(house_key: str):
+    return RedirectResponse(url=f'/admin/library/houses/{house_key}', status_code=301)
+
+
 _LIBRARY_TABS = frozenset({'houses', 'songs', 'backgrounds'})
 
 _SONG_EXT = frozenset({'.mp3', '.wav', '.ogg'})

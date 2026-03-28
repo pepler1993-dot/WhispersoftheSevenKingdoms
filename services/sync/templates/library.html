@@ -29,6 +29,26 @@ function togglePlay(btn, src) {
   };
 }
 </script>
+
+<script>
+(function() {
+  var thumbs = document.querySelectorAll('.thumb-card');
+  if (thumbs.length <= 12) return;
+  for (var i = 12; i < thumbs.length; i++) thumbs[i].style.display = 'none';
+  var grid = thumbs[0].parentElement;
+  var btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'btn btn-secondary btn-sm';
+  btn.textContent = 'Alle anzeigen (' + thumbs.length + ')';
+  btn.id = 'showMoreBg';
+  btn.style.cssText = 'margin-top:12px; width:100%;';
+  btn.addEventListener('click', function() {
+    thumbs.forEach(function(t) { t.style.display = ''; });
+    btn.remove();
+  });
+  grid.parentElement.appendChild(btn);
+})();
+</script>
 {% endblock %}
 {% block head_extra %}
 <link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
@@ -61,6 +81,26 @@ function togglePlay(btn, src) {
     currentBtn = null;
   };
 }
+</script>
+
+<script>
+(function() {
+  var thumbs = document.querySelectorAll('.thumb-card');
+  if (thumbs.length <= 12) return;
+  for (var i = 12; i < thumbs.length; i++) thumbs[i].style.display = 'none';
+  var grid = thumbs[0].parentElement;
+  var btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'btn btn-secondary btn-sm';
+  btn.textContent = 'Alle anzeigen (' + thumbs.length + ')';
+  btn.id = 'showMoreBg';
+  btn.style.cssText = 'margin-top:12px; width:100%;';
+  btn.addEventListener('click', function() {
+    thumbs.forEach(function(t) { t.style.display = ''; });
+    btn.remove();
+  });
+  grid.parentElement.appendChild(btn);
+})();
 </script>
 {% endblock %}
 {% block content %}
@@ -510,5 +550,25 @@ function togglePlay(btn, src) {
     currentBtn = null;
   };
 }
+</script>
+
+<script>
+(function() {
+  var thumbs = document.querySelectorAll('.thumb-card');
+  if (thumbs.length <= 12) return;
+  for (var i = 12; i < thumbs.length; i++) thumbs[i].style.display = 'none';
+  var grid = thumbs[0].parentElement;
+  var btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'btn btn-secondary btn-sm';
+  btn.textContent = 'Alle anzeigen (' + thumbs.length + ')';
+  btn.id = 'showMoreBg';
+  btn.style.cssText = 'margin-top:12px; width:100%;';
+  btn.addEventListener('click', function() {
+    thumbs.forEach(function(t) { t.style.display = ''; });
+    btn.remove();
+  });
+  grid.parentElement.appendChild(btn);
+})();
 </script>
 {% endblock %}
