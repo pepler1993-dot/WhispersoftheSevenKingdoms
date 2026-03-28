@@ -308,6 +308,78 @@
 </section>
 
 <style>
+
+/* ── Step Indicator ──────────────────────────────────── */
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  padding: 16px 20px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 64px;
+}
+.step-num {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: var(--surface);
+  border: 2px solid var(--line);
+  color: var(--muted);
+  transition: all 0.3s ease;
+}
+.step-label {
+  font-size: 0.68rem;
+  color: var(--muted);
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+.step.active .step-num {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #000;
+  box-shadow: 0 0 12px rgba(212,168,69,0.3);
+}
+.step.active .step-label { color: var(--gold); }
+.step.done .step-num {
+  background: var(--good, #34d399);
+  border-color: var(--good, #34d399);
+  color: #000;
+  font-size: 0;
+}
+.step.done .step-num::after { content: '✓'; font-size: 0.85rem; }
+.step.done .step-label { color: var(--good, #34d399); }
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: var(--line);
+  margin: 0 6px;
+  margin-bottom: 22px;
+  max-width: 60px;
+  transition: background 0.3s ease;
+}
+.step.done + .step-line,
+.step-line.done { background: var(--good, #34d399); }
+@media (max-width: 480px) {
+  .step-label { display: none; }
+  .step { min-width: 44px; }
+  .step-num { width: 28px; height: 28px; font-size: 0.7rem; }
+  .step-indicator { padding: 12px; }
+}
+
 .variant-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
