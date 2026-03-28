@@ -44,7 +44,7 @@
   {% endif %}
 </div>
 
-{% if run.error_message %}
+{% if run.error_message and run.status | display_status == 'failed' %}
 <div class="run-error-box">
   <strong>❌ Fehler:</strong> {{ run.error_message }}
 </div>

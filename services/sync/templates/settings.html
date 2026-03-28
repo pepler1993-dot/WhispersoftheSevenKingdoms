@@ -415,11 +415,11 @@ fetch('/admin/audio/health')
           </div>
         </div>
         <div class="st-preset-actions">
-          <a href="/admin/settings/presets/{{ key }}/variants" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:0.7rem;" title="Varianten">📋 {{ (house.variants or {}) | length }}</a>
-          <a href="/admin/settings?tab=presets&edit={{ key }}" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:0.7rem;">✏️</a>
-          <form method="post" action="/admin/settings/presets/delete" style="display:inline;" onsubmit="return confirm('Preset «{{ house.display_name }}» wirklich löschen?')">
+          <a href="/admin/settings/presets/{{ key }}/variants" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:0.7rem;">📋 Varianten ({{ (house.variants or {}) | length }})</a>
+          <a href="/admin/settings?tab=presets&edit={{ key }}" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:0.7rem;">✏️ Bearbeiten</a>
+          <form method="post" action="/admin/settings/presets/delete" style="display:inline;" onsubmit="return confirm('Preset «{{ house.display_name }}» und alle Varianten wirklich löschen? Das kann nicht rückgängig gemacht werden.')">
             <input type="hidden" name="preset_key" value="{{ key }}" />
-            <button type="submit" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:0.7rem; color:#f87171;">🗑️</button>
+            <button type="submit" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:0.7rem; color:#f87171;">🗑️ Löschen</button>
           </form>
         </div>
       </div>
