@@ -369,13 +369,17 @@
 }
 .mini-item:last-child { border-bottom: none; }
 .mini-item:hover { opacity: 0.85; }
+/* Overview: eine Karte pro Zeile = volle Panel-Breite (keine schmalen Multi-Spalten) */
 .overview-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  grid-template-columns: 1fr;
   gap: clamp(10px, 0.9vw, 14px);
 }
 .overview-card {
   display: block;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   text-decoration: none;
   color: var(--text);
   border: 1px solid var(--line);
@@ -547,15 +551,9 @@
   .dashboard-main-grid {
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
   }
-  .overview-card-grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
-  }
 }
 @media (min-width: 1920px) {
   .active-grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
-  }
-  .overview-card-grid {
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   }
 }
@@ -565,9 +563,6 @@
   }
   .dashboard-main-grid {
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
-  }
-  .overview-card-grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
   }
 }
 </style>
