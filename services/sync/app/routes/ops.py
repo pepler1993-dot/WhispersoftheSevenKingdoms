@@ -28,7 +28,7 @@ def admin_ops(request: Request):
             'title': 'Kritische Tickets vorhanden',
             'action': 'Sofort triagieren und einen Owner zuweisen.',
         })
-    if system.get('counts', {}).get('pipeline_runs', 0) == 0:
+    if system.get('counts', {}).get('workflows', 0) == 0:
         alerts.append({
             'level': 'info',
             'title': 'Keine Pipeline-Runs gefunden',

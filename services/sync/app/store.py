@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import sqlite3
 from pathlib import Path
 from threading import Lock
@@ -14,6 +15,7 @@ class AgentSyncDB:
         self.db_path = self.data_dir / 'agent_sync.db'
         self._lock = Lock()
         self._init_db()
+        self._migrate_legacy_tables()
         self._integrity_check()
 
     def _integrity_check(self) -> None:
@@ -21,10 +23,8 @@ class AgentSyncDB:
             with self._connect() as conn:
                 result = conn.execute('PRAGMA integrity_check').fetchone()
                 if result[0] != 'ok':
-                    import logging
                     logging.warning('DB integrity check failed: %s', result[0])
         except Exception as e:
-            import logging
             logging.error('DB integrity check error: %s', e)
 
     def backup(self, backup_dir: Path | None = None) -> Path:
@@ -59,29 +59,35 @@ class AgentSyncDB:
                 '''
                 PRAGMA journal_mode=WAL;
 
-                CREATE TABLE IF NOT EXISTS pipeline_runs (
-                    run_id TEXT PRIMARY KEY,
+                CREATE TABLE IF NOT EXISTS workflows (
+                    workflow_id TEXT PRIMARY KEY,
+                    type TEXT NOT NULL DEFAULT 'video',
                     slug TEXT NOT NULL,
                     title TEXT,
+                    phase TEXT NOT NULL DEFAULT 'render',
                     status TEXT NOT NULL DEFAULT 'created',
+                    audio_job_id TEXT,
                     config_json TEXT,
+                    auto_upload INTEGER NOT NULL DEFAULT 0,
                     pid INTEGER,
                     started_at TEXT,
                     finished_at TEXT,
                     error_message TEXT,
-                    created_at TEXT NOT NULL
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT
                 );
-                CREATE INDEX IF NOT EXISTS idx_pipeline_runs_status ON pipeline_runs(status);
-                CREATE INDEX IF NOT EXISTS idx_pipeline_runs_created_at ON pipeline_runs(created_at);
+                CREATE INDEX IF NOT EXISTS idx_workflows_status ON workflows(status);
+                CREATE INDEX IF NOT EXISTS idx_workflows_created_at ON workflows(created_at);
+                CREATE INDEX IF NOT EXISTS idx_workflows_type ON workflows(type);
 
-                CREATE TABLE IF NOT EXISTS pipeline_run_logs (
+                CREATE TABLE IF NOT EXISTS workflow_logs (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    run_id TEXT NOT NULL,
+                    workflow_id TEXT NOT NULL,
                     stream TEXT NOT NULL DEFAULT 'stdout',
                     message TEXT NOT NULL,
                     created_at TEXT NOT NULL
                 );
-                CREATE INDEX IF NOT EXISTS idx_pipeline_run_logs_run_id ON pipeline_run_logs(run_id);
+                CREATE INDEX IF NOT EXISTS idx_workflow_logs_workflow_id ON workflow_logs(workflow_id);
 
                 CREATE TABLE IF NOT EXISTS audio_jobs (
                     job_id TEXT PRIMARY KEY,
@@ -165,10 +171,100 @@ class AgentSyncDB:
                 pass
             conn.commit()
 
+    def _migrate_legacy_tables(self) -> None:
+        """Migrate data from old pipeline_runs + old workflows tables into unified workflows table."""
+        with self._connect() as conn:
+            tables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()}
+
+            if 'pipeline_runs' not in tables:
+                return
+
+            # Load old workflows data (keyed by pipeline_run_id) for merging
+            old_wf_by_run: dict[str, dict] = {}
+            if '_old_workflows_backup' not in tables:
+                # Check if workflows table has the old schema (pipeline_run_id column)
+                cols = {r[1] for r in conn.execute('PRAGMA table_info(workflows)').fetchall()}
+                if 'pipeline_run_id' in cols:
+                    for row in conn.execute('SELECT * FROM workflows').fetchall():
+                        d = dict(row)
+                        run_id = d.get('pipeline_run_id')
+                        if run_id:
+                            old_wf_by_run[run_id] = d
+                    # Rename old workflows table before we drop/recreate
+                    conn.execute('ALTER TABLE workflows RENAME TO _old_workflows_backup')
+                    conn.commit()
+
+            # Rename old pipeline tables
+            conn.execute('ALTER TABLE pipeline_runs RENAME TO _pipeline_runs_backup')
+            if 'pipeline_run_logs' in tables:
+                conn.execute('ALTER TABLE pipeline_run_logs RENAME TO _pipeline_run_logs_backup')
+            conn.commit()
+
+        # Re-init to create new schema
+        self._init_db()
+
+        with self._lock:
+            with self._connect() as conn:
+                # Migrate pipeline_runs → workflows
+                for row in conn.execute('SELECT * FROM _pipeline_runs_backup').fetchall():
+                    d = dict(row)
+                    run_id = d['run_id']
+                    config_json = d.get('config_json') or '{}'
+                    try:
+                        config = json.loads(config_json)
+                    except (json.JSONDecodeError, TypeError):
+                        config = {}
+
+                    wf_type = 'short' if config.get('content_type') == 'short' else 'video'
+
+                    # Merge fields from old workflow if available
+                    old_wf = old_wf_by_run.get(run_id, {})
+                    audio_job_id = old_wf.get('audio_job_id')
+                    auto_upload = 1 if old_wf.get('auto_upload') else (1 if config.get('auto_upload') else 0)
+
+                    status = d.get('status', 'created')
+                    phase = 'render'
+                    if status == 'waiting_for_audio':
+                        phase = 'audio'
+                    elif status in ('uploaded',):
+                        phase = 'done'
+                    elif status in ('uploading',):
+                        phase = 'upload'
+
+                    if old_wf.get('phase'):
+                        phase = old_wf['phase']
+
+                    conn.execute(
+                        '''INSERT OR IGNORE INTO workflows
+                           (workflow_id, type, slug, title, phase, status, audio_job_id,
+                            config_json, auto_upload, pid, started_at, finished_at,
+                            error_message, created_at, updated_at)
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                        (
+                            run_id, wf_type, d['slug'], d.get('title'),
+                            phase, status, audio_job_id,
+                            config_json, auto_upload,
+                            d.get('pid'), d.get('started_at'), d.get('finished_at'),
+                            d.get('error_message'), d['created_at'],
+                            old_wf.get('updated_at'),
+                        ),
+                    )
+
+                # Migrate pipeline_run_logs → workflow_logs
+                backup_tables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()}
+                if '_pipeline_run_logs_backup' in backup_tables:
+                    conn.execute(
+                        '''INSERT INTO workflow_logs (workflow_id, stream, message, created_at)
+                           SELECT run_id, stream, message, created_at FROM _pipeline_run_logs_backup'''
+                    )
+
+                conn.commit()
+                logging.info('Migrated legacy pipeline_runs + workflows into unified workflows table.')
+
     def get_system_summary(self) -> dict[str, Any]:
         with self._connect() as conn:
             counts: dict[str, int] = {}
-            for table in ('pipeline_runs', 'audio_jobs', 'tickets'):
+            for table in ('workflows', 'audio_jobs', 'tickets'):
                 row = conn.execute(f'SELECT COUNT(*) AS count FROM {table}').fetchone()
                 counts[table] = int(row['count'] or 0)
         return {
@@ -176,42 +272,49 @@ class AgentSyncDB:
             'counts': counts,
         }
 
-    # ── pipeline runs ──
+    # ── workflows ──
 
-    def create_run(self, run: dict[str, Any]) -> None:
-        config_val = run.get('config')
+    def create_workflow(self, wf: dict[str, Any]) -> None:
+        config_val = wf.get('config')
         config_json = json.dumps(config_val, ensure_ascii=False) if config_val is not None else None
         params = (
-            str(run['run_id']),
-            str(run['slug']),
-            str(run['title']) if run.get('title') else None,
-            str(run.get('status', 'created')),
+            str(wf['workflow_id']),
+            str(wf.get('type', 'video')),
+            str(wf['slug']),
+            str(wf['title']) if wf.get('title') else None,
+            str(wf.get('phase', 'render')),
+            str(wf.get('status', 'created')),
+            wf.get('audio_job_id'),
             config_json,
-            run.get('pid'),
-            run.get('started_at'),
-            run.get('finished_at'),
-            run.get('error_message'),
-            str(run['created_at']),
+            1 if wf.get('auto_upload') else 0,
+            wf.get('pid'),
+            wf.get('started_at'),
+            wf.get('finished_at'),
+            wf.get('error_message'),
+            str(wf['created_at']),
+            wf.get('updated_at'),
         )
         with self._lock:
             with self._connect() as conn:
                 conn.execute(
                     '''
-                    INSERT INTO pipeline_runs (
-                        run_id, slug, title, status, config_json,
-                        pid, started_at, finished_at, error_message, created_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO workflows (
+                        workflow_id, type, slug, title, phase, status, audio_job_id,
+                        config_json, auto_upload, pid, started_at, finished_at,
+                        error_message, created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ''',
                     params,
                 )
                 conn.commit()
 
-    def update_run(self, run_id: str, **fields: Any) -> None:
+    def update_workflow(self, workflow_id: str, **fields: Any) -> None:
         if not fields:
             return
         allowed_columns = {
-            'slug', 'title', 'status', 'config', 'pid',
-            'started_at', 'finished_at', 'error_message',
+            'type', 'slug', 'title', 'phase', 'status', 'audio_job_id',
+            'config', 'auto_upload', 'pid', 'started_at', 'finished_at',
+            'error_message', 'updated_at',
         }
         set_clauses = []
         params: list[Any] = []
@@ -219,61 +322,84 @@ class AgentSyncDB:
             if key == 'config':
                 set_clauses.append('config_json = ?')
                 params.append(json.dumps(value, ensure_ascii=False))
+            elif key == 'auto_upload':
+                set_clauses.append('auto_upload = ?')
+                params.append(1 if value else 0)
             elif key in allowed_columns:
                 set_clauses.append(f'{key} = ?')
                 params.append(value)
         if not set_clauses:
             return
-        params.append(run_id)
+        params.append(workflow_id)
         with self._lock:
             with self._connect() as conn:
                 conn.execute(
-                    f"UPDATE pipeline_runs SET {', '.join(set_clauses)} WHERE run_id = ?",
+                    f"UPDATE workflows SET {', '.join(set_clauses)} WHERE workflow_id = ?",
                     params,
                 )
                 conn.commit()
 
-    def get_run(self, run_id: str) -> dict[str, Any] | None:
+    def get_workflow(self, workflow_id: str) -> dict[str, Any] | None:
         with self._connect() as conn:
-            row = conn.execute('SELECT * FROM pipeline_runs WHERE run_id = ?', (run_id,)).fetchone()
-        return self._row_to_run(row) if row else None
+            row = conn.execute('SELECT * FROM workflows WHERE workflow_id = ?', (workflow_id,)).fetchone()
+        return self._row_to_workflow(row) if row else None
 
-    def list_runs(self, limit: int = 50) -> list[dict[str, Any]]:
+    def list_workflows(self, limit: int = 50, type: str | None = None) -> list[dict[str, Any]]:
+        with self._connect() as conn:
+            if type:
+                rows = conn.execute(
+                    'SELECT * FROM workflows WHERE type = ? ORDER BY created_at DESC LIMIT ?', (type, limit)
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    'SELECT * FROM workflows ORDER BY created_at DESC LIMIT ?', (limit,)
+                ).fetchall()
+        return [self._row_to_workflow(row) for row in rows]
+
+    def list_active_workflows(self) -> list[dict[str, Any]]:
+        """Get workflows that need polling (running or waiting for audio)."""
         with self._connect() as conn:
             rows = conn.execute(
-                'SELECT * FROM pipeline_runs ORDER BY created_at DESC LIMIT ?', (limit,)
+                "SELECT * FROM workflows WHERE status IN ('running', 'waiting_for_audio') "
+                "OR (phase = 'audio' AND status NOT IN ('error', 'cancelled', 'completed')) "
+                "ORDER BY created_at ASC"
             ).fetchall()
-        return [self._row_to_run(row) for row in rows]
+        return [self._row_to_workflow(row) for row in rows]
 
-    def append_run_log(self, run_id: str, stream: str, message: str, created_at: str) -> None:
+    def append_workflow_log(self, workflow_id: str, stream: str, message: str, created_at: str) -> None:
         with self._lock:
             with self._connect() as conn:
                 conn.execute(
-                    'INSERT INTO pipeline_run_logs (run_id, stream, message, created_at) VALUES (?, ?, ?, ?)',
-                    (run_id, stream, message, created_at),
+                    'INSERT INTO workflow_logs (workflow_id, stream, message, created_at) VALUES (?, ?, ?, ?)',
+                    (workflow_id, stream, message, created_at),
                 )
                 conn.commit()
 
-    def get_run_logs(self, run_id: str, after_id: int = 0, limit: int = 500) -> list[dict[str, Any]]:
+    def get_workflow_logs(self, workflow_id: str, after_id: int = 0, limit: int = 500) -> list[dict[str, Any]]:
         with self._connect() as conn:
             rows = conn.execute(
-                'SELECT * FROM pipeline_run_logs WHERE run_id = ? AND id > ? ORDER BY id ASC LIMIT ?',
-                (run_id, after_id, limit),
+                'SELECT * FROM workflow_logs WHERE workflow_id = ? AND id > ? ORDER BY id ASC LIMIT ?',
+                (workflow_id, after_id, limit),
             ).fetchall()
         return [{'id': r['id'], 'stream': r['stream'], 'message': r['message'], 'created_at': r['created_at']} for r in rows]
 
-    def _row_to_run(self, row: sqlite3.Row) -> dict[str, Any]:
+    def _row_to_workflow(self, row: sqlite3.Row) -> dict[str, Any]:
         return {
-            'run_id': row['run_id'],
+            'workflow_id': row['workflow_id'],
+            'type': row['type'],
             'slug': row['slug'],
             'title': row['title'],
+            'phase': row['phase'],
             'status': row['status'],
+            'audio_job_id': row['audio_job_id'],
             'config': json.loads(row['config_json']) if row['config_json'] else {},
+            'auto_upload': bool(row['auto_upload']),
             'pid': row['pid'],
             'started_at': row['started_at'],
             'finished_at': row['finished_at'],
             'error_message': row['error_message'],
             'created_at': row['created_at'],
+            'updated_at': row['updated_at'],
         }
 
     # ── audio jobs ──

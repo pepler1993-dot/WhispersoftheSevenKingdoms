@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Short {{ run.run_id }}{% endblock %}
+{% block title %}Short {{ run.workflow_id }}{% endblock %}
 {% block head_extra %}
 <link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
 {% endblock %}
@@ -31,12 +31,12 @@
     <i data-lucide="arrow-left" class="icon-sm"></i> Alle Shorts
   </a>
   {% if run.status in ('created', 'failed') %}
-  <form method="post" action="/admin/shorts/{{ run.run_id }}/render" style="display:inline;">
+  <form method="post" action="/admin/shorts/{{ run.workflow_id }}/render" style="display:inline;">
     <button type="submit" class="btn btn-primary btn-sm">Rendern</button>
   </form>
   {% endif %}
   {% if run.status == 'rendered' %}
-  <form method="post" action="/admin/shorts/{{ run.run_id }}/upload" style="display:inline;">
+  <form method="post" action="/admin/shorts/{{ run.workflow_id }}/upload" style="display:inline;">
     <button type="submit" class="btn btn-primary btn-sm">Upload</button>
   </form>
   {% endif %}
@@ -113,7 +113,7 @@
 <script>
 (function() {
   var status = '{{ run.status }}';
-  var runId = '{{ run.run_id }}';
+  var runId = '{{ run.workflow_id }}';
   var viewer = document.getElementById('log-viewer');
   var lastId = {{ logs[-1].id if logs else 0 }};
   var polling = (status === 'running' || status === 'queued' || status === 'created');

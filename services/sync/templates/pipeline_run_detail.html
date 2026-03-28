@@ -15,7 +15,7 @@
     </span>
   </div>
   <div class="run-detail-sub">
-    <code>{{ run.run_id }}</code>
+    <code>{{ run.workflow_id }}</code>
     <span>·</span>
     <span>{{ run.slug }}</span>
     {% if run.created_at %}
@@ -28,14 +28,14 @@
 {# ── Actions ──────────────────────────────────────────────────── #}
 <div class="run-actions">
   {% if run.status in ('running', 'queued') %}
-  <form method="post" action="/admin/pipeline/run/{{ run.run_id }}/cancel" style="margin:0">
+  <form method="post" action="/admin/pipeline/run/{{ run.workflow_id }}/cancel" style="margin:0">
     <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Run wirklich abbrechen?')">
       <i data-lucide="square" class="icon-sm"></i> {% if run.status == 'queued' %}Aus Queue entfernen{% else %}Abbrechen{% endif %}
     </button>
   </form>
   {% endif %}
   {% if run.status == 'rendered' %}
-  <form method="post" action="/admin/pipeline/run/{{ run.run_id }}/upload" style="margin:0">
+  <form method="post" action="/admin/pipeline/run/{{ run.workflow_id }}/upload" style="margin:0">
     <button type="submit" class="btn btn-primary" onclick="return confirm('Video jetzt zu YouTube hochladen?')">
       <i data-lucide="upload" class="icon-md"></i> Upload zu YouTube
     </button>
@@ -242,7 +242,7 @@
 <script>
 (function() {
   var status = '{{ run.status }}';
-  var runId = '{{ run.run_id }}';
+  var runId = '{{ run.workflow_id }}';
   var slug = '{{ run.slug }}';
   var viewer = document.getElementById('log-viewer');
   var lastId = {{ logs[-1].id if logs else 0 }};

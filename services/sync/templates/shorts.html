@@ -133,7 +133,7 @@
   {% if short_runs %}
   <div class="shorts-draft-grid">
     {% for run in short_runs %}
-    <a href="/admin/shorts/{{ run.run_id }}" class="shorts-draft-card">
+    <a href="/admin/shorts/{{ run.workflow_id }}" class="shorts-draft-card">
       <div class="shorts-draft-card-top">
         <div class="shorts-draft-title">{{ run.title or 'Ohne Titel' }}</div>
         <span class="badge {{ run.status }}">{{ run.status }}</span>
@@ -188,7 +188,7 @@
       btn.addEventListener('click', () => {
         videoList.querySelectorAll('.shorts-video-card').forEach(x => x.classList.remove('selected'));
         btn.classList.add('selected');
-        sourceRunId.value = v.run_id || '';
+        sourceRunId.value = v.workflow_id || '';
         sourceAudio.value = v.audio_filename || '';
         houseInput.value = houseKey;
         variantInput.value = variantKey;

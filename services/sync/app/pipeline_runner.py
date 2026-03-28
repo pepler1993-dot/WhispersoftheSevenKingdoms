@@ -65,24 +65,24 @@ def _build_command(slug: str, config: dict[str, Any]) -> list[str]:
     return cmd
 
 
-def _stream_reader(pipe, run_id: str, stream_name: str, db: AgentSyncDB) -> None:
+def _stream_reader(pipe, workflow_id: str, stream_name: str, db: AgentSyncDB) -> None:
     try:
         for raw_line in pipe:
             line = raw_line.decode('utf-8', errors='replace').rstrip('\n\r')
             if line:
-                db.append_run_log(run_id, stream_name, line, _now_iso())
+                db.append_workflow_log(workflow_id, stream_name, line, _now_iso())
     except Exception as exc:
         import logging
-        logging.warning('Stream reader error for run %s (%s): %s', run_id, stream_name, exc)
+        logging.warning('Stream reader error for workflow %s (%s): %s', workflow_id, stream_name, exc)
     finally:
         pipe.close()
 
 
-def start_run(run_id: str, slug: str, config: dict[str, Any], db: AgentSyncDB) -> None:
+def start_run(workflow_id: str, slug: str, config: dict[str, Any], db: AgentSyncDB) -> None:
     cmd = _build_command(slug, config)
 
-    db.append_run_log(run_id, 'system', f'Starting pipeline: {" ".join(cmd)}', _now_iso())
-    db.update_run(run_id, status='running', started_at=_now_iso())
+    db.append_workflow_log(workflow_id, 'system', f'Starting pipeline: {" ".join(cmd)}', _now_iso())
+    db.update_workflow(workflow_id, status='running', started_at=_now_iso())
 
     try:
         proc = subprocess.Popen(
@@ -93,17 +93,17 @@ def start_run(run_id: str, slug: str, config: dict[str, Any], db: AgentSyncDB) -
             env=_utf8_env(),
         )
     except Exception as exc:
-        db.update_run(run_id, status='failed', error_message=str(exc), finished_at=_now_iso())
-        db.append_run_log(run_id, 'system', f'Failed to start process: {exc}', _now_iso())
+        db.update_workflow(workflow_id, status='failed', error_message=str(exc), finished_at=_now_iso())
+        db.append_workflow_log(workflow_id, 'system', f'Failed to start process: {exc}', _now_iso())
         return
 
-    db.update_run(run_id, pid=proc.pid)
+    db.update_workflow(workflow_id, pid=proc.pid)
 
     stdout_thread = threading.Thread(
-        target=_stream_reader, args=(proc.stdout, run_id, 'stdout', db), daemon=True
+        target=_stream_reader, args=(proc.stdout, workflow_id, 'stdout', db), daemon=True
     )
     stderr_thread = threading.Thread(
-        target=_stream_reader, args=(proc.stderr, run_id, 'stderr', db), daemon=True
+        target=_stream_reader, args=(proc.stderr, workflow_id, 'stderr', db), daemon=True
     )
     stdout_thread.start()
     stderr_thread.start()
@@ -113,32 +113,32 @@ def start_run(run_id: str, slug: str, config: dict[str, Any], db: AgentSyncDB) -
     stderr_thread.join(timeout=5)
 
     if exit_code == 0:
-        db.update_run(run_id, status='rendered', finished_at=_now_iso(), pid=None)
-        db.append_run_log(run_id, 'system', 'Pipeline finished successfully', _now_iso())
+        db.update_workflow(workflow_id, status='rendered', finished_at=_now_iso(), pid=None)
+        db.append_workflow_log(workflow_id, 'system', 'Pipeline finished successfully', _now_iso())
     else:
-        db.update_run(
-            run_id, status='failed', finished_at=_now_iso(), pid=None,
+        db.update_workflow(
+            workflow_id, status='failed', finished_at=_now_iso(), pid=None,
             error_message=f'Process exited with code {exit_code}',
         )
-        db.append_run_log(run_id, 'system', f'Pipeline failed with exit code {exit_code}', _now_iso())
+        db.append_workflow_log(workflow_id, 'system', f'Pipeline failed with exit code {exit_code}', _now_iso())
 
 
-def start_run_async(run_id: str, slug: str, config: dict[str, Any], db: AgentSyncDB) -> None:
+def start_run_async(workflow_id: str, slug: str, config: dict[str, Any], db: AgentSyncDB) -> None:
     thread = threading.Thread(
-        target=start_run, args=(run_id, slug, config, db), daemon=True
+        target=start_run, args=(workflow_id, slug, config, db), daemon=True
     )
     thread.start()
 
 
-def trigger_upload(run_id: str, slug: str, config: dict[str, Any], db: AgentSyncDB) -> None:
+def trigger_upload(workflow_id: str, slug: str, config: dict[str, Any], db: AgentSyncDB) -> None:
     video_path = PIPELINE_DIR / 'data' / 'output' / 'youtube' / slug / 'video.mp4'
     metadata_path = PIPELINE_DIR / 'data' / 'output' / 'youtube' / slug / 'metadata.json'
 
     if not video_path.exists():
-        db.update_run(run_id, status='failed', error_message='Video file not found for upload')
+        db.update_workflow(workflow_id, status='failed', error_message='Video file not found for upload')
         return
     if not metadata_path.exists():
-        db.update_run(run_id, status='failed', error_message='Metadata file not found for upload')
+        db.update_workflow(workflow_id, status='failed', error_message='Metadata file not found for upload')
         return
 
     cmd = [
@@ -150,9 +150,9 @@ def trigger_upload(run_id: str, slug: str, config: dict[str, Any], db: AgentSync
         cmd.append('--public')
 
     upload_env = _upload_env()
-    db.update_run(run_id, status='uploading')
-    db.append_run_log(run_id, 'system', f'Starting YouTube upload: {" ".join(cmd)}', _now_iso())
-    db.append_run_log(run_id, 'system', f'YouTube credentials source: {upload_env.get("GOOGLE_CLIENT_SECRET", "client_secret.json")}', _now_iso())
+    db.update_workflow(workflow_id, status='uploading')
+    db.append_workflow_log(workflow_id, 'system', f'Starting YouTube upload: {" ".join(cmd)}', _now_iso())
+    db.append_workflow_log(workflow_id, 'system', f'YouTube credentials source: {upload_env.get("GOOGLE_CLIENT_SECRET", "client_secret.json")}', _now_iso())
 
     def _upload():
         try:
@@ -161,10 +161,10 @@ def trigger_upload(run_id: str, slug: str, config: dict[str, Any], db: AgentSync
                 env=upload_env,
             )
             stdout_t = threading.Thread(
-                target=_stream_reader, args=(proc.stdout, run_id, 'stdout', db), daemon=True
+                target=_stream_reader, args=(proc.stdout, workflow_id, 'stdout', db), daemon=True
             )
             stderr_t = threading.Thread(
-                target=_stream_reader, args=(proc.stderr, run_id, 'stderr', db), daemon=True
+                target=_stream_reader, args=(proc.stderr, workflow_id, 'stderr', db), daemon=True
             )
             stdout_t.start()
             stderr_t.start()
@@ -173,35 +173,35 @@ def trigger_upload(run_id: str, slug: str, config: dict[str, Any], db: AgentSync
             stderr_t.join(timeout=5)
 
             if exit_code == 0:
-                db.update_run(run_id, status='uploaded', finished_at=_now_iso())
-                db.append_run_log(run_id, 'system', 'YouTube upload completed', _now_iso())
+                db.update_workflow(workflow_id, status='uploaded', finished_at=_now_iso())
+                db.append_workflow_log(workflow_id, 'system', 'YouTube upload completed', _now_iso())
             else:
-                db.update_run(run_id, status='rendered', error_message=f'Upload failed (exit {exit_code})')
-                db.append_run_log(run_id, 'system', f'Upload failed with exit code {exit_code}', _now_iso())
+                db.update_workflow(workflow_id, status='rendered', error_message=f'Upload failed (exit {exit_code})')
+                db.append_workflow_log(workflow_id, 'system', f'Upload failed with exit code {exit_code}', _now_iso())
         except Exception as exc:
-            db.update_run(run_id, status='rendered', error_message=f'Upload error: {exc}')
-            db.append_run_log(run_id, 'system', f'Upload error: {exc}', _now_iso())
+            db.update_workflow(workflow_id, status='rendered', error_message=f'Upload error: {exc}')
+            db.append_workflow_log(workflow_id, 'system', f'Upload error: {exc}', _now_iso())
 
     threading.Thread(target=_upload, daemon=True).start()
 
 
-def cancel_run(run_id: str, db: AgentSyncDB) -> bool:
+def cancel_run(workflow_id: str, db: AgentSyncDB) -> bool:
     import signal
-    run = db.get_run(run_id)
-    if not run or not run.get('pid'):
+    wf = db.get_workflow(workflow_id)
+    if not wf or not wf.get('pid'):
         return False
     try:
         import os
-        os.kill(run['pid'], signal.SIGTERM)
-        db.update_run(run_id, status='cancelled', finished_at=_now_iso(), pid=None)
-        db.append_run_log(run_id, 'system', 'Pipeline cancelled by user', _now_iso())
+        os.kill(wf['pid'], signal.SIGTERM)
+        db.update_workflow(workflow_id, status='cancelled', finished_at=_now_iso(), pid=None)
+        db.append_workflow_log(workflow_id, 'system', 'Pipeline cancelled by user', _now_iso())
         return True
     except ProcessLookupError:
-        db.update_run(run_id, status='cancelled', finished_at=_now_iso(), pid=None)
+        db.update_workflow(workflow_id, status='cancelled', finished_at=_now_iso(), pid=None)
         return True
     except Exception as exc:
         import logging
-        logging.warning('Failed to cancel run %s: %s', run_id, exc)
+        logging.warning('Failed to cancel workflow %s: %s', workflow_id, exc)
         return False
 
 

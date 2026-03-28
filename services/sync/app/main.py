@@ -134,21 +134,19 @@ app.include_router(settings_router)
 
 # ── Startup ──────────────────────────────────────────────────────────────
 
-from app.pipeline_queue import _ensure_worker, recover_interrupted_runs  # noqa: E402
-from app.stores.workflows import ensure_table as _ensure_workflows_table  # noqa: E402
-from app.pipeline_workflow import _ensure_poll_thread  # noqa: E402
+from app.pipeline_queue import _ensure_worker, recover_interrupted_workflows  # noqa: E402
+from app.workflow_orchestrator import _ensure_poll_thread  # noqa: E402
 
-_ensure_workflows_table(db)
 if AUTH_ENABLED:
     ensure_admin_exists()
 
-# ── Recover jobs/runs interrupted by restarts ─────────────────────────────
+# ── Recover jobs/workflows interrupted by restarts ────────────────────────
 import os as _os
 if _os.environ.get('SKIP_RECOVERY') != '1':
     _recovered_audio = recover_interrupted_jobs(db)
-    _recovered_runs = recover_interrupted_runs(db)
-    if _recovered_audio or _recovered_runs:
-        print(f'[startup] Recovered {_recovered_audio} audio jobs, {_recovered_runs} pipeline runs after restart.')
+    _recovered_workflows = recover_interrupted_workflows(db)
+    if _recovered_audio or _recovered_workflows:
+        print(f'[startup] Recovered {_recovered_audio} audio jobs, {_recovered_workflows} workflows after restart.')
 else:
     print('[startup] Recovery skipped (SKIP_RECOVERY=1)')
 
