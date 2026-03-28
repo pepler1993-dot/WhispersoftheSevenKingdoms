@@ -1,5 +1,8 @@
 {% extends 'base.html' %}
 {% block title %}Studio{% endblock %}
+{% block head_extra %}
+<link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
+{% endblock %}
 {% block content %}
 <div class="page-header page-header-flex">
   <div>
@@ -103,7 +106,7 @@
 {% endif %}
 
 {# ── Recent Workflows (unified list) ─────────────────────────── #}
-<section class="dash-recent">
+<section class="dash-recent" style="background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;">
   <div class="section-header-inline">
     <h2>Workflows</h2>
     <a href="/admin/pipeline/logs" class="section-link">Alle anzeigen →</a>
@@ -314,24 +317,29 @@
 }
 .section-link:hover { color: var(--text); }
 
-.workflow-list { display: flex; flex-direction: column; }
+.workflow-list { display: flex; flex-direction: column; gap: 8px; }
 .workflow-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--line);
+  gap: 14px;
+  padding: 14px 18px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
   text-decoration: none;
   color: var(--text);
-  transition: opacity 0.15s;
+  transition: all 0.15s ease;
 }
-.workflow-row:last-child { border-bottom: none; }
-.workflow-row:hover { opacity: 0.85; }
+.workflow-row:hover {
+  border-color: rgba(255,255,255,0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
 .workflow-row-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   min-width: 0;
   flex: 1;
 }
@@ -342,13 +350,21 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-bottom: 2px;
 }
 .workflow-row-meta {
   font-size: 0.72rem;
   color: var(--muted);
-  margin-top: 2px;
 }
 .workflow-row-right { flex-shrink: 0; }
+
+/* Status-colored left border accent */
+.workflow-row-uploaded { border-left: 3px solid var(--blue, #4a8fe7); }
+.workflow-row-rendered { border-left: 3px solid var(--gold, #d4a845); }
+.workflow-row-running, .workflow-row-uploading, .workflow-row-waiting_for_audio { border-left: 3px solid var(--good, #34d399); }
+.workflow-row-failed, .workflow-row-error { border-left: 3px solid var(--bad, #f87171); }
+.workflow-row-cancelled { border-left: 3px solid #6b7280; }
+.workflow-row-created, .workflow-row-queued { border-left: 3px solid var(--warn, #fbbf24); }
 
 /* ── Section head ────────────────────────────────────────── */
 .section-head {
