@@ -89,8 +89,7 @@
       <div class="active-body">
         <div class="active-title">{{ run.title or run.slug }}</div>
         <div class="active-sub">
-          <span class="type-badge type-badge-{{ wtype }}">{{ wtype|capitalize }}</span>
-          <span class="active-slug">{{ run.slug }}</span>
+  <span class="active-slug">{{ run.slug }}</span>
         </div>
         {% if not is_queued %}
         <div class="active-progress">
@@ -120,7 +119,7 @@
         {% if w.config and w.config.get('loop_hours') %}
         <span class="published-duration">{{ w.config.loop_hours }}h</span>
         {% endif %}
-        <span class="type-badge type-badge-{{ wtype }} published-type-overlay">{{ wtype|capitalize }}</span>
+
       </div>
       <div class="published-info">
         <div class="published-title">{{ w.title or w.slug }}</div>
@@ -145,8 +144,7 @@
     {% set href = '/admin/shorts/' ~ w.workflow_id if wtype == 'short' else '/admin/pipeline/run/' ~ w.workflow_id %}
     <a href="{{ href }}" class="wf-card wf-card-{{ w.status }}">
       <div class="wf-card-header">
-        <span class="type-badge type-badge-{{ wtype }}">{{ wtype|capitalize }}</span>
-        <span class="mini-badge mini-badge-{{ w.status }}">{{ w.status }}</span>
+<span class="mini-badge mini-badge-{{ w.status }}">{{ w.status }}</span>
       </div>
       <div class="wf-card-title">{{ w.title or w.slug }}</div>
       <div class="wf-card-meta">

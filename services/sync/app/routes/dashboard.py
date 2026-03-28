@@ -45,17 +45,16 @@ def admin_dashboard(request: Request):
     else:
         filtered = all_content
 
-    # Stats (always across ALL content, not filtered)
+    # Stats (scoped to current tab)
     running_statuses = {'running', 'uploading', 'waiting_for_audio'}
-    count_running = sum(1 for w in all_content if w['status'] in running_statuses)
-    count_queued = sum(1 for w in all_content if w['status'] == 'queued')
-    count_rendered = sum(1 for w in all_content if w['status'] == 'rendered')
-    count_uploaded = sum(1 for w in all_content if w['status'] == 'uploaded')
+    count_running = sum(1 for w in filtered if w['status'] in running_statuses)
+    count_queued = sum(1 for w in filtered if w['status'] == 'queued')
+    count_rendered = sum(1 for w in filtered if w['status'] == 'rendered')
+    count_uploaded = sum(1 for w in filtered if w['status'] == 'uploaded')
 
-    # Sections
-    active = [w for w in all_content if w['status'] in running_statuses | {'queued'}]
-    needs_attention = [w for w in all_content if w['status'] in ('failed', 'error')]
-    published = [w for w in all_content if w['status'] == 'uploaded'][:8]
+    # Sections (scoped to current tab)
+    active = [w for w in filtered if w['status'] in running_statuses | {'queued'}]
+    published = [w for w in filtered if w['status'] == 'uploaded'][:8]
 
     # Type counts for tabs
     count_all = len(all_content)
@@ -69,7 +68,6 @@ def admin_dashboard(request: Request):
         'tab': tab,
         'workflows': filtered[:20],
         'active': active,
-        'needs_attention': needs_attention,
         'published': published,
         'count_running': count_running,
         'count_queued': count_queued,
