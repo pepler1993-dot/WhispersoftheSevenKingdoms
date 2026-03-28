@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - 'PROJECT_STATUS.md'
+      - 'CHANGELOG.md'
+      - '**.md'
+      - '!services/**/*.md'
   workflow_dispatch:
 
 jobs:
