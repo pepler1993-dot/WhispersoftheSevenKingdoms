@@ -54,7 +54,7 @@ def admin_dashboard(request: Request):
         'recent_shorts': recent_shorts,
         'active_runs': active_workflows,
         'active_audio': active_audio,
-        'count_running': status_counts.get('running', 0) + status_counts.get('uploading', 0) + status_counts.get('waiting_for_audio', 0),
+        'count_running': sum(status_counts.get(s, 0) for s in ('running', 'uploading', 'waiting_for_audio')),
         'count_queued': status_counts.get('queued', 0),
         'count_rendered': status_counts.get('rendered', 0),
         'count_uploaded': status_counts.get('uploaded', 0),
