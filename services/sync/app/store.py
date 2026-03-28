@@ -173,6 +173,12 @@ class AgentSyncDB:
 
     def _migrate_legacy_tables(self) -> None:
         """Migrate data from old pipeline_runs + old workflows tables into unified workflows table."""
+        try:
+            self._do_migrate_legacy()
+        except Exception as e:
+            logging.error('Legacy migration failed (non-fatal): %s', e)
+
+    def _do_migrate_legacy(self) -> None:
         with self._connect() as conn:
             tables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()}
 

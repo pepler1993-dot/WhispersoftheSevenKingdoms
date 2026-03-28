@@ -54,7 +54,7 @@ templates.env.globals['app_version'] = APP_VERSION
 
 # ── App ───────────────────────────────────────────────────────────────────
 
-app = FastAPI(title='Whisper Studio')  # deploy touch
+app = FastAPI(title='Whisper Studio')
 
 # ── Static files ──────────────────────────────────────────────────────────
 
