@@ -129,13 +129,23 @@
   {% if short_runs %}
   <div class="shorts-draft-grid">
     {% for run in short_runs %}
-    <a href="/admin/shorts/{{ run.workflow_id }}" class="shorts-draft-card">
-      <div class="shorts-draft-card-top">
-        <div class="shorts-draft-title">{{ run.title or 'Ohne Titel' }}</div>
-        <span class="badge {{ run.status }}">{{ run.status }}</span>
+    {% set cfg = run.config or {} %}
+    <a href="/admin/shorts/{{ run.workflow_id }}" class="shorts-draft-card shorts-draft-{{ run.status | display_status }}">
+      <div class="shorts-draft-thumb">
+        {% if cfg.get('source_run_id') %}
+        <img src="/admin/pipeline/preview/{{ cfg.get('source_audio', '').replace('.mp3','').replace('.wav','').replace('.ogg','') }}/thumbnail.jpg" onerror="this.style.display='none'" alt="" />
+        {% endif %}
+        <div class="shorts-draft-thumb-fallback">📱</div>
       </div>
-      <div class="shorts-draft-meta">
-        {% if run.created_at %}{{ run.created_at[:16] }}{% else %}–{% endif %}
+      <div class="shorts-draft-body">
+        <div class="shorts-draft-title">{{ run.title or 'Ohne Titel' }}</div>
+        <div class="shorts-draft-clip">
+          {{ cfg.get('clip_start_seconds', 0) }}s – {{ cfg.get('clip_start_seconds', 0) + cfg.get('clip_duration_seconds', 30) }}s · {{ cfg.get('visual_mode', 'static') }}
+        </div>
+        <div class="shorts-draft-meta">
+          <span class="mini-badge mini-badge-{{ run.status | display_status }}">{{ run.status | display_status }}</span>
+          <span>{{ run.created_at[:10] if run.created_at else '–' }}</span>
+        </div>
       </div>
     </a>
     {% endfor %}
@@ -385,5 +395,48 @@
 @media (max-width: 400px) {
   .al-house-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+.shorts-draft-card {
+  display: flex;
+  gap: 14px;
+  padding: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.15s ease;
+}
+.shorts-draft-card:hover {
+  border-color: rgba(255,255,255,0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+.shorts-draft-running { border-left: 3px solid var(--good); }
+.shorts-draft-rendered { border-left: 3px solid var(--gold); }
+.shorts-draft-uploaded { border-left: 3px solid var(--blue); }
+.shorts-draft-failed { border-left: 3px solid var(--bad); }
+.shorts-draft-thumb {
+  width: 60px;
+  height: 80px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+  position: relative;
+  background: var(--surface);
+}
+.shorts-draft-thumb img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.shorts-draft-thumb-fallback {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+}
+.shorts-draft-thumb img + .shorts-draft-thumb-fallback { display: none; }
+.shorts-draft-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.shorts-draft-title { font-size: 0.88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.shorts-draft-clip { font-size: 0.72rem; color: var(--muted); }
+.shorts-draft-meta { display: flex; align-items: center; gap: 8px; font-size: 0.7rem; color: var(--muted); margin-top: auto; }
 </style>
 {% endblock %}
