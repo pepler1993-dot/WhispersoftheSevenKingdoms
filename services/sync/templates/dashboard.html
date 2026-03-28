@@ -1,7 +1,49 @@
 {% extends 'base.html' %}
-{% block title %}Studio{% endblock %}
+{% block title %}Studio
+<script>
+(function() {
+  // Limit workflow cards
+  var wfCards = document.querySelectorAll('.wf-card-grid .wf-card');
+  if (wfCards.length > 8) {
+    for (var i = 8; i < wfCards.length; i++) wfCards[i].style.display = 'none';
+    var grid = document.querySelector('.wf-card-grid');
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-secondary btn-sm';
+    btn.textContent = 'Alle anzeigen (' + wfCards.length + ')';
+    btn.style.cssText = 'margin-top:12px; width:100%;';
+    btn.addEventListener('click', function() {
+      wfCards.forEach(function(c) { c.style.display = ''; });
+      btn.remove();
+    });
+    grid.parentElement.appendChild(btn);
+  }
+})();
+</script>
+{% endblock %}
 {% block head_extra %}
 <link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
+
+<script>
+(function() {
+  // Limit workflow cards
+  var wfCards = document.querySelectorAll('.wf-card-grid .wf-card');
+  if (wfCards.length > 8) {
+    for (var i = 8; i < wfCards.length; i++) wfCards[i].style.display = 'none';
+    var grid = document.querySelector('.wf-card-grid');
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-secondary btn-sm';
+    btn.textContent = 'Alle anzeigen (' + wfCards.length + ')';
+    btn.style.cssText = 'margin-top:12px; width:100%;';
+    btn.addEventListener('click', function() {
+      wfCards.forEach(function(c) { c.style.display = ''; });
+      btn.remove();
+    });
+    grid.parentElement.appendChild(btn);
+  }
+})();
+</script>
 {% endblock %}
 {% block content %}
 
@@ -748,4 +790,25 @@
   .published-grid { grid-template-columns: 1fr; }
 }
 </style>
+
+<script>
+(function() {
+  // Limit workflow cards
+  var wfCards = document.querySelectorAll('.wf-card-grid .wf-card');
+  if (wfCards.length > 8) {
+    for (var i = 8; i < wfCards.length; i++) wfCards[i].style.display = 'none';
+    var grid = document.querySelector('.wf-card-grid');
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-secondary btn-sm';
+    btn.textContent = 'Alle anzeigen (' + wfCards.length + ')';
+    btn.style.cssText = 'margin-top:12px; width:100%;';
+    btn.addEventListener('click', function() {
+      wfCards.forEach(function(c) { c.style.display = ''; });
+      btn.remove();
+    });
+    grid.parentElement.appendChild(btn);
+  }
+})();
+</script>
 {% endblock %}

@@ -1,7 +1,75 @@
 {% extends 'base.html' %}
-{% block title %}Videos{% endblock %}
+{% block title %}Videos
+<script>
+(function() {
+  // Limit visible items in each section, add "show more" button
+  document.querySelectorAll('[data-run-section]').forEach(function(section) {
+    var items = section.querySelectorAll('.yt-card, .run-row, .queue-item, .live-card');
+    var limit = 6;
+    if (items.length <= limit) return;
+    
+    for (var i = limit; i < items.length; i++) {
+      items[i].style.display = 'none';
+      items[i].dataset.hidden = 'true';
+    }
+    
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-secondary btn-sm show-more-btn';
+    btn.textContent = 'Alle anzeigen (' + items.length + ')';
+    btn.style.marginTop = '12px';
+    btn.style.width = '100%';
+    btn.addEventListener('click', function() {
+      items.forEach(function(item) {
+        item.style.display = '';
+        delete item.dataset.hidden;
+      });
+      btn.remove();
+    });
+    
+    // Find the grid/list container
+    var container = items[0].parentElement;
+    container.parentElement.appendChild(btn);
+  });
+})();
+</script>
+{% endblock %}
 {% block head_extra %}
 <link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
+
+<script>
+(function() {
+  // Limit visible items in each section, add "show more" button
+  document.querySelectorAll('[data-run-section]').forEach(function(section) {
+    var items = section.querySelectorAll('.yt-card, .run-row, .queue-item, .live-card');
+    var limit = 6;
+    if (items.length <= limit) return;
+    
+    for (var i = limit; i < items.length; i++) {
+      items[i].style.display = 'none';
+      items[i].dataset.hidden = 'true';
+    }
+    
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-secondary btn-sm show-more-btn';
+    btn.textContent = 'Alle anzeigen (' + items.length + ')';
+    btn.style.marginTop = '12px';
+    btn.style.width = '100%';
+    btn.addEventListener('click', function() {
+      items.forEach(function(item) {
+        item.style.display = '';
+        delete item.dataset.hidden;
+      });
+      btn.remove();
+    });
+    
+    // Find the grid/list container
+    var container = items[0].parentElement;
+    container.parentElement.appendChild(btn);
+  });
+})();
+</script>
 {% endblock %}
 {% block content %}
 <div class="pipeline-runs-page">
@@ -830,4 +898,38 @@
 </script>
 
 </div>
+
+<script>
+(function() {
+  // Limit visible items in each section, add "show more" button
+  document.querySelectorAll('[data-run-section]').forEach(function(section) {
+    var items = section.querySelectorAll('.yt-card, .run-row, .queue-item, .live-card');
+    var limit = 6;
+    if (items.length <= limit) return;
+    
+    for (var i = limit; i < items.length; i++) {
+      items[i].style.display = 'none';
+      items[i].dataset.hidden = 'true';
+    }
+    
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-secondary btn-sm show-more-btn';
+    btn.textContent = 'Alle anzeigen (' + items.length + ')';
+    btn.style.marginTop = '12px';
+    btn.style.width = '100%';
+    btn.addEventListener('click', function() {
+      items.forEach(function(item) {
+        item.style.display = '';
+        delete item.dataset.hidden;
+      });
+      btn.remove();
+    });
+    
+    // Find the grid/list container
+    var container = items[0].parentElement;
+    container.parentElement.appendChild(btn);
+  });
+})();
+</script>
 {% endblock %}

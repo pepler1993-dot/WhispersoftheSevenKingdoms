@@ -1,7 +1,59 @@
 {% extends 'base.html' %}
-{% block title %}Audio Lab{% endblock %}
+{% block title %}Audio Lab
+<script>
+(function() {
+  fetch('/admin/audio/health')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var dot = document.getElementById('al-worker-dot');
+      var text = document.getElementById('al-worker-text');
+      if (data.available) {
+        dot.className = 'al-worker-dot online';
+        text.textContent = 'GPU Worker online' + (data.daemon ? ' (Daemon)' : '') + (data.gpu ? ' · ' + data.gpu : '');
+        text.style.color = '#4ade80';
+      } else {
+        dot.className = 'al-worker-dot offline';
+        text.textContent = 'GPU Worker offline — Jobs werden warten';
+        text.style.color = '#f87171';
+      }
+    })
+    .catch(function() {
+      var dot = document.getElementById('al-worker-dot');
+      var text = document.getElementById('al-worker-text');
+      dot.className = 'al-worker-dot offline';
+      text.textContent = 'Status konnte nicht geprüft werden';
+    });
+})();
+</script>
+{% endblock %}
 {% block head_extra %}
 <link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
+
+<script>
+(function() {
+  fetch('/admin/audio/health')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var dot = document.getElementById('al-worker-dot');
+      var text = document.getElementById('al-worker-text');
+      if (data.available) {
+        dot.className = 'al-worker-dot online';
+        text.textContent = 'GPU Worker online' + (data.daemon ? ' (Daemon)' : '') + (data.gpu ? ' · ' + data.gpu : '');
+        text.style.color = '#4ade80';
+      } else {
+        dot.className = 'al-worker-dot offline';
+        text.textContent = 'GPU Worker offline — Jobs werden warten';
+        text.style.color = '#f87171';
+      }
+    })
+    .catch(function() {
+      var dot = document.getElementById('al-worker-dot');
+      var text = document.getElementById('al-worker-text');
+      dot.className = 'al-worker-dot offline';
+      text.textContent = 'Status konnte nicht geprüft werden';
+    });
+})();
+</script>
 {% endblock %}
 {% block content %}
 <div class="page-header page-header-flex">
@@ -92,6 +144,11 @@
       <div class="form-group">
         <textarea name="prompt_text" id="prompt_text" class="form-input" rows="8" placeholder="Eine Zeile pro Prompt. Mehrere Prompts werden auf die Clips verteilt."></textarea>
       </div>
+    </div>
+
+    <div class="al-worker-status" id="al-worker-status">
+      <span class="al-worker-dot" id="al-worker-dot"></span>
+      <span class="al-worker-text" id="al-worker-text">GPU Worker wird geprüft...</span>
     </div>
 
     <button type="submit" class="btn btn-primary al-btn-launch">
@@ -377,5 +434,54 @@
 @media (max-width: 400px) {
   .al-house-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ── Worker Status ────────────────────────────────────── */
+.al-worker-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-bottom: 14px;
+  font-size: 0.78rem;
+}
+.al-worker-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+  flex-shrink: 0;
+}
+.al-worker-dot.online { background: #22c55e; }
+.al-worker-dot.offline { background: #ef4444; }
+.al-worker-text { color: var(--muted); }
 </style>
+
+<script>
+(function() {
+  fetch('/admin/audio/health')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var dot = document.getElementById('al-worker-dot');
+      var text = document.getElementById('al-worker-text');
+      if (data.available) {
+        dot.className = 'al-worker-dot online';
+        text.textContent = 'GPU Worker online' + (data.daemon ? ' (Daemon)' : '') + (data.gpu ? ' · ' + data.gpu : '');
+        text.style.color = '#4ade80';
+      } else {
+        dot.className = 'al-worker-dot offline';
+        text.textContent = 'GPU Worker offline — Jobs werden warten';
+        text.style.color = '#f87171';
+      }
+    })
+    .catch(function() {
+      var dot = document.getElementById('al-worker-dot');
+      var text = document.getElementById('al-worker-text');
+      dot.className = 'al-worker-dot offline';
+      text.textContent = 'Status konnte nicht geprüft werden';
+    });
+})();
+</script>
 {% endblock %}

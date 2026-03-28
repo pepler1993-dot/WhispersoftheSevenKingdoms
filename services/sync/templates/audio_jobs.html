@@ -1,5 +1,28 @@
 {% extends 'base.html' %}
-{% block title %}Audio Lab – Jobs{% endblock %}
+{% block title %}Audio Lab – Jobs
+<script>
+(function() {
+  document.querySelectorAll('[data-run-section]').forEach(function(section) {
+    var items = section.querySelectorAll('.aj-card');
+    var limit = 6;
+    if (items.length <= limit) return;
+    for (var i = limit; i < items.length; i++) {
+      items[i].style.display = 'none';
+    }
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-secondary btn-sm';
+    btn.textContent = 'Alle anzeigen (' + items.length + ')';
+    btn.style.cssText = 'margin-top:12px; width:100%;';
+    btn.addEventListener('click', function() {
+      items.forEach(function(item) { item.style.display = ''; });
+      btn.remove();
+    });
+    section.appendChild(btn);
+  });
+})();
+</script>
+{% endblock %}
 {% block content %}
 <div class="page-header page-header-flex">
   <div>
@@ -257,6 +280,29 @@
   if (btnAllOff) btnAllOff.addEventListener('click', () => { active.clear(); render(); });
 
   render();
+})();
+</script>
+
+<script>
+(function() {
+  document.querySelectorAll('[data-run-section]').forEach(function(section) {
+    var items = section.querySelectorAll('.aj-card');
+    var limit = 6;
+    if (items.length <= limit) return;
+    for (var i = limit; i < items.length; i++) {
+      items[i].style.display = 'none';
+    }
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-secondary btn-sm';
+    btn.textContent = 'Alle anzeigen (' + items.length + ')';
+    btn.style.cssText = 'margin-top:12px; width:100%;';
+    btn.addEventListener('click', function() {
+      items.forEach(function(item) { item.style.display = ''; });
+      btn.remove();
+    });
+    section.appendChild(btn);
+  });
 })();
 </script>
 {% endblock %}
