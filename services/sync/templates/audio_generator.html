@@ -23,8 +23,12 @@
   <div class="al-house-grid" id="al-house-grid">
     {% for key, house in house_templates.items() %}
     <div class="al-house-card" data-house="{{ key }}" style="--house-color: {{ house.color }}; --house-bg: {{ house.bg_color }}">
-      <div class="al-house-sigil">{{ house.sigil }}</div>
-      <div class="al-house-name">{{ house.display_name }}</div>
+      <img class="al-house-card-bg" src="/static/backgrounds/{{ key }}.jpg" onerror="this.style.display='none'" alt="" />
+      <div class="al-house-card-overlay"></div>
+      <div class="al-house-card-content">
+        <div class="al-house-sigil">{{ house.sigil }}</div>
+        <div class="al-house-name">{{ house.display_name }}</div>
+      </div>
     </div>
     {% endfor %}
   </div>
@@ -178,35 +182,61 @@
   background: var(--house-bg, var(--panel));
   border: 2px solid var(--line);
   border-radius: 12px;
-  padding: 16px 10px;
+  padding: 0;
   text-align: center;
   cursor: pointer;
   transition: all 0.25s ease;
   position: relative;
   overflow: hidden;
+  aspect-ratio: 16 / 10;
+  display: flex;
+  align-items: flex-end;
+}
+.al-house-card-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  transition: transform 0.4s ease;
+}
+.al-house-card:hover .al-house-card-bg { transform: scale(1.05); }
+.al-house-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.1) 100%);
+  z-index: 1;
+}
+.al-house-card-content {
+  position: relative;
+  z-index: 2;
+  padding: 12px;
+  width: 100%;
 }
 .al-house-card::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0;
+  bottom: 0; left: 0; right: 0;
   height: 3px;
   background: var(--house-color, var(--gold));
-  opacity: 0.4;
+  opacity: 0;
+  z-index: 3;
   transition: opacity 0.25s ease;
 }
+.al-house-card:hover::before { opacity: 1; }
 .al-house-card:hover {
   border-color: var(--house-color, var(--gold));
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0,0,0,0.3);
 }
-.al-house-card:hover::before { opacity: 1; }
 .al-house-card.selected {
   border-color: var(--house-color, var(--gold));
   box-shadow: 0 0 16px color-mix(in srgb, var(--house-color) 25%, transparent);
 }
 .al-house-card.selected::before { opacity: 1; height: 4px; }
-.al-house-sigil { font-size: 1.8rem; margin-bottom: 6px; }
-.al-house-name { font-size: 0.78rem; font-weight: 700; color: var(--text); }
+.al-house-sigil { font-size: 1.6rem; margin-bottom: 4px; text-shadow: 0 2px 6px rgba(0,0,0,0.5); }
+.al-house-name { font-size: 0.78rem; font-weight: 700; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
 
 /* ── Variant Grid ─────────────────────────────────────────── */
 .al-variant-grid {

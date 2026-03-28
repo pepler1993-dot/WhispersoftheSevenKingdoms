@@ -24,9 +24,13 @@
   <div class="house-grid">
     {% for key, house in houses.items() %}
     <div class="house-card" data-house="{{ key }}" style="--house-color: {{ house.color }}; --house-bg: {{ house.bg_color }}">
-      <div class="house-sigil">{{ house.sigil }}</div>
-      <div class="house-name">{{ house.display_name }}</div>
-      <div class="house-subtitle">{{ house.house }}</div>
+      <img class="house-card-bg" src="/static/backgrounds/{{ key }}.jpg" onerror="this.style.display='none'" alt="" />
+      <div class="house-card-overlay"></div>
+      <div class="house-card-content">
+        <div class="house-sigil">{{ house.sigil }}</div>
+        <div class="house-name">{{ house.display_name }}</div>
+        <div class="house-subtitle">{{ house.house }}</div>
+      </div>
     </div>
     {% endfor %}
   </div>
@@ -380,37 +384,67 @@
   background: var(--house-bg, var(--panel));
   border: 2px solid var(--line);
   border-radius: var(--radius);
-  padding: 24px 16px;
+  padding: 0;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s var(--ease);
   position: relative;
   overflow: hidden;
+  aspect-ratio: 16 / 10;
+  display: flex;
+  align-items: flex-end;
+}
+.house-card-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  transition: transform 0.4s var(--ease);
+}
+.house-card:hover .house-card-bg { transform: scale(1.05); }
+.house-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.1) 100%);
+  z-index: 1;
+  transition: background 0.3s var(--ease);
+}
+.house-card:hover .house-card-overlay {
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.05) 100%);
+}
+.house-card-content {
+  position: relative;
+  z-index: 2;
+  padding: 16px;
+  width: 100%;
 }
 .house-card::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0;
+  bottom: 0; left: 0; right: 0;
   height: 3px;
   background: var(--house-color, var(--gold));
-  opacity: 0.5;
+  opacity: 0;
+  z-index: 3;
   transition: opacity 0.3s var(--ease);
 }
+.house-card:hover::before { opacity: 1; }
 .house-card:hover {
   border-color: var(--house-color, var(--gold));
   transform: translateY(-3px);
   box-shadow: 0 8px 30px rgba(0,0,0,0.3);
 }
-.house-card:hover::before { opacity: 1; }
 .house-card.selected {
   border-color: var(--house-color, var(--gold));
   box-shadow: 0 0 20px color-mix(in srgb, var(--house-color) 30%, transparent),
               0 8px 30px rgba(0,0,0,0.3);
 }
 .house-card.selected::before { opacity: 1; height: 4px; }
-.house-sigil { font-size: 2.2rem; margin-bottom: 8px; }
-.house-name { font-size: 0.9rem; font-weight: 700; color: var(--text); }
-.house-subtitle { font-size: 0.7rem; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
+.house-sigil { font-size: 2rem; margin-bottom: 6px; text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+.house-name { font-size: 0.9rem; font-weight: 700; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+.house-subtitle { font-size: 0.68rem; color: rgba(255,255,255,0.7); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
 
 /* config panel */
 .panel-config {
