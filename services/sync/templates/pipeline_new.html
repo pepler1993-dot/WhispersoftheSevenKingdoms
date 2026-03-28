@@ -24,7 +24,7 @@
   <div class="house-grid">
     {% for key, house in houses.items() %}
     <div class="house-card" data-house="{{ key }}" style="--house-color: {{ house.color }}; --house-bg: {{ house.bg_color }}">
-      <img class="house-card-bg" src="/static/backgrounds/{{ key }}.jpg" onerror="this.style.display='none'" alt="" />
+      <img class="house-card-bg" src="/static/backgrounds/{{ (house.background_prompts.values()|first).bg_key if house.background_prompts else key }}.jpg" onerror="this.style.display='none'" alt="" />
       <div class="house-card-overlay"></div>
       <div class="house-card-content">
         <div class="house-sigil">{{ house.sigil }}</div>

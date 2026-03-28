@@ -197,6 +197,14 @@ def admin_library(
         v = h.get('variants')
         if isinstance(v, dict):
             n_var = len(v)
+        # Get first variant bg_key for house preview image
+        first_bg_key = ''
+        bg_prompts = h.get('background_prompts', {})
+        if isinstance(bg_prompts, dict):
+            for vdata in bg_prompts.values():
+                if isinstance(vdata, dict) and vdata.get('bg_key'):
+                    first_bg_key = vdata['bg_key']
+                    break
         house_cards.append({
             'key': key,
             'display_name': str(h.get('display_name') or key),
@@ -205,6 +213,7 @@ def admin_library(
             'color': str(h.get('color') or '#475569'),
             'bg_color': str(h.get('bg_color') or '#0f172a'),
             'variant_count': n_var,
+            'first_bg_key': first_bg_key,
         })
     library_tab = _normalize_library_tab(tab)
     return shared.templates.TemplateResponse(request, 'library.html', {

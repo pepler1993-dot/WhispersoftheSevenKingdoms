@@ -23,7 +23,7 @@
   <div class="al-house-grid" id="al-house-grid">
     {% for key, house in house_templates.items() %}
     <div class="al-house-card" data-house="{{ key }}" style="--house-color: {{ house.color }}; --house-bg: {{ house.bg_color }}">
-      <img class="al-house-card-bg" src="/static/backgrounds/{{ key }}.jpg" onerror="this.style.display='none'" alt="" />
+      <img class="al-house-card-bg" src="/static/backgrounds/{{ (house.background_prompts.values()|first).bg_key if house.background_prompts else key }}.jpg" onerror="this.style.display='none'" alt="" />
       <div class="al-house-card-overlay"></div>
       <div class="al-house-card-content">
         <div class="al-house-sigil">{{ house.sigil }}</div>

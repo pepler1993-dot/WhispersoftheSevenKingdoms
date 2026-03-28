@@ -36,7 +36,11 @@ def admin_audio(request: Request):
 
 @router.get('/admin/audio/jobs', response_class=HTMLResponse)
 def admin_audio_jobs_list(request: Request):
+    from app.routes.dashboard import _humanize_error
     jobs = shared.db.list_audio_jobs(limit=100)
+    for j in jobs:
+        if j.get('error_message'):
+            j['error_display'] = _humanize_error(j['error_message'])
     return shared.templates.TemplateResponse(request, 'audio_jobs.html', {
         'request': request,
         'page': 'audio',

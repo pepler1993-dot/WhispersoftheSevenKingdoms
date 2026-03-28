@@ -123,7 +123,7 @@
     <div class="aj-dot aj-dot-error"></div>
     <div class="aj-info">
       <div class="aj-title">{{ job.title or job.slug or job.job_id[:8] }}</div>
-      <div class="aj-sub">{{ job.error_message[:80] if job.error_message else 'Unbekannter Fehler' }}</div>
+      <div class="aj-sub">{{ job.error_display or 'Unbekannter Fehler' }}</div>
     </div>
     <span class="aj-badge aj-badge-error">error</span>
     <form method="post" action="/admin/audio/jobs/{{ job.job_id }}/retry" style="display:inline;" onclick="event.stopPropagation();">

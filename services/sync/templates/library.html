@@ -39,7 +39,7 @@
     {% for h in house_cards %}
     <div class="house-card-wrap" style="position:relative;">
       <a class="house-card" role="listitem" href="/admin/library/houses/{{ h.key }}" aria-label="{{ h.display_name }}{% if h.house %}, {{ h.house }}{% endif %}" style="--house-color: {{ h.color }}; --house-bg: {{ h.bg_color }}; background: var(--house-bg);">
-        <img class="house-card-bg" src="/static/backgrounds/{{ h.key }}.jpg" onerror="this.style.display='none'" alt="" />
+        <img class="house-card-bg" src="/static/backgrounds/{{ h.first_bg_key or h.key }}.jpg" onerror="this.style.display='none'" alt="" />
         <div class="house-card-overlay"></div>
         <div class="house-card-inner">
           <span class="house-card-sigil" aria-hidden="true">{{ h.sigil }}</span>
