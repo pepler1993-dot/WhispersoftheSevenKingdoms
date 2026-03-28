@@ -62,15 +62,14 @@
   <div class="variant-grid" role="list">
     {% for v in variants %}
     <a class="variant-tile" role="listitem" href="{{ v.href }}">
-      <div class="variant-tile-head">
+      {% if v.bg_key %}
+      <img class="variant-tile-bg" src="/static/backgrounds/{{ v.bg_key }}.jpg" onerror="this.style.display='none'" alt="" />
+      <div class="variant-tile-overlay"></div>
+      {% endif %}
+      <div class="variant-tile-content">
         <span class="variant-tile-title">{{ v.title }}</span>
-        <code class="variant-tile-slug">{{ v.key }}</code>
+        <p class="variant-tile-desc">{{ v.description }}</p>
       </div>
-      <p class="variant-tile-desc">{{ v.description }}</p>
-      <span class="variant-tile-cta">
-        <span>Details ansehen</span>
-        <i data-lucide="chevron-right" class="icon-md" style="flex-shrink:0" aria-hidden="true"></i>
-      </span>
     </a>
     {% else %}
     <p class="empty-state">Für dieses Haus sind keine Varianten hinterlegt.</p>

@@ -240,14 +240,21 @@ def admin_library_house(request: Request, house_key: str):
 
     variant_rows: list[dict[str, str]] = []
     vmap = house.get('variants')
+    bg_prompts = house.get('background_prompts', {})
     if isinstance(vmap, dict):
         for vk, desc in sorted(vmap.items(), key=lambda x: x[0]):
             title = str(vk).replace('_', ' ').strip().title()
+            bg_key = ''
+            if isinstance(bg_prompts, dict) and vk in bg_prompts:
+                vdata = bg_prompts[vk]
+                if isinstance(vdata, dict):
+                    bg_key = str(vdata.get('bg_key', ''))
             variant_rows.append({
                 'key': vk,
                 'title': title,
                 'description': str(desc) if desc is not None else vk,
                 'href': f'/admin/library/houses/{house_key}/variants/{vk}',
+                'bg_key': bg_key,
             })
 
     banner_class, banner_style = _house_banner_gradient(house_key, house.get('color'), house.get('bg_color'))
