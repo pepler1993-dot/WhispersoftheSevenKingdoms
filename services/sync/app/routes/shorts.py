@@ -380,12 +380,17 @@ def admin_shorts_upload(workflow_id: str):
         raise HTTPException(status_code=400, detail='Rendered short output is incomplete')
 
     run_cfg = run.get('config', {})
+    thumb_candidates = [output_dir / 'thumbnail.jpg', output_dir / 'thumbnail.png', output_dir / 'thumbnail.webp']
+
     cmd = [
         sys.executable,
         str(PIPELINE_DIR / 'pipeline' / 'scripts' / 'publish' / 'youtube_upload.py'),
         '--video', str(video_path),
         '--metadata', str(metadata_path),
     ]
+    thumbnail_path = next((p for p in thumb_candidates if p.exists()), None)
+    if thumbnail_path:
+        cmd += ['--thumbnail', str(thumbnail_path)]
     if run_cfg.get('visibility') == 'public':
         cmd.append('--public')
 

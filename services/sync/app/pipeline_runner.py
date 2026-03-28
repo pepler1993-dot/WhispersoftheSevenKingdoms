@@ -141,11 +141,15 @@ def trigger_upload(workflow_id: str, slug: str, config: dict[str, Any], db: Agen
         db.update_workflow(workflow_id, status='failed', error_message='Metadata file not found for upload')
         return
 
+    thumbnail_path = PIPELINE_DIR / 'data' / 'output' / 'youtube' / slug / 'thumbnail.jpg'
+
     cmd = [
         sys.executable, str(PIPELINE_DIR / 'pipeline' / 'scripts' / 'publish' / 'youtube_upload.py'),
         '--video', str(video_path),
         '--metadata', str(metadata_path),
     ]
+    if thumbnail_path.exists():
+        cmd += ['--thumbnail', str(thumbnail_path)]
     if config.get('public'):
         cmd.append('--public')
 

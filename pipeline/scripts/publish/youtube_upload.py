@@ -40,6 +40,7 @@ SCOPES = ["https://www.googleapis.com/auth/youtube.upload",
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 TOKEN_PATH = os.path.join(REPO_ROOT, ".youtube_token.json")
+THUMB_EXTS = (".jpg", ".jpeg", ".png", ".webp")
 
 # Retry config
 MAX_RETRIES = 3
@@ -129,6 +130,40 @@ def get_credentials():
         print(f"✅ Token gespeichert: {TOKEN_PATH}")
 
     return creds
+
+
+def find_thumbnail_path(video_path: str, metadata_path: str | None = None) -> str | None:
+    candidates: list[str] = []
+    video_dir = os.path.dirname(os.path.abspath(video_path))
+    for ext in THUMB_EXTS:
+        candidates.append(os.path.join(video_dir, f'thumbnail{ext}'))
+
+    if metadata_path:
+        meta_dir = os.path.dirname(os.path.abspath(metadata_path))
+        if meta_dir != video_dir:
+            for ext in THUMB_EXTS:
+                candidates.append(os.path.join(meta_dir, f'thumbnail{ext}'))
+
+    stem = os.path.splitext(os.path.basename(video_path))[0]
+    for ext in THUMB_EXTS:
+        candidates.append(os.path.join(video_dir, f'{stem}{ext}'))
+
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+    return None
+
+
+def upload_thumbnail(youtube, video_id: str, thumbnail_path: str) -> bool:
+    print(f"🖼️  Setze Thumbnail: {os.path.basename(thumbnail_path)}")
+    media = MediaFileUpload(thumbnail_path, mimetype='image/jpeg', resumable=False)
+    try:
+        youtube.thumbnails().set(videoId=video_id, media_body=media).execute()
+        print("✅ Thumbnail erfolgreich gesetzt")
+        return True
+    except Exception as exc:
+        print(f"⚠️  Thumbnail-Upload fehlgeschlagen: {exc}")
+        return False
 
 
 def upload_video(youtube, video_path, metadata, privacy="private"):
@@ -252,6 +287,7 @@ def main():
     )
     parser.add_argument("--video", type=str, help="Pfad zur Video-Datei (MP4)")
     parser.add_argument("--metadata", type=str, help="Pfad zur Metadaten-JSON")
+    parser.add_argument("--thumbnail", type=str, help="Pfad zur Thumbnail-Datei (optional)")
     parser.add_argument("--public", action="store_true",
                         help="Video als öffentlich hochladen (Standard: privat)")
     parser.add_argument("--playlist", action="store_true",
@@ -295,6 +331,12 @@ def main():
 
     if not video_id:
         sys.exit(1)
+
+    thumbnail_path = args.thumbnail or find_thumbnail_path(args.video, args.metadata)
+    if thumbnail_path:
+        upload_thumbnail(youtube, video_id, thumbnail_path)
+    else:
+        print("ℹ️  Kein Thumbnail gefunden – YouTube verwendet weiter das Auto-Frame.")
 
     # Playlist
     if args.playlist and "playlists" in metadata:
