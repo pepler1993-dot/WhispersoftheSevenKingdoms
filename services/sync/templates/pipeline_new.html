@@ -17,6 +17,19 @@
 
 <!-- House Selection -->
 
+<!-- Step Indicator -->
+<div class="step-indicator" id="step-indicator">
+  <div class="step active" data-step="1"><span class="step-num">1</span><span class="step-label">Haus</span></div>
+  <div class="step-line"></div>
+  <div class="step" data-step="2"><span class="step-num">2</span><span class="step-label">Variante</span></div>
+  <div class="step-line"></div>
+  <div class="step" data-step="3"><span class="step-num">3</span><span class="step-label">Länge</span></div>
+  <div class="step-line"></div>
+  <div class="step" data-step="4"><span class="step-num">4</span><span class="step-label">Config</span></div>
+  <div class="step-line"></div>
+  <div class="step" data-step="5"><span class="step-num">5</span><span class="step-label">Start</span></div>
+</div>
+
 <section class="panel panel-accent-blue">
   <div class="section-header-inline">
     <h2>Wähle ein Haus</h2>
@@ -924,6 +937,7 @@
             const durationPanel = document.getElementById('duration-panel');
             if (durationPanel) {
               durationPanel.style.display = 'block';
+              updateSteps(3);
               setTimeout(() => durationPanel.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
             }
             // Store selected variant key for prompt selection
@@ -958,11 +972,13 @@
           variantGrid.appendChild(btn);
         });
         variantPanel.style.display = 'block';
+        updateSteps(2);
         configPanel.style.display = 'none';
         setTimeout(() => variantPanel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
       } else {
         variantPanel.style.display = 'none';
         configPanel.style.display = 'block';
+        updateSteps(4);
         configPanel.style.borderTopColor = house.color || 'var(--gold)';
         setTimeout(() => configPanel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
       }
