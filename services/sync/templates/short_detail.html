@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Short {{ run.workflow_id }}{% endblock %}
+{% block title %}{{ run.title or 'Short' }}{% endblock %}
 {% block head_extra %}
 <link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
 {% endblock %}

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Audio Job {{ job.job_id }}{% endblock %}
+{% block title %}{{ job.title or 'Audio Job' }}{% endblock %}
 {% block content %}
 <div class="status-header">
   <h1>{{ job.title or job.slug }}</h1>

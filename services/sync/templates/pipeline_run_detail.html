@@ -15,13 +15,9 @@
     </span>
   </div>
   <div class="run-detail-sub">
-    <code>{{ run.workflow_id }}</code>
-    <span>·</span>
-    <span>{{ run.slug }}</span>
-    {% if run.created_at %}
-    <span>·</span>
-    <span>{{ run.created_at[:16] }}</span>
-    {% endif %}
+    {% if run.created_at %}<span>{{ run.created_at[:10] }} · {{ run.created_at[11:16] }}</span>{% endif %}
+    {% if run.config and run.config.get('house') %}<span>·</span><span>{{ run.config.house | capitalize }}</span>{% endif %}
+    {% if run.config and run.config.get('loop_hours') %}<span>·</span><span>{{ run.config.loop_hours }}h Video</span>{% endif %}
   </div>
 </div>
 
@@ -229,7 +225,11 @@
 
 {# ── Logs ─────────────────────────────────────────────────────── #}
 <section class="run-panel">
-  <h2>📋 Logs</h2>
+  <details {% if run.status | display_status == 'running' %}open{% endif %}>
+    <summary style="cursor:pointer; font-size:0.95rem; font-weight:700; margin-bottom:14px; list-style:none; display:flex; align-items:center; gap:8px;">
+      📋 Logs <span style="font-size:0.7rem; color:var(--muted); font-weight:500;">({{ logs|length }} Einträge)</span>
+      <i data-lucide="chevron-down" class="icon-sm" style="margin-left:auto;"></i>
+    </summary>
   <div class="log-viewer" id="log-viewer">
     {% for log in logs %}
     <div class="log-line {{ log.stream }}">{{ log.message }}</div>
@@ -237,6 +237,7 @@
     <div class="log-line system">Warte auf Logs…</div>
     {% endfor %}
   </div>
+  </details>
 </section>
 
 <script>
