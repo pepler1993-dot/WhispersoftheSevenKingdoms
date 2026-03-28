@@ -400,23 +400,28 @@ fetch('/admin/audio/health')
   {% if presets %}
   <div class="st-preset-grid">
     {% for key, house in presets.items() %}
+    {% set first_bg = '' %}
+    {% if house.background_prompts %}{% for vdata in house.background_prompts.values() %}{% if not first_bg and vdata.bg_key %}{% set first_bg = vdata.bg_key %}{% endif %}{% endfor %}{% endif %}
     <div class="st-preset-card" style="--house-color: {{ house.color }}; --house-bg: {{ house.bg_color }}">
-      <div class="st-preset-sigil">{{ house.sigil }}</div>
-      <div class="st-preset-info">
-        <div class="st-preset-name">{{ house.display_name }}</div>
-        <div class="st-preset-meta">
-          {{ (house.variants or {}) | length }} Varianten ·
-          {{ house.mood or '—' }} ·
-          {{ (house.defaults or {}).get('minutes', '?') }} Min
+      {% if first_bg %}<img class="st-preset-bg" src="/static/backgrounds/{{ first_bg }}.jpg" onerror="this.style.display='none'" alt="" />
+      <div class="st-preset-overlay"></div>{% endif %}
+      <div class="st-preset-content">
+        <div class="st-preset-sigil">{{ house.sigil }}</div>
+        <div class="st-preset-info">
+          <div class="st-preset-name">{{ house.display_name }}</div>
+          <div class="st-preset-meta">
+            {{ (house.variants or {}) | length }} Varianten ·
+            {{ house.mood or '—' }}
+          </div>
         </div>
-      </div>
-      <div class="st-preset-actions">
-        <a href="/admin/settings/presets/{{ key }}/variants" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:0.7rem;" title="Varianten">📋 {{ (house.variants or {}) | length }}</a>
-        <a href="/admin/settings?tab=presets&edit={{ key }}" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:0.7rem;">✏️</a>
-        <form method="post" action="/admin/settings/presets/delete" style="display:inline;" onsubmit="return confirm('Preset «{{ house.display_name }}» wirklich löschen?')">
-          <input type="hidden" name="preset_key" value="{{ key }}" />
-          <button type="submit" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:0.7rem; color:#f87171;">🗑️</button>
-        </form>
+        <div class="st-preset-actions">
+          <a href="/admin/settings/presets/{{ key }}/variants" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:0.7rem;" title="Varianten">📋 {{ (house.variants or {}) | length }}</a>
+          <a href="/admin/settings?tab=presets&edit={{ key }}" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:0.7rem;">✏️</a>
+          <form method="post" action="/admin/settings/presets/delete" style="display:inline;" onsubmit="return confirm('Preset «{{ house.display_name }}» wirklich löschen?')">
+            <input type="hidden" name="preset_key" value="{{ key }}" />
+            <button type="submit" class="btn btn-secondary btn-sm" style="padding:4px 10px; font-size:0.7rem; color:#f87171;">🗑️</button>
+          </form>
+        </div>
       </div>
     </div>
     {% endfor %}
@@ -742,5 +747,19 @@ function editUser(userId, displayName, role) {
   .st-ct-steps { gap: 4px; }
   .st-ct-step-pill { font-size: 0.66rem; padding: 3px 8px; }
 }
+
+.st-preset-card { position: relative; overflow: hidden; }
+.st-preset-bg {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; z-index: 0; transition: transform 0.4s ease;
+}
+.st-preset-card:hover .st-preset-bg { transform: scale(1.05); }
+.st-preset-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
+}
+.st-preset-content { position: relative; z-index: 2; display: flex; align-items: center; gap: 12px; width: 100%; }
+.st-preset-name { color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+.st-preset-meta { color: rgba(255,255,255,0.7); text-shadow: 0 1px 3px rgba(0,0,0,0.4); }
 </style>
 {% endblock %}

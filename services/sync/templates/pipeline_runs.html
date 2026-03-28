@@ -93,7 +93,7 @@
       <div class="live-progress">
         <div class="live-bar"><div class="live-bar-fill"></div></div>
         <div class="live-progress-info">
-          <span class="live-status-text">Rendering läuft...</span>
+          <span class="live-status-text">{% if run.phase == "audio" %}🎵 Audio{% elif run.phase == "upload" %}🚀 Upload{% else %}🎬 Render{% endif %}</span>
           <span class="live-started">Gestartet {{ run.started_at[11:16] if run.started_at else '—' }}</span>
         </div>
       </div>
