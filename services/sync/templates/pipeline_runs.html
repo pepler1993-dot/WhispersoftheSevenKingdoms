@@ -33,6 +33,35 @@
   });
 })();
 </script>
+
+<script>
+(function() {
+  var liveBars = document.querySelectorAll('[data-live-bar]');
+  if (!liveBars.length) return;
+  function pollLiveProgress() {
+    liveBars.forEach(function(bar) {
+      var wfId = bar.dataset.liveBar;
+      var textEl = document.querySelector('[data-live-text="' + wfId + '"]');
+      fetch('/admin/pipeline/run/' + wfId + '/progress')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.progress_pct > 0) {
+            bar.style.width = data.progress_pct + '%';
+            bar.style.animation = 'none';
+            bar.style.background = 'linear-gradient(90deg, #22c55e, #3dd4bc)';
+          }
+          if (textEl && data.progress_text) {
+            var phase = data.phase === 'audio' ? '🎵' : data.phase === 'upload' ? '🚀' : '🎬';
+            textEl.textContent = phase + ' ' + data.progress_text + (data.progress_pct > 0 ? ' · ' + data.progress_pct + '%' : '');
+          }
+        })
+        .catch(function() {});
+    });
+    setTimeout(pollLiveProgress, 5000);
+  }
+  setTimeout(pollLiveProgress, 1500);
+})();
+</script>
 {% endblock %}
 {% block head_extra %}
 <link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
@@ -68,6 +97,35 @@
     var container = items[0].parentElement;
     container.parentElement.appendChild(btn);
   });
+})();
+</script>
+
+<script>
+(function() {
+  var liveBars = document.querySelectorAll('[data-live-bar]');
+  if (!liveBars.length) return;
+  function pollLiveProgress() {
+    liveBars.forEach(function(bar) {
+      var wfId = bar.dataset.liveBar;
+      var textEl = document.querySelector('[data-live-text="' + wfId + '"]');
+      fetch('/admin/pipeline/run/' + wfId + '/progress')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.progress_pct > 0) {
+            bar.style.width = data.progress_pct + '%';
+            bar.style.animation = 'none';
+            bar.style.background = 'linear-gradient(90deg, #22c55e, #3dd4bc)';
+          }
+          if (textEl && data.progress_text) {
+            var phase = data.phase === 'audio' ? '🎵' : data.phase === 'upload' ? '🚀' : '🎬';
+            textEl.textContent = phase + ' ' + data.progress_text + (data.progress_pct > 0 ? ' · ' + data.progress_pct + '%' : '');
+          }
+        })
+        .catch(function() {});
+    });
+    setTimeout(pollLiveProgress, 5000);
+  }
+  setTimeout(pollLiveProgress, 1500);
 })();
 </script>
 {% endblock %}
@@ -159,9 +217,9 @@
       <div class="live-title">{{ run.title or run.slug }}</div>
       <div class="live-sub">Gestartet {{ run.started_at[11:16] if run.started_at else "—" }}</div>
       <div class="live-progress">
-        <div class="live-bar"><div class="live-bar-fill"></div></div>
+        <div class="live-bar"><div class="live-bar-fill" data-live-bar="{{ run.workflow_id }}"></div></div>
         <div class="live-progress-info">
-          <span class="live-status-text">{% if run.phase == "audio" %}🎵 Audio{% elif run.phase == "upload" %}🚀 Upload{% else %}🎬 Render{% endif %}</span>
+          <span class="live-status-text" data-live-text="{{ run.workflow_id }}">{% if run.phase == "audio" %}🎵 Audio{% elif run.phase == "upload" %}🚀 Upload{% else %}🎬 Render{% endif %}</span>
           <span class="live-started">Gestartet {{ run.started_at[11:16] if run.started_at else '—' }}</span>
         </div>
       </div>
@@ -930,6 +988,35 @@
     var container = items[0].parentElement;
     container.parentElement.appendChild(btn);
   });
+})();
+</script>
+
+<script>
+(function() {
+  var liveBars = document.querySelectorAll('[data-live-bar]');
+  if (!liveBars.length) return;
+  function pollLiveProgress() {
+    liveBars.forEach(function(bar) {
+      var wfId = bar.dataset.liveBar;
+      var textEl = document.querySelector('[data-live-text="' + wfId + '"]');
+      fetch('/admin/pipeline/run/' + wfId + '/progress')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.progress_pct > 0) {
+            bar.style.width = data.progress_pct + '%';
+            bar.style.animation = 'none';
+            bar.style.background = 'linear-gradient(90deg, #22c55e, #3dd4bc)';
+          }
+          if (textEl && data.progress_text) {
+            var phase = data.phase === 'audio' ? '🎵' : data.phase === 'upload' ? '🚀' : '🎬';
+            textEl.textContent = phase + ' ' + data.progress_text + (data.progress_pct > 0 ? ' · ' + data.progress_pct + '%' : '');
+          }
+        })
+        .catch(function() {});
+    });
+    setTimeout(pollLiveProgress, 5000);
+  }
+  setTimeout(pollLiveProgress, 1500);
 })();
 </script>
 {% endblock %}

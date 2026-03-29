@@ -3,6 +3,75 @@
 Alle relevanten Änderungen am Projekt werden hier dokumentiert.
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [v4.0.0] – 2026-03-28
+
+### 🏗️ Architecture
+- **Unified Workflow Architecture** – `pipeline_runs` + `workflows` merged into single `workflows` table
+- New fields: `type` (video/short/song/audio_lab), `phase` (audio/render/upload/done)
+- Automatic DB migration from old schema
+- `stores/workflows.py` → merged into `store.py`
+- `pipeline_workflow.py` → `workflow_orchestrator.py`
+- Audio Lab now creates workflows with `type='audio_lab'`
+
+### 🎨 Dashboard Redesign (SaaS Command Center)
+- **Tab Navigation** – Videos | Shorts | Songs (content-type scoped)
+- **KPI Stats Row** – Running, Queued, Rendered, Published with Lucide icons
+- **Health Strip** – Live GPU Worker / Queue / Upload / Pipeline status dots
+- **Needs Attention** – Red-tinted section for failed workflows with humanized error messages
+- **Recently Published** – YouTube-style thumbnail grid
+- **Active Productions** – Hero cards with phase badges (🎵 Audio / 🎬 Render / 🚀 Upload)
+- **Live Progress Bars** – Real-time progress polling from logs (Clip 3/7 → 43%)
+- **Tab-specific empty states** with CTAs
+
+### 🖼️ Visual Overhaul
+- **House cards with background images** on Create Video, Audio Lab, Library (bg_key from presets)
+- **Variant cards with background images** on Create Video + Audio Lab
+- **Step-Indicator** for Create Video flow (5-step horizontal progress)
+- **Review Summary** panel before Video Start button
+- **Library Songs** redesigned from table to card list with cleaned filenames + audio preview
+- **Preset cards** with house background images in Settings
+- **Library House Detail** variant tiles with bg_key images
+- **Shorts draft cards** with source thumbnail, clip range, visual mode
+
+### 🔧 Backend
+- **Global Health API** – `GET /api/health/overview` (GPU, Queue, Upload, Pipeline status)
+- **Progress Tracking** – `GET /admin/pipeline/run/{id}/progress` (parses logs for clip/render/upload progress)
+- **Error humanization** – `_humanize_error()` translates exit codes to user-friendly messages
+- **Status mapping** – `waiting_for_audio` → Running, `uploading` → Running, `error` → Failed (5 UI-status)
+
+### 🧹 UI Polish
+- User/Logout moved to top-right of content area
+- Navigation buttons removed from page headers (sidebar sufficient)
+- Slugs and workflow IDs removed from all user-facing UI
+- Collapsible logs on detail pages (auto-open when running)
+- Show-more pagination on long lists (6-12 item limit)
+- Tickets table bigger fonts + card-like rows
+- Docs teasers strip markdown bold syntax
+- Backgrounds grid with show-more at 12 items
+- Audio Lab GPU Worker status indicator
+- Shorts detail: preview tab default when rendered/uploaded
+- Settings: pipelines + team tabs routing fixed
+- Settings: danger zone CSS + save toast feedback
+- Operations: database backup section with feedback
+
+### 📝 Documentation
+- **README.md** rewritten for SaaS direction
+- **ROADMAP.md** updated with current priorities
+- **SAAS_CONCEPT.md** – Phase 3c (Workflows) + Phase 3d (UI/UX) documented
+- **USE_CASES.md** – 29 use cases (UC-01 to UC-29) for systematic UI/UX testing
+- **Design Principles** + **Agent Workflow** docs in `ui_ux/`
+- Removed 10 outdated docs (~2760 lines deleted)
+
+### 🔄 CI/CD
+- Deploy pipeline ignores markdown-only changes (`paths-ignore` for `.md` files)
+- CSS cache buster system (version increments per deploy)
+
+### 🐛 Fixes
+- DB migration crash when old `workflows` table exists (rename before init)
+- Workflow type assignment fix (`_fix_workflow_types` on startup)
+- Error box only shows for actually failed runs (no contradiction with success)
+- Library `/admin/library/house/{key}` → redirect to `/houses/{key}`
+
 ## [v3.4.0] – 2026-03-27
 
 ### Added

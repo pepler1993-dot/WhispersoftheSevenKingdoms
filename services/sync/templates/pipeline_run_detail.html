@@ -13,6 +13,7 @@
       {% if run.status | display_status == 'running' %}<span class="status-dot-pulse"></span>{% endif %}
       {{ run.status | display_status }}
     </span>
+    <span class="run-phase-live" id="run-phase-text" style="font-size:0.74rem; color:var(--muted); font-weight:500;"></span>
   </div>
   <div class="run-detail-sub">
     {% if run.created_at %}<span>{{ run.created_at[:10] }} · {{ run.created_at[11:16] }}</span>{% endif %}
@@ -44,7 +45,7 @@
   {% endif %}
 </div>
 
-{% if run.error_message %}
+{% if run.error_message and run.status | display_status == 'failed' %}
 <div class="run-error-box">
   <strong>❌ Fehler:</strong> {{ run.error_message }}
 </div>
@@ -279,6 +280,24 @@
     viewer.scrollTop = viewer.scrollHeight;
     setTimeout(pollLogs, 2000);
   }
+
+  // Live progress tracking
+  if (polling) {
+    function pollProgress() {
+      fetch('/admin/pipeline/run/' + runId + '/progress')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          var phaseEl = document.getElementById('run-phase-text');
+          if (phaseEl && data.progress_text) {
+            phaseEl.textContent = data.progress_text + (data.progress_pct > 0 ? ' · ' + data.progress_pct + '%' : '');
+          }
+        })
+        .catch(function() {});
+      if (polling) setTimeout(pollProgress, 5000);
+    }
+    setTimeout(pollProgress, 2000);
+  }
+
 
   var metaEl = document.getElementById('preview-meta');
   if (metaEl && (status === 'rendered' || status === 'uploaded')) {

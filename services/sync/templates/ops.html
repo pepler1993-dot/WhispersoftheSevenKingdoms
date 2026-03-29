@@ -564,5 +564,44 @@
 @media (min-width: 2560px) {
   .server-panel { padding: clamp(18px, 1.5vw, 32px); }
 }
+{# ── Database Backup ──────────────────────────────────────────── #}
+<section class="server-panel" style="margin-top:18px;">
+  <div class="section-header-inline">
+    <h2>💾 Database Backup</h2>
+  </div>
+  <p style="font-size:0.82rem; color:var(--muted); margin-bottom:14px;">Erstellt eine Hot-Backup-Kopie der SQLite-Datenbank.</p>
+  <button type="button" class="btn btn-primary btn-sm" id="backup-btn" onclick="runBackup()">
+    Backup erstellen
+  </button>
+  <div id="backup-result" style="margin-top:10px; font-size:0.78rem;"></div>
+</section>
+
+<script>
+function runBackup() {
+  var btn = document.getElementById('backup-btn');
+  var result = document.getElementById('backup-result');
+  btn.disabled = true;
+  btn.textContent = 'Backup läuft...';
+  result.textContent = '';
+  fetch('/admin/api/backup', { method: 'POST' })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.status === 'ok') {
+        result.innerHTML = '<span style="color:#4ade80;">✅ Backup erfolgreich (' + data.size_mb + ' MB)</span>';
+      } else {
+        result.innerHTML = '<span style="color:#f87171;">❌ ' + (data.detail || 'Fehler') + '</span>';
+      }
+      btn.disabled = false;
+      btn.textContent = 'Backup erstellen';
+    })
+    .catch(function(e) {
+      result.innerHTML = '<span style="color:#f87171;">❌ Fehler: ' + e.message + '</span>';
+      btn.disabled = false;
+      btn.textContent = 'Backup erstellen';
+    });
+}
+</script>
+
+
 </style>
 {% endblock %}

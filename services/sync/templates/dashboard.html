@@ -20,6 +20,63 @@
   }
 })();
 </script>
+
+<script>
+(function() {
+  fetch('/api/health/overview')
+    .then(function(r) { return r.json(); })
+    .then(function(h) {
+      function setHealth(id, status, label) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var dot = el.querySelector('.health-dot');
+        if (dot) dot.className = 'health-dot ' + status;
+        el.childNodes[el.childNodes.length - 1].textContent = ' ' + label;
+      }
+      var gpu = h.gpu_worker || {};
+      setHealth('health-gpu', gpu.status || 'offline', 'GPU Worker · ' + (gpu.status === 'healthy' ? 'Online' : 'Offline'));
+      var q = h.queue || {};
+      setHealth('health-queue', q.status || 'idle', 'Queue · ' + (q.running ? q.running + ' aktiv' : 'Idle'));
+      var u = h.upload || {};
+      setHealth('health-upload', u.status || 'healthy', 'YouTube · ' + (u.status === 'healthy' ? 'OK' : u.success_rate || '—'));
+      var p = h.pipeline || {};
+      setHealth('health-pipeline', p.status || 'healthy', 'Pipeline · ' + (p.status === 'healthy' ? 'Stabil' : p.recent_failures + ' Fehler'));
+    })
+    .catch(function() {});
+})();
+</script>
+
+<script>
+(function() {
+  var bars = document.querySelectorAll('[data-progress-bar]');
+  if (!bars.length) return;
+  
+  function pollProgress() {
+    bars.forEach(function(bar) {
+      var wfId = bar.dataset.progressBar;
+      var textEl = document.querySelector('[data-progress-text="' + wfId + '"]');
+      fetch('/admin/pipeline/run/' + wfId + '/progress')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.progress_pct > 0) {
+            bar.style.width = data.progress_pct + '%';
+            bar.style.animation = 'none';
+          }
+          if (textEl && data.progress_text) {
+            textEl.textContent = data.progress_text + (data.progress_pct > 0 ? ' · ' + data.progress_pct + '%' : '');
+          }
+          if (data.status && !['running', 'waiting_for_audio', 'uploading', 'queued'].includes(data.status)) {
+            setTimeout(function() { location.reload(); }, 2000);
+          }
+        })
+        .catch(function() {});
+    });
+    setTimeout(pollProgress, 5000);
+  }
+  
+  setTimeout(pollProgress, 1000);
+})();
+</script>
 {% endblock %}
 {% block head_extra %}
 <link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
@@ -42,6 +99,63 @@
     });
     grid.parentElement.appendChild(btn);
   }
+})();
+</script>
+
+<script>
+(function() {
+  fetch('/api/health/overview')
+    .then(function(r) { return r.json(); })
+    .then(function(h) {
+      function setHealth(id, status, label) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var dot = el.querySelector('.health-dot');
+        if (dot) dot.className = 'health-dot ' + status;
+        el.childNodes[el.childNodes.length - 1].textContent = ' ' + label;
+      }
+      var gpu = h.gpu_worker || {};
+      setHealth('health-gpu', gpu.status || 'offline', 'GPU Worker · ' + (gpu.status === 'healthy' ? 'Online' : 'Offline'));
+      var q = h.queue || {};
+      setHealth('health-queue', q.status || 'idle', 'Queue · ' + (q.running ? q.running + ' aktiv' : 'Idle'));
+      var u = h.upload || {};
+      setHealth('health-upload', u.status || 'healthy', 'YouTube · ' + (u.status === 'healthy' ? 'OK' : u.success_rate || '—'));
+      var p = h.pipeline || {};
+      setHealth('health-pipeline', p.status || 'healthy', 'Pipeline · ' + (p.status === 'healthy' ? 'Stabil' : p.recent_failures + ' Fehler'));
+    })
+    .catch(function() {});
+})();
+</script>
+
+<script>
+(function() {
+  var bars = document.querySelectorAll('[data-progress-bar]');
+  if (!bars.length) return;
+  
+  function pollProgress() {
+    bars.forEach(function(bar) {
+      var wfId = bar.dataset.progressBar;
+      var textEl = document.querySelector('[data-progress-text="' + wfId + '"]');
+      fetch('/admin/pipeline/run/' + wfId + '/progress')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.progress_pct > 0) {
+            bar.style.width = data.progress_pct + '%';
+            bar.style.animation = 'none';
+          }
+          if (textEl && data.progress_text) {
+            textEl.textContent = data.progress_text + (data.progress_pct > 0 ? ' · ' + data.progress_pct + '%' : '');
+          }
+          if (data.status && !['running', 'waiting_for_audio', 'uploading', 'queued'].includes(data.status)) {
+            setTimeout(function() { location.reload(); }, 2000);
+          }
+        })
+        .catch(function() {});
+    });
+    setTimeout(pollProgress, 5000);
+  }
+  
+  setTimeout(pollProgress, 1000);
 })();
 </script>
 {% endblock %}
@@ -109,6 +223,14 @@
 </div>
 
 
+{# ── Health Strip ──────────────────────────────────────────────── #}
+<div class="health-strip" id="health-strip">
+  <div class="health-item" id="health-gpu"><span class="health-dot"></span> GPU Worker</div>
+  <div class="health-item" id="health-queue"><span class="health-dot"></span> Queue</div>
+  <div class="health-item" id="health-upload"><span class="health-dot"></span> Upload</div>
+  <div class="health-item" id="health-pipeline"><span class="health-dot"></span> Pipeline</div>
+</div>
+
 {# ── Needs Attention ──────────────────────────────────────────── #}
 {% if errors %}
 <section class="attention-section">
@@ -158,8 +280,9 @@
   {% if run.phase == "audio" %}🎵 Audio{% elif run.phase == "upload" %}🚀 Upload{% else %}🎬 Render{% endif %}
         </div>
         {% if not is_queued %}
-        <div class="active-progress">
-          <div class="active-bar"><div class="active-bar-fill"></div></div>
+        <div class="active-progress" data-progress-wf="{{ run.workflow_id }}">
+          <div class="active-bar"><div class="active-bar-fill" data-progress-bar="{{ run.workflow_id }}"></div></div>
+          <div class="active-progress-text" data-progress-text="{{ run.workflow_id }}" style="font-size:0.72rem; color:var(--muted); margin-top:4px;"></div>
         </div>
         {% endif %}
       </div>
@@ -569,9 +692,11 @@
 .published-title {
   font-size: 0.85rem;
   font-weight: 600;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.3;
   margin-bottom: 3px;
 }
 .published-meta {
@@ -742,6 +867,42 @@
   color: rgba(255,255,255,0.7);
   vertical-align: middle;
 }
+
+/* ── Health Strip ─────────────────────────────────────── */
+.health-strip {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 10px 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.health-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+.health-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+.health-dot.healthy { background: #22c55e; }
+.health-dot.active { background: #3b82f6; animation: health-pulse 1.5s infinite; }
+.health-dot.degraded { background: #f59e0b; }
+.health-dot.offline, .health-dot.error { background: #ef4444; }
+.health-dot.idle { background: #6b7280; }
+.health-dot.waiting { background: #f59e0b; }
+@keyframes health-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0.3); }
+  50% { box-shadow: 0 0 0 4px rgba(59,130,246,0); }
+}
 /* ── Mobile ──────────────────────────────────────────────── */
 /* ── Empty State ─────────────────────────────────────────── */
 .dashboard-empty-state {
@@ -809,6 +970,63 @@
     });
     grid.parentElement.appendChild(btn);
   }
+})();
+</script>
+
+<script>
+(function() {
+  fetch('/api/health/overview')
+    .then(function(r) { return r.json(); })
+    .then(function(h) {
+      function setHealth(id, status, label) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var dot = el.querySelector('.health-dot');
+        if (dot) dot.className = 'health-dot ' + status;
+        el.childNodes[el.childNodes.length - 1].textContent = ' ' + label;
+      }
+      var gpu = h.gpu_worker || {};
+      setHealth('health-gpu', gpu.status || 'offline', 'GPU Worker · ' + (gpu.status === 'healthy' ? 'Online' : 'Offline'));
+      var q = h.queue || {};
+      setHealth('health-queue', q.status || 'idle', 'Queue · ' + (q.running ? q.running + ' aktiv' : 'Idle'));
+      var u = h.upload || {};
+      setHealth('health-upload', u.status || 'healthy', 'YouTube · ' + (u.status === 'healthy' ? 'OK' : u.success_rate || '—'));
+      var p = h.pipeline || {};
+      setHealth('health-pipeline', p.status || 'healthy', 'Pipeline · ' + (p.status === 'healthy' ? 'Stabil' : p.recent_failures + ' Fehler'));
+    })
+    .catch(function() {});
+})();
+</script>
+
+<script>
+(function() {
+  var bars = document.querySelectorAll('[data-progress-bar]');
+  if (!bars.length) return;
+  
+  function pollProgress() {
+    bars.forEach(function(bar) {
+      var wfId = bar.dataset.progressBar;
+      var textEl = document.querySelector('[data-progress-text="' + wfId + '"]');
+      fetch('/admin/pipeline/run/' + wfId + '/progress')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.progress_pct > 0) {
+            bar.style.width = data.progress_pct + '%';
+            bar.style.animation = 'none';
+          }
+          if (textEl && data.progress_text) {
+            textEl.textContent = data.progress_text + (data.progress_pct > 0 ? ' · ' + data.progress_pct + '%' : '');
+          }
+          if (data.status && !['running', 'waiting_for_audio', 'uploading', 'queued'].includes(data.status)) {
+            setTimeout(function() { location.reload(); }, 2000);
+          }
+        })
+        .catch(function() {});
+    });
+    setTimeout(pollProgress, 5000);
+  }
+  
+  setTimeout(pollProgress, 1000);
 })();
 </script>
 {% endblock %}
