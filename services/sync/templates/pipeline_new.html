@@ -1447,6 +1447,8 @@
       const houseKey = (document.getElementById('house').value || '').trim();
       const variantKey = (document.getElementById('variant_key').value || '').trim();
       const loopHours = (document.getElementById('loop_hours').value || '').trim();
+      const audioSource = (document.getElementById('audio_source').value || '').trim();
+      const selectedTrack = (document.getElementById('library-audio').value || '').trim();
       if (!houseKey) {
         e.preventDefault();
         alert('Bitte zuerst ein Haus wählen.');
@@ -1460,6 +1462,11 @@
       if (!loopHours) {
         e.preventDefault();
         alert('Bitte eine Länge wählen.');
+        return;
+      }
+      if (audioSource === 'library' && !selectedTrack) {
+        e.preventDefault();
+        alert('Bitte im Library-Modus einen Audio-Track auswählen.');
         return;
       }
     });
