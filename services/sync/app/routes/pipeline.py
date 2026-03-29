@@ -153,6 +153,16 @@ def _prompts_from_house_variant(house_key: str, variant_key: str) -> str:
     return '\n'.join(lines)
 
 
+def _get_house_sleep_fields(house_key: str) -> dict:
+    """Return base_dna and negative_prompt from house templates for sleep-first prompts."""
+    houses = _load_house_templates()
+    h = houses.get((house_key or '').strip(), {})
+    return {
+        'base_dna': h.get('base_dna', ''),
+        'negative_prompt': h.get('negative_prompt', ''),
+    }
+
+
 @router.get('/admin/pipeline/logs', response_class=HTMLResponse)
 def admin_pipeline_logs(request: Request):
     from app.routes.dashboard import _humanize_error
@@ -339,6 +349,7 @@ def admin_pipeline_start(
             if not prompt_text:
                 prompt_text = _prompts_from_house_variant(house, variant_key)
 
+            sleep_fields = _get_house_sleep_fields(house)
             resolved_audio_job_id = create_audio_job(
                 slug=slug,
                 title=title,
@@ -349,6 +360,9 @@ def admin_pipeline_start(
                 clip_seconds=47,
                 db=shared.db,
                 steps=gen_steps,
+                house=house,
+                base_dna=sleep_fields['base_dna'],
+                negative_prompt=sleep_fields['negative_prompt'],
             )
 
         metadata = _build_song_metadata(

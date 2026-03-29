@@ -87,6 +87,9 @@ def create_audio_job(
     clip_seconds: int,
     db: AgentSyncDB,
     steps: int = 50,
+    house: str = '',
+    base_dna: str = '',
+    negative_prompt: str = '',
 ) -> str:
     prompts = [line.strip() for line in (prompt_text or '').splitlines() if line.strip()]
     if not prompts:
@@ -105,6 +108,9 @@ def create_audio_job(
         'model': model,
         'clip_seconds': clip_seconds,
         'steps': steps,
+        'house': house,
+        'base_dna': base_dna,
+        'negative_prompt': negative_prompt,
         'status': 'queued',
         'created_at': now_iso(),
     }

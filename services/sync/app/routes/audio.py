@@ -166,6 +166,9 @@ def admin_audio_job_retry(job_id: str):
         model=job.get('model', 'medium'),
         clip_seconds=job.get('clip_seconds') or 47,
         db=shared.db,
+        house=job.get('house', ''),
+        base_dna=job.get('base_dna', ''),
+        negative_prompt=job.get('negative_prompt', ''),
     )
     return RedirectResponse(url=f'/admin/audio/jobs/{new_job_id}', status_code=303)
 
