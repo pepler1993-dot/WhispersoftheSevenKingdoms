@@ -160,12 +160,15 @@
       <div class="active-body">
         <div class="active-title">{{ run.title or run.slug }}</div>
         <div class="active-sub">
-  {% if run.phase == "audio" %}🎵 Audio{% elif run.phase == "upload" %}🚀 Upload{% else %}🎬 Render{% endif %}
+          <span class="active-step-pill" id="active-step-{{ run.workflow_id }}">{% if run.phase == "audio" %}🎵 Audio{% elif run.phase == "upload" %}🚀 Upload{% else %}🎬 Render{% endif %}</span>
         </div>
         {% if not is_queued %}
         <div class="active-progress" data-progress-wf="{{ run.workflow_id }}">
-          <div class="active-bar"><div class="active-bar-fill" data-progress-bar="{{ run.workflow_id }}"></div></div>
-          <div class="active-progress-text" data-progress-text="{{ run.workflow_id }}" style="font-size:0.72rem; color:var(--muted); margin-top:4px;"></div>
+          <div class="active-bar-outer">
+            <div class="active-bar"><div class="active-bar-fill" data-progress-bar="{{ run.workflow_id }}" style="width:0%"></div></div>
+            <span class="active-pct" data-progress-pct="{{ run.workflow_id }}">—</span>
+          </div>
+          <div class="active-progress-text" data-progress-text="{{ run.workflow_id }}"></div>
         </div>
         {% endif %}
       </div>
@@ -494,20 +497,36 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.active-step-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 999px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  font-size: 0.78rem; font-weight: 600; color: var(--text);
+}
 .active-progress { margin-top: 12px; }
+.active-bar-outer { display:flex; align-items:center; gap:8px; margin-bottom:4px; }
 .active-bar {
+  flex: 1;
   height: 5px;
   background: rgba(255,255,255,0.06);
   border-radius: 3px;
   overflow: hidden;
 }
+.active-pct { font-size: 0.68rem; font-weight: 700; color: var(--good, #34d399); white-space: nowrap; min-width: 28px; text-align: right; }
 .active-bar-fill {
   height: 100%;
-  width: 55%;
+  width: 0%;
+  background: linear-gradient(90deg, #22c55e, #3dd4bc);
+  border-radius: 3px;
+  transition: width 1.2s ease;
+}
+.active-bar-fill.pulsing {
   background: linear-gradient(90deg, #22c55e, #3dd4bc, #22c55e);
   background-size: 200% 100%;
-  border-radius: 3px;
   animation: shimmer 2.5s ease-in-out infinite;
+}
+.active-progress-text {
+  font-size: 0.72rem; color: var(--muted); line-height: 1.3;
 }
 @keyframes shimmer {
   0% { background-position: 200% 0; }
@@ -739,10 +758,14 @@
 }
 .wf-card-bar-fill {
   height: 100%;
-  width: 60%;
+  width: 0%;
+  background: linear-gradient(90deg, #22c55e, #3dd4bc);
+  border-radius: 2px;
+  transition: width 1.2s ease;
+}
+.wf-card-bar-fill.pulsing {
   background: linear-gradient(90deg, #22c55e, #3dd4bc, #22c55e);
   background-size: 200% 100%;
-  border-radius: 2px;
   animation: shimmer 2.5s ease-in-out infinite;
 }
 
@@ -931,22 +954,44 @@
           // Update active running cards (top)
           var bar = document.querySelector('[data-progress-bar="' + wfId + '"]');
           var textEl = document.querySelector('[data-progress-text="' + wfId + '"]');
-          if (bar && data.progress_pct > 0) {
-            bar.style.width = data.progress_pct + '%';
-            bar.style.animation = 'none';
+          var pctEl = document.querySelector('[data-progress-pct="' + wfId + '"]');
+          var stepPill = document.querySelector('#active-step-' + wfId);
+          if (bar) {
+            if (data.progress_pct > 0) {
+              bar.style.width = data.progress_pct + '%';
+              bar.classList.remove('pulsing');
+            } else {
+              bar.style.width = '55%';
+              bar.classList.add('pulsing');
+            }
+          }
+          if (pctEl) {
+            pctEl.textContent = data.progress_pct > 0 ? data.progress_pct + '%' : '—';
           }
           if (textEl && data.progress_text) {
-            textEl.textContent = data.progress_text + (data.progress_pct > 0 ? ' \u00b7 ' + data.progress_pct + '%' : '');
+            textEl.textContent = data.progress_text;
+          }
+          if (stepPill && data.progress_text) {
+            var stepEmoji = data.progress_text.toLowerCase().indexOf('audio') !== -1 ? '🎵' :
+                            data.progress_text.toLowerCase().indexOf('upload') !== -1 ? '🚀' :
+                            data.progress_text.toLowerCase().indexOf('render') !== -1 ? '🎬' :
+                            data.progress_text.toLowerCase().indexOf('thumb') !== -1 ? '🖼️' : null;
+            if (stepEmoji) stepPill.textContent = stepEmoji + ' ' + data.progress_text;
           }
           // Update workflow list cards (bottom)
           var wfBar = document.querySelector('.wf-card-bar-fill[data-wf-progress="' + wfId + '"]');
-          if (wfBar && data.progress_pct > 0) {
-            wfBar.style.width = data.progress_pct + '%';
-            wfBar.style.animation = 'none';
+          if (wfBar) {
+            if (data.progress_pct > 0) {
+              wfBar.style.width = data.progress_pct + '%';
+              wfBar.classList.remove('pulsing');
+            } else {
+              wfBar.style.width = '60%';
+              wfBar.classList.add('pulsing');
+            }
           }
           var wfText = document.querySelector('.wf-card-progress-text[data-wf-progress-text="' + wfId + '"]');
-          if (wfText && data.progress_text) {
-            wfText.textContent = data.progress_pct + '%';
+          if (wfText) {
+            wfText.textContent = data.progress_pct > 0 ? data.progress_pct + '%' : '…';
           }
           if (data.status && !['running', 'waiting_for_audio', 'uploading', 'queued'].includes(data.status)) {
             setTimeout(function() { location.reload(); }, 2000);
@@ -960,7 +1005,6 @@
   setTimeout(pollProgress, 1000);
 })();
 </script>
-<<<<<<< HEAD
 
 <script>
 (function() {
