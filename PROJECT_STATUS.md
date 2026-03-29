@@ -1,5 +1,5 @@
 # PROJECT STATUS – Whispers of the Seven Kingdoms
-> Letzte Aktualisierung: 2026-03-29T13:00:01Z
+> Letzte Aktualisierung: 2026-03-29T19:00:01Z
 > Aktualisiert von: Pako
 
 **Wichtig:** Es gibt jetzt **zwei gültige Source-of-Truth-Ebenen**:
@@ -226,8 +226,34 @@ cc1dc9a feat(audio-lab): pass house_templates to audio page (#63)
 
 
 
-## 🕐 Letzte Commits (auto-generated 2026-03-29T13:00:01Z)
+
+## 🕐 Letzte Commits (auto-generated 2026-03-29T19:00:01Z)
 ```
+362b130 fix(#162,#163,#164): thumbnail fallback + progress bar improvements
+9fcfa9d fix(ui): progress bar starts at 0% not 55%
+33919b2 fix(ui): clean up progress pct display – remove stray dash when no progress
+ef5ac61 fix(ui): improve progress display + fix conflict marker in dashboard
+63b6a47 fix(ui): simplify dismissed attention and make health strip tab-specific
+60be4cc fix(dashboard): remove duplicated template tail causing 500
+dc094d2 chore: remove accidentally committed test db
+0db037b fix(P0): remove duplicate endblock + script fragment breaking dashboard
+4e87f4c fix(P0): defensive config parsing to prevent dashboard 500 errors
+46fa7a7 feat(ui): add dismissible needs-attention and tab-specific dashboard KPIs
+cc454cb fix(shorts-overview): use real short thumbnails and portrait cards
+a822d03 feat(#162,#163,#164): thumbnail fallback + live progress in dashboard
+1a3def0 fix(ui): add visible thumbnail library selector in create flow
+da93c21 fix: thumbnail library selection actually used by pipeline
+5f84699 docs(engineering): track final thumbnail library implementation block
+cf3c5b5 docs(engineering): record live smoke checks in stable gate
+6cc3230 docs(engineering): incorporate verification docs into stable gate
+85e6946 fix(P1): thumbnail library shows pipeline-generated thumbnails
+23277da docs(engineering): record current fix review state
+e9eb661 fix(P1): auto-upload endstatus + cancel race conditions
+2013b6a fix(P0): circular import crash between pipeline_queue and workflow_orchestrator
+eb438f0 docs: P1 backend verification for Jarvis stable-gate review
+3d791f1 docs(engineering): add UI verification notes for bug wave
+3cb286e docs(engineering): add stable criteria artifact
+f769b2a auto: update PROJECT_STATUS.md (2026-03-29T13:00:01Z)
 86d2d84 fix(P1): 4 backend stability fixes for bug wave
 0565140 fix(ui): block create submit in library mode without track selection
 63c5563 docs(engineering): expand bug board with reviewed P1 items
@@ -249,23 +275,5 @@ b59dfdc docs(architecture): add domain model v1 spike
 40c0c5d docs(engineering): add Test Strategy B05
 0803807 docs: implement A01, A02, A05 – Baseline, System Map, Security Audit (#133, #134, #136)
 f74ca56 docs(engineering): add project risk register
-fe605b8 fix(create): preserve preset moods in create flow
-8016998 fix: add missing house moods to Create Video mood tags
-3779ccd fix: remaining old defaults across all routes and templates
-d3da8e1 docs(engineering): add Engineering Standards A03 (DoR/DoD/Review/WIP)
-bd7ba15 fix: update Create Video page (pipeline_new.html) to Audio v2 defaults
-2429a56 fix: wire base_dna + negative_prompt through to audio generator
-c19080a Delete client_secret.json
-1e2cc16 Delete .youtube_token.json
-463d857 Merge branch 'main' of https://github.com/pepler1993-dot/WhispersoftheSevenKingdoms
-1f7142b Fix youtube upload
-ce7ad7f fix: update all UI/route defaults to Audio v2 values (47s clips, 60 min unique)
-7dded21 new client token
-eb57a9d new youtube token
-a3e4584 delete old docs
-f036ffc feat(audio-v2): implement quality improvements #122 #123 #124 #125 #126 #127 #128 #129
-e8af200 docs(status): clarify dual source of truth
-7a7c6c4 Resolve short detail merge and organize review docs
-f03b283 auto: update PROJECT_STATUS.md (2026-03-29T07:00:01Z)
 ```
 ---
