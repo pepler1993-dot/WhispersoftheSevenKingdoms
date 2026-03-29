@@ -35,33 +35,49 @@
 </div>
 
 {# ── KPI Stats Row ────────────────────────────────────────────── #}
+{% if tab == 'shorts' %}
+  {% set kpi_running_label = 'Shorts aktiv' %}
+  {% set kpi_queued_label = 'Wartend' %}
+  {% set kpi_ready_label = 'Render fertig' %}
+  {% set kpi_done_label = 'Shorts veröffentlicht' %}
+{% elif tab == 'songs' %}
+  {% set kpi_running_label = 'Audio läuft' %}
+  {% set kpi_queued_label = 'Audio queued' %}
+  {% set kpi_ready_label = 'Songs bereit' %}
+  {% set kpi_done_label = 'Songs veröffentlicht' %}
+{% else %}
+  {% set kpi_running_label = 'Running' %}
+  {% set kpi_queued_label = 'Queued' %}
+  {% set kpi_ready_label = 'Rendered' %}
+  {% set kpi_done_label = 'Published' %}
+{% endif %}
 <div class="kpi-row">
   <div class="kpi-card">
     <div class="kpi-icon kpi-icon-running"><i data-lucide="play-circle"></i></div>
     <div class="kpi-body">
       <div class="kpi-value">{{ count_running }}</div>
-      <div class="kpi-label">Running</div>
+      <div class="kpi-label">{{ kpi_running_label }}</div>
     </div>
   </div>
   <div class="kpi-card">
     <div class="kpi-icon kpi-icon-queued"><i data-lucide="clock"></i></div>
     <div class="kpi-body">
       <div class="kpi-value">{{ count_queued }}</div>
-      <div class="kpi-label">Queued</div>
+      <div class="kpi-label">{{ kpi_queued_label }}</div>
     </div>
   </div>
   <div class="kpi-card">
     <div class="kpi-icon kpi-icon-ready"><i data-lucide="check-circle"></i></div>
     <div class="kpi-body">
       <div class="kpi-value">{{ count_rendered }}</div>
-      <div class="kpi-label">Rendered</div>
+      <div class="kpi-label">{{ kpi_ready_label }}</div>
     </div>
   </div>
   <div class="kpi-card">
     <div class="kpi-icon kpi-icon-published"><i data-lucide="upload-cloud"></i></div>
     <div class="kpi-body">
       <div class="kpi-value">{{ count_uploaded }}</div>
-      <div class="kpi-label">Published</div>
+      <div class="kpi-label">{{ kpi_done_label }}</div>
     </div>
   </div>
 </div>
@@ -81,21 +97,32 @@
   <div class="section-head">
     <h2>⚠️ Needs Attention</h2>
   </div>
-  <div class="attention-grid">
+  <div class="attention-grid" id="attention-grid">
     {% for w in errors %}
     {% set wtype = w.get('type', 'video') %}
     {% set href = '/admin/shorts/' ~ w.workflow_id if wtype == 'short' else '/admin/pipeline/run/' ~ w.workflow_id %}
-    <a href="{{ href }}" class="attention-card">
-      <div class="attention-card-head">
-        <span class="mini-badge mini-badge-{{ w.status }}">{{ w.status }}</span>
-        <span class="attention-link">Details anzeigen →</span>
+    <div class="attention-card-wrap" data-attention-id="{{ tab }}:{{ w.workflow_id }}">
+      <a href="{{ href }}" class="attention-card">
+        <div class="attention-card-head">
+          <span class="mini-badge mini-badge-{{ w.status }}">{{ w.status }}</span>
+          <span class="attention-link">Details anzeigen →</span>
+        </div>
+        <div class="attention-title">{{ w.title or w.slug }}</div>
+        <div class="attention-error">
+          {{ (w.error_display or 'Unbekannter Fehler')}}
+        </div>
+      </a>
+      <div class="attention-actions">
+        <button type="button" class="attention-action-btn" data-action="seen" data-attention-id="{{ tab }}:{{ w.workflow_id }}">Gesehen</button>
+        <button type="button" class="attention-action-btn" data-action="ignore" data-attention-id="{{ tab }}:{{ w.workflow_id }}">Ignorieren</button>
+        <button type="button" class="attention-action-btn" data-action="later" data-attention-id="{{ tab }}:{{ w.workflow_id }}">Später erinnern</button>
       </div>
-      <div class="attention-title">{{ w.title or w.slug }}</div>
-      <div class="attention-error">
-        {{ (w.error_display or 'Unbekannter Fehler')}}
-      </div>
-    </a>
+    </div>
     {% endfor %}
+  </div>
+  <div id="dismissed-attention" class="dismissed-attention" style="display:none;">
+    <div class="section-subhead">Dismissed / Ignored</div>
+    <div id="dismissed-attention-list" class="dismissed-attention-list"></div>
   </div>
 </section>
 {% endif %}
@@ -276,6 +303,7 @@
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
   gap: 12px;
 }
+.attention-card-wrap { display:flex; flex-direction:column; gap:8px; }
 .attention-card {
   display: block;
   text-decoration: none;
@@ -317,6 +345,24 @@
   font-size: 0.76rem;
   line-height: 1.45;
   color: #f3c3c3;
+}
+.attention-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.attention-action-btn {
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.attention-action-btn:hover { background: rgba(255,255,255,0.08); }
+.dismissed-attention { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); }
+.section-subhead { font-size: 0.9rem; color: var(--muted); margin-bottom: 8px; }
+.dismissed-attention-list { display:flex; flex-wrap:wrap; gap:8px; }
+.dismissed-chip {
+  display:inline-flex; align-items:center; gap:6px; padding:6px 10px;
+  border-radius: 999px; background: rgba(255,255,255,0.05); border:1px solid var(--line); font-size:0.8rem;
 }
 
 /* ── Type badges ─────────────────────────────────────────── */
@@ -894,6 +940,57 @@
   }
   
   setTimeout(pollProgress, 1000);
+})();
+</script>
+
+<script>
+(function() {
+  var STORAGE_KEY = 'dashboard_attention_dismissed_v1';
+  function loadState() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch (e) { return {}; }
+  }
+  function saveState(state) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+  function renderDismissed(state) {
+    var box = document.getElementById('dismissed-attention');
+    var list = document.getElementById('dismissed-attention-list');
+    if (!box || !list) return;
+    list.innerHTML = '';
+    var ids = Object.keys(state);
+    if (!ids.length) {
+      box.style.display = 'none';
+      return;
+    }
+    box.style.display = 'block';
+    ids.forEach(function(id) {
+      var item = state[id];
+      var chip = document.createElement('div');
+      chip.className = 'dismissed-chip';
+      chip.textContent = (item.title || id) + ' · ' + item.action;
+      list.appendChild(chip);
+    });
+  }
+  var state = loadState();
+  document.querySelectorAll('[data-attention-id]').forEach(function(el) {
+    var id = el.getAttribute('data-attention-id');
+    if (state[id]) el.style.display = 'none';
+  });
+  document.querySelectorAll('.attention-action-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var id = btn.getAttribute('data-attention-id');
+      var action = btn.getAttribute('data-action');
+      var wrap = document.querySelector('.attention-card-wrap[data-attention-id="' + id + '"]');
+      var title = wrap ? (wrap.querySelector('.attention-title')?.textContent || id) : id;
+      state[id] = { action: action, title: title, at: new Date().toISOString() };
+      saveState(state);
+      if (wrap) wrap.style.display = 'none';
+      renderDismissed(state);
+    });
+  });
+  renderDismissed(state);
 })();
 </script>
 {% endblock %}
