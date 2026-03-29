@@ -346,7 +346,7 @@ def admin_pipeline_start(
                 preset_name=None,
                 minutes=gen_minutes,
                 model=gen_model,
-                clip_seconds=30,
+                clip_seconds=47,
                 db=shared.db,
                 steps=gen_steps,
             )

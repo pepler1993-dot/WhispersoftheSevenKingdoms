@@ -325,7 +325,7 @@ fetch('/admin/audio/health')
       <div class="grid two">
         <div class="form-group">
           <label for="minutes">Dauer (Min)</label>
-          <input type="number" name="minutes" class="form-input" value="{{ d.get('minutes', 20) }}" min="1" max="180" />
+          <input type="number" name="minutes" class="form-input" value="{{ d.get('minutes', 60) }}" min="1" max="180" />
         </div>
         <div class="form-group">
           <label for="loop_hours">Loop (Stunden)</label>
