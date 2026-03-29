@@ -62,7 +62,7 @@ def admin_audio_generate(
     prompt_text: str = Form(''),
     minutes: int = Form(42),
     model: str = Form('medium'),
-    clip_seconds: int = Form(30),
+    clip_seconds: int = Form(47),
     steps: int = Form(50),
 ):
     slug = slug.strip().lower()
@@ -162,9 +162,9 @@ def admin_audio_job_retry(job_id: str):
         title=job.get('title', job['slug']),
         prompt_text=job.get('prompt_text', ''),
         preset_name=None,
-        minutes=job.get('minutes') or 20,
+        minutes=job.get('minutes') or 60,
         model=job.get('model', 'medium'),
-        clip_seconds=job.get('clip_seconds') or 30,
+        clip_seconds=job.get('clip_seconds') or 47,
         db=shared.db,
     )
     return RedirectResponse(url=f'/admin/audio/jobs/{new_job_id}', status_code=303)

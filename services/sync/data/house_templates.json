@@ -16,7 +16,7 @@
       "the_long_night": "Deep winter, howling wind, endless darkness"
     },
     "defaults": {
-      "minutes": 20,
+      "minutes": 60,
       "loop_hours": 3,
       "crossfade": 8,
       "audio_preset": "ambient",
@@ -167,7 +167,7 @@
       "lannister_feast": "Grand banquet, soft harp, wine and warmth"
     },
     "defaults": {
-      "minutes": 20,
+      "minutes": 60,
       "loop_hours": 3,
       "crossfade": 8,
       "audio_preset": "ambient",
@@ -318,7 +318,7 @@
       "fire_and_blood": "Ritual fire, chanting, primal power"
     },
     "defaults": {
-      "minutes": 20,
+      "minutes": 60,
       "loop_hours": 3,
       "crossfade": 8,
       "audio_preset": "dark",
@@ -468,7 +468,7 @@
       "shipbreaker_bay": "Violent sea, lighthouse, sailors' lullaby"
     },
     "defaults": {
-      "minutes": 20,
+      "minutes": 60,
       "loop_hours": 3,
       "crossfade": 8,
       "audio_preset": "dark",
@@ -618,7 +618,7 @@
       "sky_cells": "Open air prison, stars at night, freedom in captivity"
     },
     "defaults": {
-      "minutes": 20,
+      "minutes": 60,
       "loop_hours": 3,
       "crossfade": 8,
       "audio_preset": "gentle",
@@ -768,7 +768,7 @@
       "the_twins": "Bridge fortress, crossing waters, passage"
     },
     "defaults": {
-      "minutes": 20,
+      "minutes": 60,
       "loop_hours": 3,
       "crossfade": 8,
       "audio_preset": "gentle",
@@ -918,7 +918,7 @@
       "rose_garden": "Midnight garden, moonflowers, gentle fountain"
     },
     "defaults": {
-      "minutes": 20,
+      "minutes": 60,
       "loop_hours": 3,
       "crossfade": 8,
       "audio_preset": "gentle",
@@ -1069,7 +1069,7 @@
       "old_wyk": "Ancient island, standing stones, old magic"
     },
     "defaults": {
-      "minutes": 20,
+      "minutes": 60,
       "loop_hours": 3,
       "crossfade": 8,
       "audio_preset": "dark",
@@ -1219,7 +1219,7 @@
       "the_sandship": "Ancient fortress, desert wind, unbowed spirit"
     },
     "defaults": {
-      "minutes": 20,
+      "minutes": 60,
       "loop_hours": 3,
       "crossfade": 8,
       "audio_preset": "ambient",
@@ -1369,7 +1369,7 @@
       "hardhome": "Abandoned wildling village, eerie silence, snow"
     },
     "defaults": {
-      "minutes": 20,
+      "minutes": 60,
       "loop_hours": 3,
       "crossfade": 8,
       "audio_preset": "dark",
