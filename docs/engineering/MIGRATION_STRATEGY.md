@@ -1,12 +1,29 @@
-# B08 – Migrationsstrategie
+# Migration Strategy
 
-> Ticket: #144
-> Status: Draft
-> Scope: Database schema migration approach for SQLite
+**Owner:** Jarvis  
+**Reviewer:** Smith  
+**Stand:** 2026-03-29  
+**Welle:** B08  
+**Ticket:** #144  
+**Status:** Final
+
+Scope: Database schema migration approach for SQLite
 
 ---
 
 ## 1. Current State
+
+### Bootstrap-Regel für bestehende Datenbanken
+
+Solange das Projekt noch auf der heutigen Inline-Initialisierung in `services/sync/app/store.py` läuft, gilt für bestehende DBs diese Regel:
+
+1. **Vor jeder strukturellen Änderung zuerst Backup erstellen**
+2. Applikation startet gegen die bestehende Datei `data/agent_sync.db`
+3. `_init_db()` darf fehlende Tabellen/Indizes anlegen
+4. `_migrate_legacy_tables()` und ähnliche Bootstrap-Helfer dürfen nur für klar definierte Altstände dienen
+5. Bootstrap-Helfer dürfen **keine unklaren, wiederholt wechselnden Schemaeingriffe** verstecken
+
+Kurz: Bestehende Datenbanken dürfen beim Start in einen lauffähigen Stand gehoben werden, aber nur über explizit nachvollziehbare und begrenzte Bootstrap-Logik.
 
 ### Storage Layer
 
@@ -101,6 +118,21 @@ CREATE TABLE IF NOT EXISTS schema_migrations (
 ---
 
 ## 4. Rollback Strategy
+
+### Regel für irreversible Änderungen
+
+Irreversible Änderungen sind standardmäßig **zu vermeiden**. Dazu zählen insbesondere:
+- Spalten-/Tabellenentfernungen ohne Rückbaupfad
+- destruktive Umbenennungen ohne Mapping
+- Datenumschreibungen, die alte Zustände nicht mehr rekonstruierbar machen
+
+Wenn eine irreversible Änderung fachlich trotzdem nötig ist, gilt zwingend:
+- vorab Backup-Pflicht
+- Migration muss als **irreversible** markiert werden
+- Begründung und Risiko müssen dokumentiert werden
+- Rollback darf dann nicht als einfacher Code-Rollback behauptet werden
+
+Ohne diese explizite Kennzeichnung darf keine irreversible Strukturänderung in `main` gehen.
 
 ### Per-Migration Rollback
 
@@ -387,11 +419,37 @@ CREATE INDEX IF NOT EXISTS idx_workflows_type ON workflows(type);
 
 ---
 
-## 8. Transition Plan
+## 8. Governance Rules
+
+### Keine Schemaänderung mehr ohne Migration File
+
+Sobald das erste dateibasierte Migrationssystem eingeführt ist, gilt:
+
+- **jede neue Schemaänderung braucht ein eigenes Migration File**
+- kein stilles `ALTER TABLE` mehr direkt in Runtime-Pfaden
+- keine neue Spalte mehr „mal eben" in `store.py` ergänzen, ohne Migration
+- Datenmigrationen gehören entweder in ein explizites Migration File oder in einen klar benannten, einmaligen Migrationsschritt
+
+Diese Regel ist die eigentliche Schnittstelle zwischen heutigem Bootstrap und künftigem sauberem Migrationsbetrieb.
+
+### Wann die aktuelle Inline-Migrationslogik abgelöst wird
+
+Die heutige Inline-Logik in `store.py` gilt nur noch als Übergang und soll abgelöst werden, sobald diese Mindestbedingungen erfüllt sind:
+
+1. `schema_migrations` ist eingeführt
+2. initiales Baseline-Migration-File existiert
+3. mindestens ein echter Folge-Migrationsschritt läuft über den neuen Mechanismus
+4. Fresh-install und Upgrade-Pfad sind einmal getestet
+
+**Ab diesem Punkt** dürfen neue strukturelle Änderungen nicht mehr primär über `_init_db()` + try/except-`ALTER TABLE` eingebaut werden.
+
+---
+
+## 9. Transition Plan
 
 1. **Create `migrations/` directory** and `001_initial_schema.sql`.
 2. **Implement `app/migrate.py`** (~80 lines, as sketched above).
-3. **Bootstrap existing DBs:** On first run, detect existing tables → insert `001` into `schema_migrations` without re-running it.
+3. **Bootstrap existing DBs:** On first run, detect existing tables in the current default DB at `data/agent_sync.db` → insert `001` into `schema_migrations` without re-running it.
 4. **Replace `_init_db()` / `_migrate_legacy_tables()`** with a single `migrate()` call in `AgentSyncDB.__init__()`.
 5. **Add migration tests** to CI.
 6. **All future schema changes** go through numbered migration files — no more inline DDL.

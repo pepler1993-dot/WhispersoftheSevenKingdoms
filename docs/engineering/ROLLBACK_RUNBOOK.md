@@ -112,7 +112,9 @@ Wichtig:
 ## Schritt 5 – Verify
 Nach Rollback mindestens prüfen:
 - Dienst startet
-- Hauptseiten laden
+- `/healthz` antwortet wieder sauber
+- `/api/health/overview` liefert plausiblen Status
+- `/admin` lädt wieder
 - Kernpfad funktioniert wieder
 - keine offensichtlichen Folgefehler sichtbar
 
@@ -129,8 +131,11 @@ Danach:
 ## Minimaler Verify-Check nach Rollback
 
 - [ ] App erreichbar
-- [ ] Login / Zugriff funktioniert
+- [ ] `GET /healthz` liefert wieder Erfolg
+- [ ] `GET /api/health/overview` liefert plausiblen JSON-Status
+- [ ] Login / Zugriff auf `/admin` funktioniert
 - [ ] betroffener Hauptpfad funktioniert wieder
+- [ ] Default-DB-Pfad `data/agent_sync.db` ist konsistent und erwartbar
 - [ ] keine neuen Tracebacks / Crash-Symptome sichtbar
 - [ ] Version / Stand nachvollziehbar
 

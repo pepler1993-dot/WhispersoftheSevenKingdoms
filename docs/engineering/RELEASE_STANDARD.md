@@ -158,7 +158,9 @@ Deploy gemäß dem realen Projektpfad durchführen.
 ## Schritt 7 – Verify
 Nach Deploy mindestens prüfen:
 - Dienst startet sauber
-- Haupt-UI erreichbar
+- Basis-Health unter `/healthz` antwortet mit OK
+- Übersichts-Health unter `/api/health/overview` antwortet plausibel
+- Haupt-UI unter `/admin` ist erreichbar
 - Kernpfad nicht offensichtlich gebrochen
 - bei relevanten Änderungen gezielter Smoke-Test
 
@@ -169,8 +171,11 @@ Nach Deploy mindestens prüfen:
 Nach jedem produktiven Release mindestens prüfen:
 
 - [ ] App / Dashboard startet
-- [ ] Login bzw. Zugriff funktioniert
+- [ ] `GET /healthz` liefert Erfolg
+- [ ] `GET /api/health/overview` liefert plausiblen JSON-Status
+- [ ] Login bzw. Zugriff auf `/admin` funktioniert
 - [ ] Hauptnavigation lädt
+- [ ] zentrale DB-Datei / Default-Pfad bleibt konsistent (`data/agent_sync.db`)
 - [ ] zentraler Kernpfad der betroffenen Änderung funktioniert
 - [ ] keine sofort sichtbaren Server-/Traceback-Fehler
 - [ ] Version / Stand ist nachvollziehbar
@@ -179,6 +184,7 @@ Bei Upload-/Pipeline-Änderungen zusätzlich:
 - [ ] Workflow anlegbar
 - [ ] Audio-/Render-/Upload-Pfad nicht offensichtlich gebrochen
 - [ ] Logs / Statusanzeigen plausibel
+- [ ] bei UI-Health-Änderungen stimmen `/healthz`, `/api/health/overview` und `/admin` weiterhin mit der Doku überein
 
 ---
 
