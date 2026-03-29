@@ -78,6 +78,15 @@ Solange offen oder unklar, blockieren diese Themen typischerweise einen Stable-S
 
 ---
 
+## Live-Smoke-Stand 2026-03-29
+
+Externe Live-Checks gegen `dashboard.ka189.de` bestätigen aktuell:
+- `/healthz` antwortet mit `200` und `{ "status": "ok" }`
+- `/api/health/overview` antwortet mit plausiblem JSON-Status
+- `/admin` ist erreichbar und leitet sauber auf `/login` weiter
+
+Diese Live-Checks ersetzen **nicht** die vollständige Regression oder echte Browser-Endabnahme, sind aber ein belastbarer Teil des Stable-Gates.
+
 ## Nicht-Ziel
 
 Dieses Dokument bewertet keine Welle-C-Themen, keine neuen Features und keine Architektur-Expansion.  

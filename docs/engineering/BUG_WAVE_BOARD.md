@@ -57,6 +57,7 @@ Typische Fälle:
 - **Offene P2:** 1 (`#159`)
 - **Stable-Gate:** noch **nicht** freigabefähig, weil offene P1-Bugs und Regression noch nicht als gelaufen dokumentiert sind
 - **Stable-Criteria:** siehe `docs/engineering/STABLE_CRITERIA.md`
+- **Smoke-Livecheck:** teilweise grün dokumentiert (`/healthz`, `/api/health/overview`, `/admin → /login`)
 
 ### P0
 Aktuell keine offen bestätigten P0-Issues im neuen Bug-Set.

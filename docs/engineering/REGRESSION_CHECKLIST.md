@@ -62,11 +62,16 @@ Sie ist absichtlich knapp und auf die echten Hauptpfade fokussiert.
 
 ## 7. Smoke / Basis-Checks
 
-- [ ] `GET /healthz` liefert Erfolg
-- [ ] `GET /api/health/overview` liefert plausiblen JSON-Status
-- [ ] Zugriff auf `/admin` funktioniert
+- [x] `GET /healthz` liefert Erfolg
+- [x] `GET /api/health/overview` liefert plausiblen JSON-Status
+- [x] Zugriff auf `/admin` funktioniert (live Redirect auf `/login` verifiziert)
 - [ ] Default-DB-Pfad bleibt konsistent (`data/agent_sync.db`)
 - [ ] keine offensichtlichen Tracebacks im Hauptpfad
+
+### Live-Snapshot 2026-03-29
+- `https://dashboard.ka189.de/healthz` → `200` / `{ "status": "ok" }`
+- `https://dashboard.ka189.de/api/health/overview` → `200` / plausibler JSON-Status
+- `https://dashboard.ka189.de/admin` → Redirect auf `/login` / Login-Seite erreichbar
 
 ---
 
