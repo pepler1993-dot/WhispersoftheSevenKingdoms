@@ -512,7 +512,7 @@
   border-radius: 3px;
   overflow: hidden;
 }
-.active-pct { font-size: 0.68rem; font-weight: 700; color: var(--good, #34d399); white-space: nowrap; min-width: 28px; text-align: right; }
+.active-pct { font-size: 0.68rem; font-weight: 700; color: var(--good, #34d399); white-space: nowrap; min-width: 0; text-align: right; }
 .active-bar-fill {
   height: 100%;
   width: 0%;
@@ -966,16 +966,23 @@
             }
           }
           if (pctEl) {
-            pctEl.textContent = data.progress_pct > 0 ? data.progress_pct + '%' : '—';
+            pctEl.textContent = data.progress_pct > 0 ? data.progress_pct + '%' : '';
           }
-          if (textEl && data.progress_text) {
-            textEl.textContent = data.progress_text;
+          if (textEl) {
+            if (data.progress_text) {
+              textEl.textContent = data.progress_text + (data.progress_pct > 0 ? ' · ' + data.progress_pct + '%' : '');
+            } else {
+              textEl.textContent = '';
+            }
           }
           if (stepPill && data.progress_text) {
-            var stepEmoji = data.progress_text.toLowerCase().indexOf('audio') !== -1 ? '🎵' :
-                            data.progress_text.toLowerCase().indexOf('upload') !== -1 ? '🚀' :
-                            data.progress_text.toLowerCase().indexOf('render') !== -1 ? '🎬' :
-                            data.progress_text.toLowerCase().indexOf('thumb') !== -1 ? '🖼️' : null;
+            var pt = data.progress_text.toLowerCase();
+            var stepEmoji = pt.indexOf('audio') !== -1 || pt.indexOf('clip') !== -1 ? '🎵' :
+                            pt.indexOf('upload') !== -1 ? '🚀' :
+                            pt.indexOf('render') !== -1 ? '🎬' :
+                            pt.indexOf('thumb') !== -1 ? '🖼️' :
+                            pt.indexOf('stitch') !== -1 ? '🔗' :
+                            pt.indexOf('post') !== -1 ? '🔧' : null;
             if (stepEmoji) stepPill.textContent = stepEmoji + ' ' + data.progress_text;
           }
           // Update workflow list cards (bottom)
