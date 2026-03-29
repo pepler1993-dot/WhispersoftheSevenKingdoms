@@ -37,3 +37,4 @@ token.json
 
 # Virtual Environment
 .venv/
+data/agent_sync.db
