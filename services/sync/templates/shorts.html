@@ -201,6 +201,12 @@
         selectedVideoLabel.textContent = v.title || v.slug;
         title.value = (v.title || v.slug) + ' | Short';
         slug.value = slugify((v.slug || 'short') + '-short');
+        // Populate config fields from video config
+        const cfg = v.config || {};
+        document.getElementById('clip_start_seconds').value = cfg.clip_start_seconds ?? 0;
+        document.getElementById('clip_duration_seconds').value = cfg.clip_duration_seconds ?? 30;
+        document.getElementById('visual_mode').value = cfg.visual_mode || 'static-artwork';
+        document.getElementById('visibility').value = cfg.visibility || 'private';
         createPanel.style.display = 'block';
       });
       videoList.appendChild(btn);

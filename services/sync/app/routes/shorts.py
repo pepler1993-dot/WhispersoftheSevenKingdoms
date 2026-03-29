@@ -92,6 +92,7 @@ def _list_uploaded_longform_videos() -> list[dict[str, Any]]:
                             variant_key = vk
                             break
                 break
+        cfg = wf.get('config') or {}
         out.append({
             'workflow_id': wf['workflow_id'],
             'slug': slug,
@@ -101,6 +102,7 @@ def _list_uploaded_longform_videos() -> list[dict[str, Any]]:
             'variant_key': variant_key,
             'audio_filename': next((f'{slug}{ext}' for ext in ('.mp3','.wav','.ogg') if (PIPELINE_DIR / 'data' / 'upload' / 'songs' / f'{slug}{ext}').exists()), ''),
             'video_path': str(PIPELINE_DIR / 'data' / 'output' / 'youtube' / slug / 'video.mp4'),
+            'config': cfg,
         })
     return out
 
