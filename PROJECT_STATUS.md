@@ -1,5 +1,5 @@
 # PROJECT STATUS – Whispers of the Seven Kingdoms
-> Letzte Aktualisierung: 2026-03-29T07:00:01Z
+> Letzte Aktualisierung: 2026-03-29T13:00:01Z
 > Aktualisiert von: Pako
 
 **Wichtig:** Es gibt jetzt **zwei gültige Source-of-Truth-Ebenen**:
@@ -225,13 +225,47 @@ cc1dc9a feat(audio-lab): pass house_templates to audio page (#63)
 
 
 
-## 🕐 Letzte Commits (auto-generated 2026-03-29T07:00:01Z)
+
+## 🕐 Letzte Commits (auto-generated 2026-03-29T13:00:01Z)
 ```
-8abd493 fix(create): harden variant state and clean dashboard scripts
-56c90e6 Merge branch 'main' of https://github.com/pepler1993-dot/WhispersoftheSevenKingdoms
-99c2073 Add detailed plan for future next steps
-1248920 docs: v4.0.0 changelog – unified workflows, SaaS dashboard, UI overhaul
-3387da5 fix(#114,#116,#119): preset cards spacing, tickets readability, shorts drafts
-34307c6 fix(#112-#121): batch UI polish - routes, docs, tickets, backgrounds
+86d2d84 fix(P1): 4 backend stability fixes for bug wave
+0565140 fix(ui): block create submit in library mode without track selection
+63c5563 docs(engineering): expand bug board with reviewed P1 items
+3a4027e fix(ui): restore missing audio status target in create flow
+8eb1159 fix(ui): prefill short config from selected source video
+3a14626 docs(engineering): update bug board and stable gate status
+47a209e fix(P1): title_template {variant} handling on house select (#157)
+9e1da12 docs(engineering): add bug wave board and regression checklist
+afef001 fix(P0): pipeline.py accepts 'sleep' preset + always pass audio_preset to pipeline
+efec0b3 fix(ui): re-apply mood tags after variant selection in Create Flow (#154 #155)
+ef677d8 fix(B10,B03,B07): correct smoke test routes, add status mapping, finalize observability
+5f26c17 test+docs: first unit tests (38 passing) + UI IA appendix with current page mapping
+9c0003a docs(engineering): finalize migration and verify standards
+a60d6b3 docs(B02,B03,B04,B10): Target Architecture, API Contracts, Config Scope, Smoke Tests #138 #139 #140 #146
+68dbe15 docs+test: B06 test fixtures + B11 UI Information Architecture Guide
+bf11353 docs(engineering): add release and rollback standards
+3f8829d docs(B07,B08): Observability Minimum + Migrationsstrategie #143 #144
+b59dfdc docs(architecture): add domain model v1 spike
+40c0c5d docs(engineering): add Test Strategy B05
+0803807 docs: implement A01, A02, A05 – Baseline, System Map, Security Audit (#133, #134, #136)
+f74ca56 docs(engineering): add project risk register
+fe605b8 fix(create): preserve preset moods in create flow
+8016998 fix: add missing house moods to Create Video mood tags
+3779ccd fix: remaining old defaults across all routes and templates
+d3da8e1 docs(engineering): add Engineering Standards A03 (DoR/DoD/Review/WIP)
+bd7ba15 fix: update Create Video page (pipeline_new.html) to Audio v2 defaults
+2429a56 fix: wire base_dna + negative_prompt through to audio generator
+c19080a Delete client_secret.json
+1e2cc16 Delete .youtube_token.json
+463d857 Merge branch 'main' of https://github.com/pepler1993-dot/WhispersoftheSevenKingdoms
+1f7142b Fix youtube upload
+ce7ad7f fix: update all UI/route defaults to Audio v2 values (47s clips, 60 min unique)
+7dded21 new client token
+eb57a9d new youtube token
+a3e4584 delete old docs
+f036ffc feat(audio-v2): implement quality improvements #122 #123 #124 #125 #126 #127 #128 #129
+e8af200 docs(status): clarify dual source of truth
+7a7c6c4 Resolve short detail merge and organize review docs
+f03b283 auto: update PROJECT_STATUS.md (2026-03-29T07:00:01Z)
 ```
 ---
