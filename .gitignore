@@ -28,4 +28,12 @@ data/upload/songs/*-looped-processed.mp3
 # OAuth Secrets
 client_secret*.json
 .youtube_token.json
+token.json
+
+# Environment & Keys
+.env
+*.pem
+*.key
+
+# Virtual Environment
 .venv/
