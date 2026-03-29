@@ -74,6 +74,7 @@ Solange offen oder unklar, blockieren diese Themen typischerweise einen Stable-S
 - unvollständiges Cancel-Verhalten in Hauptzuständen
 - stille Fallbacks statt klarer Fehlermeldung
 - fehlende Regression-/Smoke-Dokumentation
+- nicht abgeschlossene echte Browser-/Screen-Verifikation auf dem Zielsystem
 
 ---
 

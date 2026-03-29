@@ -179,9 +179,13 @@ Eine Freigabe für einen Stable-Stand darf nur vorbereitet werden, wenn:
 ### Aktuelle Aussage
 **Noch kein Stable-Freigabe-Stand.**
 
+Aktuell dokumentiert:
+- Backend-Verifikation liegt vor in `docs/engineering/P1_VERIFICATION_SMITH.md`
+- UI-Verifikation liegt vor in `docs/engineering/UI_VERIFICATION_BUG_WAVE_2026-03-29.md`
+
 Blocker im Moment:
-1. offene P1-Bugs im sichtbaren Hauptprodukt und im Hauptpfad-Backend
-2. neue Review-P1s zu Auto-Upload-Endstatus, Cancel, Library-Fallback, Upload-Robustheit und Thumbnail-Library sind noch offen
-3. keine abgeschlossene Regression-Dokumentation für Dashboard / Create / Shorts / Workflow / Upload
+1. GitHub-Issues `#156`, `#157`, `#158`, `#159` sind formal noch offen
+2. UI-Verifikation sagt selbst, dass für Teile noch echter Browser-/Screen-Check fehlt
+3. Regression-Checklist und Smoke-Checks sind noch nicht vollständig als grün abgehakt
 s / Workflow / Upload
 d

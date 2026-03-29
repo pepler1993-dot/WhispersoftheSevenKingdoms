@@ -85,7 +85,7 @@ Siehe auch: `docs/engineering/STABLE_CRITERIA.md`
 Stand jetzt:
 - [x] keine offenen P0-Bugs bekannt
 - [ ] P1-Bugs vollständig abgearbeitet
-- [ ] Reproduktion, Ursache, Fix und Verifikation für neue Review-P1s dokumentiert
+- [x] Reproduktion, Ursache, Fix und Verifikation für neue Review-P1s dokumentiert
 - [ ] Hauptpfad als regressionsgeprüft dokumentiert
 - [ ] Smoke-Checks grün dokumentiert
 
@@ -94,7 +94,9 @@ Stand jetzt:
 - `8eb1159` verbessert Shorts-Prefill sichtbar
 - `3a4027e` stellt Audio-Status-Ziel im Create-Flow wieder her
 - `0565140` blockiert Submit im Library-Modus ohne Track-Auswahl
-- `86d2d84` adressiert vier Backend-P1s plausibel
+- `86d2d84` und `e9eb661` adressieren die Backend-P1s plausibel
+- `docs/engineering/P1_VERIFICATION_SMITH.md` dokumentiert die Backend-Verifikation
+- `docs/engineering/UI_VERIFICATION_BUG_WAVE_2026-03-29.md` dokumentiert die UI-Verifikation
 
 ### Gate-Aussage
-Trotz sichtbarer Fixes ist der Stable-Stand **noch nicht freigegeben**, solange Regression/Smoke/Verifikation nicht vollständig dokumentiert sind.
+Trotz dokumentierter Verifikation ist der Stable-Stand **noch nicht freigegeben**, solange Regression/Smoke nicht vollständig grün dokumentiert sind und die restlichen UI-Screen-Checks nicht final durch sind.
