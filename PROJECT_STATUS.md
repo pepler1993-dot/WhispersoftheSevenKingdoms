@@ -1,5 +1,5 @@
 # PROJECT STATUS – Whispers of the Seven Kingdoms
-> Letzte Aktualisierung: 2026-03-29T00:45:00Z
+> Letzte Aktualisierung: 2026-03-29T07:00:01Z
 > Aktualisiert von: Pako
 
 **Wichtig:** Diese Datei ist **nicht mehr** der alleinige erste Einstiegspunkt.
@@ -211,43 +211,14 @@ cc1dc9a feat(audio-lab): pass house_templates to audio page (#63)
 
 
 
-## 🕐 Letzte Commits (auto-generated 2026-03-28T19:00:01Z)
+
+## 🕐 Letzte Commits (auto-generated 2026-03-29T07:00:01Z)
 ```
-a411060 fix(dashboard): implement issue 71 overview states
-074dae2 Add design phase handbook
-b34697b docs: complete SaaS use cases (UC-01 to UC-29) for UI/UX testing
-988e2b3 docs: update SaaS concept with Phase 3c/3d status and revised priorities
-c71287f fix(ui): map waiting_for_audio to running in all status displays
-8c1d1a2 fix: scope all dashboard sections to active tab, remove type badges
-e7a2ea2 fix: remove Needs Attention + Alle tab, redesign workflow cards
-097bbeb redesign: SaaS command center overview with KPIs, attention alerts, published grid
-ec9a47d fix: dashboard tabs + workflow list card design
-3cc73db redesign: modern overview with tab navigation and unified workflow list
-961f8b0 fix: remove all header-actions navigation buttons from pages
-7d641a8 fix(dashboard): hide workflow-linked audio jobs from audio section
-688cffe fix: topbar-user sits above page header, no overlap with action buttons
-8c6fbd8 fix: bump CSS cache buster to force reload
-79e8d24 fix(dashboard): collapse all active statuses to running/queued
-fd52c6a fix(dashboard): show uploading + waiting_for_audio as active runs
-9c6f825 fix: move user/logout to top-right of content area
-f7d3372 fix(ui): sidebar user row at bottom, nav-only scroll, no overflow
-6ee00e8 fix(ui): replace topbar with fixed user-pill, restore layout
-1129249 fix(ui): remove sidebar footer html, clean topbar style
-3972e90 feat: Audio Lab filter bar with clickable status pills
-9fc01ef feat(ui): topbar with user/logout, remove sidebar footer + gold line
-b89c5fc fix: Audio Lab tab count + redesign job list
-f715379 fix(ui): bump css cache version to v-4
-8719ff6 fix(ui): fix sidebar logo clipping, simpler responsive sizing
-3671533 feat: Audio Lab creates workflow with type='audio_lab'
-43facdd fix(ui): responsive sidebar at laptop breakpoints
-f1874df fix(ui): responsive sidebar logo + clean footer layout
-a3f2bd0 fix: separate video/short workflows in UI + fix type assignment
-8d59e3e fix: DB migration crash when old workflows table exists
-b56e579 fix(db): make legacy migration non-fatal to prevent startup crash
-3060477 auto: update PROJECT_STATUS.md (2026-03-28T13:00:01Z)
-1cebb06 chore(deploy): trigger redeploy
-29ce29d fix(upload): push thumbnails to youtube
-dcb810c refactor: unified workflow architecture - merge pipeline_runs + workflows into single entity
-fa31be6 fix(upload): stabilize youtube credential source
+8abd493 fix(create): harden variant state and clean dashboard scripts
+56c90e6 Merge branch 'main' of https://github.com/pepler1993-dot/WhispersoftheSevenKingdoms
+99c2073 Add detailed plan for future next steps
+1248920 docs: v4.0.0 changelog – unified workflows, SaaS dashboard, UI overhaul
+3387da5 fix(#114,#116,#119): preset cards spacing, tickets readability, shorts drafts
+34307c6 fix(#112-#121): batch UI polish - routes, docs, tickets, backgrounds
 ```
 ---
