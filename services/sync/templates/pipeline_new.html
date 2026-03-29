@@ -1093,10 +1093,23 @@
     });
   });
 
+  function normalizeMoodList(values) {
+    return (values || [])
+      .flatMap(value => String(value || '').split(','))
+      .map(value => value.trim().toLowerCase())
+      .filter(Boolean);
+  }
+
   function buildMoodTags(moods, defaults) {
-    selectedMoods = new Set(defaults);
+    const normalizedDefaults = normalizeMoodList(defaults);
+    selectedMoods = new Set(normalizedDefaults);
     moodContainer.innerHTML = '';
-    const allMoods = [...new Set([...moods, 'festive', 'epic', 'dreamy', 'warm', 'dark', 'ancient'])];
+    const allMoods = [...new Set([
+      ...normalizeMoodList(moods),
+      ...normalizedDefaults,
+      'calm', 'cold', 'dark', 'warm', 'mystical', 'melancholic', 'exotic', 'meditative',
+      'festive', 'epic', 'dreamy', 'ancient', 'stormy', 'ethereal', 'peaceful', 'pastoral', 'oceanic', 'frozen'
+    ])];
     allMoods.forEach(mood => {
       const tag = document.createElement('span');
       tag.className = 'mood-tag' + (selectedMoods.has(mood) ? ' active' : '');
