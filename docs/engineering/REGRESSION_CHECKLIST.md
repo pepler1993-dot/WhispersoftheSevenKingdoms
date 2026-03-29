@@ -78,6 +78,8 @@ Stable ist nur vorbereitbar, wenn:
 - [ ] Hauptpfad Dashboard → Create → Workflow → Upload nicht offensichtlich bricht
 - [ ] Smoke-Checks grün sind
 
+Siehe auch: `docs/engineering/STABLE_CRITERIA.md`
+
 ## Aktueller Freigabe-Status
 
 Stand jetzt:
