@@ -29,6 +29,17 @@ class AgentSyncDB:
         except Exception as e:
             logging.error('DB integrity check error: %s', e)
 
+    @staticmethod
+    def _safe_json(raw: str | None) -> dict:
+        """Parse JSON safely, return empty dict on failure."""
+        if not raw:
+            return {}
+        try:
+            result = json.loads(raw)
+            return result if isinstance(result, dict) else {}
+        except (json.JSONDecodeError, TypeError):
+            return {}
+
     def backup(self, backup_dir: Path | None = None) -> Path:
         """Create a hot backup using SQLite backup API."""
         from datetime import datetime
@@ -448,7 +459,7 @@ class AgentSyncDB:
             'phase': row['phase'],
             'status': row['status'],
             'audio_job_id': row['audio_job_id'],
-            'config': json.loads(row['config_json']) if row['config_json'] else {},
+            'config': self._safe_json(row['config_json']),
             'auto_upload': bool(row['auto_upload']),
             'pid': row['pid'],
             'started_at': row['started_at'],

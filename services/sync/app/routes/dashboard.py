@@ -83,11 +83,15 @@ def admin_dashboard(request: Request):
     errors = [w for w in filtered if w['status'] in {'failed', 'error'}]
     published = [w for w in filtered if w['status'] == 'uploaded'][:8]
 
-    # Humanize error messages for display
+    # Humanize error messages and ensure config is always a dict
     for w in filtered:
+        if not isinstance(w.get('config'), dict):
+            w['config'] = {}
         if w.get('error_message'):
             w['error_display'] = _humanize_error(w['error_message'])
     for w in errors:
+        if not isinstance(w.get('config'), dict):
+            w['config'] = {}
         if w.get('error_message'):
             w['error_display'] = _humanize_error(w['error_message'])
 
