@@ -165,8 +165,8 @@
         {% if not is_queued %}
         <div class="active-progress" data-progress-wf="{{ run.workflow_id }}">
           <div class="active-bar-outer">
-            <div class="active-bar"><div class="active-bar-fill" data-progress-bar="{{ run.workflow_id }}" style="width:0%"></div></div>
-            <span class="active-pct" data-progress-pct="{{ run.workflow_id }}">—</span>
+            <div class="active-bar"><div class="active-bar-fill pulsing" data-progress-bar="{{ run.workflow_id }}" style="width:0%"></div></div>
+            <span class="active-pct" data-progress-pct="{{ run.workflow_id }}">0%</span>
           </div>
           <div class="active-progress-text" data-progress-text="{{ run.workflow_id }}"></div>
         </div>
@@ -244,8 +244,8 @@
       {% endif %}
       {% if w.status in ('running', 'uploading', 'waiting_for_audio') %}
       <div class="wf-card-progress">
-        <div class="wf-card-bar"><div class="wf-card-bar-fill" data-wf-progress="{{ w.workflow_id }}"></div></div>
-        <span class="wf-card-progress-text" data-wf-progress-text="{{ w.workflow_id }}" style="font-size:0.68rem; color:var(--muted); margin-left:8px;"></span>
+        <div class="wf-card-bar"><div class="wf-card-bar-fill pulsing" data-wf-progress="{{ w.workflow_id }}" style="width:0%"></div></div>
+        <span class="wf-card-progress-text" data-wf-progress-text="{{ w.workflow_id }}" style="font-size:0.68rem; color:var(--muted); margin-left:8px;">0%</span>
       </div>
       {% endif %}
     </a>
@@ -749,18 +749,20 @@
   line-height: 1.45;
   color: #f2b3b3;
 }
-.wf-card-progress { margin-top: 10px; }
+.wf-card-progress { margin-top: 10px; display: flex; align-items: center; gap: 8px; }
 .wf-card-bar {
-  height: 4px;
-  background: rgba(255,255,255,0.06);
-  border-radius: 2px;
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 3px;
   overflow: hidden;
 }
 .wf-card-bar-fill {
   height: 100%;
   width: 0%;
+  min-width: 2px;
   background: linear-gradient(90deg, #22c55e, #3dd4bc);
-  border-radius: 2px;
+  border-radius: 3px;
   transition: width 1.2s ease;
 }
 .wf-card-bar-fill.pulsing {
@@ -938,13 +940,11 @@
 
 <script>
 (function() {
-  var bars = document.querySelectorAll('[data-progress-bar]');
-  if (!bars.length) return;
-  
   // Collect all workflow IDs that need progress polling (active cards + workflow list)
   var allWfIds = new Set();
-  bars.forEach(function(bar) { allWfIds.add(bar.dataset.progressBar); });
+  document.querySelectorAll('[data-progress-bar]').forEach(function(bar) { allWfIds.add(bar.dataset.progressBar); });
   document.querySelectorAll('.wf-card-bar-fill[data-wf-progress]').forEach(function(el) { allWfIds.add(el.dataset.wfProgress); });
+  if (!allWfIds.size) return;
 
   function pollProgress() {
     allWfIds.forEach(function(wfId) {

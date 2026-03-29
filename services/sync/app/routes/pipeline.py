@@ -723,15 +723,28 @@ def admin_pipeline_run_progress(workflow_id: str):
 def admin_pipeline_preview_file(slug: str, filename: str):
     path = get_output_path(slug, filename)
     if not path and 'thumbnail' in filename.lower():
-        # Fallback: check data/output/thumbnails/ and data/upload/thumbnails/
-        for fallback_dir in [
+        # Fallback chain for thumbnails – check multiple locations
+        search_dirs = [
             PIPELINE_DIR / 'data' / 'output' / 'thumbnails',
             PIPELINE_DIR / 'data' / 'upload' / 'thumbnails',
-        ]:
+            PIPELINE_DIR / 'data' / 'output' / 'thumbnails' / slug,
+            PIPELINE_DIR / 'data' / 'upload' / 'thumbnails' / slug,
+        ]
+        for fallback_dir in search_dirs:
+            if not fallback_dir.is_dir():
+                continue
+            # Check slug-named files
             for ext in ('.jpg', '.jpeg', '.png', '.webp'):
                 candidate = fallback_dir / f'{slug}{ext}'
                 if candidate.exists():
                     path = candidate
+                    break
+            if path:
+                break
+            # Check any thumbnail-like file in slug subdirectory
+            for f in fallback_dir.iterdir():
+                if f.is_file() and f.suffix.lower() in ('.jpg', '.jpeg', '.png', '.webp'):
+                    path = f
                     break
             if path:
                 break
