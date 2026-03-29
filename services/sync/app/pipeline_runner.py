@@ -49,7 +49,7 @@ def _build_command(slug: str, config: dict[str, Any]) -> list[str]:
         cmd += ['--loop-hours', str(config['loop_hours'])]
     if config.get('crossfade'):
         cmd += ['--crossfade', str(config['crossfade'])]
-    if config.get('audio_preset') and config['audio_preset'] != 'ambient':
+    if config.get('audio_preset'):
         cmd += ['--audio-preset', config['audio_preset']]
     if config.get('animated'):
         cmd.append('--animated')

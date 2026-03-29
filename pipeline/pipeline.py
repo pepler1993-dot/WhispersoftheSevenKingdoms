@@ -130,8 +130,8 @@ def parse_args():
     p.add_argument('--dry-run', action='store_true', help='Print steps without executing external scripts')
     p.add_argument('--loop-hours', type=float, default=0, help='Loop audio to target hours (e.g. 3 for 3h from 20min source)')
     p.add_argument('--crossfade', type=int, default=8, help='Crossfade seconds for loop (default: 8)')
-    p.add_argument('--audio-preset', default='ambient', choices=['ambient', 'dark', 'gentle', 'raw'],
-                   help='Audio post-processing preset (default: ambient)')
+    p.add_argument('--audio-preset', default='sleep', choices=['sleep', 'ambient', 'dark', 'gentle', 'raw'],
+                   help='Audio post-processing preset (default: sleep)')
     p.add_argument('--skip-post-process', action='store_true', help='Skip audio post-processing (EQ/Reverb/Normalize)')
     p.add_argument('--bg-image', help='Explicit background image for video rendering')
     return p.parse_args()
