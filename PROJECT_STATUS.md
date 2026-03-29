@@ -1,20 +1,35 @@
 # PROJECT STATUS – Whispers of the Seven Kingdoms
-> Letzte Aktualisierung: 2026-03-28T19:00:01Z
-> Aktualisiert von: Smith
+> Letzte Aktualisierung: 2026-03-29T00:45:00Z
+> Aktualisiert von: Pako
 
-**Agents: Lest diese Datei zuerst. Sie enthält alles was ihr wissen müsst.**
+**Wichtig:** Diese Datei ist **nicht mehr** der alleinige erste Einstiegspunkt.
+Der aktuelle Stand, die Arbeitsregeln und der Zukunftsplan liegen jetzt primär in **`detailed_plan/*`**.
 
 ---
 
-## ⚠️ PFLICHT: Ticket-System im Sync Service nutzen!
-- **Jede Aufgabe** läuft über das **Ticket-System** im Sync Service Dashboard (NICHT über GitHub Issues/Tasks)
-- **Tickets holen:** `GET https://discretion-plan-dairy-puzzle.trycloudflare.com/api/tickets`
-- **Ticket claimen:** `POST https://discretion-plan-dairy-puzzle.trycloudflare.com/admin/tickets/{ID}/update` mit `status=in_progress&assigned_to=Name`
-- **Kein stilles Arbeiten** – alles läuft über Tickets nach Protokoll
-- **Dashboard URL:** `https://discretion-plan-dairy-puzzle.trycloudflare.com` (wird bald `dashboard.ka189.de` via Cloudflare Tunnel)
-- **Workflow:** Ticket holen → claimen → Branch erstellen → arbeiten → im Chat melden → Review + Merge → Ticket auf done
-- **Wenn ein Ticket fertig ist → immer auf `done` setzen!**
-- GitHub Issues und Tasks sind **veraltet** — Tickets im Dashboard sind die Single Source of Truth
+## ✅ Aktuelle Source of Truth
+Die maßgeblichen Planungs- und Steuerdateien liegen jetzt unter:
+- `detailed_plan/AGENT_QUICK_START_2026-03-29.md`
+- `detailed_plan/AGENT_OPERATING_RULES_2026-03-29_v6.md`
+- `detailed_plan/MASTER_PLAN_FINAL_2026-03-29_v2.md`
+- `detailed_plan/COMPACT_TICKET_BACKLOG_2026-03-29_v6.md`
+- `detailed_plan/UI_INFORMATION_ARCHITECTURE_GUIDE_2026-03-29_v5.md`
+- bei Bedarf: `detailed_plan/EXECUTION_ROADMAP_2026-03-29_v6.md`
+
+### Kurzregel
+- **Aktueller Stand** = was heute gilt
+- **Zukunftsplan** = wie das System strukturiert weiterentwickelt wird
+- beides wird jetzt primär über **`detailed_plan/*`** gesteuert
+
+### Für Agents
+- **Erster Einstieg:** `detailed_plan/AGENT_QUICK_START_2026-03-29.md`
+- Danach nur rollenbasiert weiterlesen, nicht alles blind laden
+
+---
+
+## Hinweis zu älteren Plan-/Backlog-Dateien
+Ältere Roadmaps, Agent-Backlogs und ältere Architektur-/Review-Pläne sind als historischer Stand zu verstehen, **nicht mehr als führende Wahrheit**.
+Wenn es Widersprüche gibt, gilt **`detailed_plan/*`**.
 
 ## 🚀 Deploy-Regeln
 - **Smith deployed auf den Server.** Im Notfall auch Jarvis.

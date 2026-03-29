@@ -5,6 +5,7 @@ import json
 import uuid
 from datetime import datetime
 from pathlib import Path
+import shutil
 from typing import Any
 
 from fastapi import APIRouter, File, Form, HTTPException, Query, Request, UploadFile
@@ -267,6 +268,7 @@ def admin_pipeline_start(
     skip_post_process: bool = Form(False),
     mood: str = Form(''),
     notes: str = Form(''),
+    variant_key: str = Form(''),
     duration_hint: str = Form('long-form sleep track'),
     tags: str = Form(''),
     music_style: str = Form(''),
@@ -283,6 +285,8 @@ def admin_pipeline_start(
     thumbnail_file: str = Form(''),
     background_file: str = Form(''),
     audio_source: str = Form('library'),
+    selected_audio_track: str = Form(''),
+    audio_job_id: str = Form(''),
     gen_minutes: int = Form(42),
     gen_steps: int = Form(50),
     gen_model: str = Form('medium'),
@@ -290,6 +294,7 @@ def admin_pipeline_start(
 ):
     title = title.strip()
     theme = theme.strip()
+    variant_key = (variant_key or notes or '').strip()
     slug = slugify(title)
     if not slug:
         raise HTTPException(status_code=400, detail='Title must produce a valid slug')
@@ -297,29 +302,54 @@ def admin_pipeline_start(
         raise HTTPException(status_code=400, detail='Title is required')
     if not theme:
         raise HTTPException(status_code=400, detail='Theme is required')
+    if not house.strip():
+        raise HTTPException(status_code=400, detail='Bitte ein Haus wählen.')
+    if not variant_key:
+        raise HTTPException(status_code=400, detail='Bitte eine Haus-Variante wählen.')
 
-    audio_found = any(
+    selected_audio_track = (selected_audio_track or '').strip()
+    audio_job_id = (audio_job_id or '').strip()
+    audio_path = None
+
+    if audio_source == 'library' and selected_audio_track:
+        for ext in ALLOWED_AUDIO_EXT:
+            candidate = PIPELINE_DIR / 'data' / 'upload' / 'songs' / f'{selected_audio_track}{ext}'
+            if candidate.exists():
+                audio_path = candidate
+                break
+        if not audio_path:
+            return RedirectResponse(
+                url=f'/admin/pipeline/new?slug={slug}&error=Der+gewählte+Library-Track+wurde+nicht+gefunden.',
+                status_code=303,
+            )
+
+    audio_found = bool(audio_path) or any(
         (PIPELINE_DIR / 'data' / 'upload' / 'songs' / f'{slug}{ext}').exists()
         for ext in ALLOWED_AUDIO_EXT
     )
 
+    existing_audio_job = shared.db.get_audio_job(audio_job_id) if audio_job_id else None
+
     # -- Generate mode: start full workflow (Audio -> Pipeline -> Upload) --
     if not audio_found and audio_source == 'generate':
-        prompt_text = gen_prompt.strip()
-        if not prompt_text:
-            prompt_text = _prompts_from_house_variant(house, notes)
+        if existing_audio_job and existing_audio_job.get('status') in {'queued', 'pushing', 'running', 'downloading', 'complete'}:
+            resolved_audio_job_id = audio_job_id
+        else:
+            prompt_text = gen_prompt.strip()
+            if not prompt_text:
+                prompt_text = _prompts_from_house_variant(house, variant_key)
 
-        audio_job_id = create_audio_job(
-            slug=slug,
-            title=title,
-            prompt_text=prompt_text,
-            preset_name=None,
-            minutes=gen_minutes,
-            model=gen_model,
-            clip_seconds=30,
-            db=shared.db,
-            steps=gen_steps,
-        )
+            resolved_audio_job_id = create_audio_job(
+                slug=slug,
+                title=title,
+                prompt_text=prompt_text,
+                preset_name=None,
+                minutes=gen_minutes,
+                model=gen_model,
+                clip_seconds=30,
+                db=shared.db,
+                steps=gen_steps,
+            )
 
         metadata = _build_song_metadata(
             slug=slug, title=title, theme=theme, mood=mood,
@@ -338,7 +368,7 @@ def admin_pipeline_start(
         thumbnail_source = _detect_thumbnail_source(slug, thumbnail_file, metadata)
         bg_selected = (background_file or '').strip()
         if not bg_selected:
-            bg_selected = (_resolve_background_from_house_variant(house, notes) or '').strip()
+            bg_selected = (_resolve_background_from_house_variant(house, variant_key) or '').strip()
         background_source = _detect_background_source(bg_selected or None, theme)
 
         pipeline_config = {
@@ -352,6 +382,7 @@ def admin_pipeline_start(
             'skip_post_process': skip_post_process,
             'mood': mood or None,
             'house': house or theme or None,
+            'variant_key': variant_key or None,
             'metadata': metadata,
             'thumbnail_source': thumbnail_source,
             'background_source': background_source,
@@ -367,14 +398,14 @@ def admin_pipeline_start(
             'type': 'video',
             'status': 'waiting_for_audio',
             'phase': 'audio',
-            'audio_job_id': audio_job_id,
+            'audio_job_id': resolved_audio_job_id,
             'auto_upload': auto_upload,
             'config': pipeline_config,
             'created_at': now,
         })
         shared.db.append_workflow_log(workflow_id, 'system', 'Generate-Workflow gestartet. Warte auf Audio-Job.', now)
 
-        start_workflow(workflow_id, audio_job_id, slug, title, pipeline_config, auto_upload, shared.db)
+        start_workflow(workflow_id, resolved_audio_job_id, slug, title, pipeline_config, auto_upload, shared.db)
         return RedirectResponse(url=f'/admin/pipeline/run/{workflow_id}', status_code=303)
 
     if not audio_found:
@@ -382,6 +413,12 @@ def admin_pipeline_start(
             url=f'/admin/pipeline/new?slug={slug}&error=Kein+Audio-Track+f\u00fcr+"{slug}"+gefunden.+W\u00e4hle+"Neu+generieren"+als+Audio-Quelle.',
             status_code=303,
         )
+
+    if audio_path and audio_path.stem != slug:
+        target_audio = PIPELINE_DIR / 'data' / 'upload' / 'songs' / f'{slug}{audio_path.suffix.lower()}'
+        target_audio.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(audio_path, target_audio)
+        audio_found = True
 
     metadata = _build_song_metadata(
         slug=slug,
@@ -410,7 +447,7 @@ def admin_pipeline_start(
     thumbnail_source = _detect_thumbnail_source(slug, thumbnail_file, metadata)
     bg_selected = (background_file or '').strip()
     if not bg_selected:
-        bg_selected = (_resolve_background_from_house_variant(house, notes) or '').strip()
+        bg_selected = (_resolve_background_from_house_variant(house, variant_key) or '').strip()
     background_source = _detect_background_source(bg_selected or None, theme)
 
     config = {
@@ -424,6 +461,7 @@ def admin_pipeline_start(
         'skip_post_process': skip_post_process,
         'mood': mood or None,
         'house': house or theme or None,
+        'variant_key': variant_key or None,
         'metadata': metadata,
         'thumbnail_source': thumbnail_source,
         'background_source': background_source,

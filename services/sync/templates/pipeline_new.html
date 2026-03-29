@@ -114,6 +114,7 @@
     <input type="hidden" name="thumbnail_style" id="thumbnail_style" />
     <input type="hidden" name="thumbnail_avoid" id="thumbnail_avoid" />
     <input type="hidden" name="notes" id="notes" />
+    <input type="hidden" name="variant_key" id="variant_key" />
     <input type="hidden" name="tags" id="tags" />
     <input type="hidden" name="duration_hint" id="duration_hint" value="long-form sleep track" />
     <input type="hidden" name="house" id="house" />
@@ -142,7 +143,7 @@
 
       <!-- Option A: Existing track -->
       <div id="audio-library" class="audio-source" style="display:none">
-        <select id="library-audio" class="form-select" autocomplete="off">
+        <select id="library-audio" name="selected_audio_track" class="form-select" autocomplete="off">
           <option value="">— Audio aus Bibliothek wählen —</option>
           {% for t in library_tracks %}
           <option value="{{ t.stem }}">{{ t.label }}</option>
@@ -793,6 +794,14 @@
   }
 
   window.selectDuration = function selectDuration(hours) {
+    if (!selectedHouse) {
+      alert('Bitte zuerst ein Haus wählen.');
+      return;
+    }
+    if (!document.getElementById('variant_key').value) {
+      alert('Bitte zuerst eine Variante wählen.');
+      return;
+    }
     document.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('active'));
     document.querySelector(`.duration-btn[data-hours="${hours}"]`).classList.add('active');
     document.getElementById('loop_hours').value = hours;
@@ -802,6 +811,8 @@
       document.getElementById('thumbnail_text').value = titleInput.value;
     }
     syncSlugFromTitle();
+    updateSteps(4);
+    updateReviewSummary();
     const cp = document.getElementById('config-panel');
     cp.style.display = 'block';
     setTimeout(() => cp.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
@@ -945,6 +956,7 @@
       card.classList.add('selected');
       selectedHouse = key;
       document.getElementById('notes').value = '';
+      document.getElementById('variant_key').value = '';
 
       document.getElementById('theme').value = house.display_name;
       document.getElementById('house').value = key;
@@ -1026,6 +1038,7 @@
             }
             // Store selected variant key for prompt selection
             document.getElementById('notes').value = vKey;
+            document.getElementById('variant_key').value = vKey;
             document.getElementById('theme').value = vName;
             applyThumbnailBriefToForm(mergeVariantThumbnailBrief(house, vKey));
             // Auto-select background image from preset
@@ -1091,10 +1104,38 @@
         if (selectedMoods.has(mood)) { selectedMoods.delete(mood); tag.classList.remove('active'); }
         else { selectedMoods.add(mood); tag.classList.add('active'); }
         moodInput.value = [...selectedMoods].join(', ');
+        updateReviewSummary();
       });
       moodContainer.appendChild(tag);
     });
     moodInput.value = [...selectedMoods].join(', ');
+  }
+
+  function updateSteps(currentStep) {
+    const steps = document.querySelectorAll('#step-indicator .step');
+    steps.forEach(step => {
+      const stepNo = Number(step.dataset.step || '0');
+      step.classList.toggle('active', stepNo === currentStep);
+      step.classList.toggle('done', stepNo < currentStep);
+    });
+  }
+
+  function updateReviewSummary() {
+    const selectedVariantKey = (document.getElementById('notes').value || '').trim();
+    const selectedVariant = selectedVariantKey
+      ? selectedVariantKey.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+      : '—';
+    const audioSource = document.getElementById('audio_source').value;
+    const selectedTrack = (document.getElementById('library-audio').value || '').trim();
+    const audioJobId = (document.getElementById('audio_job_id').value || '').trim();
+
+    document.getElementById('review-house').textContent = selectedHouse ? (houses[selectedHouse]?.display_name || selectedHouse) : '—';
+    document.getElementById('review-variant').textContent = selectedVariant;
+    document.getElementById('review-duration').textContent = (document.getElementById('loop_hours').value || '3') + 'h';
+    document.getElementById('review-audio').textContent = audioSource === 'library'
+      ? (selectedTrack || 'Bibliothek (noch nichts gewählt)')
+      : (audioJobId ? 'Separater Audio-Job vorhanden' : 'Neu generieren');
+    document.getElementById('review-upload').textContent = document.getElementById('auto_upload').checked ? 'Ja' : 'Nein';
   }
 
   // sync advanced → hidden
@@ -1170,9 +1211,19 @@
     document.getElementById('btn-library').classList.toggle('active', mode === 'library');
     document.getElementById('btn-generate').classList.toggle('active', mode === 'generate');
     document.getElementById('audio_source').value = mode;
+    updateReviewSummary();
   };
 
   // Sync generate settings to hidden fields
+  document.getElementById('library-audio').addEventListener('change', function() {
+    if (this.value) {
+      document.getElementById('audio_source').value = 'library';
+      document.getElementById('audio_job_id').value = '';
+    }
+    updateReviewSummary();
+  });
+  document.getElementById('auto_upload').addEventListener('change', updateReviewSummary);
+
   document.getElementById('gen-minutes').addEventListener('input', function() {
     document.getElementById('gen_minutes_hidden').value = this.value;
   });
@@ -1245,6 +1296,8 @@
           const loc = r.headers.get('Location') || '';
           const jobId = loc.split('/').pop();
           document.getElementById('audio_job_id').value = jobId;
+          document.getElementById('audio_source').value = 'generate';
+          updateReviewSummary();
           statusEl.innerHTML = '✅ Job gestartet! <a href="' + loc + '" target="_blank">Job-Details →</a><br>Track wird nach Fertigstellung automatisch in die Bibliothek gelegt.';
           btn.textContent = '✅ Job läuft...';
           pollJobStatus(jobId);
@@ -1368,13 +1421,33 @@
 
   const runForm = document.getElementById('run-form');
   if (runForm) {
-    runForm.addEventListener('submit', function() {
+    runForm.addEventListener('submit', function(e) {
       syncSlugFromTitle();
+      const houseKey = (document.getElementById('house').value || '').trim();
+      const variantKey = (document.getElementById('variant_key').value || '').trim();
+      const loopHours = (document.getElementById('loop_hours').value || '').trim();
+      if (!houseKey) {
+        e.preventDefault();
+        alert('Bitte zuerst ein Haus wählen.');
+        return;
+      }
+      if (!variantKey) {
+        e.preventDefault();
+        alert('Bitte zuerst eine Variante wählen.');
+        return;
+      }
+      if (!loopHours) {
+        e.preventDefault();
+        alert('Bitte eine Länge wählen.');
+        return;
+      }
     });
   }
 
   updateThumbnailSourcePreview();
   updateBackgroundSourcePreview();
+  updateSteps(1);
+  updateReviewSummary();
 
   {% if prefill_slug %}
   // auto-select house from prefill slug
