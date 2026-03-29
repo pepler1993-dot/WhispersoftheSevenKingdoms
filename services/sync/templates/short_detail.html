@@ -4,131 +4,161 @@
 <link rel="stylesheet" href="/static/css/library-presets.css?v={{ app_version | default('dev') }}" />
 {% endblock %}
 {% block content %}
-<div class="page-header page-header-flex">
-  <div>
+{% set cfg = run.config or {} %}
+{% set can_render = run.status in ('created', 'failed') %}
+{% set can_upload = run.status == 'rendered' %}
+{% set has_preview = run.status in ('rendered', 'uploaded') and output_files %}
+
+<div class="run-detail-header">
+  <a href="/admin/shorts" class="back-link">← Alle Shorts</a>
+  <div class="run-detail-title-row">
     <h1>{{ run.title or run.slug }}</h1>
-    <div class="page-subtitle short-detail-kicker">
-      {% if run.created_at %}<span>{{ run.created_at[:16] }}</span>{% else %}<span>–</span>{% endif %}
-      <span class="short-detail-kicker-sep" aria-hidden="true">·</span>
-      <span class="badge {{ run.status }}">{{ run.status }}</span>
-    </div>
+    <span class="run-status-pill run-status-{{ 'running' if run.status in ('running','queued','uploading') else ('done' if run.status in ('rendered','uploaded') else ('failed' if run.status == 'failed' else 'created')) }}">{{ run.status }}</span>
+  </div>
+  <div class="run-detail-sub">
+    <span>{{ run.created_at[:16] if run.created_at else '—' }}</span>
+    <span>·</span>
+    <span>{{ cfg.get('clip_duration_seconds', 30) }}s Clip</span>
+    <span>·</span>
+    <span>{{ cfg.get('visual_mode', 'static-artwork') }}</span>
   </div>
 </div>
 
 {% if success_message %}
-<div class="panel panel-accent-teal" style="margin-bottom:18px;">
-  <div class="success-banner">✅ {{ success_message }}</div>
-</div>
+<div class="run-success-banner" style="margin-bottom:18px;">✅ {{ success_message }}</div>
 {% endif %}
 {% if error_message or run.error_message %}
-<div class="panel error-panel" style="margin-bottom:18px;">
+<div class="run-error-box" style="margin-bottom:18px;">
   <strong>Fehler:</strong> {{ error_message or run.error_message }}
 </div>
 {% endif %}
 
-<div class="action-bar">
-  <a href="/admin/shorts" class="btn btn-secondary btn-sm">
-    <i data-lucide="arrow-left" class="icon-sm"></i> Alle Shorts
-  </a>
-  {% if run.status in ('created', 'failed') %}
-  <form method="post" action="/admin/shorts/{{ run.workflow_id }}/render" style="display:inline;">
-    <button type="submit" class="btn btn-primary">🎬 Short rendern</button>
-  </form>
-  {% endif %}
-  {% if run.status == 'rendered' %}
-  <form method="post" action="/admin/shorts/{{ run.workflow_id }}/upload" style="display:inline;">
-    <button type="submit" class="btn btn-primary" onclick="return confirm('Short jetzt zu YouTube hochladen?')">🚀 Auf YouTube hochladen</button>
-  </form>
-  {% endif %}
-  {% if run.status == 'uploaded' %}
-  <div style="display:inline-flex; align-items:center; gap:6px; padding:8px 16px; background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.3); border-radius:8px; color:#4ade80; font-size:0.82rem; font-weight:600;">
-    ✅ Erfolgreich veröffentlicht
-  </div>
-  {% endif %}
-</div>
-
-<div class="library-tabs-wrap shorts-tabs-wrap">
-  <nav class="library-tabs short-detail-tabs" aria-label="Short-Details">
-    <button type="button" class="library-tab{% if run.status not in ("rendered", "uploaded") %} active{% endif %}" data-short-detail-tab="overview">Übersicht</button>
-    <button type="button" class="library-tab{% if run.status in ("rendered", "uploaded") %} active{% endif %}" data-short-detail-tab="preview">Video</button>
-    <button type="button" class="library-tab" data-short-detail-tab="logs">Logs</button>
-  </nav>
-</div>
-
-<div class="grid two short-detail-grid short-detail-pane {% if run.status not in ('rendered', 'uploaded') %}is-active{% endif %}" data-short-detail-pane="overview" {% if run.status in ("rendered", "uploaded") %}{% else %}class="short-detail-pane is-active"{% endif %}>
-  <div class="panel panel-accent-purple">
-    <h2>Konfiguration</h2>
-    <div class="config-grid">
-      <div class="config-item"><div class="label">Format</div><div class="value">{{ run.config.get('format', 'youtube_short') }}</div></div>
-      <div class="config-item"><div class="label">Seitenverhältnis</div><div class="value">{{ run.config.get('aspect_ratio', '9:16') }}</div></div>
-      <div class="config-item"><div class="label">Audio-Quelle</div><div class="value" style="font-size:0.85rem;word-break:break-word;">{{ run.config.get('source_audio', '—') }}</div></div>
-      <div class="config-item"><div class="label">Clip-Start</div><div class="value">{{ run.config.get('clip_start_seconds', 0) }}s</div></div>
-      <div class="config-item"><div class="label">Clip-Länge</div><div class="value">{{ run.config.get('clip_duration_seconds', 30) }}s</div></div>
-      <div class="config-item"><div class="label">Visual</div><div class="value">{{ run.config.get('visual_mode', 'static-artwork') }}</div></div>
-      <div class="config-item"><div class="label">Sichtbarkeit</div><div class="value">{{ run.config.get('visibility', 'private') }}</div></div>
+<div class="detail-summary-grid">
+  <section class="run-panel detail-summary-card detail-summary-primary">
+    <div class="section-header-inline">
+      <h2>Review Summary</h2>
+      <span class="section-note">
+        {% if run.status == 'uploaded' %}veröffentlicht{% elif run.status == 'rendered' %}bereit zum Upload{% elif run.status == 'running' %}Rendering läuft{% elif run.status == 'uploading' %}Upload läuft{% elif run.status == 'created' %}Entwurf{% else %}Aktion nötig{% endif %}
+      </span>
     </div>
-  </div>
-
-  <div class="panel panel-accent-blue">
-    <h2>Status</h2>
-    <div class="preview-meta" style="margin-bottom:14px;">
-      {% if run.status == 'created' %}📝 Entwurf bereit — als Nächstes rendern.
-      {% elif run.status == 'running' %}🔄 Rendering läuft...
-      {% elif run.status == 'rendered' %}✅ Video fertig — Upload möglich.
-      {% elif run.status == 'uploading' %}🚀 Upload läuft...
-      {% elif run.status == 'uploaded' %}📺 Short wurde veröffentlicht.
-      {% else %}❌ Fehler — Log prüfen und erneut versuchen.{% endif %}
-    </div>
-    {% if run.config.get('source_audio') %}
-    <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--line);">
-      <div class="label" style="margin-bottom:6px;">Quelle</div>
-      <div style="font-size:0.82rem;">
-        🎵 {{ run.config.source_audio.replace('-', ' ').replace('.mp3','').replace('.wav','') | title }}
-        {% if run.config.get('clip_start_seconds') is not none %}
-        <br><span style="font-size:0.72rem; color:var(--muted);">Clip: {{ run.config.clip_start_seconds }}s – {{ run.config.clip_start_seconds + run.config.get('clip_duration_seconds', 30) }}s</span>
-        {% endif %}
-      </div>
-    </div>
-    {% endif %}
-  </div>
-</div>
-
-<div class="panel panel-accent-gold short-detail-pane {% if run.status in ('rendered', 'uploaded') %}is-active{% endif %}" data-short-detail-pane="preview">
-  <h2>Video</h2>
-  {% if run.status in ('rendered', 'uploaded') and output_files %}
-    {% for f in output_files %}
-      {% if f.name == 'video.mp4' %}
-      <div class="short-video-frame">
-        <video class="preview-video" controls preload="metadata">
-          <source src="/admin/shorts/preview/{{ run.slug }}/video.mp4" type="video/mp4" />
-        </video>
-      </div>
+    <div class="detail-summary-text">
+      {% if run.status == 'uploaded' %}
+        Der Short ist veröffentlicht. Jetzt prüfen, ob Preview, Metadaten und Quelle sauber zusammenpassen.
+      {% elif run.status == 'rendered' %}
+        Der Render ist fertig. Jetzt Vorschau prüfen und dann hochladen.
+      {% elif run.status == 'running' %}
+        Der Render läuft gerade. Unten stehen Quelle und Konfiguration, Logs bleiben sekundär.
+      {% elif run.status == 'uploading' %}
+        Der Upload läuft. Nach Abschluss sollte die Seite einen klaren Publish-Zustand zeigen.
+      {% elif run.status == 'created' %}
+        Entwurf ist angelegt. Der nächste sinnvolle Schritt ist Rendering starten.
+      {% else %}
+        Der Short braucht Aufmerksamkeit. Prüfe Ursache, Vorschau und nächsten Schritt.
       {% endif %}
-    {% endfor %}
-    <div class="output-files" style="margin-top:12px;">
+    </div>
+    <div class="detail-metric-grid">
+      <div class="detail-metric"><span class="label">Quelle</span><strong>{{ source_run.title if source_run else (cfg.get('source_audio') or '—') }}</strong></div>
+      <div class="detail-metric"><span class="label">Start</span><strong>{{ cfg.get('clip_start_seconds', 0) }}s</strong></div>
+      <div class="detail-metric"><span class="label">Dauer</span><strong>{{ cfg.get('clip_duration_seconds', 30) }}s</strong></div>
+      <div class="detail-metric"><span class="label">Sichtbarkeit</span><strong>{{ cfg.get('visibility', 'private') }}</strong></div>
+    </div>
+  </section>
+
+  <section class="run-panel detail-summary-card">
+    <div class="section-header-inline">
+      <h2>Nächste Schritte</h2>
+      <span class="section-note">zustandsspezifisch</span>
+    </div>
+    <div class="detail-action-list">
+      {% if can_render %}
+      <form method="post" action="/admin/shorts/{{ run.workflow_id }}/render" style="display:inline; margin:0;">
+        <button type="submit" class="btn btn-primary">Rendern</button>
+      </form>
+      {% endif %}
+      {% if can_upload %}
+      <form method="post" action="/admin/shorts/{{ run.workflow_id }}/upload" style="display:inline; margin:0;">
+        <button type="submit" class="btn btn-primary">Upload</button>
+      </form>
+      {% endif %}
+      <a href="/admin/shorts" class="btn btn-secondary">Zur Übersicht</a>
+      {% if source_run %}
+      <a href="/admin/pipeline/run/{{ source_run.workflow_id }}" class="btn btn-secondary">Zum Quellvideo</a>
+      {% endif %}
+    </div>
+  </section>
+</div>
+
+<div class="grid two detail-lower-grid short-detail-content-grid">
+  <section class="run-panel">
+    <div class="section-header-inline">
+      <h2>Quelle & Kontext</h2>
+      <span class="section-note">woher kommt dieser Short?</span>
+    </div>
+    <div class="config-grid">
+      <div class="config-item"><div class="label">Quellvideo</div><div class="value">{{ source_run.title if source_run else '—' }}</div></div>
+      <div class="config-item"><div class="label">Source Run</div><div class="value">{% if source_run %}<code>{{ source_run.workflow_id }}</code>{% else %}—{% endif %}</div></div>
+      <div class="config-item"><div class="label">Audio-Datei</div><div class="value detail-break">{{ cfg.get('source_audio', '—') }}</div></div>
+      <div class="config-item"><div class="label">Visual</div><div class="value">{{ cfg.get('visual_mode', 'static-artwork') }}</div></div>
+      <div class="config-item"><div class="label">Clip-Fenster</div><div class="value">{{ cfg.get('clip_start_seconds', 0) }}s → {{ cfg.get('clip_start_seconds', 0) + cfg.get('clip_duration_seconds', 30) }}s</div></div>
+      <div class="config-item"><div class="label">Format</div><div class="value">{{ cfg.get('format', 'youtube_short') }} · {{ cfg.get('aspect_ratio', '9:16') }}</div></div>
+    </div>
+
+    <details class="detail-raw-box">
+      <summary>Technische Details</summary>
+      <div class="config-grid" style="margin-top:14px;">
+        <div class="config-item"><div class="label">Slug</div><div class="value">{{ run.slug }}</div></div>
+        <div class="config-item"><div class="label">Workflow ID</div><div class="value"><code>{{ run.workflow_id }}</code></div></div>
+        <div class="config-item"><div class="label">House</div><div class="value">{{ cfg.get('house_key', '—') }}</div></div>
+        <div class="config-item"><div class="label">Variante</div><div class="value">{{ cfg.get('variant_key', '—') }}</div></div>
+      </div>
+    </details>
+  </section>
+
+  <section class="run-panel panel-accent-gold">
+    <div class="section-header-inline">
+      <h2>Preview</h2>
+      <span class="section-note">zuerst visuell prüfen</span>
+    </div>
+    {% if has_preview %}
       {% for f in output_files %}
         {% if f.name == 'video.mp4' %}
-        <span class="output-file-tag">Datei · {{ f.name }} ({{ f.size }})</span>
+        <div class="short-video-frame">
+          <video class="preview-video" controls preload="metadata">
+            <source src="/admin/shorts/preview/{{ run.slug }}/video.mp4" type="video/mp4" />
+          </video>
+        </div>
         {% endif %}
       {% endfor %}
-    </div>
-  {% else %}
-  <div class="short-preview-placeholder">
-    Nach erfolgreichem Render erscheint hier die Vorschau.
-  </div>
-  {% endif %}
+      {% if preview_image %}
+      <div style="margin-top:14px;">
+        <img class="preview-thumb" src="/admin/shorts/preview/{{ run.slug }}/{{ preview_image.name }}" alt="Short Thumbnail" />
+      </div>
+      {% endif %}
+      <div class="output-files" style="margin-top:12px;">
+        {% for f in output_files %}
+        <span class="output-file-tag">{{ f.name }} ({{ f.size }})</span>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="short-preview-placeholder">
+        Noch keine Vorschau vorhanden. Nach erfolgreichem Render erscheint hier Video und ggf. Thumbnail.
+      </div>
+    {% endif %}
+  </section>
 </div>
 
-<div class="panel short-detail-pane" data-short-detail-pane="logs">
-  <h2>Logs</h2>
-  <div class="log-viewer" id="log-viewer">
-    {% for log in logs %}
-    <div class="log-line {{ log.stream }}">{{ log.message }}</div>
-    {% else %}
-    <div class="log-line system">Warte auf Logs…</div>
-    {% endfor %}
-  </div>
-</div>
+<section class="run-panel" style="margin-top:18px;">
+  <details {% if run.status in ('running','queued','uploading') %}open{% endif %}>
+    <summary class="detail-log-summary">Logs <span>{{ logs|length }} Einträge</span></summary>
+    <div class="log-viewer" id="log-viewer">
+      {% for log in logs %}
+      <div class="log-line {{ log.stream }}">{{ log.message }}</div>
+      {% else %}
+      <div class="log-line system">Warte auf Logs…</div>
+      {% endfor %}
+    </div>
+  </details>
+</section>
 
 <script>
 (function() {
@@ -136,7 +166,7 @@
   var runId = '{{ run.workflow_id }}';
   var viewer = document.getElementById('log-viewer');
   var lastId = {{ logs[-1].id if logs else 0 }};
-  var polling = (status === 'running' || status === 'queued' || status === 'created');
+  var polling = (status === 'running' || status === 'queued' || status === 'created' || status === 'uploading');
 
   function pollLogs() {
     if (!polling) return;
@@ -153,8 +183,9 @@
           });
           viewer.scrollTop = viewer.scrollHeight;
         }
-        if (data.status !== 'running' && data.status !== 'queued' && data.status !== 'created') {
+        if (!['running', 'queued', 'created', 'uploading'].includes(data.status)) {
           polling = false;
+          setTimeout(function() { location.reload(); }, 1000);
         }
         if (polling) setTimeout(pollLogs, 3000);
       })
@@ -162,79 +193,28 @@
   }
 
   if (polling) setTimeout(pollLogs, 3000);
-
-  var tabButtons = document.querySelectorAll('[data-short-detail-tab]');
-  var panes = document.querySelectorAll('[data-short-detail-pane]');
-  tabButtons.forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var key = btn.getAttribute('data-short-detail-tab');
-      tabButtons.forEach(function(x) { x.classList.toggle('active', x === btn); });
-      panes.forEach(function(p) {
-        p.classList.toggle('is-active', p.getAttribute('data-short-detail-pane') === key);
-      });
-    });
-  });
 })();
 </script>
 
 <style>
-.short-detail-kicker {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 10px;
-}
-.short-detail-kicker-sep {
-  opacity: 0.45;
-  user-select: none;
-}
-.short-detail-tabs .library-tab {
-  appearance: none;
-  -webkit-appearance: none;
-  background: transparent;
-  border: 0;
-  cursor: pointer;
-  font: inherit;
-  color: var(--text-secondary);
-}
-.short-detail-pane { display: none; }
-.short-detail-pane.is-active { display: block; }
-.short-detail-grid { align-items: start; }
-.short-detail-grid.short-detail-pane.is-active { display: grid; }
-
-@media (min-width: 769px) {
-  .short-detail-grid { grid-template-columns: minmax(0, 1fr) minmax(280px, 0.9fr); }
-  .short-detail-pane { display: block; }
-  .shorts-tabs-wrap { display: none; }
-}
-
-@media (max-width: 768px) {
-  .short-detail-grid { grid-template-columns: 1fr; }
-}
-
-.short-video-frame {
-  max-width: min(100%, 420px);
-  margin: 0 auto;
-}
-.short-video-frame .preview-video {
-  width: 100%;
-  aspect-ratio: 9 / 16;
-  object-fit: cover;
-  border-radius: var(--radius-sm);
-  background: #000;
-}
-.output-files {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.output-file-tag {
-  padding: 4px 10px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  font-size: 0.72rem;
-  color: var(--muted);
+.detail-summary-grid { display:grid; grid-template-columns:1.1fr 0.9fr; gap:18px; margin-bottom:18px; }
+.detail-summary-primary { background:linear-gradient(180deg, rgba(251,191,36,0.08), rgba(15,23,42,0.96)); }
+.detail-summary-text { color:var(--muted); margin:10px 0 16px; line-height:1.55; }
+.detail-metric-grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; }
+.detail-metric { border:1px solid var(--line); border-radius:12px; padding:12px; background:rgba(255,255,255,0.02); }
+.detail-metric .label { display:block; font-size:0.72rem; color:var(--muted); margin-bottom:4px; }
+.detail-action-list { display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; }
+.detail-lower-grid { align-items:start; }
+.detail-raw-box { margin-top:18px; }
+.detail-raw-box summary, .detail-log-summary { cursor:pointer; font-weight:700; }
+.detail-log-summary { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.detail-break { word-break:break-word; font-size:0.88rem; }
+.short-video-frame { max-width:min(100%, 420px); margin:0 auto; }
+.short-video-frame .preview-video { width:100%; aspect-ratio:9 / 16; object-fit:cover; border-radius:var(--radius-sm); background:#000; }
+.short-preview-placeholder { padding:18px; border:1px dashed var(--line); border-radius:12px; color:var(--muted); background:rgba(255,255,255,0.02); }
+@media (max-width: 980px) {
+  .detail-summary-grid { grid-template-columns:1fr; }
+  .short-detail-content-grid { grid-template-columns:1fr; }
 }
 </style>
 {% endblock %}

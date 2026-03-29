@@ -270,12 +270,22 @@ def admin_shorts_detail(request: Request, workflow_id: str, success: str | None 
         for f in sorted(output_dir.iterdir()):
             if f.is_file():
                 output_files.append({'name': f.name, 'size': f'{f.stat().st_size / 1024 / 1024:.1f} MB'})
+
+    cfg = run.get('config') or {}
+    source_run = None
+    source_run_id = cfg.get('source_run_id')
+    if source_run_id:
+        source_run = shared.db.get_workflow(source_run_id)
+
+    preview_image = next((f for f in output_files if f['name'].lower().startswith('thumbnail.') or f['name'].lower() in {'thumbnail.jpg', 'thumbnail.png', 'thumbnail.webp'}), None)
     return shared.templates.TemplateResponse(request, 'short_detail.html', {
         'request': request,
         'page': 'shorts',
         'run': run,
         'logs': logs,
         'output_files': output_files,
+        'source_run': source_run,
+        'preview_image': preview_image,
         'success_message': success or '',
         'error_message': error or '',
     })

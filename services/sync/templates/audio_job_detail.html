@@ -1,109 +1,145 @@
 {% extends 'base.html' %}
 {% block title %}{{ job.title or 'Audio Job' }}{% endblock %}
 {% block content %}
+{% set active_statuses = ('queued', 'pushing', 'running', 'downloading') %}
+{% set is_active = job.status in active_statuses %}
+{% set is_done = job.status == 'complete' %}
+{% set is_failed = job.status in ('error', 'cancelled') %}
 
-{# ── Header ───────────────────────────────────────────────────── #}
-<div class="ajd-header">
-  <a href="/admin/audio/jobs" class="back-link"><i data-lucide="arrow-left" class="icon-md"></i> Audio Lab</a>
-  <div class="ajd-title-row">
+<div class="run-detail-header">
+  <a href="/admin/audio/jobs" class="back-link">← Alle Audio-Jobs</a>
+  <div class="run-detail-title-row">
     <h1>{{ job.title or job.slug }}</h1>
-    <span class="run-status-pill run-status-{{ job.status | display_status }}">
-      {% if job.status in ('running', 'queued') %}<span class="status-dot-pulse"></span>{% endif %}
-      {{ job.status | display_status }}
-    </span>
+    <span class="run-status-pill run-status-{{ 'running' if is_active else ('done' if is_done else ('failed' if is_failed else 'created')) }}">{{ job.status }}</span>
   </div>
-  <div class="ajd-sub">
-    {% if job.created_at %}<span>{{ job.created_at[:10] }} · {{ job.created_at[11:16] }}</span>{% endif %}
-    <span>· {{ job.minutes or '?' }} Min · {{ job.model or 'stable-audio' }}</span>
+  <div class="run-detail-sub">
+    <span>{{ job.created_at[:16] if job.created_at else '—' }}</span>
+    <span>·</span>
+    <span>{{ job.minutes or '—' }} Min Audio</span>
+    <span>·</span>
+    <span>{{ job.model or 'stable-audio' }}</span>
   </div>
 </div>
 
-{# ── Result Summary (only when complete) ──────────────────────── #}
-{% if job.status == 'complete' %}
-<section class="ajd-result">
-  <div class="ajd-result-header">
-    <span class="ajd-result-icon">✅</span>
-    <div>
-      <div class="ajd-result-title">Track fertig</div>
-      <div class="ajd-result-meta">{{ job.minutes or '?' }} Min Audio · {{ job.clip_seconds or 30 }}s Clips</div>
+<div class="detail-summary-grid">
+  <section class="run-panel detail-summary-card detail-summary-primary">
+    <div class="section-header-inline">
+      <h2>Ergebnis</h2>
+      <span class="section-note">
+        {% if is_done %}Fertig zum Prüfen{% elif is_active %}Job läuft{% elif job.status == 'queued' %}Wartet auf Start{% elif job.status == 'cancelled' %}Abgebrochen{% else %}Aktion nötig{% endif %}
+      </span>
     </div>
-  </div>
-  <audio controls preload="metadata" style="width:100%; margin-top:14px;">
-    <source src="/admin/audio/stream/{{ job.job_id }}" type="audio/wav">
-  </audio>
-  <div class="ajd-actions">
-    <a href="/admin/pipeline/new?slug={{ job.slug }}" class="btn btn-primary">🎬 In Video verwenden</a>
-    <form method="post" action="/admin/audio/jobs/{{ job.job_id }}/retry" style="margin:0">
-      <button type="submit" class="btn btn-secondary">🔄 Nochmal generieren</button>
-    </form>
-  </div>
-</section>
-{% endif %}
 
-{# ── Error state ──────────────────────────────────────────────── #}
-{% if job.status in ('error', 'cancelled') %}
-<section class="ajd-error">
-  <div class="ajd-error-icon">{% if job.status == 'cancelled' %}⚠️{% else %}❌{% endif %}</div>
-  <div class="ajd-error-body">
-    <div class="ajd-error-title">{{ 'Abgebrochen' if job.status == 'cancelled' else 'Fehlgeschlagen' }}</div>
-    <div class="ajd-error-msg">{{ job.error_message or 'Unbekannter Fehler' }}</div>
-  </div>
-  <form method="post" action="/admin/audio/jobs/{{ job.job_id }}/retry" style="margin:0">
-    <button type="submit" class="btn btn-primary">🔄 Nochmal versuchen</button>
-  </form>
-</section>
-{% endif %}
-
-{# ── Running state ────────────────────────────────────────────── #}
-{% if job.status in ('running', 'queued') %}
-<section class="ajd-running">
-  <div class="ajd-running-bar"><div class="ajd-running-fill"></div></div>
-  <div class="ajd-running-text">{{ 'Audio wird generiert...' if job.status == 'running' else 'In der Warteschlange...' }}</div>
-  {% if job.status in ('running', 'queued') %}
-  <form method="post" action="/admin/audio/jobs/{{ job.job_id }}/cancel" style="margin-top:12px">
-    <button type="submit" class="btn btn-danger btn-sm">Abbrechen</button>
-  </form>
-  {% endif %}
-</section>
-{% endif %}
-
-{# ── Config ───────────────────────────────────────────────────── #}
-<section class="ajd-panel">
-  <h2>⚙️ Konfiguration</h2>
-  <div class="ajd-config-grid">
-    <div class="ajd-config"><span class="ajd-config-label">Modell</span><span class="ajd-config-value">{{ job.model or 'stable-audio' }}</span></div>
-    <div class="ajd-config"><span class="ajd-config-label">Dauer</span><span class="ajd-config-value">{{ job.minutes or '?' }} Min</span></div>
-    <div class="ajd-config"><span class="ajd-config-label">Clip-Länge</span><span class="ajd-config-value">{{ job.clip_seconds or 30 }}s</span></div>
-    <div class="ajd-config"><span class="ajd-config-label">Preset</span><span class="ajd-config-value">{{ job.preset_name or 'custom' }}</span></div>
-  </div>
-
-  {% if job.prompts %}
-  <details style="margin-top:16px;">
-    <summary style="cursor:pointer; font-size:0.82rem; font-weight:600; color:var(--muted);">Prompts anzeigen ({{ job.prompts|length }})</summary>
-    <div class="ajd-prompts">
-      {% for prompt in job.prompts %}
-      <div class="ajd-prompt">{{ prompt }}</div>
-      {% endfor %}
-    </div>
-  </details>
-  {% endif %}
-</section>
-
-{# ── Logs (collapsible) ──────────────────────────────────────── #}
-<section class="ajd-panel">
-  <details {% if job.status in ('running', 'queued') %}open{% endif %}>
-    <summary style="cursor:pointer; font-size:0.95rem; font-weight:700; list-style:none; display:flex; align-items:center; gap:8px;">
-      📋 Logs <span style="font-size:0.7rem; color:var(--muted); font-weight:500;">({{ logs|length }})</span>
-    </summary>
-    <div class="log-viewer" id="log-viewer" style="margin-top:12px;">
-      {% for log in logs %}
-      <div class="log-line {{ log.stream }}">{{ log.message }}</div>
+    <div class="detail-summary-text">
+      {% if is_done %}
+        Audio wurde erfolgreich erstellt. Jetzt anhören und dann in der Pipeline verwenden.
+      {% elif is_active %}
+        Der Audio-Job läuft gerade. Logs sind sekundär verfügbar, der Fokus bleibt auf Status und nächstem Schritt.
+      {% elif job.status == 'queued' %}
+        Der Job wartet in der Queue. Danach startet die Generierung automatisch.
+      {% elif job.status == 'cancelled' %}
+        Der Job wurde abgebrochen. Du kannst ihn mit gleicher Konfiguration erneut starten.
       {% else %}
-      <div class="log-line system">Warte auf Logs...</div>
+        Die Generierung ist fehlgeschlagen. Prüfe die Kurzfassung und starte dann gezielt neu.
+      {% endif %}
+    </div>
+
+    <div class="detail-metric-grid">
+      <div class="detail-metric"><span class="label">Preset</span><strong>{{ job.preset_name or 'custom' }}</strong></div>
+      <div class="detail-metric"><span class="label">Clip-Länge</span><strong>{{ job.clip_seconds or '—' }}s</strong></div>
+      <div class="detail-metric"><span class="label">Prompts</span><strong>{{ job.prompts|length if job.prompts else 0 }}</strong></div>
+      <div class="detail-metric"><span class="label">Status</span><strong>{{ job.status }}</strong></div>
+    </div>
+
+    {% if is_done and job.output_path %}
+    <div class="detail-audio-box">
+      <audio controls preload="metadata" style="width:100%;">
+        <source src="/admin/audio/stream/{{ job.job_id }}" type="audio/wav">
+        Dein Browser unterstützt kein Audio-Playback.
+      </audio>
+    </div>
+    {% endif %}
+  </section>
+
+  <section class="run-panel detail-summary-card">
+    <div class="section-header-inline">
+      <h2>Nächste Schritte</h2>
+      <span class="section-note">keine Sackgasse</span>
+    </div>
+    <div class="detail-action-list">
+      <a href="/admin/pipeline/new?slug={{ job.slug }}" class="btn btn-primary">In Video verwenden</a>
+      <a href="/admin/audio/jobs" class="btn btn-secondary">Zur Job-Übersicht</a>
+      {% if is_active %}
+      <form method="post" action="/admin/audio/jobs/{{ job.job_id }}/cancel" style="margin:0">
+        <button type="submit" class="btn btn-danger btn-sm">Abbrechen</button>
+      </form>
+      {% endif %}
+      {% if is_failed %}
+      <form method="post" action="/admin/audio/jobs/{{ job.job_id }}/retry" style="margin:0">
+        <button type="submit" class="btn btn-primary btn-sm">🔄 Nochmal versuchen</button>
+      </form>
+      {% endif %}
+    </div>
+
+    {% if job.error_message %}
+    <div class="detail-alert detail-alert-error">
+      <strong>Fehler:</strong> {{ job.error_message }}
+    </div>
+    {% elif job.status == 'cancelled' %}
+    <div class="detail-alert detail-alert-warn">
+      <strong>Abgebrochen:</strong> {{ job.error_message or 'Der Job wurde abgebrochen.' }}
+    </div>
+    {% endif %}
+  </section>
+</div>
+
+<div class="grid two detail-lower-grid">
+  <section class="run-panel">
+    <div class="section-header-inline">
+      <h2>Konfiguration</h2>
+      <span class="section-note">relevante Werte zuerst</span>
+    </div>
+    <div class="config-grid">
+      <div class="config-item"><div class="label">Titel</div><div class="value">{{ job.title or '—' }}</div></div>
+      <div class="config-item"><div class="label">Model</div><div class="value">{{ job.model or '—' }}</div></div>
+      <div class="config-item"><div class="label">Minuten</div><div class="value">{{ job.minutes or '—' }}</div></div>
+      <div class="config-item"><div class="label">Clip</div><div class="value">{{ job.clip_seconds or '—' }}s</div></div>
+      <div class="config-item"><div class="label">Preset</div><div class="value">{{ job.preset_name or 'custom' }}</div></div>
+      <div class="config-item"><div class="label">Job ID</div><div class="value"><code>{{ job.job_id }}</code></div></div>
+    </div>
+
+    {% if job.prompts %}
+    <div class="detail-prompt-stack">
+      <div class="label" style="margin-bottom:10px">Prompts</div>
+      {% for prompt in job.prompts %}
+      <div class="detail-prompt-item">{{ prompt }}</div>
       {% endfor %}
     </div>
-  </details>
-</section>
+    {% endif %}
+
+    <details class="detail-raw-box">
+      <summary>Technische Details</summary>
+      <div class="config-grid" style="margin-top:14px;">
+        <div class="config-item"><div class="label">Slug</div><div class="value">{{ job.slug }}</div></div>
+        <div class="config-item"><div class="label">Kernel Ref</div><div class="value">{{ job.kernel_ref or '—' }}</div></div>
+        <div class="config-item"><div class="label">Output</div><div class="value detail-break">{{ job.output_path or '—' }}</div></div>
+      </div>
+    </details>
+  </section>
+
+  <section class="run-panel">
+    <details {% if is_active %}open{% endif %}>
+      <summary class="detail-log-summary">Logs <span>{{ logs|length }} Einträge</span></summary>
+      <div class="log-viewer" id="log-viewer">
+        {% for log in logs %}
+        <div class="log-line {{ log.stream }}">{{ log.message }}</div>
+        {% else %}
+        <div class="log-line system">Warte auf Logs...</div>
+        {% endfor %}
+      </div>
+    </details>
+  </section>
+</div>
 
 <script>
 (function() {
@@ -112,6 +148,7 @@
   const viewer = document.getElementById('log-viewer');
   let lastId = {{ logs[-1].id if logs else 0 }};
   let polling = ['queued', 'pushing', 'running', 'downloading'].includes(status);
+
   function pollLogs() {
     if (!polling) return;
     fetch('/admin/audio/jobs/' + jobId + '/logs?after_id=' + lastId)
@@ -135,95 +172,40 @@
       })
       .catch(() => { if (polling) setTimeout(pollLogs, 5000); });
   }
-  if (polling) { viewer.scrollTop = viewer.scrollHeight; setTimeout(pollLogs, 2000); }
+
+  if (polling) {
+    viewer.scrollTop = viewer.scrollHeight;
+    setTimeout(pollLogs, 2000);
+  }
 })();
 </script>
 
 <style>
-.ajd-header { margin-bottom: 20px; }
-.back-link { display:inline-flex; align-items:center; gap:4px; font-size:0.78rem; color:var(--muted); text-decoration:none; margin-bottom:12px; }
-.back-link:hover { color:var(--text); }
-.ajd-title-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
-.ajd-title-row h1 { margin:0; font-size:1.3rem; }
-.ajd-sub { font-size:0.74rem; color:var(--muted); margin-top:6px; }
-
-/* Result */
-.ajd-result {
-  background: rgba(34,197,94,0.06);
-  border: 1px solid rgba(34,197,94,0.2);
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 16px;
+.detail-summary-grid { display:grid; grid-template-columns:1.2fr 0.8fr; gap:18px; margin-bottom:18px; }
+.detail-summary-card { min-height:100%; }
+.detail-summary-primary { background:linear-gradient(180deg, rgba(45,212,191,0.08), rgba(15,23,42,0.96)); }
+.detail-summary-text { color:var(--muted); margin:10px 0 16px; line-height:1.55; }
+.detail-metric-grid { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px; }
+.detail-metric { border:1px solid var(--line); border-radius:12px; padding:12px; background:rgba(255,255,255,0.02); }
+.detail-metric .label { display:block; font-size:0.72rem; color:var(--muted); margin-bottom:4px; }
+.detail-audio-box { margin-top:16px; padding:14px; border:1px solid var(--line); border-radius:12px; background:rgba(255,255,255,0.02); }
+.detail-action-list { display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; }
+.detail-alert { margin-top:14px; padding:12px 14px; border-radius:12px; border:1px solid var(--line); }
+.detail-alert-error { border-color:rgba(239,68,68,0.4); background:rgba(127,29,29,0.18); }
+.detail-alert-warn { border-color:rgba(217,119,6,0.35); background:rgba(120,53,15,0.18); }
+.detail-lower-grid { align-items:start; }
+.detail-prompt-stack { margin-top:18px; display:grid; gap:10px; }
+.detail-prompt-item { padding:12px 14px; border:1px solid var(--line); border-radius:12px; background:rgba(255,255,255,0.02); line-height:1.5; }
+.detail-raw-box { margin-top:18px; }
+.detail-raw-box summary, .detail-log-summary { cursor:pointer; font-weight:700; }
+.detail-log-summary { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.detail-break { word-break:break-word; font-size:0.88rem; }
+@media (max-width: 980px) {
+  .detail-summary-grid { grid-template-columns:1fr; }
+  .detail-metric-grid { grid-template-columns:repeat(2, minmax(0,1fr)); }
 }
-.ajd-result-header { display:flex; align-items:center; gap:12px; }
-.ajd-result-icon { font-size:1.5rem; }
-.ajd-result-title { font-size:1rem; font-weight:700; color:#4ade80; }
-.ajd-result-meta { font-size:0.74rem; color:var(--muted); }
-.ajd-actions { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
-
-/* Error */
-.ajd-error {
-  display:flex; align-items:center; gap:14px;
-  background: rgba(239,68,68,0.06);
-  border: 1px solid rgba(239,68,68,0.2);
-  border-radius: 12px;
-  padding: 18px 20px;
-  margin-bottom: 16px;
-}
-.ajd-error-icon { font-size:1.5rem; flex-shrink:0; }
-.ajd-error-body { flex:1; min-width:0; }
-.ajd-error-title { font-size:0.95rem; font-weight:700; color:#f87171; }
-.ajd-error-msg { font-size:0.78rem; color:var(--muted); margin-top:2px; }
-
-/* Running */
-.ajd-running {
-  background: var(--panel);
-  border: 1px solid rgba(59,130,246,0.2);
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 16px;
-}
-.ajd-running-bar { height:5px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden; }
-.ajd-running-fill {
-  height:100%; width:55%;
-  background: linear-gradient(90deg, #3b82f6, #60a5fa, #3b82f6);
-  background-size: 200% 100%;
-  border-radius:3px;
-  animation: shimmer 2.5s ease-in-out infinite;
-}
-@keyframes shimmer { 0% { background-position:200% 0; } 100% { background-position:-200% 0; } }
-.ajd-running-text { font-size:0.85rem; font-weight:600; color:var(--muted); margin-top:10px; }
-
-/* Panel + Config */
-.ajd-panel {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 16px;
-}
-.ajd-panel h2 { font-size:0.95rem; font-weight:700; margin:0 0 14px 0; }
-.ajd-config-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:10px; }
-.ajd-config { display:flex; flex-direction:column; gap:2px; }
-.ajd-config-label { font-size:0.65rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; font-weight:600; }
-.ajd-config-value { font-size:0.88rem; font-weight:600; }
-
-/* Prompts */
-.ajd-prompts { margin-top:10px; display:flex; flex-direction:column; gap:6px; }
-.ajd-prompt {
-  padding:10px 14px;
-  background:var(--surface);
-  border:1px solid var(--line);
-  border-radius:8px;
-  font-size:0.78rem;
-  color:var(--text-secondary);
-  line-height:1.4;
-}
-
-@media (max-width:768px) {
-  .ajd-title-row h1 { font-size:1.1rem; }
-  .ajd-config-grid { grid-template-columns:repeat(2, 1fr); }
-  .ajd-error { flex-direction:column; align-items:flex-start; }
+@media (max-width: 640px) {
+  .detail-metric-grid { grid-template-columns:1fr; }
 }
 </style>
 {% endblock %}
