@@ -722,6 +722,19 @@ def admin_pipeline_run_progress(workflow_id: str):
 @router.get('/admin/pipeline/preview/{slug}/{filename}')
 def admin_pipeline_preview_file(slug: str, filename: str):
     path = get_output_path(slug, filename)
+    if not path and 'thumbnail' in filename.lower():
+        # Fallback: check data/output/thumbnails/ and data/upload/thumbnails/
+        for fallback_dir in [
+            PIPELINE_DIR / 'data' / 'output' / 'thumbnails',
+            PIPELINE_DIR / 'data' / 'upload' / 'thumbnails',
+        ]:
+            for ext in ('.jpg', '.jpeg', '.png', '.webp'):
+                candidate = fallback_dir / f'{slug}{ext}'
+                if candidate.exists():
+                    path = candidate
+                    break
+            if path:
+                break
     if not path:
         raise HTTPException(status_code=404, detail='File not found')
     return FileResponse(path)

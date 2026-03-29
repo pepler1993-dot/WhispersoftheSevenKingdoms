@@ -201,7 +201,10 @@
       <div class="wf-card-error">{{ (w.error_display or 'Unbekannter Fehler')}}</div>
       {% endif %}
       {% if w.status in ('running', 'uploading', 'waiting_for_audio') %}
-      <div class="wf-card-progress"><div class="wf-card-bar"><div class="wf-card-bar-fill"></div></div></div>
+      <div class="wf-card-progress">
+        <div class="wf-card-bar"><div class="wf-card-bar-fill" data-wf-progress="{{ w.workflow_id }}"></div></div>
+        <span class="wf-card-progress-text" data-wf-progress-text="{{ w.workflow_id }}" style="font-size:0.68rem; color:var(--muted); margin-left:8px;"></span>
+      </div>
       {% endif %}
     </a>
     {% endfor %}
@@ -847,19 +850,35 @@
   var bars = document.querySelectorAll('[data-progress-bar]');
   if (!bars.length) return;
   
+  // Collect all workflow IDs that need progress polling (active cards + workflow list)
+  var allWfIds = new Set();
+  bars.forEach(function(bar) { allWfIds.add(bar.dataset.progressBar); });
+  document.querySelectorAll('.wf-card-bar-fill[data-wf-progress]').forEach(function(el) { allWfIds.add(el.dataset.wfProgress); });
+
   function pollProgress() {
-    bars.forEach(function(bar) {
-      var wfId = bar.dataset.progressBar;
-      var textEl = document.querySelector('[data-progress-text="' + wfId + '"]');
+    allWfIds.forEach(function(wfId) {
       fetch('/admin/pipeline/run/' + wfId + '/progress')
         .then(function(r) { return r.json(); })
         .then(function(data) {
-          if (data.progress_pct > 0) {
+          // Update active running cards (top)
+          var bar = document.querySelector('[data-progress-bar="' + wfId + '"]');
+          var textEl = document.querySelector('[data-progress-text="' + wfId + '"]');
+          if (bar && data.progress_pct > 0) {
             bar.style.width = data.progress_pct + '%';
             bar.style.animation = 'none';
           }
           if (textEl && data.progress_text) {
-            textEl.textContent = data.progress_text + (data.progress_pct > 0 ? ' · ' + data.progress_pct + '%' : '');
+            textEl.textContent = data.progress_text + (data.progress_pct > 0 ? ' \u00b7 ' + data.progress_pct + '%' : '');
+          }
+          // Update workflow list cards (bottom)
+          var wfBar = document.querySelector('.wf-card-bar-fill[data-wf-progress="' + wfId + '"]');
+          if (wfBar && data.progress_pct > 0) {
+            wfBar.style.width = data.progress_pct + '%';
+            wfBar.style.animation = 'none';
+          }
+          var wfText = document.querySelector('.wf-card-progress-text[data-wf-progress-text="' + wfId + '"]');
+          if (wfText && data.progress_text) {
+            wfText.textContent = data.progress_pct + '%';
           }
           if (data.status && !['running', 'waiting_for_audio', 'uploading', 'queued'].includes(data.status)) {
             setTimeout(function() { location.reload(); }, 2000);
