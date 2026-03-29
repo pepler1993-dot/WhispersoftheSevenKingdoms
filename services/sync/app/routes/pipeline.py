@@ -251,12 +251,30 @@ async def admin_pipeline_upload_asset(
         raise HTTPException(status_code=400, detail='asset_type must be audio or thumbnail')
 
     target.parent.mkdir(parents=True, exist_ok=True)
-    content = await file.read()
-    if len(content) > MAX_UPLOAD_SIZE:
-        raise HTTPException(status_code=413, detail='File too large (max 500MB)')
 
-    target.write_bytes(content)
-    return {'ok': True, 'path': str(target.relative_to(PIPELINE_DIR)), 'size': len(content)}
+    # Stream to disk in chunks to avoid loading entire file into RAM
+    total_size = 0
+    chunk_size = 1024 * 1024  # 1MB chunks
+    tmp_target = target.with_suffix(target.suffix + '.tmp')
+    try:
+        with open(tmp_target, 'wb') as f:
+            while True:
+                chunk = await file.read(chunk_size)
+                if not chunk:
+                    break
+                total_size += len(chunk)
+                if total_size > MAX_UPLOAD_SIZE:
+                    tmp_target.unlink(missing_ok=True)
+                    raise HTTPException(status_code=413, detail='File too large (max 500MB)')
+                f.write(chunk)
+        tmp_target.rename(target)
+    except HTTPException:
+        raise
+    except Exception as e:
+        tmp_target.unlink(missing_ok=True)
+        raise HTTPException(status_code=500, detail=f'Upload failed: {e}')
+
+    return {'ok': True, 'path': str(target.relative_to(PIPELINE_DIR)), 'size': total_size}
 
 
 @router.get('/admin/pipeline/assets')
@@ -321,7 +339,12 @@ def admin_pipeline_start(
     audio_job_id = (audio_job_id or '').strip()
     audio_path = None
 
-    if audio_source == 'library' and selected_audio_track:
+    if audio_source == 'library':
+        if not selected_audio_track:
+            return RedirectResponse(
+                url=f'/admin/pipeline/new?slug={slug}&error=Bitte+einen+Audio-Track+aus+der+Bibliothek+wählen.',
+                status_code=303,
+            )
         for ext in ALLOWED_AUDIO_EXT:
             candidate = PIPELINE_DIR / 'data' / 'upload' / 'songs' / f'{selected_audio_track}{ext}'
             if candidate.exists():
@@ -552,13 +575,32 @@ def admin_pipeline_run_cancel(workflow_id: str):
     run = shared.db.get_workflow(workflow_id)
     if not run:
         raise HTTPException(status_code=404, detail='Run not found')
-    if run['status'] == 'queued':
-        shared.db.update_workflow(workflow_id, status='cancelled', finished_at=datetime.now(shared.CET).isoformat())
-        shared.db.append_workflow_log(workflow_id, 'system', 'Job aus Warteschlange entfernt.', datetime.now(shared.CET).isoformat())
-        return RedirectResponse(url=f'/admin/pipeline/run/{workflow_id}', status_code=303)
-    if run['status'] != 'running':
-        raise HTTPException(status_code=409, detail='Can only cancel running or queued pipelines')
-    cancel_run(workflow_id, shared.db)
+
+    now = datetime.now(shared.CET).isoformat()
+    status = run['status']
+    cancellable = {'queued', 'waiting_for_audio', 'running', 'uploading', 'created'}
+
+    if status not in cancellable:
+        raise HTTPException(status_code=409, detail=f'Cannot cancel workflow in status "{status}"')
+
+    if status == 'running':
+        # Running pipeline has a subprocess – kill it
+        cancel_run(workflow_id, shared.db)
+    elif status == 'waiting_for_audio':
+        # Cancel the linked audio job too
+        audio_job_id = run.get('audio_job_id')
+        if audio_job_id:
+            from app.audio_jobs import get_audio_generator
+            audio_job = shared.db.get_audio_job(audio_job_id)
+            if audio_job and audio_job.get('status') in ('queued', 'running'):
+                get_audio_generator().cancel(audio_job, shared.db)
+        shared.db.update_workflow(workflow_id, status='cancelled', finished_at=now)
+        shared.db.append_workflow_log(workflow_id, 'system', 'Workflow + Audio-Job abgebrochen.', now)
+    else:
+        # queued, uploading, created – just mark as cancelled
+        shared.db.update_workflow(workflow_id, status='cancelled', finished_at=now)
+        shared.db.append_workflow_log(workflow_id, 'system', f'Workflow abgebrochen (war: {status}).', now)
+
     return RedirectResponse(url=f'/admin/pipeline/run/{workflow_id}', status_code=303)
 
 

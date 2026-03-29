@@ -8,6 +8,7 @@ from typing import Any
 
 from app.pipeline_runner import start_run, trigger_upload
 from app.store import AgentSyncDB
+from app.workflow_orchestrator import _ensure_poll_thread
 
 _lock = threading.Lock()
 _worker_thread: threading.Thread | None = None
@@ -96,7 +97,10 @@ def _queue_worker(db: AgentSyncDB) -> None:
             wf_after = db.get_workflow(workflow_id)
             if wf_after and wf_after.get('status') == 'rendered' and config.get('auto_upload'):
                 db.append_workflow_log(workflow_id, 'system', f'Auto-Upload gestartet (public={config.get("public", False)})', _now_iso())
+                db.update_workflow(workflow_id, phase='upload')
                 trigger_upload(workflow_id, slug, config, db)
+                # Ensure orchestrator polls for upload→completed transition
+                _ensure_poll_thread(db)
         except Exception as exc:
             db.update_workflow(workflow_id, status='failed', error_message=f'Queue worker error: {exc}', finished_at=_now_iso())
             db.append_workflow_log(workflow_id, 'system', f'Queue worker error: {exc}', _now_iso())
