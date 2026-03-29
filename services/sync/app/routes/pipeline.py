@@ -93,6 +93,23 @@ def _detect_thumbnail_source(slug: str, selected_thumbnail: str | None, metadata
     }
 
 
+def _place_selected_thumbnail(slug: str, thumbnail_source: dict[str, Any]) -> None:
+    """Copy a library-selected thumbnail to data/upload/thumbnails/{slug}.ext so pipeline.py finds it."""
+    if thumbnail_source.get('type') != 'library':
+        return
+    src_path_str = thumbnail_source.get('path')
+    if not src_path_str:
+        return
+    src = PIPELINE_DIR / src_path_str
+    if not src.exists():
+        return
+    dest_dir = PIPELINE_DIR / 'data' / 'upload' / 'thumbnails'
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    dest = dest_dir / f'{slug}{src.suffix.lower()}'
+    if not dest.exists() or dest.stat().st_mtime < src.stat().st_mtime:
+        shutil.copy2(src, dest)
+
+
 def _detect_background_source(selected_background: str | None, theme: str) -> dict[str, Any]:
     selected_background = (selected_background or '').strip()
     bg_dir = PIPELINE_DIR / 'data' / 'assets' / 'backgrounds'
@@ -427,6 +444,7 @@ def admin_pipeline_start(
         metadata_path.write_text(json.dumps(metadata, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
 
         thumbnail_source = _detect_thumbnail_source(slug, thumbnail_file, metadata)
+        _place_selected_thumbnail(slug, thumbnail_source)
         bg_selected = (background_file or '').strip()
         if not bg_selected:
             bg_selected = (_resolve_background_from_house_variant(house, variant_key) or '').strip()
@@ -506,6 +524,7 @@ def admin_pipeline_start(
     metadata_path.write_text(json.dumps(metadata, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
 
     thumbnail_source = _detect_thumbnail_source(slug, thumbnail_file, metadata)
+    _place_selected_thumbnail(slug, thumbnail_source)
     bg_selected = (background_file or '').strip()
     if not bg_selected:
         bg_selected = (_resolve_background_from_house_variant(house, variant_key) or '').strip()
