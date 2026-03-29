@@ -40,6 +40,12 @@ PRESETS = {
         "reverb": "aecho=0.8:0.8:40|70:0.25|0.15",
         "loudnorm": "loudnorm=I=-16:TP=-1.5:LRA=11",
     },
+    "sleep": {
+        "desc": "Sleep-optimized – minimal processing, no mumpf, gentle space",
+        "eq": "highpass=f=40:poles=2,equalizer=f=300:t=q:w=1.5:g=-2,equalizer=f=3500:t=q:w=1:g=-1.5",
+        "reverb": "aecho=0.8:0.85:40:0.15",
+        "loudnorm": "loudnorm=I=-18:TP=-1.5:LRA=14",
+    },
     "raw": {
         "desc": "Nur Normalisierung, kein EQ/Reverb",
         "eq": "",
@@ -112,7 +118,7 @@ def main():
     parser = argparse.ArgumentParser(description="Audio Post-Processing")
     parser.add_argument("--input", required=True, help="Input Audio (MP3/WAV)")
     parser.add_argument("--output", required=True, help="Output Audio (MP3)")
-    parser.add_argument("--preset", default="ambient",
+    parser.add_argument("--preset", default="sleep",
                        choices=list(PRESETS.keys()),
                        help="Processing-Preset (default: ambient)")
     parser.add_argument("--no-reverb", action="store_true", help="Reverb überspringen")

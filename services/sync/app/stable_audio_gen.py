@@ -57,7 +57,7 @@ GPU_WORKER_STATUS_FILE = '/mnt/data/worker_status.json'
 GPU_WORKER_CODE_DIR = os.environ.get('GPU_WORKER_CODE_DIR', '/opt/stable-audio-worker')
 
 MODEL_NAME = 'stabilityai/stable-audio-open-1.0'
-MAX_CLIP_DURATION = 30  # reduced from 47 for 4GB RAM
+MAX_CLIP_DURATION = 47  # Stable Audio Open supports up to 47s
 SAMPLE_RATE = 44100
 
 # Polling config for daemon job completion
@@ -65,6 +65,26 @@ JOB_POLL_INTERVAL = 5  # seconds between status checks
 JOB_TIMEOUT = 600  # max seconds to wait for a single clip
 
 CET = timezone(timedelta(hours=1))
+
+# ── Clip-role system ──────────────────────────────────────────────────────
+CLIP_ROLES = {
+    "foundation": {
+        "pct": 50,
+        "modifier": "Stable, grounding, consistent base layer. No sudden changes.",
+    },
+    "texture": {
+        "pct": 25,
+        "modifier": "Subtle textural variation, gentle movement, complementary layer.",
+    },
+    "breathing_space": {
+        "pct": 15,
+        "modifier": "Minimal, spacious, near-silence, room to breathe.",
+    },
+    "motif": {
+        "pct": 10,
+        "modifier": "Gentle recurring theme element, memorable but subtle.",
+    },
+}
 
 
 class StableAudioGenerator(AudioGenerator):
@@ -215,16 +235,60 @@ class StableAudioGenerator(AudioGenerator):
             time.sleep(JOB_POLL_INTERVAL)
         return None  # timeout
 
+    # ── Clip-role helpers ────────────────────────────────────────────────
+    @staticmethod
+    def _assign_clip_roles(num_clips: int) -> list[str]:
+        """Return a list of role names distributed by CLIP_ROLES percentages."""
+        roles: list[str] = []
+        for role, cfg in CLIP_ROLES.items():
+            count = max(1, round(num_clips * cfg["pct"] / 100))
+            roles.extend([role] * count)
+        # Trim or pad to exact num_clips
+        roles = roles[:num_clips]
+        while len(roles) < num_clips:
+            roles.append("foundation")
+        return roles
+
+    # ── Similarity-based stitching helpers ────────────────────────────────
+    def _analyze_clip_loudness(self, remote_path: str) -> float:
+        """Run ffprobe volumedetect on the GPU worker and return mean_volume."""
+        cmd = (
+            f'ffmpeg -i {remote_path} -af volumedetect -f null /dev/null 2>&1 '
+            f'| grep mean_volume | sed "s/.*mean_volume: //" | sed "s/ dB//"'
+        )
+        result = self._ssh_run(cmd, timeout=30)
+        return float(result.stdout.strip())
+
+    @staticmethod
+    def _sort_clips_by_similarity(clips_with_loudness: list[tuple[str, float]]) -> list[str]:
+        """Order clips so adjacent ones have similar RMS (greedy nearest-neighbour)."""
+        if not clips_with_loudness:
+            return []
+        remaining = list(clips_with_loudness)
+        # Start with the clip closest to the median loudness
+        median_vol = sorted(v for _, v in remaining)[len(remaining) // 2]
+        remaining.sort(key=lambda x: abs(x[1] - median_vol))
+        ordered = [remaining.pop(0)]
+        while remaining:
+            last_vol = ordered[-1][1]
+            remaining.sort(key=lambda x: abs(x[1] - last_vol))
+            ordered.append(remaining.pop(0))
+        return [path for path, _ in ordered]
+
     def _run_job(self, job: dict[str, Any], db: AgentSyncDB) -> None:
         job_id = job['job_id']
         if self._job_cancelled(job_id, db):
             return
         slug = job['slug']
         prompts = job.get('prompts', []) or []
-        minutes = int(job.get('minutes') or 3)
+        unique_minutes = int(job.get('unique_minutes') or job.get('minutes') or 60)
         clip_seconds = min(int(job.get('clip_seconds') or MAX_CLIP_DURATION), MAX_CLIP_DURATION)
         steps = int(job.get('steps') or 50)
         crossfade = 4
+
+        # Sleep-first prompt architecture: base_dna + negative_prompt
+        base_dna = job.get('base_dna') or ''
+        negative_prompt = job.get('negative_prompt') or ''
 
         if not prompts:
             db.update_audio_job(job_id, status='error', finished_at=now_iso(),
@@ -247,9 +311,9 @@ class StableAudioGenerator(AudioGenerator):
         mode_str = 'daemon (model pre-loaded)' if use_daemon else 'single-shot (cold start)'
         db.append_audio_job_log(job_id, 'system', f"GPU: {health['gpu']} | Mode: {mode_str}", now_iso())
 
-        # Calculate clips needed
+        # Calculate clips needed (based on unique_minutes)
         effective_clip = clip_seconds - crossfade
-        num_clips = max(1, int((minutes * 60) / effective_clip) + 1)
+        num_clips = max(1, int((unique_minutes * 60) / effective_clip) + 1)
         total_duration = (num_clips * effective_clip + crossfade) / 60
 
         # Estimate render time: measured ~4s per step on GTX 1070 as initial guess
@@ -267,12 +331,25 @@ class StableAudioGenerator(AudioGenerator):
         if self._job_cancelled(job_id, db, log=True):
             return
 
+        # Assign clip roles
+        clip_roles = self._assign_clip_roles(num_clips)
+
         # Generate each clip
         remote_clips = []
         for i in range(num_clips):
             if self._job_cancelled(job_id, db, log=True):
                 return
             prompt = prompts[i % len(prompts)]
+
+            # Sleep-first prompt assembly
+            if base_dna:
+                prompt = f'{base_dna}. {prompt}'
+            role_name = clip_roles[i]
+            role_modifier = CLIP_ROLES[role_name]['modifier']
+            prompt = f'{prompt}. {role_modifier}'
+            if negative_prompt:
+                prompt = f'{prompt} Avoid: {negative_prompt}'
+
             clip_slug = f'{job_id}_clip_{i:03d}'
             remote_path = f'{GPU_WORKER_OUTPUT_DIR}/{clip_slug}.wav'
 
@@ -282,7 +359,7 @@ class StableAudioGenerator(AudioGenerator):
             est_label = "" if actual_clip_duration else " (Schätzung)"
             db.append_audio_job_log(
                 job_id, 'system',
-                f"Generating clip {i + 1}/{num_clips} (~{spc:.0f}s/clip, ~{est_remaining:.0f} min übrig{est_label}): \"{prompt[:80]}\"",
+                f"Generating clip {i + 1}/{num_clips} [role:{role_name}] (~{spc:.0f}s/clip, ~{est_remaining:.0f} min übrig{est_label}): \"{prompt[:80]}\"",
                 now_iso(),
             )
 
@@ -367,6 +444,19 @@ class StableAudioGenerator(AudioGenerator):
 
         if self._job_cancelled(job_id, db, log=True):
             return
+
+        # Similarity-based clip ordering
+        if len(remote_clips) > 1:
+            db.append_audio_job_log(job_id, 'system', 'Analyzing clip loudness for similarity-based stitching...', now_iso())
+            try:
+                clips_with_loudness = []
+                for rp in remote_clips:
+                    vol = self._analyze_clip_loudness(rp)
+                    clips_with_loudness.append((rp, vol))
+                remote_clips = self._sort_clips_by_similarity(clips_with_loudness)
+                db.append_audio_job_log(job_id, 'system', 'Clips reordered by loudness similarity.', now_iso())
+            except Exception as e:
+                db.append_audio_job_log(job_id, 'system', f'Similarity sorting failed ({e}), using original order.', now_iso())
 
         # Stitch clips with crossfade
         if len(remote_clips) > 1:

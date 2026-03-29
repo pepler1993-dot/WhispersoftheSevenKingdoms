@@ -41,8 +41,10 @@ def loop_audio(input_path, output_path, target_hours=3, crossfade_seconds=8):
     effective_duration = duration - crossfade_seconds
     repeats = int(target_seconds / effective_duration) + 1
 
+    ratio = target_seconds / duration if duration > 0 else 0
     print(f"📎 Input: {input_path} ({duration:.0f}s = {duration/60:.1f} Min)")
     print(f"🎯 Ziel: {target_hours}h ({target_seconds}s)")
+    print(f"📊 Ratio: {duration/60:.1f} min unique material → {target_hours}h target ({ratio:.1f}× loop)")
     print(f"🔁 Wiederholungen: {repeats} mit {crossfade_seconds}s Crossfade")
 
     output_path.parent.mkdir(parents=True, exist_ok=True)

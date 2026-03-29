@@ -108,6 +108,46 @@
         "prompt": "Endless blizzard, pure white and dark blue, barely visible landscape, absolute winter, minimal, 1920x1080",
         "bg_key": "stark_longnight"
       }
+    },
+    "prompt_mode": "sleep",
+    "base_dna": "Frozen ambient sleep music. Very slow, very quiet, minimal evolution. No drums, no vocals, no percussion.",
+    "negative_prompt": "drums, vocals, percussion, fast tempo, major keys",
+    "variant_tags": {
+      "winterfell": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "godswood": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "the_crypts": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "beyond_winterfell": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "the_long_night": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      }
     }
   },
   "lannister": {
@@ -219,6 +259,46 @@
         "prompt": "Grand banquet hall with roaring fireplace, long wooden table, warm candlelight, red and gold tapestries, 1920x1080",
         "bg_key": "lannister_feast"
       }
+    },
+    "prompt_mode": "sleep",
+    "base_dna": "Royal warm ambient sleep music. Very slow, gentle classical warmth. No drums, no vocals, no harsh sounds.",
+    "negative_prompt": "drums, vocals, harsh sounds, minor keys, dark tones",
+    "variant_tags": {
+      "casterly_rock": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "kings_landing": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "castamere": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "the_sept": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "lannister_feast": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      }
     }
   },
   "targaryen": {
@@ -328,6 +408,46 @@
       "fire_and_blood": {
         "prompt": "Ritual fire in ancient temple, dragon eggs, red and black atmosphere, primal power, 1920x1080",
         "bg_key": "targaryen_fire"
+      }
+    },
+    "prompt_mode": "sleep",
+    "base_dna": "Ethereal dark ambient sleep music. Mysterious, otherworldly, very slow. No drums, no vocals, no modern electronic.",
+    "negative_prompt": "drums, vocals, modern electronic, cheerful tones",
+    "variant_tags": {
+      "dragonstone": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "old_valyria": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "dragons_lair": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "the_painted_table": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "fire_and_blood": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
       }
     }
   },
@@ -439,6 +559,46 @@
         "prompt": "Rocky coastline with violent waves at night, lighthouse beam cutting through fog, 1920x1080",
         "bg_key": "baratheon_shipbreaker"
       }
+    },
+    "prompt_mode": "sleep",
+    "base_dna": "Storm ambient sleep music. Deep warmth, thunder and rain textures, very slow. No vocals, no fast rhythms.",
+    "negative_prompt": "vocals, fast rhythms, cheerful tones, high-pitched sounds",
+    "variant_tags": {
+      "storms_end": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "the_stormlands": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "roberts_rebellion": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "the_great_hall": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "shipbreaker_bay": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      }
     }
   },
   "arryn": {
@@ -549,6 +709,46 @@
         "prompt": "Open-air prison cell on cliff edge, stars visible, vast night sky, freedom in captivity, 1920x1080",
         "bg_key": "arryn_skycells"
       }
+    },
+    "prompt_mode": "sleep",
+    "base_dna": "High altitude crystal ambient sleep music. Pure, thin air tranquility, very slow. No drums, no vocals, no bass-heavy sounds.",
+    "negative_prompt": "drums, vocals, bass-heavy sounds, dark tones",
+    "variant_tags": {
+      "the_eyrie": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "the_vale": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "the_moon_door": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "the_bloody_gate": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "sky_cells": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      }
     }
   },
   "tully": {
@@ -658,6 +858,46 @@
       "the_twins": {
         "prompt": "Twin castle towers connected by stone bridge over wide river, moonlight, 1920x1080",
         "bg_key": "tully_twins"
+      }
+    },
+    "prompt_mode": "sleep",
+    "base_dna": "River ambient sleep music. Gentle flowing water, pastoral warmth, very slow. No drums, no vocals, no electronic sounds.",
+    "negative_prompt": "drums, vocals, electronic sounds, dark tones",
+    "variant_tags": {
+      "riverrun": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "the_trident": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "the_riverlands": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "harrenhal": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "the_twins": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
       }
     }
   },
@@ -770,6 +1010,46 @@
         "prompt": "Moonlit rose garden with fountain, fireflies, night-blooming flowers, magical, 1920x1080",
         "bg_key": "tyrell_rosegarden"
       }
+    },
+    "prompt_mode": "sleep",
+    "base_dna": "Pastoral garden ambient sleep music. Warm, gentle, sunlit atmosphere, very slow. No drums, no vocals, no dark tones.",
+    "negative_prompt": "drums, vocals, dark tones, minor keys, electronic",
+    "variant_tags": {
+      "highgarden": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "the_reach": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "oldtown": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "the_arbor": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "rose_garden": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      }
     }
   },
   "greyjoy": {
@@ -879,6 +1159,46 @@
       "old_wyk": {
         "prompt": "Ancient island with standing stones on cliff, prehistoric atmosphere, moss and lichen, 1920x1080",
         "bg_key": "greyjoy_oldwyk"
+      }
+    },
+    "prompt_mode": "sleep",
+    "base_dna": "Deep ocean dark ambient sleep music. Underwater drones, salt wind, very slow. No vocals, no fast rhythms, no bright tones.",
+    "negative_prompt": "vocals, fast rhythms, bright tones, cheerful sounds",
+    "variant_tags": {
+      "pyke": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "the_iron_islands": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "the_drowned_god": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "the_silence": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "old_wyk": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
       }
     }
   },
@@ -990,6 +1310,46 @@
         "prompt": "Ancient sandstone fortress in desert, wind-worn walls, sunset, unbowed strength, 1920x1080",
         "bg_key": "martell_sandship"
       }
+    },
+    "prompt_mode": "sleep",
+    "base_dna": "Warm desert night ambient sleep music. Oasis tranquility, exotic warmth, very slow. No drums, no vocals, no cold sounds.",
+    "negative_prompt": "drums, vocals, western instruments, cold sounds",
+    "variant_tags": {
+      "sunspear": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "water_gardens": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "the_desert": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "the_shadow_city": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "the_sandship": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      }
     }
   },
   "the_wall": {
@@ -1100,6 +1460,46 @@
       "hardhome": {
         "prompt": "Abandoned wildling village in snow, broken structures, eerie silence, Arctic, 1920x1080",
         "bg_key": "wall_hardhome"
+      }
+    },
+    "prompt_mode": "sleep",
+    "base_dna": "Extreme frozen dark ambient sleep music. Arctic desolation, deep bass drones, very slow. No vocals, no melody, no warmth.",
+    "negative_prompt": "vocals, melody, warmth, rhythm, hope",
+    "variant_tags": {
+      "castle_black": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "the_wall_top": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "beyond_the_wall": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "the_haunted_forest": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
+      },
+      "hardhome": {
+        "prompt_tags": {
+          "sleep_safe": true,
+          "foreground_density": "low",
+          "event_density": "low"
+        }
       }
     }
   }
