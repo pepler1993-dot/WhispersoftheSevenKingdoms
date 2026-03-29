@@ -412,11 +412,12 @@ class AgentSyncDB:
         return [self._row_to_workflow(row) for row in rows]
 
     def list_active_workflows(self) -> list[dict[str, Any]]:
-        """Get workflows that need polling (running or waiting for audio)."""
+        """Get workflows that need polling (any non-terminal state or upload phase)."""
         with self._connect() as conn:
             rows = conn.execute(
-                "SELECT * FROM workflows WHERE status IN ('running', 'waiting_for_audio') "
-                "OR (phase = 'audio' AND status NOT IN ('error', 'cancelled', 'completed')) "
+                "SELECT * FROM workflows "
+                "WHERE status IN ('running', 'waiting_for_audio', 'uploading', 'uploaded') "
+                "OR (phase IN ('audio', 'upload') AND status NOT IN ('error', 'cancelled', 'completed', 'failed')) "
                 "ORDER BY created_at ASC"
             ).fetchall()
         return [self._row_to_workflow(row) for row in rows]

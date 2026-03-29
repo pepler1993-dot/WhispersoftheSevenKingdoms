@@ -112,7 +112,11 @@ def start_run(workflow_id: str, slug: str, config: dict[str, Any], db: AgentSync
     stdout_thread.join(timeout=5)
     stderr_thread.join(timeout=5)
 
-    if exit_code == 0:
+    # Check if already cancelled (race condition: cancel_run sets cancelled before proc exits)
+    current = db.get_workflow(workflow_id)
+    if current and current.get('status') == 'cancelled':
+        db.append_workflow_log(workflow_id, 'system', f'Process exited with code {exit_code} (already cancelled)', _now_iso())
+    elif exit_code == 0:
         db.update_workflow(workflow_id, status='rendered', finished_at=_now_iso(), pid=None)
         db.append_workflow_log(workflow_id, 'system', 'Pipeline finished successfully', _now_iso())
     else:
@@ -176,14 +180,22 @@ def trigger_upload(workflow_id: str, slug: str, config: dict[str, Any], db: Agen
             stdout_t.join(timeout=5)
             stderr_t.join(timeout=5)
 
-            if exit_code == 0:
+            # Check if cancelled during upload (race condition protection)
+            current = db.get_workflow(workflow_id)
+            already_cancelled = current and current.get('status') == 'cancelled'
+
+            if already_cancelled:
+                db.append_workflow_log(workflow_id, 'system', f'Upload exited with code {exit_code} (already cancelled)', _now_iso())
+            elif exit_code == 0:
                 db.update_workflow(workflow_id, status='uploaded', finished_at=_now_iso())
                 db.append_workflow_log(workflow_id, 'system', 'YouTube upload completed', _now_iso())
             else:
                 db.update_workflow(workflow_id, status='rendered', error_message=f'Upload failed (exit {exit_code})')
                 db.append_workflow_log(workflow_id, 'system', f'Upload failed with exit code {exit_code}', _now_iso())
         except Exception as exc:
-            db.update_workflow(workflow_id, status='rendered', error_message=f'Upload error: {exc}')
+            current = db.get_workflow(workflow_id)
+            if current and current.get('status') != 'cancelled':
+                db.update_workflow(workflow_id, status='rendered', error_message=f'Upload error: {exc}')
             db.append_workflow_log(workflow_id, 'system', f'Upload error: {exc}', _now_iso())
 
     threading.Thread(target=_upload, daemon=True).start()
