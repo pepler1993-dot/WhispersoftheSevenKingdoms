@@ -1042,6 +1042,10 @@
             document.getElementById('variant_key').value = vKey;
             document.getElementById('theme').value = vName;
             applyThumbnailBriefToForm(mergeVariantThumbnailBrief(house, vKey));
+            // Re-apply mood from house preset so mood is never lost after variant selection
+            const houseMoodOnVariant = house.mood || 'calm';
+            buildMoodTags(['calm', 'cold', 'dark', 'warm', 'mystical', 'melancholic', 'exotic', 'meditative', 'ethereal', 'frozen', 'oceanic', 'pastoral', 'peaceful', 'stormy'], [houseMoodOnVariant]);
+            updateReviewSummary();
             // Auto-select background image from preset
             const bgPrompts = house.background_prompts || {};
             const bgData = bgPrompts[vKey];
