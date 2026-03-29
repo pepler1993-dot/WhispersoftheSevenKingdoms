@@ -460,6 +460,7 @@ def admin_library_preview(asset_type: str, filename: str):
     mapping = {
         'songs': PIPELINE_DIR / 'data' / 'upload' / 'songs',
         'thumbnails': PIPELINE_DIR / 'data' / 'upload' / 'thumbnails',
+        'output-thumbnails': PIPELINE_DIR / 'data' / 'output' / 'thumbnails',
         'backgrounds': PIPELINE_DIR / 'data' / 'assets' / 'backgrounds',
         'metadata': PIPELINE_DIR / 'data' / 'upload' / 'metadata',
     }

@@ -208,8 +208,19 @@
         </div>
       </div>
 
-    <!-- Thumbnail: Library optional hidden; Hintergrund wie zuvor sichtbar, Standard aus Preset -->
-    <input type="hidden" name="thumbnail_file" id="library-thumbnail" value="" />
+    <!-- Thumbnail: sichtbare Library-Auswahl + Hintergrund -->
+    <div class="form-group library-audio-row">
+      <label for="library-thumbnail">🖼️ Thumbnail-Library</label>
+      <select id="library-thumbnail" name="thumbnail_file" class="form-select" autocomplete="off">
+        <option value="">— Automatisch / aus Briefing —</option>
+        {% for thumb in library_thumbnails %}
+        <option value="{{ thumb }}">{{ thumb }}</option>
+        {% endfor %}
+      </select>
+      <div id="thumb-preview" style="margin-top:10px; display:none;">
+        <img id="thumb-preview-img" src="" alt="Thumbnail-Preview" style="width:100%; max-width:480px; border-radius:8px; border:1px solid rgba(255,255,255,0.1);" />
+      </div>
+    </div>
     <div class="form-group library-audio-row">
       <label for="library-background">🎞️ Video-Hintergrund</label>
       <select id="library-background" name="background_file" class="form-select" autocomplete="off">
@@ -1180,6 +1191,8 @@
 
   function updateThumbnailSourcePreview() {
     const preview = document.getElementById('thumbnail-source-preview');
+    const thumbPreview = document.getElementById('thumb-preview');
+    const thumbImg = document.getElementById('thumb-preview-img');
     if (!preview) return;
     const selected = document.getElementById('library-thumbnail').value;
     const slug = document.getElementById('slug').value;
@@ -1188,8 +1201,13 @@
 
     if (selected) {
       preview.innerHTML = 'Voraussichtliche Thumbnail-Quelle: <strong>Aus Thumbnail-Library gewählt</strong> · ' + selected;
+      if (thumbPreview && thumbImg) {
+        thumbImg.src = '/admin/library/preview/output-thumbnails/' + selected;
+        thumbPreview.style.display = 'block';
+      }
       return;
     }
+    if (thumbPreview) thumbPreview.style.display = 'none';
     if (slug) {
       if (scene || text) {
         preview.innerHTML = 'Voraussichtliche Thumbnail-Quelle: <strong>Wird aus dem Thumbnail-Briefing generiert</strong>';
