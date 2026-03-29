@@ -60,7 +60,7 @@ def admin_audio_generate(
     slug: str = Form(...),
     title: str = Form(''),
     prompt_text: str = Form(''),
-    minutes: int = Form(42),
+    minutes: int = Form(60),
     model: str = Form('medium'),
     clip_seconds: int = Form(47),
     steps: int = Form(50),

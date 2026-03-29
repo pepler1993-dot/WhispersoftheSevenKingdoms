@@ -298,7 +298,7 @@ def save_preset(
     mood: str = Form('calm'),
     motto: str = Form(''),
     seat: str = Form(''),
-    minutes: int = Form(20),
+    minutes: int = Form(60),
     loop_hours: int = Form(3),
     crossfade: int = Form(8),
     audio_preset: str = Form('ambient'),

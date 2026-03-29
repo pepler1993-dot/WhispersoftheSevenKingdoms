@@ -268,7 +268,7 @@ def admin_pipeline_assets():
 def admin_pipeline_start(
     title: str = Form(...),
     theme: str = Form(...),
-    minutes: int = Form(42),
+    minutes: int = Form(60),
     loop_hours: float = Form(0),
     crossfade: int = Form(8),
     audio_preset: str = Form('ambient'),
@@ -297,7 +297,7 @@ def admin_pipeline_start(
     audio_source: str = Form('library'),
     selected_audio_track: str = Form(''),
     audio_job_id: str = Form(''),
-    gen_minutes: int = Form(42),
+    gen_minutes: int = Form(60),
     gen_steps: int = Form(50),
     gen_model: str = Form('medium'),
     gen_prompt: str = Form(''),
