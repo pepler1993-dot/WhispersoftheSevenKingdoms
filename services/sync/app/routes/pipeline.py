@@ -44,6 +44,17 @@ def _detect_thumbnail_source(slug: str, selected_thumbnail: str | None, metadata
     output_dir = PIPELINE_DIR / 'data' / 'output' / 'thumbnails'
 
     if selected_thumbnail:
+        # Handle slug-prefixed YouTube output thumbnails (e.g. "my-slug--thumbnail.jpg")
+        if '--' in selected_thumbnail:
+            yt_slug, yt_filename = selected_thumbnail.split('--', 1)
+            yt_path = PIPELINE_DIR / 'data' / 'output' / 'youtube' / yt_slug / yt_filename
+            return {
+                'type': 'library',
+                'label': f'Pipeline-Thumbnail ({yt_slug})',
+                'path': str(yt_path.relative_to(PIPELINE_DIR)) if yt_path.exists() else f'data/output/youtube/{yt_slug}/{yt_filename}',
+                'filename': selected_thumbnail,
+                'fallback_reason': None,
+            }
         selected_path = output_dir / selected_thumbnail
         return {
             'type': 'library',
@@ -194,8 +205,21 @@ def admin_pipeline_new(request: Request, slug: str | None = Query(default=None),
     houses = _load_house_templates()
     workflows = shared.db.list_workflows(type='video', limit=100)
     library_tracks = list_library_tracks_for_pipeline(shared.db)
-    thumb_dir = Path(__file__).resolve().parent.parent.parent.parent / 'data' / 'output' / 'thumbnails'
-    library_thumbnails = sorted(f.name for f in thumb_dir.iterdir() if f.is_file() and f.suffix in {'.jpg', '.jpeg', '.png', '.webp'}) if thumb_dir.exists() else []
+    # Collect thumbnails from both manual output dir and pipeline-generated YouTube outputs
+    thumb_dir = PIPELINE_DIR / 'data' / 'output' / 'thumbnails'
+    yt_output_dir = PIPELINE_DIR / 'data' / 'output' / 'youtube'
+    _thumb_exts = {'.jpg', '.jpeg', '.png', '.webp'}
+    _thumbs = set()
+    if thumb_dir.exists():
+        _thumbs.update(f.name for f in thumb_dir.iterdir() if f.is_file() and f.suffix.lower() in _thumb_exts)
+    if yt_output_dir.exists():
+        for slug_dir in yt_output_dir.iterdir():
+            if slug_dir.is_dir():
+                for f in slug_dir.iterdir():
+                    if f.name.startswith('thumbnail') and f.suffix.lower() in _thumb_exts:
+                        # Use slug-prefixed name to avoid collisions
+                        _thumbs.add(f'{slug_dir.name}--{f.name}')
+    library_thumbnails = sorted(_thumbs)
     bg_dir = PIPELINE_DIR / 'data' / 'assets' / 'backgrounds'
     library_backgrounds = sorted(f.name for f in bg_dir.iterdir() if f.is_file() and f.suffix.lower() in {'.jpg', '.jpeg', '.png', '.webp'}) if bg_dir.exists() else []
     prefill_slug = (slug or '').strip().lower()
