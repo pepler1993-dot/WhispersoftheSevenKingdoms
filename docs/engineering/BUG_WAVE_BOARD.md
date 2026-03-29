@@ -51,6 +51,12 @@ Typische Fälle:
 
 ## Aktueller Board-Stand
 
+### Status-Snapshot
+- **Offene P0:** 0
+- **Offene P1:** 3 (`#156`, `#157`, `#158`)
+- **Offene P2:** 1 (`#159`)
+- **Stable-Gate:** noch **nicht** freigabefähig, weil offene P1-Bugs und Regression noch nicht als gelaufen dokumentiert sind
+
 ### P0
 Aktuell keine offen bestätigten P0-Issues im neuen Bug-Set.
 
@@ -118,3 +124,18 @@ Eine Freigabe für einen Stable-Stand darf nur vorbereitet werden, wenn:
 - P0 = 0 offen
 - P1 entweder behoben oder bewusst als nicht-blockierend akzeptiert
 - Regression-Checkliste einmal sauber gegen den realen Stand gelaufen ist
+
+## Aktuelle Stable-Bewertung
+
+### Stand jetzt
+- **P0:** frei
+- **P1:** noch offen (`#156`, `#157`, `#158`)
+- **P2:** offen, aber nicht automatisch blockierend (`#159`)
+- **Regression:** noch nicht als komplett gelaufen dokumentiert
+
+### Aktuelle Aussage
+**Noch kein Stable-Freigabe-Stand.**
+
+Blocker im Moment:
+1. offene P1-Bugs im sichtbaren Hauptprodukt
+2. keine abgeschlossene Regression-Dokumentation für Dashboard / Create / Shorts / Workflow / Upload

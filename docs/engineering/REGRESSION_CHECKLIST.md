@@ -72,3 +72,11 @@ Stable ist nur vorbereitbar, wenn:
 - [ ] alle betroffenen P1-Bugs geprüft wurden
 - [ ] Hauptpfad Dashboard → Create → Workflow → Upload nicht offensichtlich bricht
 - [ ] Smoke-Checks grün sind
+
+## Aktueller Freigabe-Status
+
+Stand jetzt:
+- [x] keine offenen P0-Bugs bekannt
+- [ ] P1-Bugs vollständig abgearbeitet
+- [ ] Hauptpfad als regressionsgeprüft dokumentiert
+- [ ] Smoke-Checks grün dokumentiert
