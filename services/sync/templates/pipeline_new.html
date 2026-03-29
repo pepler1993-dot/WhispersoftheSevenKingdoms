@@ -99,10 +99,10 @@
     <!-- Hidden defaults (filled by JS from house template) -->
     <input type="hidden" id="slug" />
     <input type="hidden" name="theme" id="theme" />
-    <input type="hidden" name="minutes" id="minutes" value="20" />
+    <input type="hidden" name="minutes" id="minutes" value="60" />
     <input type="hidden" name="loop_hours" id="loop_hours" value="3" />
     <input type="hidden" name="crossfade" id="crossfade" value="8" />
-    <input type="hidden" name="audio_preset" id="audio_preset" value="ambient" />
+    <input type="hidden" name="audio_preset" id="audio_preset" value="sleep" />
     <input type="hidden" name="music_style" id="music_style" />
     <input type="hidden" name="music_influences" id="music_influences" />
     <input type="hidden" name="music_tempo" id="music_tempo" value="slow" />
@@ -166,7 +166,7 @@
             <div class="grid two">
               <div class="form-group">
                 <label for="gen-minutes">Dauer (Min)</label>
-                <input type="number" id="gen-minutes" class="form-input" value="20" min="1" max="120" />
+                <input type="number" id="gen-minutes" class="form-input" value="60" min="1" max="120" />
               </div>
               <div class="form-group">
                 <label for="gen-steps">Steps</label>
@@ -191,7 +191,7 @@
       </div>
       <input type="hidden" name="audio_job_id" id="audio_job_id" />
       <input type="hidden" name="audio_source" id="audio_source" value="generate" />
-      <input type="hidden" name="gen_minutes" id="gen_minutes_hidden" value="20" />
+      <input type="hidden" name="gen_minutes" id="gen_minutes_hidden" value="60" />
       <input type="hidden" name="gen_steps" id="gen_steps_hidden" value="50" />
       <input type="hidden" name="gen_model" id="gen_model_hidden" value="medium" />
       <input type="hidden" name="gen_prompt" id="gen_prompt_hidden" value="" />
@@ -246,7 +246,7 @@
         <div class="grid two">
           <div class="form-group">
             <label for="adv-minutes">Dauer (Minuten)</label>
-            <input type="number" id="adv-minutes" class="form-input" value="20" min="1" max="720" />
+            <input type="number" id="adv-minutes" class="form-input" value="60" min="1" max="720" />
           </div>
           <div class="form-group">
             <label for="adv-loop">Loop (Stunden)</label>
@@ -261,6 +261,7 @@
           <div class="form-group">
             <label for="adv-preset">Audio-Preset</label>
             <select id="adv-preset" class="form-select">
+              <option value="sleep" selected>😴 Sleep</option>
               <option value="ambient">🌙 Ambient</option>
               <option value="dark">🖤 Dark</option>
               <option value="gentle">☁️ Gentle</option>
@@ -963,18 +964,18 @@
 
       // defaults
       const d = house.defaults || {};
-      document.getElementById('minutes').value = d.minutes || 20;
+      document.getElementById('minutes').value = d.minutes || 60;
       document.getElementById('loop_hours').value = d.loop_hours || 3;
       document.getElementById('crossfade').value = d.crossfade || 8;
-      document.getElementById('audio_preset').value = d.audio_preset || 'ambient';
+      document.getElementById('audio_preset').value = d.audio_preset || 'sleep';
       document.getElementById('music_tempo').value = d.music_tempo || 'slow';
       document.getElementById('music_energy').value = d.music_energy || 'low';
 
       // advanced fields
-      document.getElementById('adv-minutes').value = d.minutes || 20;
+      document.getElementById('adv-minutes').value = d.minutes || 60;
       document.getElementById('adv-loop').value = d.loop_hours || 3;
       document.getElementById('adv-crossfade').value = d.crossfade || 8;
-      document.getElementById('adv-preset').value = d.audio_preset || 'ambient';
+      document.getElementById('adv-preset').value = d.audio_preset || 'sleep';
 
       // music brief
       const mb = house.music_brief || {};
@@ -1249,7 +1250,7 @@
     name.textContent = vLabel ? (house.display_name + ' · ' + vLabel) : (house.display_name + ' – Variante wählen');
     const pc = lines.length;
     info.textContent = pc
-      ? (pc + ' Prompts (Variante) · ' + (house.defaults?.minutes || 20) + ' Min · Stable Audio Local')
+      ? (pc + ' Prompts (Variante) · ' + (house.defaults?.minutes || 60) + ' Min · Stable Audio Local')
       : ('Keine Variante gewählt — Prompts nur pro Variante.');
     document.getElementById('gen_prompt_hidden').value = lines.join('\n');
     if (btn) btn.disabled = !pc;
@@ -1288,7 +1289,7 @@
     fd.append('minutes', minutes);
     fd.append('steps', steps);
     fd.append('model', model);
-    fd.append('clip_seconds', '30');
+    fd.append('clip_seconds', '47');
 
     fetch('/admin/audio/generate', { method: 'POST', body: fd, redirect: 'manual' })
       .then(r => {
