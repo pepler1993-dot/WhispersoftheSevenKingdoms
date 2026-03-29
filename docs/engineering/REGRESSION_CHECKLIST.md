@@ -42,18 +42,23 @@ Sie ist absichtlich knapp und auf die echten Hauptpfade fokussiert.
 - [ ] Progress-/Status-Anzeige wirkt konsistent
 - [ ] keine offensichtlichen Widersprüche zwischen Status, Phase und UI-Anzeige
 - [ ] laufende / fehlgeschlagene / fertige Zustände sind unterscheidbar
+- [ ] Auto-Upload endet sichtbar sauber im finalen Abschlusszustand
+- [ ] Cancel wurde für `queued`, `waiting_for_audio`, `running` und `uploading` geprüft
 
 ## 5. Audio / Library / Generation
 
 - [ ] Audio-Library-Auswahl verhält sich nachvollziehbar
+- [ ] bei Library-Modus ohne explizite Auswahl passiert kein stiller Fallback
 - [ ] Audio-Generation startet ohne offensichtlichen UI-/Route-Bruch
 - [ ] bekannte Defaults sind konsistent zwischen UI und Backend
+- [ ] Thumbnail-Library auf der Create-Seite ist korrekt befüllt
 
 ## 6. Upload / Publish
 
 - [ ] Upload-Startpfad ist technisch intakt
 - [ ] OAuth-/Token-Fehler sind klar diagnostizierbar und nicht irreführend
 - [ ] Publish-/Upload-Status wird nachvollziehbar angezeigt
+- [ ] Upload-/Asset-Handling verhält sich robust auch bei größeren Dateien
 
 ## 7. Smoke / Basis-Checks
 
@@ -78,5 +83,6 @@ Stable ist nur vorbereitbar, wenn:
 Stand jetzt:
 - [x] keine offenen P0-Bugs bekannt
 - [ ] P1-Bugs vollständig abgearbeitet
+- [ ] Reproduktion, Ursache, Fix und Verifikation für neue Review-P1s dokumentiert
 - [ ] Hauptpfad als regressionsgeprüft dokumentiert
 - [ ] Smoke-Checks grün dokumentiert

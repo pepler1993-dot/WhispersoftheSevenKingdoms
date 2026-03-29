@@ -53,7 +53,7 @@ Typische Fälle:
 
 ### Status-Snapshot
 - **Offene P0:** 0
-- **Offene P1:** 3 (`#156`, `#157`, `#158`)
+- **Offene P1:** 7 (`#156`, `#157`, `#158` + neue P1-Stabilitätspunkte aus Review)
 - **Offene P2:** 1 (`#159`)
 - **Stable-Gate:** noch **nicht** freigabefähig, weil offene P1-Bugs und Regression noch nicht als gelaufen dokumentiert sind
 
@@ -82,6 +82,46 @@ Aktuell keine offen bestätigten P0-Issues im neuen Bug-Set.
 - **Vermutete Ursache:** Preset-Auswahl befüllt abhängige Zustände/Felder nicht vollständig
 - **Fix-Richtung:** Preset-Verhalten an den stabilen Haupt-Create-Flow angleichen
 - **Verifikation:** sichtbare Felder werden konsistent vorausgefüllt, keine leeren Mood-/Preset-Felder
+
+#### P1-A – Auto-Upload-Endstatus nicht sauber finalisiert
+- **Owner:** Smith
+- **Bereich:** Backend / Orchestrator / Upload
+- **Reproduktion:** Create → Render → Auto-Upload → finalen Workflow-Status prüfen
+- **Vermutete Ursache:** Upload landet auf `uploaded`, aber Abschluss zu `completed` / `phase=done` wird nicht zuverlässig bis zum Ende nachgezogen
+- **Fix-Richtung:** Endstatus im Queue-/Orchestrator-Pfad sauber finalisieren
+- **Verifikation:** erfolgreicher Auto-Upload endet sichtbar konsistent im finalen Abschlusszustand
+
+#### P1-B – Cancel unvollständig für Zwischenzustände
+- **Owner:** Smith + Pako (manuelle Repros)
+- **Bereich:** Backend / Workflow-Steuerung / UI-Verhalten
+- **Reproduktion:** Cancel für `queued`, `waiting_for_audio`, `running`, `uploading` testen
+- **Vermutete Ursache:** Cancel behandelt aktuell nur Teilmengen der Runtime-Zustände zuverlässig
+- **Fix-Richtung:** Cancel-Verhalten für alle relevanten Hauptpfad-Zustände vereinheitlichen
+- **Verifikation:** Cancel stoppt sichtbar und konsistent in allen vier Zuständen ohne hängenden Mischzustand
+
+#### P1-C – Library-Modus hat möglicherweise stillen Fallback
+- **Owner:** Smith + Pako (UI-/Flow-Verifikation)
+- **Bereich:** Create-Flow / Audio-Library / Contract
+- **Reproduktion:** `audio_source=library` ohne explizit gewählten Track testen
+- **Vermutete Ursache:** alter slug-basierter Fallback greift still statt harter eindeutiger Auswahl
+- **Fix-Richtung:** Verhalten hart machen; ohne Auswahl kein versteckter Fallback
+- **Verifikation:** ohne expliziten Library-Track gibt es keinen stillen Ersatzpfad; UI/Fehlermeldung ist klar
+
+#### P1-D – Upload-Asset RAM-Verhalten robust machen
+- **Owner:** Smith
+- **Bereich:** Upload / Publish / Robustheit
+- **Reproduktion:** Upload-Asset-Pfad auf große Dateien prüfen
+- **Vermutete Ursache:** Datei wird vor Größenprüfung vollständig in den Speicher gelesen
+- **Fix-Richtung:** Größen-/Upload-Handling robust machen, ohne Voll-Load als Vorbedingung
+- **Verifikation:** große Upload-Artefakte werden ohne unnötigen Full-Memory-Load geprüft/verarbeitet
+
+#### P1-E – Thumbnail-Library auf Create-Seite ggf. falscher Pfad
+- **Owner:** Pako
+- **Bereich:** UI / Create / Asset-Library
+- **Reproduktion:** Create-Seite öffnen und Thumbnail-Library-Befüllung prüfen
+- **Vermutete Ursache:** Pfad in `admin_pipeline_new()` zeigt evtl. nicht auf den echten Thumbnail-Output-Ordner
+- **Fix-Richtung:** Pfad und Library-Befüllung an realen Output-Stand angleichen
+- **Verifikation:** Library listet die erwarteten Thumbnail-Assets korrekt
 
 ### P2
 
@@ -129,7 +169,7 @@ Eine Freigabe für einen Stable-Stand darf nur vorbereitet werden, wenn:
 
 ### Stand jetzt
 - **P0:** frei
-- **P1:** noch offen (`#156`, `#157`, `#158`)
+- **P1:** noch offen (`#156`, `#157`, `#158` + P1-A bis P1-E aus aktuellem Review)
 - **P2:** offen, aber nicht automatisch blockierend (`#159`)
 - **Regression:** noch nicht als komplett gelaufen dokumentiert
 
@@ -137,5 +177,6 @@ Eine Freigabe für einen Stable-Stand darf nur vorbereitet werden, wenn:
 **Noch kein Stable-Freigabe-Stand.**
 
 Blocker im Moment:
-1. offene P1-Bugs im sichtbaren Hauptprodukt
-2. keine abgeschlossene Regression-Dokumentation für Dashboard / Create / Shorts / Workflow / Upload
+1. offene P1-Bugs im sichtbaren Hauptprodukt und im Hauptpfad-Backend
+2. neue Review-P1s zu Auto-Upload-Endstatus, Cancel, Library-Fallback, Upload-Robustheit und Thumbnail-Library sind noch offen
+3. keine abgeschlossene Regression-Dokumentation für Dashboard / Create / Shorts / Workflow / Upload
