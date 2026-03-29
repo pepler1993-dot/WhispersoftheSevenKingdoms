@@ -222,12 +222,16 @@ def cancel_run(workflow_id: str, db: AgentSyncDB) -> bool:
 
 
 def get_output_path(slug: str, filename: str) -> Path | None:
-    base = PIPELINE_DIR / 'data' / 'output' / 'youtube'
-    path = (base / slug / filename).resolve()
-    if not path.is_relative_to(base.resolve()):
-        return None
-    if path.exists() and path.is_file():
-        return path
+    bases = [
+        PIPELINE_DIR / 'data' / 'output' / 'youtube',
+        PIPELINE_DIR / 'data' / 'output' / 'shorts',
+    ]
+    for base in bases:
+        path = (base / slug / filename).resolve()
+        if not path.is_relative_to(base.resolve()):
+            continue
+        if path.exists() and path.is_file():
+            return path
     return None
 
 
