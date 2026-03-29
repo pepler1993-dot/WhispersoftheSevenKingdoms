@@ -994,7 +994,7 @@
 
       // title
       const duration = (d.loop_hours || 3) + ' Hours';
-      titleInput.value = (house.title_template || '').replace('{duration}', duration) || house.display_name;
+      titleInput.value = buildTitleFromPreset(house, null, duration);
       document.getElementById('thumbnail_text').value = titleInput.value;
       syncSlugFromTitle();
 
