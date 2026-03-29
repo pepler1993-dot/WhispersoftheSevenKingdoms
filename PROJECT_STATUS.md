@@ -2,13 +2,25 @@
 > Letzte Aktualisierung: 2026-03-29T07:00:01Z
 > Aktualisiert von: Pako
 
-**Wichtig:** Diese Datei ist **nicht mehr** der alleinige erste Einstiegspunkt.
-Der aktuelle Stand, die Arbeitsregeln und der Zukunftsplan liegen jetzt primär in **`detailed_plan/*`**.
+**Wichtig:** Es gibt jetzt **zwei gültige Source-of-Truth-Ebenen**:
+- **`PROJECT_STATUS.md`** = aktueller Ist-Stand des Projekts
+- **`detailed_plan/*`** = Zielbild, Zukunftsplan, Struktur der Weiterentwicklung
+
+Beide sind führend — aber **für unterschiedliche Zwecke**.
 
 ---
 
-## ✅ Aktuelle Source of Truth
-Die maßgeblichen Planungs- und Steuerdateien liegen jetzt unter:
+## ✅ Source of Truth
+
+### 1) Aktueller Status
+**`PROJECT_STATUS.md`** ist die maßgebliche Referenz für:
+- aktuellen Stand
+- laufende Umsetzung
+- bereits vorhandene Systeme
+- reale technische Situation im Repo / Projekt
+
+### 2) Zukunftsplan
+Die maßgeblichen Planungs- und Steuerdateien für die Weiterentwicklung liegen unter:
 - `detailed_plan/AGENT_QUICK_START_2026-03-29.md`
 - `detailed_plan/AGENT_OPERATING_RULES_2026-03-29_v6.md`
 - `detailed_plan/MASTER_PLAN_FINAL_2026-03-29_v2.md`
@@ -17,13 +29,14 @@ Die maßgeblichen Planungs- und Steuerdateien liegen jetzt unter:
 - bei Bedarf: `detailed_plan/EXECUTION_ROADMAP_2026-03-29_v6.md`
 
 ### Kurzregel
-- **Aktueller Stand** = was heute gilt
-- **Zukunftsplan** = wie das System strukturiert weiterentwickelt wird
-- beides wird jetzt primär über **`detailed_plan/*`** gesteuert
+- **`PROJECT_STATUS.md`** = was aktuell wirklich gilt
+- **`detailed_plan/*`** = wie das System künftig strukturiert werden soll
+- Bei Widersprüchen gilt: **Ist-Zustand in `PROJECT_STATUS.md`, Ziel-/Soll-Zustand in `detailed_plan/*`**
 
 ### Für Agents
-- **Erster Einstieg:** `detailed_plan/AGENT_QUICK_START_2026-03-29.md`
-- Danach nur rollenbasiert weiterlesen, nicht alles blind laden
+- Für Statusfragen zuerst `PROJECT_STATUS.md` lesen
+- Für Zielarchitektur, Regeln und Roadmap danach `detailed_plan/*` heranziehen
+- Einstieg bei Bedarf über `detailed_plan/AGENT_QUICK_START_2026-03-29.md`
 
 ---
 
