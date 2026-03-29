@@ -84,11 +84,27 @@
 
 
 {# ── Health Strip ──────────────────────────────────────────────── #}
-<div class="health-strip" id="health-strip">
-  <div class="health-item" id="health-gpu"><span class="health-dot"></span> GPU Worker</div>
-  <div class="health-item" id="health-queue"><span class="health-dot"></span> Queue</div>
-  <div class="health-item" id="health-upload"><span class="health-dot"></span> Upload</div>
-  <div class="health-item" id="health-pipeline"><span class="health-dot"></span> Pipeline</div>
+{% if tab == 'shorts' %}
+  {% set hs1 = 'Shorts Queue' %}
+  {% set hs2 = 'Shorts Render' %}
+  {% set hs3 = 'Shorts Upload' %}
+  {% set hs4 = 'Source Video' %}
+{% elif tab == 'songs' %}
+  {% set hs1 = 'Audio Worker' %}
+  {% set hs2 = 'Audio Queue' %}
+  {% set hs3 = 'Library' %}
+  {% set hs4 = 'Generation' %}
+{% else %}
+  {% set hs1 = 'GPU Worker' %}
+  {% set hs2 = 'Queue' %}
+  {% set hs3 = 'Upload' %}
+  {% set hs4 = 'Pipeline' %}
+{% endif %}
+<div class="health-strip" id="health-strip" data-tab="{{ tab }}">
+  <div class="health-item" id="health-gpu"><span class="health-dot"></span> {{ hs1 }}</div>
+  <div class="health-item" id="health-queue"><span class="health-dot"></span> {{ hs2 }}</div>
+  <div class="health-item" id="health-upload"><span class="health-dot"></span> {{ hs3 }}</div>
+  <div class="health-item" id="health-pipeline"><span class="health-dot"></span> {{ hs4 }}</div>
 </div>
 
 {# ── Needs Attention ──────────────────────────────────────────── #}
@@ -119,10 +135,6 @@
       </div>
     </div>
     {% endfor %}
-  </div>
-  <div id="dismissed-attention" class="dismissed-attention" style="display:none;">
-    <div class="section-subhead">Dismissed / Ignored</div>
-    <div id="dismissed-attention-list" class="dismissed-attention-list"></div>
   </div>
 </section>
 {% endif %}
@@ -357,13 +369,6 @@
   cursor: pointer;
 }
 .attention-action-btn:hover { background: rgba(255,255,255,0.08); }
-.dismissed-attention { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); }
-.section-subhead { font-size: 0.9rem; color: var(--muted); margin-bottom: 8px; }
-.dismissed-attention-list { display:flex; flex-wrap:wrap; gap:8px; }
-.dismissed-chip {
-  display:inline-flex; align-items:center; gap:6px; padding:6px 10px;
-  border-radius: 999px; background: rgba(255,255,255,0.05); border:1px solid var(--line); font-size:0.8rem;
-}
 
 /* ── Type badges ─────────────────────────────────────────── */
 .type-badge {
@@ -882,14 +887,27 @@
         if (dot) dot.className = 'health-dot ' + status;
         el.childNodes[el.childNodes.length - 1].textContent = ' ' + label;
       }
+      var tab = (document.getElementById('health-strip')?.dataset?.tab) || 'videos';
       var gpu = h.gpu_worker || {};
-      setHealth('health-gpu', gpu.status || 'offline', 'GPU Worker · ' + (gpu.status === 'healthy' ? 'Online' : 'Offline'));
       var q = h.queue || {};
-      setHealth('health-queue', q.status || 'idle', 'Queue · ' + (q.running ? q.running + ' aktiv' : 'Idle'));
       var u = h.upload || {};
-      setHealth('health-upload', u.status || 'healthy', 'YouTube · ' + (u.status === 'healthy' ? 'OK' : u.success_rate || '—'));
       var p = h.pipeline || {};
-      setHealth('health-pipeline', p.status || 'healthy', 'Pipeline · ' + (p.status === 'healthy' ? 'Stabil' : p.recent_failures + ' Fehler'));
+      if (tab === 'shorts') {
+        setHealth('health-gpu', q.status || 'idle', 'Shorts Queue · ' + (q.running ? q.running + ' aktiv' : 'Idle'));
+        setHealth('health-queue', p.status || 'healthy', 'Shorts Render · ' + (p.status === 'healthy' ? 'Stabil' : (p.recent_failures || 0) + ' Fehler'));
+        setHealth('health-upload', u.status || 'healthy', 'Shorts Upload · ' + (u.status === 'healthy' ? 'OK' : u.success_rate || '—'));
+        setHealth('health-pipeline', gpu.status || 'offline', 'Source Video · ' + (gpu.status === 'healthy' ? 'Verfügbar' : 'Prüfen'));
+      } else if (tab === 'songs') {
+        setHealth('health-gpu', gpu.status || 'offline', 'Audio Worker · ' + (gpu.status === 'healthy' ? 'Online' : 'Offline'));
+        setHealth('health-queue', q.status || 'idle', 'Audio Queue · ' + (q.running ? q.running + ' aktiv' : 'Idle'));
+        setHealth('health-upload', 'healthy', 'Library · Verfügbar');
+        setHealth('health-pipeline', p.status || 'healthy', 'Generation · ' + (p.status === 'healthy' ? 'Bereit' : (p.recent_failures || 0) + ' Fehler'));
+      } else {
+        setHealth('health-gpu', gpu.status || 'offline', 'GPU Worker · ' + (gpu.status === 'healthy' ? 'Online' : 'Offline'));
+        setHealth('health-queue', q.status || 'idle', 'Queue · ' + (q.running ? q.running + ' aktiv' : 'Idle'));
+        setHealth('health-upload', u.status || 'healthy', 'YouTube · ' + (u.status === 'healthy' ? 'OK' : u.success_rate || '—'));
+        setHealth('health-pipeline', p.status || 'healthy', 'Pipeline · ' + (p.status === 'healthy' ? 'Stabil' : (p.recent_failures || 0) + ' Fehler'));
+      }
     })
     .catch(function() {});
 })();
@@ -953,25 +971,6 @@
   function saveState(state) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }
-  function renderDismissed(state) {
-    var box = document.getElementById('dismissed-attention');
-    var list = document.getElementById('dismissed-attention-list');
-    if (!box || !list) return;
-    list.innerHTML = '';
-    var ids = Object.keys(state);
-    if (!ids.length) {
-      box.style.display = 'none';
-      return;
-    }
-    box.style.display = 'block';
-    ids.forEach(function(id) {
-      var item = state[id];
-      var chip = document.createElement('div');
-      chip.className = 'dismissed-chip';
-      chip.textContent = (item.title || id) + ' · ' + item.action;
-      list.appendChild(chip);
-    });
-  }
   var state = loadState();
   document.querySelectorAll('[data-attention-id]').forEach(function(el) {
     var id = el.getAttribute('data-attention-id');
@@ -984,14 +983,11 @@
       var id = btn.getAttribute('data-attention-id');
       var action = btn.getAttribute('data-action');
       var wrap = document.querySelector('.attention-card-wrap[data-attention-id="' + id + '"]');
-      var title = wrap ? (wrap.querySelector('.attention-title')?.textContent || id) : id;
-      state[id] = { action: action, title: title, at: new Date().toISOString() };
+      state[id] = { action: action, at: new Date().toISOString() };
       saveState(state);
       if (wrap) wrap.style.display = 'none';
-      renderDismissed(state);
     });
   });
-  renderDismissed(state);
 })();
 </script>
 {% endblock %}
