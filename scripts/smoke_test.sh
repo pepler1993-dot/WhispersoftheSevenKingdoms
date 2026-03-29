@@ -9,7 +9,7 @@
 #
 # Defaults:
 #   BASE_URL = http://localhost:8000
-#   DB_PATH  = data/db/agent_sync.db
+#   DB_PATH  = services/sync/data/agent_sync.db
 #
 # Exit codes:
 #   0 = all checks passed
@@ -19,7 +19,7 @@
 set -euo pipefail
 
 BASE_URL="${1:-http://localhost:8000}"
-DB_PATH="${2:-data/db/agent_sync.db}"
+DB_PATH="${2:-services/sync/data/agent_sync.db}"
 
 PASS=0
 FAIL=0
@@ -75,22 +75,30 @@ else
 fi
 
 # ─────────────────────────────────────────────
-# 2. Health-Endpoint
+# 2. Health-Endpoint (/healthz)
 # ─────────────────────────────────────────────
 echo ""
 echo "▸ Health Endpoint"
 
-HEALTH_RESPONSE=$(curl -s --connect-timeout 5 "${BASE_URL}/api/health" 2>/dev/null || echo "CURL_FAILED")
-if [ "$HEALTH_RESPONSE" = "CURL_FAILED" ]; then
-  check "Health endpoint reachable" 1 "Could not connect to ${BASE_URL}/api/health"
+HEALTHZ_CODE=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 "${BASE_URL}/healthz" 2>/dev/null || echo "000")
+if [ "$HEALTHZ_CODE" = "200" ]; then
+  check "GET /healthz responds with 200" 0
 else
-  check "Health endpoint reachable" 0
+  check "GET /healthz responds with 200" 1 "HTTP ${HEALTHZ_CODE}"
+fi
+
+# Health Overview (detailed)
+HEALTH_RESPONSE=$(curl -s --connect-timeout 5 "${BASE_URL}/api/health/overview" 2>/dev/null || echo "CURL_FAILED")
+if [ "$HEALTH_RESPONSE" = "CURL_FAILED" ]; then
+  check "GET /api/health/overview reachable" 1 "Could not connect"
+else
+  check "GET /api/health/overview reachable" 0
 
   # Valid JSON?
   if echo "$HEALTH_RESPONSE" | python3 -m json.tool > /dev/null 2>&1; then
-    check "Health returns valid JSON" 0
+    check "Health overview returns valid JSON" 0
   else
-    check "Health returns valid JSON" 1 "Response: ${HEALTH_RESPONSE:0:200}"
+    check "Health overview returns valid JSON" 1 "Response: ${HEALTH_RESPONSE:0:200}"
   fi
 fi
 
@@ -137,18 +145,18 @@ else
 fi
 
 # ─────────────────────────────────────────────
-# 5. Dashboard
+# 5. Dashboard (/admin)
 # ─────────────────────────────────────────────
 echo ""
 echo "▸ Dashboard"
 
-DASH_CODE=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 "${BASE_URL}/admin/dashboard" 2>/dev/null || echo "000")
+DASH_CODE=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 "${BASE_URL}/admin" 2>/dev/null || echo "000")
 if [ "$DASH_CODE" = "200" ]; then
-  check "Dashboard responds with 200" 0
+  check "GET /admin responds with 200" 0
 elif [ "$DASH_CODE" = "302" ] || [ "$DASH_CODE" = "303" ]; then
-  check "Dashboard responds (HTTP ${DASH_CODE} redirect — auth required?)" 0
+  check "GET /admin responds (HTTP ${DASH_CODE} redirect — auth required)" 0
 else
-  check "Dashboard responds with 200" 1 "HTTP ${DASH_CODE} at ${BASE_URL}/admin/dashboard"
+  check "GET /admin responds" 1 "HTTP ${DASH_CODE} at ${BASE_URL}/admin"
 fi
 
 # ─────────────────────────────────────────────

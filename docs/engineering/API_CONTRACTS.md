@@ -378,9 +378,70 @@ async def app_error_handler(request: Request, exc: AppError):
 
 ---
 
+---
+
+## ⚠️ Hinweis: Migrationsdokument
+
+**Dieses Dokument beschreibt den Zielvertrag (Target Contract), nicht den aktuellen Laufzustand.**
+
+Die Statuswerte und Formate unten sind das Ziel. Der aktuelle Code verwendet teilweise andere Werte.
+Die Migration erfolgt inkrementell – neue Endpoints nutzen den Zielvertrag, bestehende werden nach und nach angepasst.
+
+### Current Runtime Statuses (Ist-Zustand)
+
+**Workflow:**
+`waiting_for_audio` · `running` · `rendering` · `rendered` · `uploading` · `uploaded` · `failed` · `done` · `error` · `cancelled`
+
+**AudioJob:**
+`queued` · `running` · `complete` · `error` · `cancelled` · `pushing` · `downloading`
+
+**PublishJob / Upload:**
+`queued` · `running` · `uploading` · `uploaded` · `failed` · `created`
+
+### Target Statuses (Ziel-Zustand)
+
+**Workflow:**
+`draft` · `ready` · `running` · `needs_review` · `completed` · `failed` · `canceled`
+
+**AudioJob:**
+`queued` · `running` · `completed` · `failed` · `canceled`
+
+**PublishJob:**
+`queued` · `running` · `completed` · `failed` · `canceled`
+
+### Mapping Current → Target
+
+| Entität | Current | Target | Anmerkung |
+|---|---|---|---|
+| Workflow | `waiting_for_audio` | `running` | Sub-Phase, nicht eigener Status |
+| Workflow | `rendering` | `running` | Sub-Phase |
+| Workflow | `rendered` | `needs_review` | Vor Upload: Review möglich |
+| Workflow | `uploading` | `running` | Sub-Phase |
+| Workflow | `uploaded` | `completed` | Erfolgreich abgeschlossen |
+| Workflow | `done` | `completed` | Alias zusammenführen |
+| Workflow | `error` | `failed` | Vereinheitlichen |
+| Workflow | `cancelled` | `canceled` | Typo-Fix (US-Englisch) |
+| AudioJob | `complete` | `completed` | Konsistente Vergangenheitsform |
+| AudioJob | `error` | `failed` | Vereinheitlichen |
+| AudioJob | `cancelled` | `canceled` | Typo-Fix |
+| AudioJob | `pushing` / `downloading` | `running` | Sub-Phasen, nicht eigene Status |
+| PublishJob | `uploading` | `running` | Sub-Phase |
+| PublishJob | `uploaded` | `completed` | Erfolg |
+| PublishJob | `created` | `queued` | Konsistent benennen |
+
+### Migrationsstrategie
+
+1. **Phase 1:** Neue Endpoints verwenden Target-Statuswerte
+2. **Phase 2:** Sub-Phasen werden als separates `phase`-Feld geführt (nicht im `status`)
+3. **Phase 3:** Bestehende Endpoints werden migriert (mit Backwards-Compat Layer)
+4. **Phase 4:** Alte Statuswerte entfernen, DB bereinigen
+
+---
+
 ## Zusammenfassung
 
 - **Ein Format** für alle API-Responses: `{"status": "ok|error", "data": ..., "error": ...}`
 - **Drei State Machines** für Workflow, AudioJob, PublishJob mit definierten Übergängen
 - **Fünf Fehlerklassen** mit klarer HTTP-Zuordnung
 - **Kein Wildwuchs** — neue Endpoints müssen diese Verträge erfüllen
+- **⚠️ Target Contract** — aktueller Code verwendet noch abweichende Statuswerte (siehe Mapping oben)

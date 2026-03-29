@@ -1,7 +1,7 @@
 # B07 – Observability Minimum
 
 > Ticket: #143
-> Status: Draft
+> Status: Final
 > Scope: Structured logging, health checks, error tracking, basic metrics
 
 ---
@@ -282,3 +282,54 @@ async def metrics_middleware(request, call_next):
 4. **Request middleware** — count and time requests
 5. **`/metrics`** — expose counters for dashboards
 6. **Log aggregation** — once volume justifies it
+
+---
+
+## 7. Implementation Plan – Konkret
+
+### Erster echter Implementierungsschritt
+**JSON Logging aktivieren** — ersetzt `print()`/`logging.info()` durch strukturierte JSON-Ausgaben.
+
+```python
+# In services/sync/app/main.py beim Startup:
+import logging, json
+
+class JSONFormatter(logging.Formatter):
+    def format(self, record):
+        return json.dumps({
+            "ts": self.formatTime(record),
+            "level": record.levelname,
+            "module": record.module,
+            "message": record.getMessage(),
+            "exc": self.formatException(record.exc_info) if record.exc_info else None,
+        })
+
+handler = logging.StreamHandler()
+handler.setFormatter(JSONFormatter())
+logging.root.handlers = [handler]
+logging.root.setLevel(logging.INFO)
+```
+
+### Minimale Logging-Regeln (ab sofort)
+1. **Jeder Audio-Job:** Log bei Start, bei jedem Clip, bei Fehler, bei Abschluss
+2. **Jeder Workflow:** Log bei Status-Wechsel
+3. **Jeder Upload:** Log bei Start, Erfolg, Fehler (inkl. HTTP Status)
+4. **Kein `print()` in Production-Code** — nur `logging.*`
+5. **Fehler immer mit Kontext:** `job_id`, `workflow_id`, `slug` in jedem Log-Eintrag
+
+### Welche Endpoints/Checks zuerst gebaut werden
+1. **`/healthz`** — existiert, bleibt als Liveness-Check (immer 200 wenn App läuft)
+2. **`/api/health/overview`** — existiert, wird zum Readiness-Check erweitert:
+   - DB: `SELECT 1` Prüfung + Dateigröße
+   - GPU: bestehender SSH-Check
+   - Disk: `shutil.disk_usage()` auf `data/` Verzeichnis
+   - Jobs: Anzahl stuck Jobs (status=running, älter als 2h)
+3. **Request-Timing Middleware** — einfache Middleware die Dauer loggt
+
+### "Done enough" Kriterien
+Das Observability Minimum gilt als erreicht wenn:
+- [ ] Alle Log-Ausgaben sind JSON-formatiert
+- [ ] `/api/health/overview` prüft DB, GPU, Disk
+- [ ] Stuck-Job-Erkennung ist aktiv
+- [ ] Fehler enthalten immer `job_id`/`workflow_id` Kontext
+- [ ] Kein `print()` mehr in `services/sync/app/`

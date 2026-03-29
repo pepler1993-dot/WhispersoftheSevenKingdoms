@@ -51,7 +51,7 @@ scripts/smoke_test.sh
 | Parameter | Default | Beschreibung |
 |---|---|---|
 | `BASE_URL` | `http://localhost:8000` | Server-Adresse |
-| `DB_PATH` | `data/db/agent_sync.db` | Pfad zur SQLite-Datenbank |
+| `DB_PATH` | `services/sync/data/agent_sync.db` | Pfad zur SQLite-Datenbank |
 
 ### Exit Codes
 
@@ -69,14 +69,15 @@ scripts/smoke_test.sh
 - **Erwartet:** Beliebiger HTTP-Response (nicht Connection Refused)
 - **Fehlerfall:** Server läuft nicht, falscher Port, Firewall
 
-### 2. Health Endpoint
-- **Was:** GET `/api/health`
-- **Erwartet:** Gültiges JSON zurück
+### 2. Health Endpoints
+- **Was:** GET `/healthz` (Liveness) + GET `/api/health/overview` (Details)
+- **Erwartet:** `/healthz` → HTTP 200; `/api/health/overview` → gültiges JSON mit GPU-Status, Queue, Uploads
 - **Fehlerfall:** App nicht gestartet, Route fehlt, Exception in Health-Check
+- **Hinweis:** Es gibt kein `/api/health` – die echten Routes sind `/healthz` und `/api/health/overview`
 
 ### 3. Database
 - **Was:** Prüft Existenz, Lesbarkeit und Integrität der SQLite-DB
-- **Erwartet:** Datei existiert, ist lesbar, SQLite kann sie öffnen
+- **Erwartet:** Datei existiert unter `services/sync/data/agent_sync.db`, ist lesbar, SQLite kann sie öffnen
 - **Fehlerfall:** DB fehlt, Berechtigungen falsch, Datei korrupt
 
 ### 4. Static Files
@@ -85,9 +86,10 @@ scripts/smoke_test.sh
 - **Fehlerfall:** Static Mount fehlt, Dateien nicht deployed
 
 ### 5. Dashboard
-- **Was:** GET `/admin/dashboard`
-- **Erwartet:** HTTP 200 oder 302/303 (Redirect zu Login)
+- **Was:** GET `/admin`
+- **Erwartet:** HTTP 200 oder 302/303 (Redirect zu Login bei aktivem Auth)
 - **Fehlerfall:** Template-Fehler, Import-Fehler, DB-Problem
+- **Hinweis:** Die Dashboard-Route ist `/admin`, nicht `/admin/dashboard`
 
 ---
 
@@ -103,11 +105,12 @@ scripts/smoke_test.sh
   ✓ Server responds (HTTP 200)
 
 ▸ Health Endpoint
-  ✓ Health endpoint reachable
-  ✓ Health returns valid JSON
+  ✓ GET /healthz responds with 200
+  ✓ GET /api/health/overview reachable
+  ✓ Health overview returns valid JSON
 
 ▸ Database
-  ✓ DB file exists (data/db/agent_sync.db)
+  ✓ DB file exists (services/sync/data/agent_sync.db)
   ✓ DB file is readable
   ✓ DB is valid SQLite
 
@@ -115,10 +118,10 @@ scripts/smoke_test.sh
   ✓ Static files served (HTTP 200)
 
 ▸ Dashboard
-  ✓ Dashboard responds with 200
+  ✓ GET /admin responds with 200
 
 ═══════════════════════════════════════════
-  ALL PASSED  (8/8 checks)
+  ALL PASSED  (9/9 checks)
 ═══════════════════════════════════════════
 ```
 
@@ -163,20 +166,9 @@ fi
 
 ## Erweiterungsmöglichkeiten (Zukunft)
 
-Diese Checks sind bewusst nicht in v1, können aber später ergänzt werden:
-
 - **GPU Worker Erreichbarkeit:** SSH-Ping an GPU-VM
-- **YouTube OAuth Token:** Token-Validität prüfen (ohne API-Call)
+- **YouTube OAuth Token:** Token-Validität prüfen
 - **Disk Space:** Freier Speicher auf dem Server
 - **DB Schema Version:** Erwartete Tabellen/Spalten vorhanden
 - **Queue Health:** Keine stuck Jobs (älter als X Stunden)
 - **Response Time:** Health-Endpoint antwortet unter X ms
-
----
-
-## Zusammenfassung
-
-- **Schnell:** Smoke Test dauert < 10 Sekunden
-- **Nicht-destruktiv:** Nur lesende Zugriffe
-- **Automatisierbar:** Exit-Code 0/1 für Scripts und CI
-- **Erweiterbar:** Neue Checks einfach hinzufügbar
