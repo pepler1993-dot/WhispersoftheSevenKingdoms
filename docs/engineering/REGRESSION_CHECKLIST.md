@@ -88,3 +88,13 @@ Stand jetzt:
 - [ ] Reproduktion, Ursache, Fix und Verifikation für neue Review-P1s dokumentiert
 - [ ] Hauptpfad als regressionsgeprüft dokumentiert
 - [ ] Smoke-Checks grün dokumentiert
+
+### Repo-Review-Stand
+- `47a209e` adressiert `#157` plausibel
+- `8eb1159` verbessert Shorts-Prefill sichtbar
+- `3a4027e` stellt Audio-Status-Ziel im Create-Flow wieder her
+- `0565140` blockiert Submit im Library-Modus ohne Track-Auswahl
+- `86d2d84` adressiert vier Backend-P1s plausibel
+
+### Gate-Aussage
+Trotz sichtbarer Fixes ist der Stable-Stand **noch nicht freigegeben**, solange Regression/Smoke/Verifikation nicht vollständig dokumentiert sind.

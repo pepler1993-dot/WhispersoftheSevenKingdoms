@@ -114,7 +114,9 @@ Aktuell keine offen bestätigten P0-Issues im neuen Bug-Set.
 - **Reproduktion:** Upload-Asset-Pfad auf große Dateien prüfen
 - **Vermutete Ursache:** Datei wird vor Größenprüfung vollständig in den Speicher gelesen
 - **Fix-Richtung:** Größen-/Upload-Handling robust machen, ohne Voll-Load als Vorbedingung
+- **Repo-Stand:** Commit `86d2d84` streamt Uploads in 1MB-Chunks statt Full-Read
 - **Verifikation:** große Upload-Artefakte werden ohne unnötigen Full-Memory-Load geprüft/verarbeitet
+- **Gate-Status:** Code-Fix sichtbar, Verifikation noch nicht als Repo-Artefakt vorhanden
 
 #### P1-E – Thumbnail-Library auf Create-Seite ggf. falscher Pfad
 - **Owner:** Pako
@@ -181,3 +183,5 @@ Blocker im Moment:
 1. offene P1-Bugs im sichtbaren Hauptprodukt und im Hauptpfad-Backend
 2. neue Review-P1s zu Auto-Upload-Endstatus, Cancel, Library-Fallback, Upload-Robustheit und Thumbnail-Library sind noch offen
 3. keine abgeschlossene Regression-Dokumentation für Dashboard / Create / Shorts / Workflow / Upload
+s / Workflow / Upload
+d
