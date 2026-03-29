@@ -1,11 +1,15 @@
 {% extends 'base.html' %}
 {% block title %}Tickets
 <style>
-/* Ticket table readability */
-.table-wrap table { font-size: 0.82rem; }
-.table-wrap th { font-size: 0.75rem; padding: 10px 12px; }
-.table-wrap td { padding: 12px; line-height: 1.5; }
-.table-wrap tr:hover { background: rgba(255,255,255,0.02); }
+/* Ticket readability overhaul */
+.table-wrap { overflow-x: auto; }
+.table-wrap table { font-size: 0.85rem; border-collapse: separate; border-spacing: 0 6px; }
+.table-wrap th { font-size: 0.72rem; padding: 8px 14px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); border-bottom: 1px solid var(--line); }
+.table-wrap td { padding: 14px; line-height: 1.5; background: var(--panel); }
+.table-wrap tr td:first-child { border-radius: 8px 0 0 8px; }
+.table-wrap tr td:last-child { border-radius: 0 8px 8px 0; }
+.table-wrap tbody tr:hover td { background: var(--panel-hover); }
+.table-wrap .badge { font-size: 0.7rem; padding: 3px 8px; }
 </style>
 {% endblock %}
 {% block content %}
@@ -102,10 +106,14 @@
 </section>
 
 <style>
-/* Ticket table readability */
-.table-wrap table { font-size: 0.82rem; }
-.table-wrap th { font-size: 0.75rem; padding: 10px 12px; }
-.table-wrap td { padding: 12px; line-height: 1.5; }
-.table-wrap tr:hover { background: rgba(255,255,255,0.02); }
+/* Ticket readability overhaul */
+.table-wrap { overflow-x: auto; }
+.table-wrap table { font-size: 0.85rem; border-collapse: separate; border-spacing: 0 6px; }
+.table-wrap th { font-size: 0.72rem; padding: 8px 14px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); border-bottom: 1px solid var(--line); }
+.table-wrap td { padding: 14px; line-height: 1.5; background: var(--panel); }
+.table-wrap tr td:first-child { border-radius: 8px 0 0 8px; }
+.table-wrap tr td:last-child { border-radius: 0 8px 8px 0; }
+.table-wrap tbody tr:hover td { background: var(--panel-hover); }
+.table-wrap .badge { font-size: 0.7rem; padding: 3px 8px; }
 </style>
 {% endblock %}
