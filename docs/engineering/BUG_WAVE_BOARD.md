@@ -119,13 +119,17 @@ Aktuell keine offen bestätigten P0-Issues im neuen Bug-Set.
 - **Verifikation:** große Upload-Artefakte werden ohne unnötigen Full-Memory-Load geprüft/verarbeitet
 - **Gate-Status:** Code-Fix sichtbar, Verifikation noch nicht als Repo-Artefakt vorhanden
 
-#### P1-E – Thumbnail-Library auf Create-Seite ggf. falscher Pfad
-- **Owner:** Pako
+#### P1-E – Thumbnail-Library auf Create-Seite als letzter Umsetzungsblock
+- **Owner:** Pako (UI), Smith (Backend-Gegenprüfung nur falls nötig)
 - **Bereich:** UI / Create / Asset-Library
-- **Reproduktion:** Create-Seite öffnen und Thumbnail-Library-Befüllung prüfen
-- **Vermutete Ursache:** Pfad in `admin_pipeline_new()` zeigt evtl. nicht auf den echten Thumbnail-Output-Ordner
-- **Fix-Richtung:** Pfad und Library-Befüllung an realen Output-Stand angleichen
-- **Verifikation:** Library listet die erwarteten Thumbnail-Assets korrekt
+- **Ziel:** sichtbare und benutzbare Thumbnail-Library im Create-Flow
+- **Anforderung:**
+  - vorhandene Thumbnails sind sichtbar auswählbar
+  - Auswahl wird korrekt in den Workflow übernommen
+  - ausgewähltes Thumbnail wird beim Start wirklich verwendet
+  - kein Hidden-only Zustand ohne echte benutzbare Auswahl
+- **Verifikation:** nach Umsetzung folgt die spätere manuelle Endabnahme / E2E-Prüfung durch Eddi
+- **Scope-Regel:** nach diesem Punkt kein neuer Scope, keine Extras, kein weiterer Umbau
 
 ### P2
 

@@ -78,6 +78,17 @@ Solange offen oder unklar, blockieren diese Themen typischerweise einen Stable-S
 
 ---
 
+## Letzter offener Umsetzungsblock vor Endabnahme
+
+Der letzte ausdrücklich freigegebene Umsetzungsblock vor dem finalen manuellen Test ist:
+- **Thumbnail-Library im Create-Flow fertig bauen und korrekt durchreichen**
+
+Danach gilt:
+- kein neuer Scope
+- keine neuen Extras
+- kein weiterer Umbau
+- anschließende manuelle End-to-End-Prüfung durch Eddi
+
 ## Live-Smoke-Stand 2026-03-29
 
 Externe Live-Checks gegen `dashboard.ka189.de` bestätigen aktuell:
