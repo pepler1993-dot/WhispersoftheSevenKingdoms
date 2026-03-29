@@ -957,13 +957,8 @@
           var pctEl = document.querySelector('[data-progress-pct="' + wfId + '"]');
           var stepPill = document.querySelector('#active-step-' + wfId);
           if (bar) {
-            if (data.progress_pct > 0) {
-              bar.style.width = data.progress_pct + '%';
-              bar.classList.remove('pulsing');
-            } else {
-              bar.style.width = '55%';
-              bar.classList.add('pulsing');
-            }
+            bar.style.width = (data.progress_pct || 0) + '%';
+            bar.classList.remove('pulsing');
           }
           if (pctEl) {
             pctEl.textContent = data.progress_pct > 0 ? data.progress_pct + '%' : '';
@@ -988,17 +983,12 @@
           // Update workflow list cards (bottom)
           var wfBar = document.querySelector('.wf-card-bar-fill[data-wf-progress="' + wfId + '"]');
           if (wfBar) {
-            if (data.progress_pct > 0) {
-              wfBar.style.width = data.progress_pct + '%';
-              wfBar.classList.remove('pulsing');
-            } else {
-              wfBar.style.width = '60%';
-              wfBar.classList.add('pulsing');
-            }
+            wfBar.style.width = (data.progress_pct || 0) + '%';
+            wfBar.classList.remove('pulsing');
           }
           var wfText = document.querySelector('.wf-card-progress-text[data-wf-progress-text="' + wfId + '"]');
           if (wfText) {
-            wfText.textContent = data.progress_pct > 0 ? data.progress_pct + '%' : '…';
+            wfText.textContent = (data.progress_pct || 0) + '%';
           }
           if (data.status && !['running', 'waiting_for_audio', 'uploading', 'queued'].includes(data.status)) {
             setTimeout(function() { location.reload(); }, 2000);
