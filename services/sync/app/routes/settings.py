@@ -101,6 +101,7 @@ router = APIRouter()
 PIPELINE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
 YOUTUBE_SECRET_DIR = PIPELINE_DIR / 'data' / 'secrets' / 'youtube'
 YOUTUBE_SECRET_PATH = YOUTUBE_SECRET_DIR / 'client_secret.json'
+YOUTUBE_TOKEN_PATH = PIPELINE_DIR / '.youtube_token.json'
 
 _SETTINGS_SECTIONS = frozenset({'general', 'providers', 'presets', 'pipelines', 'team'})
 
@@ -151,6 +152,48 @@ def _validate_google_client_secret_payload(payload: dict[str, Any]) -> tuple[str
     if missing:
         raise HTTPException(status_code=400, detail=f'Ungültige Google OAuth JSON-Datei: Felder fehlen: {", ".join(missing)}')
     return root_key, root
+
+
+def _youtube_token_status() -> dict[str, Any]:
+    exists = YOUTUBE_TOKEN_PATH.exists()
+    details: dict[str, Any] = {
+        'path': str(YOUTUBE_TOKEN_PATH),
+        'exists': exists,
+        'size_bytes': None,
+        'updated_at': None,
+        'client_id_preview': None,
+        'scopes_count': None,
+        'has_refresh_token': False,
+        'expiry': None,
+        'error': None,
+    }
+    if not exists:
+        return details
+    try:
+        stat = YOUTUBE_TOKEN_PATH.stat()
+        payload = json.loads(YOUTUBE_TOKEN_PATH.read_text(encoding='utf-8'))
+        client_id = str(payload.get('client_id') or '')
+        scopes = payload.get('scopes') or []
+        if isinstance(scopes, str):
+            scopes = [scopes]
+        details.update({
+            'size_bytes': stat.st_size,
+            'updated_at': stat.st_mtime,
+            'client_id_preview': f"{client_id[:18]}…" if client_id and len(client_id) > 18 else client_id,
+            'scopes_count': len(scopes),
+            'has_refresh_token': bool(payload.get('refresh_token')),
+            'expiry': payload.get('expiry') or '',
+        })
+    except Exception as exc:
+        details['error'] = str(exc)
+    return details
+
+
+def _validate_youtube_token_payload(payload: dict[str, Any]) -> None:
+    required = ['token', 'refresh_token', 'token_uri', 'client_id', 'client_secret']
+    missing = [key for key in required if not str(payload.get(key, '')).strip()]
+    if missing:
+        raise HTTPException(status_code=400, detail=f'Ungültige .youtube_token.json: Felder fehlen: {", ".join(missing)}')
 
 # ── Default settings ──────────────────────────────────────────────────────
 
@@ -209,6 +252,7 @@ def admin_settings(
         'team_users': team_users,
         'team_count': shared.db.user_count(),
         'youtube_secret_status': _youtube_secret_status(),
+        'youtube_token_status': _youtube_token_status(),
     })
 
 
@@ -282,6 +326,43 @@ async def upload_youtube_client_secret(file: UploadFile = File(...)):
     shared.db.set_setting('providers.youtube_client_secret_project_id', root.get('project_id', ''))
     shared.db.set_setting('providers.youtube_client_secret_type', root_key)
     return RedirectResponse(url='/admin/settings?tab=providers&saved=1&success=client_secret.json+hochgeladen', status_code=303)
+
+
+@router.post('/admin/settings/providers/youtube-token')
+async def upload_youtube_token(file: UploadFile = File(...)):
+    filename = Path(file.filename or '').name
+    if not filename or Path(filename).suffix.lower() != '.json':
+        return RedirectResponse(url='/admin/settings?tab=providers&error=Bitte+eine+.youtube_token.json+hochladen', status_code=303)
+
+    raw = await file.read()
+    await file.close()
+    if not raw:
+        return RedirectResponse(url='/admin/settings?tab=providers&error=Datei+war+leer', status_code=303)
+
+    try:
+        payload = json.loads(raw.decode('utf-8'))
+        _validate_youtube_token_payload(payload)
+    except HTTPException as exc:
+        return RedirectResponse(url=f'/admin/settings?tab=providers&error={exc.detail}', status_code=303)
+    except Exception:
+        return RedirectResponse(url='/admin/settings?tab=providers&error=Token-JSON+konnte+nicht+gelesen+werden', status_code=303)
+
+    fd, temp_path = tempfile.mkstemp(prefix='youtube_token_', suffix='.json', dir=str(PIPELINE_DIR))
+    try:
+        with os.fdopen(fd, 'w', encoding='utf-8') as handle:
+            json.dump(payload, handle, ensure_ascii=False, indent=2)
+            handle.write('\n')
+        os.replace(temp_path, YOUTUBE_TOKEN_PATH)
+        try:
+            os.chmod(YOUTUBE_TOKEN_PATH, 0o600)
+        except OSError:
+            pass
+    finally:
+        if os.path.exists(temp_path):
+            os.unlink(temp_path)
+
+    shared.db.set_setting('providers.youtube_token_uploaded_at', __import__('datetime').datetime.utcnow().isoformat() + 'Z')
+    return RedirectResponse(url='/admin/settings?tab=providers&saved=1&success=.youtube_token.json+hochgeladen', status_code=303)
 
 
 # ── Team Management ───────────────────────────────────────────────────────

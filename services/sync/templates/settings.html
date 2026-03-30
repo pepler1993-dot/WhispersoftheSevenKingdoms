@@ -222,6 +222,36 @@
       <button type="submit" class="btn btn-secondary" style="width:100%;">🔐 client_secret.json hochladen / ersetzen</button>
     </form>
   </div>
+
+  <div class="st-step-card" style="margin-top:16px;">
+    <div class="st-step-header">
+      <span class="st-step-icon">🎫</span>
+      <div>
+        <h3>YouTube OAuth .youtube_token.json</h3>
+        <p class="st-step-desc">Token-Datei aus dem lokalen OAuth-Login. Wird vom Upload-Skript direkt verwendet.</p>
+      </div>
+    </div>
+
+    {% set ytt = youtube_token_status or {} %}
+    <div class="st-secret-status {% if ytt.exists %}ok{% else %}missing{% endif %}">
+      <div><strong>Status:</strong> {% if ytt.exists %}Vorhanden{% else %}Fehlt{% endif %}</div>
+      <div><strong>Pfad:</strong> <code>{{ ytt.path }}</code></div>
+      {% if ytt.client_id_preview %}<div><strong>Client ID:</strong> <code>{{ ytt.client_id_preview }}</code></div>{% endif %}
+      {% if ytt.scopes_count is not none %}<div><strong>Scopes:</strong> {{ ytt.scopes_count }}</div>{% endif %}
+      <div><strong>Refresh Token:</strong> {% if ytt.has_refresh_token %}Ja{% else %}Nein{% endif %}</div>
+      {% if ytt.expiry %}<div><strong>Expiry:</strong> {{ ytt.expiry }}</div>{% endif %}
+      {% if ytt.error %}<div><strong>Warnung:</strong> {{ ytt.error }}</div>{% endif %}
+    </div>
+
+    <form method="post" action="/admin/settings/providers/youtube-token" enctype="multipart/form-data" style="margin-top:14px;">
+      <div class="form-group">
+        <label for="youtube_token_file">.youtube_token.json hochladen</label>
+        <input type="file" name="file" id="youtube_token_file" class="form-input" accept="application/json,.json" required />
+        <div class="metric-help">Erwartet die lokal erzeugte OAuth-Token-Datei mit <code>token</code>, <code>refresh_token</code>, <code>client_id</code> und <code>client_secret</code>.</div>
+      </div>
+      <button type="submit" class="btn btn-secondary" style="width:100%;">🎫 .youtube_token.json hochladen / ersetzen</button>
+    </form>
+  </div>
 </section>
 
 <script>
