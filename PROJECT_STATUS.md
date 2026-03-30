@@ -1,5 +1,5 @@
 # PROJECT STATUS – Whispers of the Seven Kingdoms
-> Letzte Aktualisierung: 2026-03-29T19:00:01Z
+> Letzte Aktualisierung: 2026-03-30T07:00:01Z
 > Aktualisiert von: Pako
 
 **Wichtig:** Es gibt jetzt **zwei gültige Source-of-Truth-Ebenen**:
