@@ -1,5 +1,5 @@
 # PROJECT STATUS – Whispers of the Seven Kingdoms
-> Letzte Aktualisierung: 2026-03-30T07:00:01Z
+> Letzte Aktualisierung: 2026-03-30T13:00:01Z
 > Aktualisiert von: Pako
 
 **Wichtig:** Es gibt jetzt **zwei gültige Source-of-Truth-Ebenen**:
@@ -227,53 +227,10 @@ cc1dc9a feat(audio-lab): pass house_templates to audio page (#63)
 
 
 
-## 🕐 Letzte Commits (auto-generated 2026-03-29T19:00:01Z)
+
+## 🕐 Letzte Commits (auto-generated 2026-03-30T13:00:01Z)
 ```
-362b130 fix(#162,#163,#164): thumbnail fallback + progress bar improvements
-9fcfa9d fix(ui): progress bar starts at 0% not 55%
-33919b2 fix(ui): clean up progress pct display – remove stray dash when no progress
-ef5ac61 fix(ui): improve progress display + fix conflict marker in dashboard
-63b6a47 fix(ui): simplify dismissed attention and make health strip tab-specific
-60be4cc fix(dashboard): remove duplicated template tail causing 500
-dc094d2 chore: remove accidentally committed test db
-0db037b fix(P0): remove duplicate endblock + script fragment breaking dashboard
-4e87f4c fix(P0): defensive config parsing to prevent dashboard 500 errors
-46fa7a7 feat(ui): add dismissible needs-attention and tab-specific dashboard KPIs
-cc454cb fix(shorts-overview): use real short thumbnails and portrait cards
-a822d03 feat(#162,#163,#164): thumbnail fallback + live progress in dashboard
-1a3def0 fix(ui): add visible thumbnail library selector in create flow
-da93c21 fix: thumbnail library selection actually used by pipeline
-5f84699 docs(engineering): track final thumbnail library implementation block
-cf3c5b5 docs(engineering): record live smoke checks in stable gate
-6cc3230 docs(engineering): incorporate verification docs into stable gate
-85e6946 fix(P1): thumbnail library shows pipeline-generated thumbnails
-23277da docs(engineering): record current fix review state
-e9eb661 fix(P1): auto-upload endstatus + cancel race conditions
-2013b6a fix(P0): circular import crash between pipeline_queue and workflow_orchestrator
-eb438f0 docs: P1 backend verification for Jarvis stable-gate review
-3d791f1 docs(engineering): add UI verification notes for bug wave
-3cb286e docs(engineering): add stable criteria artifact
-f769b2a auto: update PROJECT_STATUS.md (2026-03-29T13:00:01Z)
-86d2d84 fix(P1): 4 backend stability fixes for bug wave
-0565140 fix(ui): block create submit in library mode without track selection
-63c5563 docs(engineering): expand bug board with reviewed P1 items
-3a4027e fix(ui): restore missing audio status target in create flow
-8eb1159 fix(ui): prefill short config from selected source video
-3a14626 docs(engineering): update bug board and stable gate status
-47a209e fix(P1): title_template {variant} handling on house select (#157)
-9e1da12 docs(engineering): add bug wave board and regression checklist
-afef001 fix(P0): pipeline.py accepts 'sleep' preset + always pass audio_preset to pipeline
-efec0b3 fix(ui): re-apply mood tags after variant selection in Create Flow (#154 #155)
-ef677d8 fix(B10,B03,B07): correct smoke test routes, add status mapping, finalize observability
-5f26c17 test+docs: first unit tests (38 passing) + UI IA appendix with current page mapping
-9c0003a docs(engineering): finalize migration and verify standards
-a60d6b3 docs(B02,B03,B04,B10): Target Architecture, API Contracts, Config Scope, Smoke Tests #138 #139 #140 #146
-68dbe15 docs+test: B06 test fixtures + B11 UI Information Architecture Guide
-bf11353 docs(engineering): add release and rollback standards
-3f8829d docs(B07,B08): Observability Minimum + Migrationsstrategie #143 #144
-b59dfdc docs(architecture): add domain model v1 spike
-40c0c5d docs(engineering): add Test Strategy B05
-0803807 docs: implement A01, A02, A05 – Baseline, System Map, Security Audit (#133, #134, #136)
-f74ca56 docs(engineering): add project risk register
+a92a874 fix(audio): make stitching robust for long multi-clip runs
+3b7191e auto: update PROJECT_STATUS.md (2026-03-30T07:00:01Z)
 ```
 ---
