@@ -98,7 +98,7 @@ def _save_content_types(ct: dict[str, Any]) -> None:
 
 router = APIRouter()
 
-PIPELINE_DIR = Path(__file__).resolve().parent.parent.parent.parent
+PIPELINE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
 YOUTUBE_SECRET_DIR = PIPELINE_DIR / 'data' / 'secrets' / 'youtube'
 YOUTUBE_SECRET_PATH = YOUTUBE_SECRET_DIR / 'client_secret.json'
 
