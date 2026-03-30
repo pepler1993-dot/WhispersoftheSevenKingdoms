@@ -1,5 +1,5 @@
 # PROJECT STATUS – Whispers of the Seven Kingdoms
-> Letzte Aktualisierung: 2026-03-30T13:00:01Z
+> Letzte Aktualisierung: 2026-03-30T19:00:01Z
 > Aktualisiert von: Pako
 
 **Wichtig:** Es gibt jetzt **zwei gültige Source-of-Truth-Ebenen**:
@@ -228,9 +228,11 @@ cc1dc9a feat(audio-lab): pass house_templates to audio page (#63)
 
 
 
-## 🕐 Letzte Commits (auto-generated 2026-03-30T13:00:01Z)
+
+## 🕐 Letzte Commits (auto-generated 2026-03-30T19:00:01Z)
 ```
-a92a874 fix(audio): make stitching robust for long multi-clip runs
-3b7191e auto: update PROJECT_STATUS.md (2026-03-30T07:00:01Z)
+2f0faea Fix YouTube client secret upload path
+4dae348 Add admin upload for YouTube client secret
+ebbd2d6 auto: update PROJECT_STATUS.md (2026-03-30T13:00:01Z)
 ```
 ---
