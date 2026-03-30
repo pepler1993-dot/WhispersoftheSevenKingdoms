@@ -26,9 +26,12 @@ def _upload_env():
     if client_secret:
         env['GOOGLE_CLIENT_SECRET'] = str(Path(client_secret).resolve())
     else:
-        default_client_secret = PIPELINE_DIR / 'client_secret.json'
-        if default_client_secret.exists():
-            env['GOOGLE_CLIENT_SECRET'] = str(default_client_secret)
+        preferred_client_secret = PIPELINE_DIR / 'data' / 'secrets' / 'youtube' / 'client_secret.json'
+        legacy_client_secret = PIPELINE_DIR / 'client_secret.json'
+        if preferred_client_secret.exists():
+            env['GOOGLE_CLIENT_SECRET'] = str(preferred_client_secret)
+        elif legacy_client_secret.exists():
+            env['GOOGLE_CLIENT_SECRET'] = str(legacy_client_secret)
     return env
 
 

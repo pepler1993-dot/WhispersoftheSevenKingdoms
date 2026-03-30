@@ -2,9 +2,12 @@
 from __future__ import annotations
 
 import json
+import os
+import tempfile
+from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, Form, HTTPException, Query, Request
+from fastapi import APIRouter, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app import shared
@@ -95,7 +98,59 @@ def _save_content_types(ct: dict[str, Any]) -> None:
 
 router = APIRouter()
 
+PIPELINE_DIR = Path(__file__).resolve().parent.parent.parent.parent
+YOUTUBE_SECRET_DIR = PIPELINE_DIR / 'data' / 'secrets' / 'youtube'
+YOUTUBE_SECRET_PATH = YOUTUBE_SECRET_DIR / 'client_secret.json'
+
 _SETTINGS_SECTIONS = frozenset({'general', 'providers', 'presets', 'pipelines', 'team'})
+
+
+def _youtube_secret_status() -> dict[str, Any]:
+    env_path = os.environ.get('GOOGLE_CLIENT_SECRET', '').strip()
+    active_path = Path(env_path).expanduser().resolve() if env_path else YOUTUBE_SECRET_PATH
+    stored_path = YOUTUBE_SECRET_PATH
+    exists = active_path.exists() if active_path else False
+    details: dict[str, Any] = {
+        'configured_via_env': bool(env_path),
+        'active_path': str(active_path),
+        'stored_path': str(stored_path),
+        'exists': exists,
+        'size_bytes': None,
+        'updated_at': None,
+        'client_type': None,
+        'project_id': None,
+        'client_id_preview': None,
+        'error': None,
+    }
+    if not exists:
+        return details
+    try:
+        stat = active_path.stat()
+        payload = json.loads(active_path.read_text(encoding='utf-8'))
+        root = payload.get('installed') or payload.get('web') or {}
+        client_id = root.get('client_id', '')
+        details.update({
+            'size_bytes': stat.st_size,
+            'updated_at': stat.st_mtime,
+            'client_type': 'installed' if 'installed' in payload else ('web' if 'web' in payload else 'unknown'),
+            'project_id': root.get('project_id') or '',
+            'client_id_preview': f"{client_id[:18]}…" if client_id and len(client_id) > 18 else client_id,
+        })
+    except Exception as exc:
+        details['error'] = str(exc)
+    return details
+
+
+def _validate_google_client_secret_payload(payload: dict[str, Any]) -> tuple[str, dict[str, Any]]:
+    root_key = 'installed' if isinstance(payload.get('installed'), dict) else 'web' if isinstance(payload.get('web'), dict) else ''
+    if not root_key:
+        raise HTTPException(status_code=400, detail='Ungültige Google OAuth JSON-Datei: installed/web Block fehlt')
+    root = payload[root_key]
+    required = ['client_id', 'client_secret', 'auth_uri', 'token_uri']
+    missing = [key for key in required if not str(root.get(key, '')).strip()]
+    if missing:
+        raise HTTPException(status_code=400, detail=f'Ungültige Google OAuth JSON-Datei: Felder fehlen: {", ".join(missing)}')
+    return root_key, root
 
 # ── Default settings ──────────────────────────────────────────────────────
 
@@ -153,6 +208,7 @@ def admin_settings(
         'edit_preset': presets.get(edit_key) if edit_key else None,
         'team_users': team_users,
         'team_count': shared.db.user_count(),
+        'youtube_secret_status': _youtube_secret_status(),
     })
 
 
@@ -186,6 +242,46 @@ def save_providers(
     shared.db.set_setting('providers.youtube_enabled', youtube_enabled)
     shared.db.set_setting('providers.stable_audio_model', stable_audio_model.strip())
     return RedirectResponse(url='/admin/settings?tab=providers&saved=1', status_code=303)
+
+
+@router.post('/admin/settings/providers/youtube-client-secret')
+async def upload_youtube_client_secret(file: UploadFile = File(...)):
+    filename = Path(file.filename or '').name
+    if not filename or Path(filename).suffix.lower() != '.json':
+        return RedirectResponse(url='/admin/settings?tab=providers&error=Bitte+eine+client_secret.json+hochladen', status_code=303)
+
+    raw = await file.read()
+    await file.close()
+    if not raw:
+        return RedirectResponse(url='/admin/settings?tab=providers&error=Datei+war+leer', status_code=303)
+
+    try:
+        payload = json.loads(raw.decode('utf-8'))
+        root_key, root = _validate_google_client_secret_payload(payload)
+    except HTTPException as exc:
+        return RedirectResponse(url=f'/admin/settings?tab=providers&error={exc.detail}', status_code=303)
+    except Exception:
+        return RedirectResponse(url='/admin/settings?tab=providers&error=JSON+konnte+nicht+gelesen+werden', status_code=303)
+
+    YOUTUBE_SECRET_DIR.mkdir(parents=True, exist_ok=True)
+    fd, temp_path = tempfile.mkstemp(prefix='client_secret_', suffix='.json', dir=str(YOUTUBE_SECRET_DIR))
+    try:
+        with os.fdopen(fd, 'w', encoding='utf-8') as handle:
+            json.dump(payload, handle, ensure_ascii=False, indent=2)
+            handle.write('\n')
+        os.replace(temp_path, YOUTUBE_SECRET_PATH)
+        try:
+            os.chmod(YOUTUBE_SECRET_PATH, 0o600)
+        except OSError:
+            pass
+    finally:
+        if os.path.exists(temp_path):
+            os.unlink(temp_path)
+
+    shared.db.set_setting('providers.youtube_client_secret_uploaded_at', __import__('datetime').datetime.utcnow().isoformat() + 'Z')
+    shared.db.set_setting('providers.youtube_client_secret_project_id', root.get('project_id', ''))
+    shared.db.set_setting('providers.youtube_client_secret_type', root_key)
+    return RedirectResponse(url='/admin/settings?tab=providers&saved=1&success=client_secret.json+hochgeladen', status_code=303)
 
 
 # ── Team Management ───────────────────────────────────────────────────────

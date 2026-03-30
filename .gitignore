@@ -28,6 +28,7 @@ data/upload/songs/*-looped-processed.mp3
 # OAuth Secrets
 client_secret*.json
 .youtube_token.json
+data/secrets/
 token.json
 
 # Environment & Keys

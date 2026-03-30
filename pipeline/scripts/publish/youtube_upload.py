@@ -48,7 +48,14 @@ RETRY_DELAY = 5
 
 
 def _get_client_secret_path() -> str:
-    return os.environ.get("GOOGLE_CLIENT_SECRET", "client_secret.json")
+    configured = os.environ.get("GOOGLE_CLIENT_SECRET", "").strip()
+    if configured:
+        return configured
+    preferred = os.path.join(REPO_ROOT, "data", "secrets", "youtube", "client_secret.json")
+    legacy = os.path.join(REPO_ROOT, "client_secret.json")
+    if os.path.exists(preferred):
+        return preferred
+    return legacy
 
 
 def _load_client_secret_info(client_secret_path: str) -> dict[str, Any]:
