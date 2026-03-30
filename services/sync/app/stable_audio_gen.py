@@ -10,6 +10,7 @@ from __future__ import annotations
 import base64
 import json
 import os
+import shlex
 import subprocess
 import threading
 import time
@@ -464,7 +465,7 @@ class StableAudioGenerator(AudioGenerator):
                                     f'Stitching {len(remote_clips)} clips with {crossfade}s crossfade...', now_iso())
             final_remote = f'{GPU_WORKER_OUTPUT_DIR}/{slug}.wav'
             try:
-                self._stitch_clips(remote_clips, final_remote, crossfade)
+                self._stitch_clips(remote_clips, final_remote, crossfade, db=db, job_id=job_id)
             except Exception as e:
                 db.update_audio_job(job_id, status='error', finished_at=now_iso(),
                                     error_message=f'Stitching failed: {e}')
@@ -576,28 +577,117 @@ class StableAudioGenerator(AudioGenerator):
             timestamps.append({'time': time_str, 'label': label, 'offset_seconds': offset_seconds})
         return timestamps
 
-    def _stitch_clips(self, clips: list[str], output: str, crossfade: int) -> None:
-        """Stitch clips with crossfade using ffmpeg on the worker."""
+    def _build_acrossfade_filter(self, num_inputs: int, crossfade: int) -> str:
+        """Build an ffmpeg acrossfade filter chain without final loudnorm."""
+        if num_inputs < 2:
+            raise ValueError('acrossfade filter requires at least 2 inputs')
+        if num_inputs == 2:
+            return f'[0][1]acrossfade=d={crossfade}:c1=exp:c2=exp[out]'
+
+        parts = []
+        for i in range(1, num_inputs):
+            if i == 1:
+                parts.append(f'[0][1]acrossfade=d={crossfade}:c1=exp:c2=exp[a{i:02d}]')
+            elif i == num_inputs - 1:
+                parts.append(f'[a{i-1:02d}][{i}]acrossfade=d={crossfade}:c1=exp:c2=exp[out]')
+            else:
+                parts.append(f'[a{i-1:02d}][{i}]acrossfade=d={crossfade}:c1=exp:c2=exp[a{i:02d}]')
+        return '; '.join(parts)
+
+    @staticmethod
+    def _chunk_paths(paths: list[str], size: int) -> list[list[str]]:
+        return [paths[i:i + size] for i in range(0, len(paths), size)]
+
+    @staticmethod
+    def _stitch_timeout(num_inputs: int, *, final_pass: bool = False) -> int:
+        base = 300
+        per_input = 120
+        timeout = base + max(0, num_inputs - 1) * per_input
+        if final_pass:
+            timeout += 900
+        return min(timeout, 7200)
+
+    def _log_stitch(self, db: AgentSyncDB | None, job_id: str | None, message: str) -> None:
+        if db is not None and job_id:
+            db.append_audio_job_log(job_id, 'system', message, now_iso())
+
+    def _stitch_batch(self, clips: list[str], output: str, crossfade: int, *, timeout: int) -> None:
         if len(clips) == 1:
-            self._ssh_run(f'cp {clips[0]} {output}', timeout=30)
+            result = self._ssh_run(
+                f'cp {shlex.quote(clips[0])} {shlex.quote(output)}',
+                timeout=max(30, min(timeout, 300)),
+            )
+            if result.returncode != 0:
+                raise RuntimeError(f'cp stitch batch failed: {(result.stderr or result.stdout)[:300]}')
             return
 
-        inputs = ' '.join(f'-i {c}' for c in clips)
-
-        if len(clips) == 2:
-            filter_str = f'[0][1]acrossfade=d={crossfade}:c1=exp:c2=exp[out]; [out]loudnorm=I=-16:TP=-1.5:LRA=11'
-        else:
-            parts = []
-            for i in range(1, len(clips)):
-                if i == 1:
-                    parts.append(f'[0][1]acrossfade=d={crossfade}:c1=exp:c2=exp[a{i:02d}]')
-                elif i == len(clips) - 1:
-                    parts.append(f'[a{i-1:02d}][{i}]acrossfade=d={crossfade}:c1=exp:c2=exp[out]; [out]loudnorm=I=-16:TP=-1.5:LRA=11')
-                else:
-                    parts.append(f'[a{i-1:02d}][{i}]acrossfade=d={crossfade}:c1=exp:c2=exp[a{i:02d}]')
-            filter_str = '; '.join(parts)
-
-        cmd = f'ffmpeg -y {inputs} -filter_complex "{filter_str}" {output}'
-        result = self._ssh_run(cmd, timeout=120)
+        inputs = ' '.join(f'-i {shlex.quote(c)}' for c in clips)
+        filter_str = self._build_acrossfade_filter(len(clips), crossfade)
+        cmd = (
+            f'ffmpeg -y {inputs} '
+            f'-filter_complex {shlex.quote(filter_str)} '
+            f'-map [out] -ar {SAMPLE_RATE} -ac 2 -c:a pcm_s16le {shlex.quote(output)}'
+        )
+        result = self._ssh_run(cmd, timeout=timeout)
         if result.returncode != 0:
-            raise RuntimeError(f'ffmpeg stitch failed: {result.stderr[:300]}')
+            raise RuntimeError(f'ffmpeg stitch batch failed: {(result.stderr or result.stdout)[:600]}')
+
+    def _apply_final_loudnorm(self, input_path: str, output_path: str, *, timeout: int) -> None:
+        cmd = (
+            f'ffmpeg -y -i {shlex.quote(input_path)} '
+            f'-af {shlex.quote("loudnorm=I=-16:TP=-1.5:LRA=11")} '
+            f'-ar {SAMPLE_RATE} -ac 2 -c:a pcm_s16le {shlex.quote(output_path)}'
+        )
+        result = self._ssh_run(cmd, timeout=timeout)
+        if result.returncode != 0:
+            raise RuntimeError(f'ffmpeg loudnorm failed: {(result.stderr or result.stdout)[:600]}')
+
+    def _stitch_clips(self, clips: list[str], output: str, crossfade: int, *, db: AgentSyncDB | None = None,
+                      job_id: str | None = None) -> None:
+        """Stitch clips in stages on the worker to avoid giant ffmpeg filter graphs."""
+        if len(clips) == 1:
+            self._stitch_batch(clips, output, crossfade, timeout=30)
+            return
+
+        temp_dir = f'{GPU_WORKER_OUTPUT_DIR}/tmp/{job_id or "stitch"}'
+        mkdir_result = self._ssh_run(f'mkdir -p {shlex.quote(temp_dir)}', timeout=30)
+        if mkdir_result.returncode != 0:
+            raise RuntimeError(f'failed to create remote temp dir: {(mkdir_result.stderr or mkdir_result.stdout)[:300]}')
+
+        chunk_size = 8
+        current_paths = list(clips)
+        stage = 1
+        try:
+            while len(current_paths) > 1:
+                batches = self._chunk_paths(current_paths, chunk_size)
+                total_batches = len(batches)
+                next_paths: list[str] = []
+                self._log_stitch(db, job_id, f'Stitch stage {stage}: {len(current_paths)} inputs → {total_batches} batch(es).')
+                for idx, batch in enumerate(batches, start=1):
+                    batch_output = f'{temp_dir}/stage_{stage:02d}_batch_{idx:02d}.wav'
+                    timeout = self._stitch_timeout(len(batch))
+                    started = time.monotonic()
+                    self._log_stitch(
+                        db, job_id,
+                        f'Stitch stage {stage}/{stage} batch {idx}/{total_batches}: {len(batch)} clips, timeout {timeout}s.',
+                    )
+                    self._stitch_batch(batch, batch_output, crossfade, timeout=timeout)
+                    elapsed = time.monotonic() - started
+                    self._log_stitch(
+                        db, job_id,
+                        f'Stitch stage {stage} batch {idx}/{total_batches} done in {elapsed:.0f}s.',
+                    )
+                    next_paths.append(batch_output)
+                current_paths = next_paths
+                stage += 1
+
+            merged_path = current_paths[0]
+            final_timeout = self._stitch_timeout(max(2, len(clips) // chunk_size + 1), final_pass=True)
+            self._log_stitch(db, job_id, f'Applying final loudnorm, timeout {final_timeout}s.')
+            started = time.monotonic()
+            self._apply_final_loudnorm(merged_path, output, timeout=final_timeout)
+            self._log_stitch(db, job_id, f'Final loudnorm done in {time.monotonic() - started:.0f}s.')
+        finally:
+            cleanup = self._ssh_run(f'rm -rf {shlex.quote(temp_dir)}', timeout=120)
+            if cleanup.returncode != 0:
+                self._log_stitch(db, job_id, f'Cleanup warning for stitch temp dir: {(cleanup.stderr or cleanup.stdout)[:200]}')
