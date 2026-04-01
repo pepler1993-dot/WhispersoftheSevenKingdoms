@@ -1,5 +1,5 @@
 # PROJECT STATUS – Whispers of the Seven Kingdoms
-> Letzte Aktualisierung: 2026-04-01T07:00:01Z
+> Letzte Aktualisierung: 2026-04-01T13:00:01Z
 > Aktualisiert von: Pako
 
 **Wichtig:** Es gibt jetzt **zwei gültige Source-of-Truth-Ebenen**:
@@ -231,8 +231,9 @@ cc1dc9a feat(audio-lab): pass house_templates to audio page (#63)
 
 
 
-## 🕐 Letzte Commits (auto-generated 2026-03-31T19:00:01Z)
+
+## 🕐 Letzte Commits (auto-generated 2026-04-01T13:00:01Z)
 ```
-94bcb0e auto: update PROJECT_STATUS.md (2026-03-31T13:00:01Z)
+402be9f auto: update PROJECT_STATUS.md (2026-04-01T07:00:01Z)
 ```
 ---
